@@ -1,0 +1,23 @@
+analyzer:
+  errors:
+    public_member_api_docs: ignore
+    matching_super_parameters: ignore
+    use_setters_to_change_properties: ignore
+    prefer_int_literals: ignore
+    comment_references: ignore
+    document_ignores: ignore
+    sort_pub_dependencies: false
+    avoid_positional_boolean_parameters: ignore
+    always_use_package_imports: ignore
+    flutter_style_todos: ignore
+  exclude:
+    - "**/*.g.dart"
+    - "**/*.freezed.dart"
+    - "lib/generated/**"
+
+include: package:very_good_analysis/analysis_options.yaml
+
+linter:
+  rules:
+    # 80 karakterden uzun satırları uyarı olarak işaretler.
+    lines_longer_than_80_chars: true

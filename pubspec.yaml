@@ -1,0 +1,118 @@
+name: fastingapp
+description: "Intermittent fasting app."
+publish_to: 'none'
+
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.12.1
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  cupertino_icons: ^1.0.8
+
+  # State management
+  flutter_bloc: ^9.1.1
+  bloc: ^9.0.0
+  equatable: ^2.0.7
+
+  # Routing
+  go_router: ^16.1.0
+
+  # Network
+  dio: ^5.7.0
+
+  # Dependency injection
+  get_it: ^8.0.3
+  injectable: ^2.5.0
+
+  # Serialization / immutability
+  json_annotation: ^4.10.0
+  freezed_annotation: ^2.4.4
+
+  # Localization
+  easy_localization: ^3.0.7
+
+  # Assets / codegen output usage
+  flutter_svg: ^2.0.16
+
+  # Storage
+  flutter_secure_storage: ^9.2.4
+  shared_preferences: ^2.3.5
+
+  # In-app purchase (RevenueCat)
+  purchases_flutter: ^8.4.1
+  purchases_ui_flutter: ^8.4.1
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+  build_runner: ^2.4.14
+  json_serializable: ^6.9.0
+  injectable_generator: ^2.6.2
+  flutter_gen_runner: ^5.8.0
+  flutter_launcher_icons: ^0.14.4
+  very_good_analysis: ^7.0.0
+  bloc_test: ^10.0.0
+  mocktail: ^1.0.4
+
+flutter:
+  uses-material-design: true
+
+  assets:
+    - assets/images/
+    - assets/icons/
+    - assets/gifs/
+    - assets/colors/
+    - assets/translations/
+
+  fonts:
+    - family: SFProDisplay
+      fonts:
+        - asset: assets/fonts/sf-pro-display/SFPRODISPLAYREGULAR.OTF
+        - asset: assets/fonts/sf-pro-display/SFPRODISPLAYMEDIUM.OTF
+          weight: 500
+        # Upright "semibold" yok; Bold upright w600 olarak maplenir.
+        - asset: assets/fonts/sf-pro-display/SFPRODISPLAYBOLD.OTF
+          weight: 600
+        - asset: assets/fonts/sf-pro-display/SFPRODISPLAYSEMIBOLDITALIC.OTF
+          weight: 600
+          style: italic
+        - asset: assets/fonts/sf-pro-display/SFPRODISPLAYBOLD.OTF
+          weight: 700
+        - asset: assets/fonts/sf-pro-display/SFPRODISPLAYHEAVYITALIC.OTF
+          weight: 800
+          style: italic
+        - asset: assets/fonts/sf-pro-display/SFPRODISPLAYBLACKITALIC.OTF
+          weight: 900
+          style: italic
+        - asset: assets/fonts/sf-pro-display/SFPRODISPLAYLIGHTITALIC.OTF
+          weight: 300
+          style: italic
+        - asset: assets/fonts/sf-pro-display/SFPRODISPLAYTHINITALIC.OTF
+          weight: 100
+          style: italic
+        - asset: assets/fonts/sf-pro-display/SFPRODISPLAYULTRALIGHTITALIC.OTF
+          weight: 200
+          style: italic
+
+# flutter_gen configuration — build_runner ile üretilir.
+flutter_gen:
+  output: lib/generated/
+  line_length: 80
+  integrations:
+    flutter_svg: true
+  colors:
+    inputs:
+      - assets/colors/colors.xml
+
+flutter_launcher_icons:
+  android: true
+  ios: true
+  image_path: "assets/images/App Icon.png"
+  adaptive_icon_background: "#A8D5BA"
+  adaptive_icon_foreground: "assets/images/App Icon.png"
+  remove_alpha_ios: true
