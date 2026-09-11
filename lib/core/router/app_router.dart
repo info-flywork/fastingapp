@@ -7,9 +7,14 @@ import 'package:fastingapp/presentation/auth/bloc/auth_state.dart';
 import 'package:fastingapp/presentation/auth/entry/view/entry_view.dart';
 import 'package:fastingapp/presentation/auth/onboard/about_you/bloc/about_you_bloc.dart';
 import 'package:fastingapp/presentation/auth/onboard/about_you/view/about_you_view.dart';
+import 'package:fastingapp/presentation/auth/onboard/building_plan/view/building_plan_view.dart';
 import 'package:fastingapp/presentation/auth/onboard/diet/bloc/diet_bloc.dart';
 import 'package:fastingapp/presentation/auth/onboard/diet/view/diet_view.dart';
 import 'package:fastingapp/presentation/auth/onboard/doable_highlight/view/doable_highlight_view.dart';
+import 'package:fastingapp/presentation/auth/onboard/fasting_plan/bloc/fasting_plan_bloc.dart';
+import 'package:fastingapp/presentation/auth/onboard/fasting_plan/view/fasting_plan_view.dart';
+import 'package:fastingapp/presentation/auth/onboard/fasting_reason/bloc/fasting_reason_bloc.dart';
+import 'package:fastingapp/presentation/auth/onboard/fasting_reason/view/fasting_reason_view.dart';
 import 'package:fastingapp/presentation/auth/onboard/food_loves/bloc/food_loves_bloc.dart';
 import 'package:fastingapp/presentation/auth/onboard/food_loves/view/food_loves_view.dart';
 import 'package:fastingapp/presentation/auth/onboard/food_prefs_nav_args.dart';
@@ -18,17 +23,24 @@ import 'package:fastingapp/presentation/auth/onboard/food_skips/view/food_skips_
 import 'package:fastingapp/presentation/auth/onboard/goal/bloc/goal_bloc.dart';
 import 'package:fastingapp/presentation/auth/onboard/goal/view/goal_view.dart';
 import 'package:fastingapp/presentation/auth/onboard/goal_highlight/view/goal_highlight_view.dart';
+import 'package:fastingapp/presentation/auth/onboard/good_company/view/good_company_view.dart';
 import 'package:fastingapp/presentation/auth/onboard/language_level/bloc/language_level_bloc.dart';
 import 'package:fastingapp/presentation/auth/onboard/language_level/view/language_level_view.dart';
+import 'package:fastingapp/presentation/auth/onboard/meal_window/bloc/meal_window_bloc.dart';
+import 'package:fastingapp/presentation/auth/onboard/meal_window/view/meal_window_view.dart';
 import 'package:fastingapp/presentation/auth/onboard/noted_highlight/view/noted_highlight_view.dart';
+import 'package:fastingapp/presentation/auth/onboard/obstacle_highlight/view/obstacle_highlight_view.dart';
 import 'package:fastingapp/presentation/auth/onboard/obstacles/bloc/obstacles_bloc.dart';
 import 'package:fastingapp/presentation/auth/onboard/obstacles/view/obstacles_view.dart';
+import 'package:fastingapp/presentation/auth/onboard/plan_highlight/view/plan_highlight_view.dart';
 import 'package:fastingapp/presentation/auth/onboard/privacy_highlight/view/privacy_highlight_view.dart';
+import 'package:fastingapp/presentation/auth/onboard/reason_highlight/view/reason_highlight_view.dart';
 import 'package:fastingapp/presentation/auth/onboard/starting_point/bloc/starting_point_bloc.dart';
 import 'package:fastingapp/presentation/auth/onboard/starting_point/starting_point_nav_args.dart';
 import 'package:fastingapp/presentation/auth/onboard/starting_point/view/starting_point_view.dart';
 import 'package:fastingapp/presentation/auth/onboard/weight_history/bloc/weight_history_bloc.dart';
 import 'package:fastingapp/presentation/auth/onboard/weight_history/view/weight_history_view.dart';
+import 'package:fastingapp/presentation/auth/onboard/weight_projection/view/weight_projection_view.dart';
 import 'package:fastingapp/presentation/auth/splash/bloc/splash_bloc.dart';
 import 'package:fastingapp/presentation/auth/splash/bloc/splash_event.dart';
 import 'package:fastingapp/presentation/auth/splash/view/splash_view.dart';
@@ -37,6 +49,7 @@ import 'package:fastingapp/presentation/auth/welcome/view/welcome_view.dart';
 import 'package:fastingapp/presentation/home/bloc/home_bloc.dart';
 import 'package:fastingapp/presentation/home/bloc/home_event.dart';
 import 'package:fastingapp/presentation/home/view/home_view.dart';
+import 'package:fastingapp/presentation/tabs/placeholder_tab_view.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -45,7 +58,9 @@ import 'package:go_router/go_router.dart';
 final rootNavigatorKey = GlobalKey<NavigatorState>();
 
 /// Korumalı (auth gerektiren) rotalar.
-const _protectedPaths = <String>{'/home', '/catalog', '/settings', '/profile'};
+/// Not: Shell (home + tablar) şu an UI geliştirme için açık;
+/// giriş akışı hazır olunca tekrar korumaya alınır.
+const _protectedPaths = <String>{};
 
 bool _isProtectedRoute(String location) => _protectedPaths.contains(location);
 
@@ -53,7 +68,7 @@ bool _isProtectedRoute(String location) => _protectedPaths.contains(location);
 /// (Doküman 11)
 final GoRouter appRouter = GoRouter(
   navigatorKey: rootNavigatorKey,
-  initialLocation: RoutePaths.splash.path,
+  initialLocation: RoutePaths.home.path,
   refreshListenable: GoRouterRefreshStream(getIt<AuthBloc>().stream),
   redirect: (context, state) {
     final authState = context.read<AuthBloc>().state;
@@ -196,6 +211,70 @@ final GoRouter appRouter = GoRouter(
       ),
     ),
     GoRoute(
+      path: RoutePaths.obstacleHighlight.path,
+      name: RoutePaths.obstacleHighlight.name,
+      builder: (context, state) => const ObstacleHighlightView(),
+    ),
+    GoRoute(
+      path: RoutePaths.fastingReason.path,
+      name: RoutePaths.fastingReason.name,
+      builder: (context, state) => BlocProvider(
+        create: (_) => getIt<FastingReasonBloc>(),
+        child: const FastingReasonView(),
+      ),
+    ),
+    GoRoute(
+      path: RoutePaths.reasonHighlight.path,
+      name: RoutePaths.reasonHighlight.name,
+      builder: (context, state) {
+        final reason = state.extra is OnboardingFastingReason
+            ? state.extra! as OnboardingFastingReason
+            : OnboardingFastingReason.specialDate;
+        return ReasonHighlightView(reason: reason);
+      },
+    ),
+    GoRoute(
+      path: RoutePaths.fastingPlan.path,
+      name: RoutePaths.fastingPlan.name,
+      builder: (context, state) => BlocProvider(
+        create: (_) => getIt<FastingPlanBloc>(),
+        child: const FastingPlanView(),
+      ),
+    ),
+    GoRoute(
+      path: RoutePaths.planHighlight.path,
+      name: RoutePaths.planHighlight.name,
+      builder: (context, state) {
+        final plan = state.extra is OnboardingFastingPlan
+            ? state.extra! as OnboardingFastingPlan
+            : OnboardingFastingPlan.sixteenEight;
+        return PlanHighlightView(plan: plan);
+      },
+    ),
+    GoRoute(
+      path: RoutePaths.mealWindow.path,
+      name: RoutePaths.mealWindow.name,
+      builder: (context, state) => BlocProvider(
+        create: (_) => getIt<MealWindowBloc>(),
+        child: const MealWindowView(),
+      ),
+    ),
+    GoRoute(
+      path: RoutePaths.buildingPlan.path,
+      name: RoutePaths.buildingPlan.name,
+      builder: (context, state) => const BuildingPlanView(),
+    ),
+    GoRoute(
+      path: RoutePaths.weightProjection.path,
+      name: RoutePaths.weightProjection.name,
+      builder: (context, state) => const WeightProjectionView(),
+    ),
+    GoRoute(
+      path: RoutePaths.goodCompany.path,
+      name: RoutePaths.goodCompany.name,
+      builder: (context, state) => const GoodCompanyView(),
+    ),
+    GoRoute(
       path: RoutePaths.languageLevel.path,
       name: RoutePaths.languageLevel.name,
       builder: (context, state) => BlocProvider(
@@ -219,7 +298,46 @@ final GoRouter appRouter = GoRouter(
             ),
           ],
         ),
-        // catalog, settings, profile branch'leri buraya eklenir.
+        StatefulShellBranch(
+          routes: [
+            GoRoute(
+              path: RoutePaths.fasting.path,
+              name: RoutePaths.fasting.name,
+              builder: (context, state) =>
+                  const PlaceholderTabView(titleKey: 'home.nav_fasting'),
+            ),
+          ],
+        ),
+        StatefulShellBranch(
+          routes: [
+            GoRoute(
+              path: RoutePaths.plans.path,
+              name: RoutePaths.plans.name,
+              builder: (context, state) =>
+                  const PlaceholderTabView(titleKey: 'home.nav_plans'),
+            ),
+          ],
+        ),
+        StatefulShellBranch(
+          routes: [
+            GoRoute(
+              path: RoutePaths.insights.path,
+              name: RoutePaths.insights.name,
+              builder: (context, state) =>
+                  const PlaceholderTabView(titleKey: 'home.nav_insights'),
+            ),
+          ],
+        ),
+        StatefulShellBranch(
+          routes: [
+            GoRoute(
+              path: RoutePaths.profile.path,
+              name: RoutePaths.profile.name,
+              builder: (context, state) =>
+                  const PlaceholderTabView(titleKey: 'home.nav_profile'),
+            ),
+          ],
+        ),
       ],
     ),
   ],

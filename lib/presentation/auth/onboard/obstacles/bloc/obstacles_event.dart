@@ -7,8 +7,8 @@ sealed class ObstaclesEvent extends Equatable {
   List<Object?> get props => [];
 }
 
-final class ObstacleToggled extends ObstaclesEvent {
-  const ObstacleToggled(this.obstacle);
+final class ObstacleSelected extends ObstaclesEvent {
+  const ObstacleSelected(this.obstacle);
 
   final OnboardingObstacle obstacle;
 

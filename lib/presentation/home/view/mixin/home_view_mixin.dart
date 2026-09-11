@@ -16,6 +16,5 @@ mixin HomeViewMixin on State<HomeView> {
 
   void onPremiumTapped() {
     context.read<HomeBloc>().add(const HomePremiumTapped());
-    // TODO(team): RevenueCat paywall aç veya premium rotasına yönlendir.
   }
 }

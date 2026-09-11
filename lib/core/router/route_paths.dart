@@ -14,11 +14,21 @@ enum RoutePaths {
   notedHighlight('/noted-highlight', 'notedHighlight'),
   weightHistory('/weight-history', 'weightHistory'),
   obstacles('/obstacles', 'obstacles'),
+  obstacleHighlight('/obstacle-highlight', 'obstacleHighlight'),
+  fastingReason('/fasting-reason', 'fastingReason'),
+  reasonHighlight('/reason-highlight', 'reasonHighlight'),
+  fastingPlan('/fasting-plan', 'fastingPlan'),
+  planHighlight('/plan-highlight', 'planHighlight'),
+  mealWindow('/meal-window', 'mealWindow'),
+  buildingPlan('/building-plan', 'buildingPlan'),
+  weightProjection('/weight-projection', 'weightProjection'),
+  goodCompany('/good-company', 'goodCompany'),
   welcome('/welcome', 'welcome'),
   languageLevel('/language-level', 'languageLevel'),
   home('/home', 'home'),
-  catalog('/catalog', 'catalog'),
-  settings('/settings', 'settings'),
+  fasting('/fasting', 'fasting'),
+  plans('/plans', 'plans'),
+  insights('/insights', 'insights'),
   profile('/profile', 'profile');
 
   const RoutePaths(this.path, this.name);

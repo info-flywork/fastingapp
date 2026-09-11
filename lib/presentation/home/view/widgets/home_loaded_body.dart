@@ -1,6 +1,6 @@
 part of '../home_view.dart';
 
-/// Home yüklendi durumu gövdesi. Alt bölümleri ayrı widget'lara delege eder.
+/// Home yüklendi durumu gövdesi.
 final class HomeLoadedBody extends StatelessWidget {
   const HomeLoadedBody({
     required this.user,
@@ -18,11 +18,19 @@ final class HomeLoadedBody extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SafeArea(
-      child: Column(
+      bottom: false,
+      child: ListView(
+        physics: const ClampingScrollPhysics(),
         children: [
-          HomeHeaderSection(user: user),
-          LevelProgressCard(progress: progress),
-          if (!isPremium) PremiumCard(onTap: onPremiumTapped),
+          HomeTopBar(
+            streakDays: progress.streakDays > 0 ? progress.streakDays : 3,
+            isPremium: isPremium,
+            onPremiumTapped: onPremiumTapped,
+          ),
+          const HomeWeekStrip(),
+          const HomeFastingCard(),
+          const HomeChallengeCard(),
+          const HomeMetricCards(),
         ],
       ),
     );

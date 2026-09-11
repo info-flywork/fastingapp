@@ -98,6 +98,10 @@ flutter:
         - asset: assets/fonts/sf-pro-display/SFPRODISPLAYULTRALIGHTITALIC.OTF
           weight: 200
           style: italic
+    - family: ShareTech
+      fonts:
+        - asset: assets/fonts/share-tech/ShareTech-Regular.ttf
+          weight: 400
 
 # flutter_gen configuration — build_runner ile üretilir.
 flutter_gen:

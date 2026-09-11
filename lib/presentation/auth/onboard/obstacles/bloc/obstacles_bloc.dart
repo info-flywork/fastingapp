@@ -15,16 +15,10 @@ enum OnboardingObstacle {
 
 final class ObstaclesBloc extends Bloc<ObstaclesEvent, ObstaclesState> {
   ObstaclesBloc() : super(const ObstaclesState()) {
-    on<ObstacleToggled>(_onToggled);
+    on<ObstacleSelected>(_onSelected);
   }
 
-  void _onToggled(ObstacleToggled event, Emitter<ObstaclesState> emit) {
-    final next = Set<OnboardingObstacle>.from(state.selected);
-    if (next.contains(event.obstacle)) {
-      next.remove(event.obstacle);
-    } else {
-      next.add(event.obstacle);
-    }
-    emit(state.copyWith(selected: next));
+  void _onSelected(ObstacleSelected event, Emitter<ObstaclesState> emit) {
+    emit(state.copyWith(selected: event.obstacle));
   }
 }

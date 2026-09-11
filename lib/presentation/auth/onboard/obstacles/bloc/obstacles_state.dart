@@ -1,13 +1,11 @@
 part of 'obstacles_bloc.dart';
 
 final class ObstaclesState extends Equatable {
-  const ObstaclesState({this.selected = const {}});
+  const ObstaclesState({this.selected});
 
-  final Set<OnboardingObstacle> selected;
+  final OnboardingObstacle? selected;
 
-  bool get hasSelection => selected.isNotEmpty;
-
-  ObstaclesState copyWith({Set<OnboardingObstacle>? selected}) {
+  ObstaclesState copyWith({OnboardingObstacle? selected}) {
     return ObstaclesState(selected: selected ?? this.selected);
   }
 

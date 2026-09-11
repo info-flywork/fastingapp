@@ -158,18 +158,18 @@ final class _ProgressTrack extends StatelessWidget {
     return LayoutBuilder(
       builder: (context, constraints) {
         final width = constraints.maxWidth;
-        final fillWidth = (width * progress).clamp(_headSize / 2, width);
-        final headLeft = (fillWidth - _headSize / 2).clamp(
-          0.0,
-          width - _headSize,
-        );
+        final t = progress.clamp(0.0, 1.0);
+        // Head merkezi progress ucunda; %100’de sağ kenara oturur (yarı taşabilir).
+        final tip = width * t;
+        final headLeft = (tip - _headSize / 2).clamp(0.0, width);
+        final fillWidth = tip.clamp(0.0, width);
+
         return SizedBox(
           height: _trackHeight,
           child: Stack(
             clipBehavior: Clip.none,
             alignment: Alignment.centerLeft,
             children: [
-              // Track
               Positioned.fill(
                 child: DecoratedBox(
                   decoration: BoxDecoration(
@@ -178,7 +178,6 @@ final class _ProgressTrack extends StatelessWidget {
                   ),
                 ),
               ),
-              // Fill
               Positioned(
                 left: 0,
                 top: 0,
@@ -196,7 +195,6 @@ final class _ProgressTrack extends StatelessWidget {
                   ),
                 ),
               ),
-              // Head — track üzerinde ortalı, layout yüksekliğine eklemez
               Positioned(
                 left: headLeft,
                 top: (_trackHeight - _headSize) / 2,

@@ -11,4 +11,7 @@
 abstract final class FontFamily {
   /// Font family: SFProDisplay
   static const String sFProDisplay = 'SFProDisplay';
+
+  /// Font family: ShareTech
+  static const String shareTech = 'ShareTech';
 }

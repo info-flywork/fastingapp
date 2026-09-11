@@ -68,7 +68,7 @@ final class OnboardingHighlightView extends StatelessWidget {
                 ),
                 const SizedBox(height: 20),
                 middle,
-                const SizedBox(height: 90),
+                const SizedBox(height: 60),
                 AppButton(
                   label: buttonLabel,
                   onPressed: onContinue,

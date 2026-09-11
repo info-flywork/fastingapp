@@ -17,10 +17,13 @@ import 'package:fastingapp/domain/user/user_repository.dart';
 import 'package:fastingapp/presentation/auth/bloc/auth_bloc.dart';
 import 'package:fastingapp/presentation/auth/onboard/about_you/bloc/about_you_bloc.dart';
 import 'package:fastingapp/presentation/auth/onboard/diet/bloc/diet_bloc.dart';
+import 'package:fastingapp/presentation/auth/onboard/fasting_plan/bloc/fasting_plan_bloc.dart';
+import 'package:fastingapp/presentation/auth/onboard/fasting_reason/bloc/fasting_reason_bloc.dart';
 import 'package:fastingapp/presentation/auth/onboard/food_loves/bloc/food_loves_bloc.dart';
 import 'package:fastingapp/presentation/auth/onboard/food_skips/bloc/food_skips_bloc.dart';
 import 'package:fastingapp/presentation/auth/onboard/goal/bloc/goal_bloc.dart';
 import 'package:fastingapp/presentation/auth/onboard/language_level/bloc/language_level_bloc.dart';
+import 'package:fastingapp/presentation/auth/onboard/meal_window/bloc/meal_window_bloc.dart';
 import 'package:fastingapp/presentation/auth/onboard/obstacles/bloc/obstacles_bloc.dart';
 import 'package:fastingapp/presentation/auth/onboard/starting_point/bloc/starting_point_bloc.dart';
 import 'package:fastingapp/presentation/auth/onboard/weight_history/bloc/weight_history_bloc.dart';
@@ -106,6 +109,9 @@ Future<void> configureDependencies() async {
     ..registerFactory<FoodSkipsBloc>(FoodSkipsBloc.new)
     ..registerFactory<WeightHistoryBloc>(WeightHistoryBloc.new)
     ..registerFactory<ObstaclesBloc>(ObstaclesBloc.new)
+    ..registerFactory<FastingReasonBloc>(FastingReasonBloc.new)
+    ..registerFactory<FastingPlanBloc>(FastingPlanBloc.new)
+    ..registerFactory<MealWindowBloc>(MealWindowBloc.new)
     ..registerFactory<LanguageLevelBloc>(
       () => LanguageLevelBloc(getIt()),
     )

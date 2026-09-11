@@ -8,6 +8,8 @@ final class OnboardingInfoChip extends StatelessWidget {
     required this.label,
     this.leading,
     this.labelStyle,
+    this.expand = false,
+    this.textAlign = TextAlign.start,
     super.key,
   });
 
@@ -15,8 +17,15 @@ final class OnboardingInfoChip extends StatelessWidget {
   final Widget? leading;
   final TextStyle? labelStyle;
 
+  /// `true` ise satır genişliği parent’ı doldurur (Figma Fill).
+  final bool expand;
+  final TextAlign textAlign;
+
   @override
   Widget build(BuildContext context) {
+    final style = labelStyle ?? AppTextStyles.infoChipLabel;
+    final text = Text(label, style: style, textAlign: textAlign);
+
     return DecoratedBox(
       decoration: BoxDecoration(
         color: ColorName.colorWhite.withValues(alpha: 0.35),
@@ -24,18 +33,16 @@ final class OnboardingInfoChip extends StatelessWidget {
       ),
       child: Padding(
         padding: const EdgeInsets.all(12),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            if (leading != null) ...[leading!, const SizedBox(width: 10)],
-            Flexible(
-              child: Text(
-                label,
-                style: labelStyle ?? AppTextStyles.infoChipLabel,
+        child: leading == null
+            ? (expand ? SizedBox(width: double.infinity, child: text) : text)
+            : Row(
+                mainAxisSize: expand ? MainAxisSize.max : MainAxisSize.min,
+                children: [
+                  leading!,
+                  const SizedBox(width: 10),
+                  Flexible(child: text),
+                ],
               ),
-            ),
-          ],
-        ),
       ),
     );
   }

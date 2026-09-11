@@ -13,7 +13,7 @@ import 'package:go_router/go_router.dart';
 part 'mixin/obstacles_view_mixin.dart';
 part 'widgets/obstacles_options.dart';
 
-/// Onboarding: geçen sefer ne engel oldu? (çoklu seçim)
+/// Onboarding: geçen sefer ne engel oldu?
 final class ObstaclesView extends StatefulWidget {
   const ObstaclesView({super.key});
 
@@ -57,7 +57,7 @@ class _ObstaclesViewState extends State<ObstaclesView> with ObstaclesViewMixin {
                         return ObstaclesOptions(
                           items: obstacleOptions,
                           selected: state.selected,
-                          onToggle: onObstacleToggled,
+                          onSelected: onObstacleSelected,
                         );
                       },
                     ),
