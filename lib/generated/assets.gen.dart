@@ -47,6 +47,10 @@ class $AssetsGifsGen {
   AssetGenImage get mascotHearts =>
       const AssetGenImage('assets/gifs/mascot_hearts.gif');
 
+  /// File path: assets/gifs/mascot_login.gif
+  AssetGenImage get mascotLogin =>
+      const AssetGenImage('assets/gifs/mascot_login.gif');
+
   /// File path: assets/gifs/mascot_ring.gif
   AssetGenImage get mascotRing =>
       const AssetGenImage('assets/gifs/mascot_ring.gif');
@@ -66,6 +70,7 @@ class $AssetsGifsGen {
     mascotCelebration,
     mascotGiggle,
     mascotHearts,
+    mascotLogin,
     mascotRing,
     mascotWav,
     mascotWriting,
@@ -74,6 +79,9 @@ class $AssetsGifsGen {
 
 class $AssetsIconsGen {
   const $AssetsIconsGen();
+
+  /// File path: assets/icons/google_g.svg
+  SvgGenImage get googleG => const SvgGenImage('assets/icons/google_g.svg');
 
   /// File path: assets/icons/ic_round-minus.svg
   SvgGenImage get icRoundMinus =>
@@ -87,7 +95,12 @@ class $AssetsIconsGen {
   SvgGenImage get uilPlus => const SvgGenImage('assets/icons/uil_plus.svg');
 
   /// List of all assets
-  List<SvgGenImage> get values => [icRoundMinus, solarArrowLeftLinear, uilPlus];
+  List<SvgGenImage> get values => [
+    googleG,
+    icRoundMinus,
+    solarArrowLeftLinear,
+    uilPlus,
+  ];
 }
 
 class $AssetsImagesGen {

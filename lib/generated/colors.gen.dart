@@ -54,6 +54,9 @@ abstract final class ColorName {
   /// Color: #FFEAA8
   static const Color colorJourneyGoalWeight = Color(0xFFFFEAA8);
 
+  /// Color: #FCFAF4
+  static const Color colorLoginBg = Color(0xFFFCFAF4);
+
   /// Color: #C8DBC5
   static const Color colorMatGreen = Color(0xFFC8DBC5);
 

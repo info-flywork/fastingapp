@@ -79,6 +79,30 @@ final class AppButtonDecoration {
     );
   }
 
+  /// Login Google: beyaz pill, ince border, koyu yazı.
+  factory AppButtonDecoration.loginSecondary() {
+    return AppButtonDecoration(
+      gradient: const LinearGradient(
+        colors: [ColorName.colorWhite, ColorName.colorWhite],
+      ),
+      borderColor: ColorName.colorWhite.withValues(alpha: 0.15),
+      borderWidth: 1,
+      borderRadius: BorderRadius.circular(99999),
+      height: 60,
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 14),
+      gap: 8,
+      innerShadowColor: ColorName.colorWhite.withValues(alpha: 0.55),
+      innerShadowOffset: const Offset(0, 4),
+      innerShadowBlur: 16,
+      labelColor: ColorName.colorTitle,
+      fontFamily: FontFamily.sFProDisplay,
+      fontWeight: FontWeight.w600,
+      defaultFontSize: 18,
+      lineHeight: 24,
+      letterSpacingPercent: -0.02,
+    );
+  }
+
   final Gradient gradient;
   final Color borderColor;
   final double borderWidth;

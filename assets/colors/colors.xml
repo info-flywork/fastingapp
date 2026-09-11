@@ -53,4 +53,5 @@
   <color name="color_week_pill">#EFEFEF</color>
   <color name="color_blood_chip">#E85D5D</color>
   <color name="color_home_chip_bg">#F6F6F6</color>
+  <color name="color_login_bg">#FCFAF4</color>
 </resources>

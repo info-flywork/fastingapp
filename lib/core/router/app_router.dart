@@ -5,6 +5,7 @@ import 'package:fastingapp/core/widgets/bottom_navigation_bar/main_wrapper.dart'
 import 'package:fastingapp/presentation/auth/bloc/auth_bloc.dart';
 import 'package:fastingapp/presentation/auth/bloc/auth_state.dart';
 import 'package:fastingapp/presentation/auth/entry/view/entry_view.dart';
+import 'package:fastingapp/presentation/auth/login/view/login_view.dart';
 import 'package:fastingapp/presentation/auth/onboard/about_you/bloc/about_you_bloc.dart';
 import 'package:fastingapp/presentation/auth/onboard/about_you/view/about_you_view.dart';
 import 'package:fastingapp/presentation/auth/onboard/building_plan/view/building_plan_view.dart';
@@ -68,7 +69,7 @@ bool _isProtectedRoute(String location) => _protectedPaths.contains(location);
 /// (Doküman 11)
 final GoRouter appRouter = GoRouter(
   navigatorKey: rootNavigatorKey,
-  initialLocation: RoutePaths.home.path,
+  initialLocation: RoutePaths.entry.path,
   refreshListenable: GoRouterRefreshStream(getIt<AuthBloc>().stream),
   redirect: (context, state) {
     final authState = context.read<AuthBloc>().state;
@@ -84,7 +85,7 @@ final GoRouter appRouter = GoRouter(
       return RoutePaths.splash.path;
     }
     if (authState is AuthUnauthenticated && _isProtectedRoute(location)) {
-      return RoutePaths.entry.path;
+      return RoutePaths.login.path;
     }
     return null;
   },
@@ -101,6 +102,14 @@ final GoRouter appRouter = GoRouter(
       path: RoutePaths.entry.path,
       name: RoutePaths.entry.name,
       builder: (context, state) => const EntryView(),
+    ),
+    GoRoute(
+      path: RoutePaths.login.path,
+      name: RoutePaths.login.name,
+      builder: (context, state) => BlocProvider(
+        create: (_) => getIt<WelcomeBloc>(),
+        child: const LoginView(),
+      ),
     ),
     GoRoute(
       path: RoutePaths.welcome.path,

@@ -102,6 +102,10 @@ flutter:
       fonts:
         - asset: assets/fonts/share-tech/ShareTech-Regular.ttf
           weight: 400
+    - family: Baloo
+      fonts:
+        - asset: assets/fonts/baloo/Baloo-Regular.ttf
+          weight: 400
 
 # flutter_gen configuration — build_runner ile üretilir.
 flutter_gen:

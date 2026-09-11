@@ -6,6 +6,6 @@ mixin EntryViewMixin on State<EntryView> {
   }
 
   void onAlreadyHaveAccount() {
-    context.go(RoutePaths.welcome.path);
+    context.go(RoutePaths.login.path);
   }
 }

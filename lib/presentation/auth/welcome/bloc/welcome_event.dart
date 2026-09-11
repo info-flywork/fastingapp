@@ -11,6 +11,10 @@ final class WelcomeGoogleTapped extends WelcomeEvent {
   const WelcomeGoogleTapped();
 }
 
+final class WelcomeAppleTapped extends WelcomeEvent {
+  const WelcomeAppleTapped();
+}
+
 final class WelcomeGuestTapped extends WelcomeEvent {
   const WelcomeGuestTapped();
 }

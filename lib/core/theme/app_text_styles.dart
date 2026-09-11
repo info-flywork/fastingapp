@@ -602,4 +602,72 @@ abstract final class AppTextStyles {
     letterSpacing: 11 * -0.015,
     color: ColorName.colorTextPrimary,
   );
+
+  /// Login brand — Baloo 52 / Regular / −1.5%
+  static TextStyle get loginBrand => const TextStyle(
+    fontFamily: FontFamily.baloo,
+    fontWeight: FontWeight.w400,
+    fontSize: 52,
+    height: 1,
+    letterSpacing: 52 * -0.015,
+    color: ColorName.colorTitle,
+  );
+
+  /// Login WELCOME — 28 / Semibold
+  static TextStyle get loginWelcome => const TextStyle(
+    fontFamily: FontFamily.sFProDisplay,
+    fontWeight: FontWeight.w700,
+    fontSize: 28,
+    height: 34 / 28,
+    letterSpacing: 28 * -0.02,
+    color: ColorName.colorTitle,
+  );
+
+  /// Login slogan — 16 / Medium / 35%
+  static TextStyle get loginSlogan => TextStyle(
+    fontFamily: FontFamily.sFProDisplay,
+    fontWeight: FontWeight.w500,
+    fontSize: 16,
+    height: 24 / 16,
+    letterSpacing: 16 * -0.02,
+    color: ColorName.colorTitle.withValues(alpha: 0.35),
+  );
+
+  /// Login "or" — 14 / Medium / 50%
+  static TextStyle get loginOr => TextStyle(
+    fontFamily: FontFamily.sFProDisplay,
+    fontWeight: FontWeight.w500,
+    fontSize: 14,
+    height: 18 / 14,
+    color: ColorName.colorTitle.withValues(alpha: 0.5),
+  );
+
+  /// Login guest — 14 / Medium / 65%
+  static TextStyle get loginGuest => TextStyle(
+    fontFamily: FontFamily.sFProDisplay,
+    fontWeight: FontWeight.w500,
+    fontSize: 14,
+    height: 18 / 14,
+    color: ColorName.colorTitle.withValues(alpha: 0.65),
+  );
+
+  /// Login legal body — 12 / Regular / 65%
+  static TextStyle get loginLegal => TextStyle(
+    fontFamily: FontFamily.sFProDisplay,
+    fontWeight: FontWeight.w400,
+    fontSize: 12,
+    height: 18 / 12,
+    color: ColorName.colorTitle.withValues(alpha: 0.65),
+  );
+
+  /// Login legal link — 12 / Medium / underline / 65%
+  static TextStyle get loginLegalLink => TextStyle(
+    fontFamily: FontFamily.sFProDisplay,
+    fontWeight: FontWeight.w500,
+    fontSize: 12,
+    height: 18 / 12,
+    color: ColorName.colorTitle.withValues(alpha: 0.65),
+    decoration: TextDecoration.underline,
+    decorationColor: ColorName.colorTitle.withValues(alpha: 0.65),
+  );
 }

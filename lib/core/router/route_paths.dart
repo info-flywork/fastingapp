@@ -2,6 +2,7 @@
 enum RoutePaths {
   splash('/splash', 'splash'),
   entry('/entry', 'entry'),
+  login('/login', 'login'),
   onboarding('/onboarding', 'onboarding'),
   goalHighlight('/goal-highlight', 'goalHighlight'),
   aboutYou('/about-you', 'aboutYou'),

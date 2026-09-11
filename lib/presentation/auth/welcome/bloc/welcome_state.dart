@@ -11,10 +11,6 @@ final class WelcomeInitial extends WelcomeState {
   const WelcomeInitial();
 }
 
-final class WelcomeLoading extends WelcomeState {
-  const WelcomeLoading();
-}
-
 /// Giriş başarılı; view [navigateTo] rotasına yönlendirir.
 final class WelcomeSuccess extends WelcomeState {
   const WelcomeSuccess({required this.navigateTo});
