@@ -142,69 +142,149 @@ class _HomeFastingCardState extends State<HomeFastingCard> {
   }
 }
 
-final class _FlipUnit extends StatelessWidget {
+final class _FlipUnit extends StatefulWidget {
   const _FlipUnit({required this.value, required this.label});
 
   final int value;
   final String label;
 
   /// Figma Rectangle 3/4 — 60.9 × 25.73, radius 3.7, #F6F6F6
-  static const _halfWidth = 60.9;
-  static const _halfHeight = 25.73;
-  static const _gap = 2.0;
-  static const _hingeSize = 10.0;
-  static const _halfRadius = 3.7;
+  static const halfWidth = 60.9;
+  static const halfHeight = 25.73;
+  static const gap = 2.0;
+  static const hingeSize = 10.0;
+  static const halfRadius = 3.7;
+  static const fullHeight = halfHeight * 2 + gap;
+
+  @override
+  State<_FlipUnit> createState() => _FlipUnitState();
+}
+
+class _FlipUnitState extends State<_FlipUnit>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _controller;
+  late int _current;
+  late int _previous;
+
+  @override
+  void initState() {
+    super.initState();
+    _current = widget.value;
+    _previous = widget.value;
+    _controller =
+        AnimationController(
+          vsync: this,
+          duration: const Duration(milliseconds: 520),
+        )..addStatusListener((status) {
+          if (status == AnimationStatus.completed && mounted) {
+            setState(() => _previous = _current);
+          }
+        });
+  }
+
+  @override
+  void didUpdateWidget(covariant _FlipUnit oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.value == widget.value) return;
+    _previous = _current;
+    _current = widget.value;
+    _controller.forward(from: 0);
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
-    final text = value.toString().padLeft(2, '0');
-    const fullHeight = _halfHeight * 2 + _gap;
-    final digit = Text(text, style: AppTextStyles.homeFlipDigits);
-
     return SizedBox(
-      width: _halfWidth,
+      width: _FlipUnit.halfWidth,
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
           SizedBox(
-            width: _halfWidth,
-            height: fullHeight,
-            child: Stack(
-              clipBehavior: Clip.none,
-              children: [
-                Column(
+            width: _FlipUnit.halfWidth,
+            height: _FlipUnit.fullHeight,
+            child: AnimatedBuilder(
+              animation: _controller,
+              builder: (context, _) {
+                final t = Curves.easeIn.transform(_controller.value);
+                final angle = t * math.pi;
+                final flipping =
+                    _controller.isAnimating ||
+                    (_controller.value > 0 && _controller.value < 1);
+                final bottomValue = flipping && angle < math.pi / 2
+                    ? _previous
+                    : _current;
+
+                return Stack(
+                  clipBehavior: Clip.none,
                   children: [
-                    _FlipHalf(
-                      isTop: true,
-                      fullHeight: fullHeight,
-                      digit: digit,
+                    Column(
+                      children: [
+                        _FlipHalf(isTop: true, value: _current),
+                        const SizedBox(height: _FlipUnit.gap),
+                        _FlipHalf(isTop: false, value: bottomValue),
+                      ],
                     ),
-                    const SizedBox(height: _gap),
-                    _FlipHalf(
-                      isTop: false,
-                      fullHeight: fullHeight,
-                      digit: digit,
+                    if (flipping && angle <= math.pi / 2)
+                      Positioned(
+                        top: 0,
+                        left: 0,
+                        right: 0,
+                        height: _FlipUnit.halfHeight,
+                        child: Transform(
+                          alignment: Alignment.bottomCenter,
+                          transform: Matrix4.identity()
+                            ..setEntry(3, 2, 0.002)
+                            ..rotateX(angle),
+                          child: _FlipHalf(
+                            isTop: true,
+                            value: _previous,
+                            shade: true,
+                          ),
+                        ),
+                      ),
+                    if (flipping && angle > math.pi / 2)
+                      Positioned(
+                        top: _FlipUnit.halfHeight + _FlipUnit.gap,
+                        left: 0,
+                        right: 0,
+                        height: _FlipUnit.halfHeight,
+                        child: Transform(
+                          alignment: Alignment.topCenter,
+                          transform: Matrix4.identity()
+                            ..setEntry(3, 2, 0.002)
+                            ..rotateX(angle - math.pi),
+                          child: _FlipHalf(
+                            isTop: false,
+                            value: _current,
+                            shade: true,
+                          ),
+                        ),
+                      ),
+                    const Positioned(
+                      left: -_FlipUnit.hingeSize / 2,
+                      top: 0,
+                      bottom: 0,
+                      child: _FlipHinge(),
+                    ),
+                    const Positioned(
+                      right: -_FlipUnit.hingeSize / 2,
+                      top: 0,
+                      bottom: 0,
+                      child: _FlipHinge(),
                     ),
                   ],
-                ),
-                const Positioned(
-                  left: -_hingeSize / 2,
-                  top: 0,
-                  bottom: 0,
-                  child: _FlipHinge(),
-                ),
-                const Positioned(
-                  right: -_hingeSize / 2,
-                  top: 0,
-                  bottom: 0,
-                  child: _FlipHinge(),
-                ),
-              ],
+                );
+              },
             ),
           ),
           const SizedBox(height: 4),
           Text(
-            label,
+            widget.label,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
             textAlign: TextAlign.center,
@@ -220,27 +300,32 @@ final class _FlipUnit extends StatelessWidget {
 final class _FlipHalf extends StatelessWidget {
   const _FlipHalf({
     required this.isTop,
-    required this.fullHeight,
-    required this.digit,
+    required this.value,
+    this.shade = false,
   });
 
   final bool isTop;
-  final double fullHeight;
-  final Widget digit;
+  final int value;
+  final bool shade;
 
   @override
   Widget build(BuildContext context) {
+    final digit = Text(
+      value.toString().padLeft(2, '0'),
+      style: AppTextStyles.homeFlipDigits,
+    );
+
     return SizedBox(
-      width: _FlipUnit._halfWidth,
-      height: _FlipUnit._halfHeight,
+      width: _FlipUnit.halfWidth,
+      height: _FlipUnit.halfHeight,
       child: ClipRRect(
         borderRadius: BorderRadius.vertical(
           top: isTop
-              ? const Radius.circular(_FlipUnit._halfRadius)
+              ? const Radius.circular(_FlipUnit.halfRadius)
               : Radius.zero,
           bottom: isTop
               ? Radius.zero
-              : const Radius.circular(_FlipUnit._halfRadius),
+              : const Radius.circular(_FlipUnit.halfRadius),
         ),
         child: Stack(
           children: [
@@ -251,10 +336,27 @@ final class _FlipHalf extends StatelessWidget {
             Positioned(
               left: 0,
               right: 0,
-              top: isTop ? 0 : -(_FlipUnit._halfHeight + _FlipUnit._gap),
-              height: fullHeight,
+              top: isTop ? 0 : -(_FlipUnit.halfHeight + _FlipUnit.gap),
+              height: _FlipUnit.fullHeight,
               child: Center(child: digit),
             ),
+            if (shade)
+              Positioned.fill(
+                child: DecoratedBox(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: isTop
+                          ? Alignment.topCenter
+                          : Alignment.bottomCenter,
+                      end: isTop ? Alignment.bottomCenter : Alignment.topCenter,
+                      colors: [
+                        ColorName.colorTitle.withValues(alpha: 0.18),
+                        ColorName.colorTitle.withValues(alpha: 0.02),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
           ],
         ),
       ),
