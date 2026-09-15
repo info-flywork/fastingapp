@@ -60,6 +60,12 @@ abstract final class ColorName {
   /// Color: #C8DBC5
   static const Color colorMatGreen = Color(0xFFC8DBC5);
 
+  /// Color: #86B57F
+  static const Color colorPremiumCard = Color(0xFF86B57F);
+
+  /// Color: #33C658
+  static const Color colorToggleOn = Color(0xFF33C658);
+
   /// Color: #E2754D
   static const Color colorNotedGradientBottom = Color(0xFFE2754D);
 

@@ -9,12 +9,14 @@ final class DietOptions extends StatelessWidget {
   });
 
   final List<
-      ({
-        OnboardingDiet diet,
-        String titleKey,
-        String subtitleKey,
-        String imagePath,
-      })> items;
+    ({
+      OnboardingDiet diet,
+      String titleKey,
+      String subtitleKey,
+      String imagePath,
+    })
+  >
+  items;
   final OnboardingDiet? selected;
   final ValueChanged<OnboardingDiet> onSelected;
 

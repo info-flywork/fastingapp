@@ -670,4 +670,94 @@ abstract final class AppTextStyles {
     decoration: TextDecoration.underline,
     decorationColor: ColorName.colorTitle.withValues(alpha: 0.65),
   );
+
+  /// Profile user name — 18 / Semibold
+  static TextStyle get profileName => const TextStyle(
+    fontFamily: FontFamily.sFProDisplay,
+    fontWeight: FontWeight.w600,
+    fontSize: 18,
+    height: 24 / 18,
+    letterSpacing: 18 * -0.015,
+    color: ColorName.colorTitle,
+  );
+
+  /// Profile Premium badge — 14 / Semibold
+  static TextStyle get profilePremiumBadge => const TextStyle(
+    fontFamily: FontFamily.sFProDisplay,
+    fontWeight: FontWeight.w600,
+    fontSize: 14,
+    height: 20 / 14,
+    letterSpacing: 14 * -0.015,
+    color: ColorName.colorWhite,
+  );
+
+  /// Profile section title — 14 / Semibold
+  static TextStyle get profileSectionTitle => const TextStyle(
+    fontFamily: FontFamily.sFProDisplay,
+    fontWeight: FontWeight.w600,
+    fontSize: 14,
+    height: 20 / 14,
+    letterSpacing: -0.5,
+    color: ColorName.colorTitle,
+  );
+
+  /// Profile row title — 15 / Semibold
+  static TextStyle get profileRowTitle => const TextStyle(
+    fontFamily: FontFamily.sFProDisplay,
+    fontWeight: FontWeight.w600,
+    fontSize: 15,
+    height: 16 / 15,
+    letterSpacing: -0.5,
+    color: ColorName.colorTitle,
+  );
+
+  /// Profile row subtitle — 14 / Semibold / 60%
+  static TextStyle get profileRowSubtitle => TextStyle(
+    fontFamily: FontFamily.sFProDisplay,
+    fontWeight: FontWeight.w600,
+    fontSize: 14,
+    height: 20 / 14,
+    letterSpacing: 14 * -0.015,
+    color: ColorName.colorSubtitle.withValues(alpha: 0.6),
+  );
+
+  /// Profile premium card title — 18 / Semibold
+  static TextStyle get profilePremiumTitle => const TextStyle(
+    fontFamily: FontFamily.sFProDisplay,
+    fontWeight: FontWeight.w600,
+    fontSize: 18,
+    height: 24 / 18,
+    letterSpacing: -0.5,
+    color: ColorName.colorWhite,
+  );
+
+  /// Profile premium card subtitle — 14 / Medium / 75%
+  static TextStyle get profilePremiumSubtitle => TextStyle(
+    fontFamily: FontFamily.sFProDisplay,
+    fontWeight: FontWeight.w500,
+    fontSize: 14,
+    height: 20 / 14,
+    letterSpacing: 14 * -0.025,
+    color: ColorName.colorWhite.withValues(alpha: 0.75),
+  );
+
+  /// Profile Get Premium CTA — 14 / Semibold
+  static TextStyle get profileGetPremium => const TextStyle(
+    fontFamily: FontFamily.sFProDisplay,
+    fontWeight: FontWeight.w600,
+    fontSize: 14,
+    height: 20 / 14,
+    letterSpacing: 14 * -0.02,
+    color: ColorName.colorTitle,
+  );
+
+  /// Profile logout — 15 / Semibold
+  static TextStyle get profileLogout => const TextStyle(
+    fontFamily: FontFamily.sFProDisplay,
+    fontWeight: FontWeight.w600,
+    fontSize: 15,
+    height: 16 / 15,
+    letterSpacing: -0.5,
+    color: ColorName.colorOptionNegative,
+  );
 }

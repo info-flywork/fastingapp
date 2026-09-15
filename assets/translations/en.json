@@ -240,5 +240,26 @@
     "steps": "Steps",
     "steps_value": "{}",
     "steps_goal": " /{}"
+  },
+  "profile": {
+    "premium_badge": "Premium",
+    "account": "Account",
+    "edit_profile": "Edit Profile",
+    "push_notifications": "Push Notifications",
+    "push_notifications_subtitle": "Fasting reminders & streak nudgets",
+    "premium_title": "Unlock AI chat and all fasting plans",
+    "premium_subtitle": "Cancel anytime - Trusted by 200K+",
+    "get_premium": "Get Premium",
+    "activity_data": "Activity & Data",
+    "weight_loss_tracker": "Weight Loss Tracker",
+    "fasting_history": "Fasting History",
+    "sync_apple_health": "Sync with Apple Health",
+    "support_app": "Support & App",
+    "notification_inbox": "Notification Inbox",
+    "language": "Language",
+    "faq": "FAQ",
+    "rate_app": "Rate Mochi Fasting",
+    "share_app": "Share App",
+    "log_out": "Log Out"
   }
 }

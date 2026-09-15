@@ -14,7 +14,7 @@ final class MainWrapper extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: ColorName.colorProfileBack,
-      body: navigationShell,
+      body: SafeArea(child: navigationShell),
       bottomNavigationBar: AppBottomNav(
         currentIndex: navigationShell.currentIndex,
         onTap: (index) => navigationShell.goBranch(

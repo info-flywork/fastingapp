@@ -50,6 +50,7 @@ import 'package:fastingapp/presentation/auth/welcome/view/welcome_view.dart';
 import 'package:fastingapp/presentation/home/bloc/home_bloc.dart';
 import 'package:fastingapp/presentation/home/bloc/home_event.dart';
 import 'package:fastingapp/presentation/home/view/home_view.dart';
+import 'package:fastingapp/presentation/profile/view/profile_view.dart';
 import 'package:fastingapp/presentation/tabs/placeholder_tab_view.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -342,8 +343,7 @@ final GoRouter appRouter = GoRouter(
             GoRoute(
               path: RoutePaths.profile.path,
               name: RoutePaths.profile.name,
-              builder: (context, state) =>
-                  const PlaceholderTabView(titleKey: 'home.nav_profile'),
+              builder: (context, state) => const ProfileView(),
             ),
           ],
         ),

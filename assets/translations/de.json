@@ -240,5 +240,26 @@
     "steps": "Schritte",
     "steps_value": "{}",
     "steps_goal": " /{}"
+  },
+  "profile": {
+    "premium_badge": "Premium",
+    "account": "Konto",
+    "edit_profile": "Profil bearbeiten",
+    "push_notifications": "Push-Benachrichtigungen",
+    "push_notifications_subtitle": "Fasten-Erinnerungen & Streak-Nudges",
+    "premium_title": "KI-Chat und alle Fastenpläne freischalten",
+    "premium_subtitle": "Jederzeit kündbar - Vertraut von 200K+",
+    "get_premium": "Premium holen",
+    "activity_data": "Aktivität & Daten",
+    "weight_loss_tracker": "Gewichtsabnahme-Tracker",
+    "fasting_history": "Fastenverlauf",
+    "sync_apple_health": "Mit Apple Health synchronisieren",
+    "support_app": "Support & App",
+    "notification_inbox": "Benachrichtigungs-Posteingang",
+    "language": "Sprache",
+    "faq": "FAQ",
+    "rate_app": "Mochi Fasting bewerten",
+    "share_app": "App teilen",
+    "log_out": "Abmelden"
   }
 }

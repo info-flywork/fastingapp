@@ -83,13 +83,57 @@ class $AssetsIconsGen {
   /// File path: assets/icons/google_g.svg
   SvgGenImage get googleG => const SvgGenImage('assets/icons/google_g.svg');
 
+  /// File path: assets/icons/hugeicons_translate.svg
+  SvgGenImage get hugeiconsTranslate =>
+      const SvgGenImage('assets/icons/hugeicons_translate.svg');
+
   /// File path: assets/icons/ic_round-minus.svg
   SvgGenImage get icRoundMinus =>
       const SvgGenImage('assets/icons/ic_round-minus.svg');
 
+  /// File path: assets/icons/solar_alt-arrow-left-linear.svg
+  SvgGenImage get solarAltArrowLeftLinear =>
+      const SvgGenImage('assets/icons/solar_alt-arrow-left-linear.svg');
+
   /// File path: assets/icons/solar_arrow-left-linear.svg
   SvgGenImage get solarArrowLeftLinear =>
       const SvgGenImage('assets/icons/solar_arrow-left-linear.svg');
+
+  /// File path: assets/icons/solar_bell-line-duotone.svg
+  SvgGenImage get solarBellLineDuotone =>
+      const SvgGenImage('assets/icons/solar_bell-line-duotone.svg');
+
+  /// File path: assets/icons/solar_chart-line-duotone.svg
+  SvgGenImage get solarChartLineDuotone =>
+      const SvgGenImage('assets/icons/solar_chart-line-duotone.svg');
+
+  /// File path: assets/icons/solar_hand-stars-line-duotone.svg
+  SvgGenImage get solarHandStarsLineDuotone =>
+      const SvgGenImage('assets/icons/solar_hand-stars-line-duotone.svg');
+
+  /// File path: assets/icons/solar_heart-line-duotone.svg
+  SvgGenImage get solarHeartLineDuotone =>
+      const SvgGenImage('assets/icons/solar_heart-line-duotone.svg');
+
+  /// File path: assets/icons/solar_history-2-line-duotone.svg
+  SvgGenImage get solarHistory2LineDuotone =>
+      const SvgGenImage('assets/icons/solar_history-2-line-duotone.svg');
+
+  /// File path: assets/icons/solar_logout-2-line-duotone.svg
+  SvgGenImage get solarLogout2LineDuotone =>
+      const SvgGenImage('assets/icons/solar_logout-2-line-duotone.svg');
+
+  /// File path: assets/icons/solar_pen-2-line-duotone.svg
+  SvgGenImage get solarPen2LineDuotone =>
+      const SvgGenImage('assets/icons/solar_pen-2-line-duotone.svg');
+
+  /// File path: assets/icons/solar_question-circle-line-duotone.svg
+  SvgGenImage get solarQuestionCircleLineDuotone =>
+      const SvgGenImage('assets/icons/solar_question-circle-line-duotone.svg');
+
+  /// File path: assets/icons/solar_share-line-duotone.svg
+  SvgGenImage get solarShareLineDuotone =>
+      const SvgGenImage('assets/icons/solar_share-line-duotone.svg');
 
   /// File path: assets/icons/uil_plus.svg
   SvgGenImage get uilPlus => const SvgGenImage('assets/icons/uil_plus.svg');
@@ -97,8 +141,19 @@ class $AssetsIconsGen {
   /// List of all assets
   List<SvgGenImage> get values => [
     googleG,
+    hugeiconsTranslate,
     icRoundMinus,
+    solarAltArrowLeftLinear,
     solarArrowLeftLinear,
+    solarBellLineDuotone,
+    solarChartLineDuotone,
+    solarHandStarsLineDuotone,
+    solarHeartLineDuotone,
+    solarHistory2LineDuotone,
+    solarLogout2LineDuotone,
+    solarPen2LineDuotone,
+    solarQuestionCircleLineDuotone,
+    solarShareLineDuotone,
     uilPlus,
   ];
 }
@@ -293,6 +348,10 @@ class $AssetsImagesGen {
   AssetGenImage get proKing =>
       const AssetGenImage('assets/images/pro_king.png');
 
+  /// File path: assets/images/pro_reading.png
+  AssetGenImage get proReading =>
+      const AssetGenImage('assets/images/pro_reading.png');
+
   /// File path: assets/images/profile.png
   AssetGenImage get profile => const AssetGenImage('assets/images/profile.png');
 
@@ -420,6 +479,7 @@ class $AssetsImagesGen {
     pleteu,
     preferNot,
     proKing,
+    proReading,
     profile,
     progressHead,
     restrictive,

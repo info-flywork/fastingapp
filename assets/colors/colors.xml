@@ -54,4 +54,6 @@
   <color name="color_blood_chip">#E85D5D</color>
   <color name="color_home_chip_bg">#F6F6F6</color>
   <color name="color_login_bg">#FCFAF4</color>
+  <color name="color_premium_card">#86B57F</color>
+  <color name="color_toggle_on">#33C658</color>
 </resources>
