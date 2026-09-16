@@ -104,28 +104,34 @@ class _WaterViewState extends State<WaterView>
             );
             final waterH = screenH * fill;
 
-            final hiReveal =
-                ((fill - WaterViewMixin.hiRevealStart) /
-                        (WaterViewMixin.hiRevealFull -
-                            WaterViewMixin.hiRevealStart))
-                    .clamp(0.0, 1.0);
-            final hiT = Curves.easeOut.transform(hiReveal);
-
             const middleFill = 0.5;
-            const diverRange = 1 - middleFill;
-            final diverReveal = diverRange <= 0
-                ? (fill >= middleFill ? 1.0 : 0.0)
-                : ((fill - middleFill) / diverRange).clamp(0.0, 1.0);
-            final diverT = Curves.easeInOut.transform(diverReveal);
+            final mascotBottomPad = bottom + 210;
+            // Su gövdeye gelmeden çıkmasın (kafa kuruda kalmasın).
+            final minWaterForMascot =
+                mascotBottomPad + _WaterMascot.height * 0.45;
+            final waterReachedMascot =
+                waterH >= minWaterForMascot || celebrationTValue > 0.01;
 
-            final hiOpacity = hiT * (1 - diverT) * (1 - celebrationTValue);
-            final diverOpacity = math.max(diverT, celebrationTValue);
-            final showMascot =
-                hiOpacity > 0.01 || diverT > 0.01 || celebrationTValue > 0.01;
+            // Sağdan yavaş giriş — su geldikten sonra uzun bir fill aralığında.
+            final entryStartFill = (minWaterForMascot / screenH).clamp(
+              0.05,
+              0.95,
+            );
+            final entryEndFill = (entryStartFill + 0.36).clamp(0.1, 1.0);
+            final entrySpan = math.max(0.08, entryEndFill - entryStartFill);
+            final entryT = Curves.easeOutCubic.transform(
+              ((fill - entryStartFill) / entrySpan).clamp(0.0, 1.0),
+            );
+
+            final showDiver =
+                waterReachedMascot &&
+                (fill >= middleFill || celebrationTValue > 0.01);
+            final showHi = waterReachedMascot && !showDiver && entryT > 0.001;
+            final showMascot = showHi || showDiver;
+
             final bob = math.sin(mascotBobController.value * math.pi) * 10;
-            final mascotLift = celebrationTValue * (screenH * 0.12);
-            final mascotScale =
-                lerpDouble(0.92, 1.62, celebrationTValue) ?? 1.0;
+            final mascotLift = celebrationTValue * (screenH * 0.07);
+            final mascotScale = lerpDouble(1.0, 1.32, celebrationTValue) ?? 1.0;
             final pageBgOpacity = 1 - celebrationTValue;
             final immersive = celebrationTValue >= 0.999;
 
@@ -160,6 +166,25 @@ class _WaterViewState extends State<WaterView>
                     bubbles: _spawnedBubbles,
                   ),
                 ),
+                // Clip yok — kafa kesilmesin; su gelince sağdan yavaş girer.
+                if (showMascot)
+                  Positioned(
+                    left: 0,
+                    right: 0,
+                    bottom: mascotBottomPad,
+                    child: Transform.translate(
+                      offset: Offset(0, -mascotLift + bob),
+                      child: Transform.scale(
+                        scale: mascotScale,
+                        alignment: Alignment.bottomCenter,
+                        child: _WaterMascot(
+                          showDiver: showDiver,
+                          entryT: math.max(entryT, celebrationTValue),
+                          screenWidth: screenW,
+                        ),
+                      ),
+                    ),
+                  ),
                 if (!immersive)
                   _buildRulerAboveWater(
                     context,
@@ -201,26 +226,6 @@ class _WaterViewState extends State<WaterView>
                     ],
                   ),
                 ),
-                if (showMascot)
-                  Positioned(
-                    left: 0,
-                    right: 0,
-                    bottom: bottom + 172,
-                    child: Transform.translate(
-                      offset: Offset(0, -mascotLift + bob),
-                      child: Transform.scale(
-                        scale: mascotScale,
-                        alignment: Alignment.bottomCenter,
-                        child: _WaterMascot(
-                          hiOpacity: hiOpacity,
-                          diverOpacity: diverOpacity,
-                          transformT: math.max(diverT, celebrationTValue),
-                          celebrationT: celebrationTValue,
-                          screenWidth: screenW,
-                        ),
-                      ),
-                    ),
-                  ),
                 Positioned(
                   left: 20,
                   right: 0,
@@ -488,61 +493,45 @@ final class _WaterRulerPainter extends CustomPainter {
   bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
 
-/// Su seviyesine göre "hi" mascot belirir; su ekranın ortasını geçince
-/// dalgıç mascot'a çapraz geçişle dönüşür.
+/// Su seviyesine göre "hi" veya dalgıç — aynı anda yalnızca biri.
 final class _WaterMascot extends StatelessWidget {
   const _WaterMascot({
-    required this.hiOpacity,
-    required this.diverOpacity,
-    required this.transformT,
-    required this.celebrationT,
+    required this.showDiver,
+    required this.entryT,
     required this.screenWidth,
   });
 
-  final double hiOpacity;
-  final double diverOpacity;
-  final double transformT;
-  final double celebrationT;
+  final bool showDiver;
+  final double entryT;
   final double screenWidth;
 
-  static const _height = 180.0;
+  static const height = 220.0;
 
   @override
   Widget build(BuildContext context) {
-    final hiDx = lerpDouble(screenWidth * 0.26, 0, transformT) ?? 0;
-    final diverBaseScale = lerpDouble(0.86, 1, diverOpacity) ?? 1;
+    // Ekran dışından (sağ) yavaşça içeri — entryT 0→1.
+    final entryDx =
+        lerpDouble(screenWidth * 0.72, screenWidth * 0.04, entryT) ?? 0;
 
+    final image = showDiver
+        ? Assets.images.mascotDiver.image(
+            height: height,
+            fit: BoxFit.contain,
+            filterQuality: FilterQuality.high,
+          )
+        : Assets.images.mascotHiWater.image(
+            height: height,
+            fit: BoxFit.contain,
+            filterQuality: FilterQuality.high,
+          );
+
+    // Clip/SizedBox yok — kafa ve snorkel kesilmesin.
     return IgnorePointer(
-      child: SizedBox(
-        height: _height,
-        child: Stack(
-          alignment: Alignment.center,
-          clipBehavior: Clip.none,
-          children: [
-            if (hiOpacity > 0.01)
-              Transform.translate(
-                offset: Offset(hiDx, 0),
-                child: Opacity(
-                  opacity: hiOpacity.clamp(0.0, 1.0),
-                  child: Assets.images.mascotHiWater.image(
-                    height: _height,
-                    fit: BoxFit.contain,
-                  ),
-                ),
-              ),
-            if (diverOpacity > 0.01)
-              Opacity(
-                opacity: diverOpacity.clamp(0.0, 1.0),
-                child: Transform.scale(
-                  scale: diverBaseScale,
-                  child: Assets.images.mascotDiver.image(
-                    height: _height,
-                    fit: BoxFit.contain,
-                  ),
-                ),
-              ),
-          ],
-        ),
+      child: Transform.translate(
+        offset: Offset(entryDx, 0),
+        child: showDiver
+            ? Transform.rotate(angle: 15 * math.pi / 180, child: image)
+            : image,
       ),
     );
   }
