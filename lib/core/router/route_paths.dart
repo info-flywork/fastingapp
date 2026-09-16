@@ -30,7 +30,22 @@ enum RoutePaths {
   fasting('/fasting', 'fasting'),
   plans('/plans', 'plans'),
   insights('/insights', 'insights'),
-  profile('/profile', 'profile');
+  profile('/profile', 'profile'),
+  chat('/chat', 'chat'),
+  latestChats('latest', 'latestChats'),
+  water('/water', 'water'),
+  waterReminder('reminder', 'waterReminder'),
+  editProfile('edit', 'editProfile'),
+  notifications('notifications', 'notifications'),
+  languages('languages', 'languages'),
+  faq('faq', 'faq'),
+  editFastingTarget('fasting-target', 'editFastingTarget'),
+  editFastingPlan('fasting-plan-edit', 'editFastingPlan'),
+  editGender('gender', 'editGender'),
+  editHeight('height', 'editHeight'),
+  editDietType('diet-type', 'editDietType'),
+  editPreferredFoods('preferred-foods', 'editPreferredFoods'),
+  editSkippedFoods('skipped-foods', 'editSkippedFoods');
 
   const RoutePaths(this.path, this.name);
 

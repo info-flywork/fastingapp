@@ -12,6 +12,9 @@ import 'package:flutter/painting.dart';
 import 'package:flutter/material.dart';
 
 abstract final class ColorName {
+  /// Color: #0F0F0F
+  static const Color colorAvatarBg = Color(0xFF0F0F0F);
+
   /// Color: #111111
   static const Color colorBlack = Color(0xFF111111);
 
@@ -20,6 +23,15 @@ abstract final class ColorName {
 
   /// Color: #67935F
   static const Color colorBrandStrong = Color(0xFF67935F);
+
+  /// Color: #1B1B21
+  static const Color colorButtonDark = Color(0xFF1B1B21);
+
+  /// Color: #2A2A32
+  static const Color colorChatSurface = Color(0xFF2A2A32);
+
+  /// Color: #67BA58
+  static const Color colorChatUserBubble = Color(0xFF67BA58);
 
   /// Color: #5E51CA
   static const Color colorCompanyActive = Color(0xFF5E51CA);
@@ -54,17 +66,14 @@ abstract final class ColorName {
   /// Color: #FFEAA8
   static const Color colorJourneyGoalWeight = Color(0xFFFFEAA8);
 
-  /// Color: #FCFAF4
-  static const Color colorLoginBg = Color(0xFFFCFAF4);
+  /// Color: #F6F6F6
+  static const Color colorLoginBg = Color(0xFFF6F6F6);
 
   /// Color: #C8DBC5
   static const Color colorMatGreen = Color(0xFFC8DBC5);
 
-  /// Color: #86B57F
-  static const Color colorPremiumCard = Color(0xFF86B57F);
-
-  /// Color: #33C658
-  static const Color colorToggleOn = Color(0xFF33C658);
+  /// Color: #D14B47
+  static const Color colorNegativeV2 = Color(0xFFD14B47);
 
   /// Color: #E2754D
   static const Color colorNotedGradientBottom = Color(0xFFE2754D);
@@ -99,6 +108,9 @@ abstract final class ColorName {
   /// Color: #6CD597
   static const Color colorPlanBuildFill = Color(0xFF6CD597);
 
+  /// Color: #86B57F
+  static const Color colorPremiumCard = Color(0xFF86B57F);
+
   /// Color: #39D2ED
   static const Color colorPremiumGradientEnd = Color(0xFF39D2ED);
 
@@ -108,8 +120,8 @@ abstract final class ColorName {
   /// Color: #89CFF0
   static const Color colorPrimaryBlue = Color(0xFF89CFF0);
 
-  /// Color: #F5F7FA
-  static const Color colorProfileBack = Color(0xFFF5F7FA);
+  /// Color: #F6F6F6
+  static const Color colorProfileBack = Color(0xFFF6F6F6);
 
   /// Color: #EFAE87
   static const Color colorProgressFillEnd = Color(0xFFEFAE87);
@@ -147,17 +159,41 @@ abstract final class ColorName {
   /// Color: #09090B
   static const Color colorTitle = Color(0xFF09090B);
 
+  /// Color: #33C658
+  static const Color colorToggleOn = Color(0xFF33C658);
+
+  /// Color: #E3E3E3
+  static const Color colorUnitToggleBg = Color(0xFFE3E3E3);
+
   /// Color: #2D9CDB
   static const Color colorVibrantBlue = Color(0xFF2D9CDB);
 
   /// Color: #F39C12
   static const Color colorWarningOrange = Color(0xFFF39C12);
 
+  /// Color: #4682EE
+  static const Color colorWaterAction = Color(0xFF4682EE);
+
   /// Color: #4D87F3
   static const Color colorWaterFill = Color(0xFF4D87F3);
 
+  /// Color: #F4F9FF
+  static const Color colorWaterPageFade = Color(0xFFF4F9FF);
+
+  /// Color: #FAFCFF
+  static const Color colorWaterGlassTile = Color(0xFFFAFCFF);
+
+  /// Color: #CFDFEE
+  static const Color colorWaterRulerTick = Color(0xFFCFDFEE);
+
   /// Color: #DCE8F7
   static const Color colorWaterTrack = Color(0xFFDCE8F7);
+
+  /// Color: #CCDFFD
+  static const Color colorWaterWaveDeep = Color(0xFFCCDFFD);
+
+  /// Color: #EBF3FF
+  static const Color colorWaterWaveLight = Color(0xFFEBF3FF);
 
   /// Color: #EFEFEF
   static const Color colorWeekPill = Color(0xFFEFEFEF);

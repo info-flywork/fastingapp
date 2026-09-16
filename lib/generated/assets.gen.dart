@@ -24,6 +24,59 @@ class $AssetsColorsGen {
   List<String> get values => [colors];
 }
 
+class $AssetsFlagsGen {
+  const $AssetsFlagsGen();
+
+  /// File path: assets/flags/ic_english.svg
+  SvgGenImage get icEnglish => const SvgGenImage('assets/flags/ic_english.svg');
+
+  /// File path: assets/flags/ic_french.svg
+  SvgGenImage get icFrench => const SvgGenImage('assets/flags/ic_french.svg');
+
+  /// File path: assets/flags/ic_germany.svg
+  SvgGenImage get icGermany => const SvgGenImage('assets/flags/ic_germany.svg');
+
+  /// File path: assets/flags/ic_india.svg
+  SvgGenImage get icIndia => const SvgGenImage('assets/flags/ic_india.svg');
+
+  /// File path: assets/flags/ic_italy.svg
+  SvgGenImage get icItaly => const SvgGenImage('assets/flags/ic_italy.svg');
+
+  /// File path: assets/flags/ic_japanne.svg
+  SvgGenImage get icJapanne => const SvgGenImage('assets/flags/ic_japanne.svg');
+
+  /// File path: assets/flags/ic_korean.svg
+  SvgGenImage get icKorean => const SvgGenImage('assets/flags/ic_korean.svg');
+
+  /// File path: assets/flags/ic_portugal.svg
+  SvgGenImage get icPortugal =>
+      const SvgGenImage('assets/flags/ic_portugal.svg');
+
+  /// File path: assets/flags/ic_russian.svg
+  SvgGenImage get icRussian => const SvgGenImage('assets/flags/ic_russian.svg');
+
+  /// File path: assets/flags/ic_spanish.svg
+  SvgGenImage get icSpanish => const SvgGenImage('assets/flags/ic_spanish.svg');
+
+  /// File path: assets/flags/ic_turkey.svg
+  SvgGenImage get icTurkey => const SvgGenImage('assets/flags/ic_turkey.svg');
+
+  /// List of all assets
+  List<SvgGenImage> get values => [
+    icEnglish,
+    icFrench,
+    icGermany,
+    icIndia,
+    icItaly,
+    icJapanne,
+    icKorean,
+    icPortugal,
+    icRussian,
+    icSpanish,
+    icTurkey,
+  ];
+}
+
 class $AssetsGifsGen {
   const $AssetsGifsGen();
 
@@ -80,8 +133,20 @@ class $AssetsGifsGen {
 class $AssetsIconsGen {
   const $AssetsIconsGen();
 
+  /// File path: assets/icons/charm_menu-kebab.svg
+  SvgGenImage get charmMenuKebab =>
+      const SvgGenImage('assets/icons/charm_menu-kebab.svg');
+
   /// File path: assets/icons/google_g.svg
   SvgGenImage get googleG => const SvgGenImage('assets/icons/google_g.svg');
+
+  /// File path: assets/icons/healthicons_height-outline.svg
+  SvgGenImage get healthiconsHeightOutline =>
+      const SvgGenImage('assets/icons/healthicons_height-outline.svg');
+
+  /// File path: assets/icons/hugeicons_banana.svg
+  SvgGenImage get hugeiconsBanana =>
+      const SvgGenImage('assets/icons/hugeicons_banana.svg');
 
   /// File path: assets/icons/hugeicons_translate.svg
   SvgGenImage get hugeiconsTranslate =>
@@ -91,21 +156,65 @@ class $AssetsIconsGen {
   SvgGenImage get icRoundMinus =>
       const SvgGenImage('assets/icons/ic_round-minus.svg');
 
+  /// File path: assets/icons/icons8_gender.svg
+  SvgGenImage get icons8Gender =>
+      const SvgGenImage('assets/icons/icons8_gender.svg');
+
   /// File path: assets/icons/solar_alt-arrow-left-linear.svg
   SvgGenImage get solarAltArrowLeftLinear =>
       const SvgGenImage('assets/icons/solar_alt-arrow-left-linear.svg');
+
+  /// File path: assets/icons/solar_alt-arrow-up-line-duotone.svg
+  SvgGenImage get solarAltArrowUpLineDuotone =>
+      const SvgGenImage('assets/icons/solar_alt-arrow-up-line-duotone.svg');
+
+  /// File path: assets/icons/solar_arrow-left-down-linear.svg
+  SvgGenImage get solarArrowLeftDownLinear =>
+      const SvgGenImage('assets/icons/solar_arrow-left-down-linear.svg');
 
   /// File path: assets/icons/solar_arrow-left-linear.svg
   SvgGenImage get solarArrowLeftLinear =>
       const SvgGenImage('assets/icons/solar_arrow-left-linear.svg');
 
+  /// File path: assets/icons/solar_bell-bing-line-duotone.svg
+  SvgGenImage get solarBellBingLineDuotone =>
+      const SvgGenImage('assets/icons/solar_bell-bing-line-duotone.svg');
+
   /// File path: assets/icons/solar_bell-line-duotone.svg
   SvgGenImage get solarBellLineDuotone =>
       const SvgGenImage('assets/icons/solar_bell-line-duotone.svg');
 
+  /// File path: assets/icons/solar_calendar-date-line-duotone.svg
+  SvgGenImage get solarCalendarDateLineDuotone =>
+      const SvgGenImage('assets/icons/solar_calendar-date-line-duotone.svg');
+
+  /// File path: assets/icons/solar_cart-3-line-duotone.svg
+  SvgGenImage get solarCart3LineDuotone =>
+      const SvgGenImage('assets/icons/solar_cart-3-line-duotone.svg');
+
   /// File path: assets/icons/solar_chart-line-duotone.svg
   SvgGenImage get solarChartLineDuotone =>
       const SvgGenImage('assets/icons/solar_chart-line-duotone.svg');
+
+  /// File path: assets/icons/solar_chat-dots-line-duotone.svg
+  SvgGenImage get solarChatDotsLineDuotone =>
+      const SvgGenImage('assets/icons/solar_chat-dots-line-duotone.svg');
+
+  /// File path: assets/icons/solar_chat-round-dots-bold.png
+  AssetGenImage get solarChatRoundDotsBoldPng =>
+      const AssetGenImage('assets/icons/solar_chat-round-dots-bold.png');
+
+  /// File path: assets/icons/solar_chat-round-dots-bold.svg
+  SvgGenImage get solarChatRoundDotsBoldSvg =>
+      const SvgGenImage('assets/icons/solar_chat-round-dots-bold.svg');
+
+  /// File path: assets/icons/solar_clock-circle-line-duotone.svg
+  SvgGenImage get solarClockCircleLineDuotone =>
+      const SvgGenImage('assets/icons/solar_clock-circle-line-duotone.svg');
+
+  /// File path: assets/icons/solar_dislike-line-duotone.svg
+  SvgGenImage get solarDislikeLineDuotone =>
+      const SvgGenImage('assets/icons/solar_dislike-line-duotone.svg');
 
   /// File path: assets/icons/solar_hand-stars-line-duotone.svg
   SvgGenImage get solarHandStarsLineDuotone =>
@@ -115,6 +224,10 @@ class $AssetsIconsGen {
   SvgGenImage get solarHeartLineDuotone =>
       const SvgGenImage('assets/icons/solar_heart-line-duotone.svg');
 
+  /// File path: assets/icons/solar_history-2-line-duotone (1).svg
+  SvgGenImage get solarHistory2LineDuotone1 =>
+      const SvgGenImage('assets/icons/solar_history-2-line-duotone (1).svg');
+
   /// File path: assets/icons/solar_history-2-line-duotone.svg
   SvgGenImage get solarHistory2LineDuotone =>
       const SvgGenImage('assets/icons/solar_history-2-line-duotone.svg');
@@ -123,9 +236,25 @@ class $AssetsIconsGen {
   SvgGenImage get solarLogout2LineDuotone =>
       const SvgGenImage('assets/icons/solar_logout-2-line-duotone.svg');
 
+  /// File path: assets/icons/solar_pen-2-line-duotone (1).svg
+  SvgGenImage get solarPen2LineDuotone1 =>
+      const SvgGenImage('assets/icons/solar_pen-2-line-duotone (1).svg');
+
   /// File path: assets/icons/solar_pen-2-line-duotone.svg
   SvgGenImage get solarPen2LineDuotone =>
       const SvgGenImage('assets/icons/solar_pen-2-line-duotone.svg');
+
+  /// File path: assets/icons/solar_pen-bold.svg
+  SvgGenImage get solarPenBold =>
+      const SvgGenImage('assets/icons/solar_pen-bold.svg');
+
+  /// File path: assets/icons/solar_pen-bold-grey.svg
+  SvgGenImage get solarPenBoldGrey =>
+      const SvgGenImage('assets/icons/solar_pen-bold-grey.svg');
+
+  /// File path: assets/icons/solar_plain-bold.svg
+  SvgGenImage get solarPlainBold =>
+      const SvgGenImage('assets/icons/solar_plain-bold.svg');
 
   /// File path: assets/icons/solar_question-circle-line-duotone.svg
   SvgGenImage get solarQuestionCircleLineDuotone =>
@@ -135,25 +264,64 @@ class $AssetsIconsGen {
   SvgGenImage get solarShareLineDuotone =>
       const SvgGenImage('assets/icons/solar_share-line-duotone.svg');
 
+  /// File path: assets/icons/solar_target-line-duotone.svg
+  SvgGenImage get solarTargetLineDuotone =>
+      const SvgGenImage('assets/icons/solar_target-line-duotone.svg');
+
+  /// File path: assets/icons/solar_trash-bin-trash-bold-duotone.svg
+  SvgGenImage get solarTrashBinTrashBoldDuotone =>
+      const SvgGenImage('assets/icons/solar_trash-bin-trash-bold-duotone.svg');
+
+  /// File path: assets/icons/solar_verified-check-bold.svg
+  SvgGenImage get solarVerifiedCheckBold =>
+      const SvgGenImage('assets/icons/solar_verified-check-bold.svg');
+
+  /// File path: assets/icons/solar_weigher-line-duotone.svg
+  SvgGenImage get solarWeigherLineDuotone =>
+      const SvgGenImage('assets/icons/solar_weigher-line-duotone.svg');
+
   /// File path: assets/icons/uil_plus.svg
   SvgGenImage get uilPlus => const SvgGenImage('assets/icons/uil_plus.svg');
 
   /// List of all assets
-  List<SvgGenImage> get values => [
+  List<dynamic> get values => [
+    charmMenuKebab,
     googleG,
+    healthiconsHeightOutline,
+    hugeiconsBanana,
     hugeiconsTranslate,
     icRoundMinus,
+    icons8Gender,
     solarAltArrowLeftLinear,
+    solarAltArrowUpLineDuotone,
+    solarArrowLeftDownLinear,
     solarArrowLeftLinear,
+    solarBellBingLineDuotone,
     solarBellLineDuotone,
+    solarCalendarDateLineDuotone,
+    solarCart3LineDuotone,
     solarChartLineDuotone,
+    solarChatDotsLineDuotone,
+    solarChatRoundDotsBoldPng,
+    solarChatRoundDotsBoldSvg,
+    solarClockCircleLineDuotone,
+    solarDislikeLineDuotone,
     solarHandStarsLineDuotone,
     solarHeartLineDuotone,
+    solarHistory2LineDuotone1,
     solarHistory2LineDuotone,
     solarLogout2LineDuotone,
+    solarPen2LineDuotone1,
     solarPen2LineDuotone,
+    solarPenBold,
+    solarPenBoldGrey,
+    solarPlainBold,
     solarQuestionCircleLineDuotone,
     solarShareLineDuotone,
+    solarTargetLineDuotone,
+    solarTrashBinTrashBoldDuotone,
+    solarVerifiedCheckBold,
+    solarWeigherLineDuotone,
     uilPlus,
   ];
 }
@@ -282,16 +450,35 @@ class $AssetsImagesGen {
   AssetGenImage get lawCarb =>
       const AssetGenImage('assets/images/law-carb.png');
 
+  /// File path: assets/images/loginv2.png
+  AssetGenImage get loginv2 => const AssetGenImage('assets/images/loginv2.png');
+
   /// File path: assets/images/man.png
   AssetGenImage get man => const AssetGenImage('assets/images/man.png');
+
+  /// File path: assets/images/mascot-chat.png
+  AssetGenImage get mascotChat =>
+      const AssetGenImage('assets/images/mascot-chat.png');
+
+  /// File path: assets/images/mascot_chat_pp.png
+  AssetGenImage get mascotChatPp =>
+      const AssetGenImage('assets/images/mascot_chat_pp.png');
 
   /// File path: assets/images/mascot_clock.png
   AssetGenImage get mascotClock =>
       const AssetGenImage('assets/images/mascot_clock.png');
 
+  /// File path: assets/images/mascot_diver.png
+  AssetGenImage get mascotDiver =>
+      const AssetGenImage('assets/images/mascot_diver.png');
+
   /// File path: assets/images/mascot_hi.png
   AssetGenImage get mascotHi =>
       const AssetGenImage('assets/images/mascot_hi.png');
+
+  /// File path: assets/images/mascot_hi_water.png
+  AssetGenImage get mascotHiWater =>
+      const AssetGenImage('assets/images/mascot_hi_water.png');
 
   /// File path: assets/images/meat.png
   AssetGenImage get meat => const AssetGenImage('assets/images/meat.png');
@@ -314,6 +501,14 @@ class $AssetsImagesGen {
 
   /// File path: assets/images/noodles.png
   AssetGenImage get noodles => const AssetGenImage('assets/images/noodles.png');
+
+  /// File path: assets/images/notificatio.png
+  AssetGenImage get notificatio =>
+      const AssetGenImage('assets/images/notificatio.png');
+
+  /// File path: assets/images/notification_empty_bell.png
+  AssetGenImage get notificationEmptyBell =>
+      const AssetGenImage('assets/images/notification_empty_bell.png');
 
   /// File path: assets/images/nuts.png
   AssetGenImage get nuts => const AssetGenImage('assets/images/nuts.png');
@@ -382,6 +577,14 @@ class $AssetsImagesGen {
   /// File path: assets/images/star.png
   AssetGenImage get star => const AssetGenImage('assets/images/star.png');
 
+  /// File path: assets/images/solar_pen-bold.png
+  AssetGenImage get solarPenBold =>
+      const AssetGenImage('assets/images/solar_pen-bold.png');
+
+  /// File path: assets/images/solar_verified-check-bold.png
+  AssetGenImage get solarVerifiedCheckBold =>
+      const AssetGenImage('assets/images/solar_verified-check-bold.png');
+
   /// File path: assets/images/steps.png
   AssetGenImage get steps => const AssetGenImage('assets/images/steps.png');
 
@@ -417,8 +620,40 @@ class $AssetsImagesGen {
   /// File path: assets/images/water.png
   AssetGenImage get water => const AssetGenImage('assets/images/water.png');
 
+  /// File path: assets/images/water_bottle.png
+  AssetGenImage get waterBottle =>
+      const AssetGenImage('assets/images/water_bottle.png');
+
+  /// File path: assets/images/water_bottle_300.png
+  AssetGenImage get waterBottle300 =>
+      const AssetGenImage('assets/images/water_bottle_300.png');
+
+  /// File path: assets/images/500ml.png
+  AssetGenImage get waterBottle500 =>
+      const AssetGenImage('assets/images/500ml.png');
+
+  /// File path: assets/images/50ml.png
+  AssetGenImage get waterGlass50 =>
+      const AssetGenImage('assets/images/50ml.png');
+
+  /// File path: assets/images/100ml.png
+  AssetGenImage get waterGlass100 =>
+      const AssetGenImage('assets/images/100ml.png');
+
+  /// File path: assets/images/200ml.png
+  AssetGenImage get waterGlass200 =>
+      const AssetGenImage('assets/images/200ml.png');
+
+  /// File path: assets/images/water_size_plus.png
+  AssetGenImage get waterSizePlus =>
+      const AssetGenImage('assets/images/water_size_plus.png');
+
   /// File path: assets/images/weigher.png
   AssetGenImage get weigher => const AssetGenImage('assets/images/weigher.png');
+
+  /// File path: assets/images/weigher_2.png
+  AssetGenImage get weigher2 =>
+      const AssetGenImage('assets/images/weigher_2.png');
 
   /// File path: assets/images/woman.png
   AssetGenImage get woman => const AssetGenImage('assets/images/woman.png');
@@ -460,15 +695,22 @@ class $AssetsImagesGen {
     home,
     insights,
     lawCarb,
+    loginv2,
     man,
+    mascotChat,
+    mascotChatPp,
     mascotClock,
+    mascotDiver,
     mascotHi,
+    mascotHiWater,
     meat,
     mediterrian,
     motivation,
     mushroom,
     nonBinary,
     noodles,
+    notificatio,
+    notificationEmptyBell,
     nuts,
     olives,
     onion,
@@ -489,6 +731,8 @@ class $AssetsImagesGen {
     seefood,
     spicy,
     star,
+    solarPenBold,
+    solarVerifiedCheckBold,
     steps,
     streak,
     streakFlame,
@@ -499,7 +743,15 @@ class $AssetsImagesGen {
     trip,
     vegetarian,
     water,
+    waterBottle,
+    waterBottle300,
+    waterBottle500,
+    waterGlass50,
+    waterGlass100,
+    waterGlass200,
+    waterSizePlus,
     weigher,
+    weigher2,
     woman,
   ];
 }
@@ -522,6 +774,7 @@ class $AssetsTranslationsGen {
 
 abstract final class Assets {
   static const $AssetsColorsGen colors = $AssetsColorsGen();
+  static const $AssetsFlagsGen flags = $AssetsFlagsGen();
   static const $AssetsGifsGen gifs = $AssetsGifsGen();
   static const $AssetsIconsGen icons = $AssetsIconsGen();
   static const $AssetsImagesGen images = $AssetsImagesGen();

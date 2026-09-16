@@ -593,6 +593,115 @@ abstract final class AppTextStyles {
     color: ColorName.colorSubtitle.withValues(alpha: 0.6),
   );
 
+  /// Water page date — 18 / Semibold
+  static TextStyle get waterToday => const TextStyle(
+    fontFamily: FontFamily.sFProDisplay,
+    fontWeight: FontWeight.w600,
+    fontSize: 18,
+    height: 24 / 18,
+    letterSpacing: -0.5,
+    color: ColorName.colorTitle,
+  );
+
+  /// Water hero amount — 80 / Semibold
+  static TextStyle get waterHeroAmount => const TextStyle(
+    fontFamily: FontFamily.sFProDisplay,
+    fontWeight: FontWeight.w600,
+    fontSize: 80,
+    height: 88 / 80,
+    letterSpacing: -1.34,
+    color: ColorName.colorTitle,
+  );
+
+  /// Water unit — 40 / Semibold
+  static TextStyle get waterUnit => const TextStyle(
+    fontFamily: FontFamily.sFProDisplay,
+    fontWeight: FontWeight.w600,
+    fontSize: 40,
+    height: 64 / 40,
+    letterSpacing: -1.34,
+    color: ColorName.colorTitle,
+  );
+
+  /// Water goal achieved — 18 / Semibold / blue
+  static TextStyle get waterGoalAchieved => const TextStyle(
+    fontFamily: FontFamily.sFProDisplay,
+    fontWeight: FontWeight.w600,
+    fontSize: 18,
+    height: 24 / 18,
+    letterSpacing: -0.5,
+    color: ColorName.colorWaterAction,
+  );
+
+  /// Water daily target — 16 / Semibold
+  static TextStyle get waterDailyTarget => const TextStyle(
+    fontFamily: FontFamily.sFProDisplay,
+    fontWeight: FontWeight.w600,
+    fontSize: 16.07,
+    height: 21.42 / 16.07,
+    letterSpacing: 16.07 * -0.015,
+    color: ColorName.colorSubtitle,
+  );
+
+  static TextStyle get waterDailyTargetBold => const TextStyle(
+    fontFamily: FontFamily.sFProDisplay,
+    fontWeight: FontWeight.w700,
+    fontSize: 16.07,
+    height: 21.42 / 16.07,
+    letterSpacing: 16.07 * -0.015,
+    color: ColorName.colorSubtitle,
+  );
+
+  /// Water add button label — 14 / w590 / line 14 / white 60%
+  static TextStyle get waterAddLabel => TextStyle(
+    fontFamily: FontFamily.sFProDisplay,
+    fontWeight: FontWeight(590),
+    fontSize: 14,
+    height: 1,
+    letterSpacing: 14 * -0.015,
+    color: ColorName.colorWhite.withValues(alpha: 0.6),
+  );
+
+  /// Water reminder row label — 18 / Semibold / secondary 60%
+  static TextStyle get waterReminderLabel => TextStyle(
+    fontFamily: FontFamily.sFProDisplay,
+    fontWeight: FontWeight(590),
+    fontSize: 18,
+    height: 24 / 18,
+    letterSpacing: 18 * -0.015,
+    color: ColorName.colorSubtitle.withValues(alpha: 0.6),
+  );
+
+  /// Water reminder value — 18 / Bold / primary
+  static TextStyle get waterReminderValue => const TextStyle(
+    fontFamily: FontFamily.sFProDisplay,
+    fontWeight: FontWeight.w700,
+    fontSize: 18,
+    height: 24 / 18,
+    letterSpacing: 18 * -0.015,
+    color: ColorName.colorTitle,
+  );
+
+  /// Water glass size label (unselected) — 18 / Bold / secondary 60%
+  static TextStyle get waterGlassSizeLabel => TextStyle(
+    fontFamily: FontFamily.sFProDisplay,
+    fontWeight: FontWeight.w700,
+    fontSize: 18,
+    height: 24 / 18,
+    letterSpacing: 18 * -0.015,
+    color: ColorName.colorSubtitle.withValues(alpha: 0.6),
+  );
+
+  /// Water glass size label (selected) — 18 / Bold / primary
+  static TextStyle get waterGlassSizeLabelSelected => const TextStyle(
+    fontFamily: FontFamily.sFProDisplay,
+    fontWeight: FontWeight.w700,
+    fontSize: 18,
+    height: 24 / 18,
+    letterSpacing: 18 * -0.015,
+    color: ColorName.colorTitle,
+  );
+
   /// Bottom nav label — 11 / Semibold
   static TextStyle get navLabel => const TextStyle(
     fontFamily: FontFamily.sFProDisplay,
@@ -759,5 +868,335 @@ abstract final class AppTextStyles {
     height: 16 / 15,
     letterSpacing: -0.5,
     color: ColorName.colorOptionNegative,
+  );
+
+  /// Edit Profile / selection sheet title — 24 / Semibold / -4.5%
+  static TextStyle get selectionSheetTitle => const TextStyle(
+    fontFamily: FontFamily.sFProDisplay,
+    fontWeight: FontWeight.w600,
+    fontSize: 24,
+    height: 32 / 24,
+    letterSpacing: 24 * -0.045,
+    color: ColorName.colorTitle,
+  );
+
+  /// Edit Profile title — 24 / Semibold
+  static TextStyle get editProfileTitle => const TextStyle(
+    fontFamily: FontFamily.sFProDisplay,
+    fontWeight: FontWeight.w600,
+    fontSize: 24,
+    height: 32 / 24,
+    letterSpacing: -0.5,
+    color: ColorName.colorTitle,
+  );
+
+  /// Edit Profile avatar initials — 22.5 / Medium
+  static TextStyle get editProfileInitials => const TextStyle(
+    fontFamily: FontFamily.sFProDisplay,
+    fontWeight: FontWeight.w500,
+    fontSize: 22.5,
+    height: 24.75 / 22.5,
+    letterSpacing: 22.5 * -0.02,
+    color: ColorName.colorWhite,
+  );
+
+  /// Edit Profile change photo — 15 / Semibold / brand
+  static TextStyle get editProfileChangePhoto => const TextStyle(
+    fontFamily: FontFamily.sFProDisplay,
+    fontWeight: FontWeight.w600,
+    fontSize: 15,
+    height: 20 / 15,
+    letterSpacing: 15 * -0.025,
+    color: ColorName.colorBrandStrong,
+  );
+
+  /// Edit Profile field label — 15 / Semibold / subtitle 75%
+  static TextStyle get editProfileLabel => TextStyle(
+    fontFamily: FontFamily.sFProDisplay,
+    fontWeight: FontWeight.w600,
+    fontSize: 15,
+    height: 16 / 15,
+    letterSpacing: -0.5,
+    color: ColorName.colorSubtitle.withValues(alpha: 0.75),
+  );
+
+  /// Edit Profile field value — 15 / Semibold
+  static TextStyle get editProfileValue => const TextStyle(
+    fontFamily: FontFamily.sFProDisplay,
+    fontWeight: FontWeight.w600,
+    fontSize: 15,
+    height: 16 / 15,
+    letterSpacing: -0.5,
+    color: ColorName.colorTitle,
+  );
+
+  /// Edit Profile food chip — 12 / Semibold
+  static TextStyle get editProfileChip => const TextStyle(
+    fontFamily: FontFamily.sFProDisplay,
+    fontWeight: FontWeight.w600,
+    fontSize: 12,
+    height: 16 / 12,
+    letterSpacing: -0.5,
+    color: ColorName.colorTitle,
+  );
+
+  /// Edit Profile skipped food chip — 12 / Semibold / negative v2
+  static TextStyle get editProfileChipNegative => const TextStyle(
+    fontFamily: FontFamily.sFProDisplay,
+    fontWeight: FontWeight.w600,
+    fontSize: 12,
+    height: 16 / 12,
+    letterSpacing: -0.5,
+    color: ColorName.colorNegativeV2,
+  );
+
+  /// Weight dialog title — 24 / Semibold / -0.5
+  static TextStyle get weightDialogTitle => const TextStyle(
+    fontFamily: FontFamily.sFProDisplay,
+    fontWeight: FontWeight.w600,
+    fontSize: 24,
+    height: 32 / 24,
+    letterSpacing: -0.5,
+    color: ColorName.colorTitle,
+  );
+
+  /// Weight dialog subtitle (Today) — 16 / Semibold / secondary 60%
+  static TextStyle get weightDialogSubtitle => TextStyle(
+    fontFamily: FontFamily.sFProDisplay,
+    fontWeight: FontWeight.w600,
+    fontSize: 16,
+    height: 24 / 16,
+    letterSpacing: 16 * -0.015,
+    color: ColorName.colorSubtitle.withValues(alpha: 0.6),
+  );
+
+  /// Weight dialog unit toggle label — 16 / Semibold
+  static TextStyle get weightDialogUnitLabel => const TextStyle(
+    fontFamily: FontFamily.sFProDisplay,
+    fontWeight: FontWeight.w600,
+    fontSize: 16,
+    height: 24 / 16,
+    letterSpacing: 16 * -0.015,
+    color: ColorName.colorTitle,
+  );
+
+  /// Weight dialog value — 32 / Semibold
+  static TextStyle get weightDialogValue => const TextStyle(
+    fontFamily: FontFamily.sFProDisplay,
+    fontWeight: FontWeight.w600,
+    fontSize: 32,
+    height: 40 / 32,
+    letterSpacing: 32 * -0.015,
+    color: ColorName.colorTitle,
+  );
+
+  /// Weight dialog value unit — 16 / Semibold / secondary 60%
+  static TextStyle get weightDialogValueUnit => TextStyle(
+    fontFamily: FontFamily.sFProDisplay,
+    fontWeight: FontWeight.w600,
+    fontSize: 16,
+    height: 24 / 16,
+    letterSpacing: 16 * -0.015,
+    color: ColorName.colorSubtitle.withValues(alpha: 0.6),
+  );
+
+  /// Notifications date header — 14 / Semibold / -0.5
+  static TextStyle get notificationsDate => const TextStyle(
+    fontFamily: FontFamily.sFProDisplay,
+    fontWeight: FontWeight.w600,
+    fontSize: 14,
+    height: 20 / 14,
+    letterSpacing: -0.5,
+    color: ColorName.colorTitle,
+  );
+
+  /// Notifications card title — 16 / Semibold / -1.5%
+  static TextStyle get notificationsCardTitle => const TextStyle(
+    fontFamily: FontFamily.sFProDisplay,
+    fontWeight: FontWeight.w600,
+    fontSize: 16,
+    height: 24 / 16,
+    letterSpacing: 16 * -0.015,
+    color: ColorName.colorTitle,
+  );
+
+  /// Notifications time — 12 / Medium / secondary 60%
+  static TextStyle get notificationsTime => TextStyle(
+    fontFamily: FontFamily.sFProDisplay,
+    fontWeight: FontWeight.w500,
+    fontSize: 12,
+    height: 16 / 12,
+    letterSpacing: 12 * -0.015,
+    color: ColorName.colorSubtitle.withValues(alpha: 0.6),
+  );
+
+  /// Notifications body — 15 / Medium / secondary 60%
+  static TextStyle get notificationsBody => TextStyle(
+    fontFamily: FontFamily.sFProDisplay,
+    fontWeight: FontWeight.w500,
+    fontSize: 15,
+    height: 24 / 15,
+    letterSpacing: 15 * -0.015,
+    color: ColorName.colorSubtitle.withValues(alpha: 0.6),
+  );
+
+  /// Notifications body emphasis — 15 / Bold
+  static TextStyle get notificationsBodyEmphasis => const TextStyle(
+    fontFamily: FontFamily.sFProDisplay,
+    fontWeight: FontWeight.w700,
+    fontSize: 15,
+    height: 24 / 15,
+    letterSpacing: 15 * -0.015,
+    color: ColorName.colorTitle,
+  );
+
+  /// Notifications empty title — 18 / Semibold / -1.5%
+  static TextStyle get notificationsEmptyTitle => const TextStyle(
+    fontFamily: FontFamily.sFProDisplay,
+    fontWeight: FontWeight.w600,
+    fontSize: 18,
+    height: 24 / 18,
+    letterSpacing: 18 * -0.015,
+    color: ColorName.colorTitle,
+  );
+
+  /// Notifications empty subtitle — 15 / Medium / secondary 60%
+  static TextStyle get notificationsEmptySubtitle => TextStyle(
+    fontFamily: FontFamily.sFProDisplay,
+    fontWeight: FontWeight.w500,
+    fontSize: 15,
+    height: 24 / 15,
+    letterSpacing: 15 * -0.015,
+    color: ColorName.colorSubtitle.withValues(alpha: 0.6),
+  );
+
+  /// FAQ question — 16 / Semibold / -4%
+  static TextStyle get faqQuestion => const TextStyle(
+    fontFamily: FontFamily.sFProDisplay,
+    fontWeight: FontWeight.w600,
+    fontSize: 16,
+    height: 24 / 16,
+    letterSpacing: 16 * -0.04,
+    color: ColorName.colorTitle,
+  );
+
+  /// FAQ answer — 14 / Medium / secondary 60%
+  static TextStyle get faqAnswer => TextStyle(
+    fontFamily: FontFamily.sFProDisplay,
+    fontWeight: FontWeight.w500,
+    fontSize: 14,
+    height: 24 / 14,
+    letterSpacing: 14 * -0.015,
+    color: ColorName.colorSubtitle.withValues(alpha: 0.6),
+  );
+
+  /// Chat header title — 18 / Semibold / white
+  static TextStyle get chatCoachName => const TextStyle(
+    fontFamily: FontFamily.sFProDisplay,
+    fontWeight: FontWeight.w600,
+    fontSize: 18,
+    height: 24 / 18,
+    letterSpacing: -0.5,
+    color: ColorName.colorWhite,
+  );
+
+  /// Chat greeting — 24 / Semibold / white
+  static TextStyle get chatGreeting => const TextStyle(
+    fontFamily: FontFamily.sFProDisplay,
+    fontWeight: FontWeight.w600,
+    fontSize: 24,
+    height: 32 / 24,
+    letterSpacing: -0.5,
+    color: ColorName.colorWhite,
+  );
+
+  /// Chat suggestion chip — 16 / Semibold / white
+  static TextStyle get chatSuggestion => const TextStyle(
+    fontFamily: FontFamily.sFProDisplay,
+    fontWeight: FontWeight.w600,
+    fontSize: 16,
+    height: 24 / 16,
+    letterSpacing: 16 * -0.015,
+    color: ColorName.colorWhite,
+  );
+
+  /// Chat input hint — 16 / Semibold / white 80%
+  static TextStyle get chatInputHint => TextStyle(
+    fontFamily: FontFamily.sFProDisplay,
+    fontWeight: FontWeight.w600,
+    fontSize: 16,
+    height: 24 / 16,
+    letterSpacing: -0.5,
+    color: ColorName.colorWhite.withValues(alpha: 0.8),
+  );
+
+  /// Chat input text — 16 / Semibold / white
+  static TextStyle get chatInputText => const TextStyle(
+    fontFamily: FontFamily.sFProDisplay,
+    fontWeight: FontWeight.w600,
+    fontSize: 16,
+    height: 24 / 16,
+    letterSpacing: -0.5,
+    color: ColorName.colorWhite,
+  );
+
+  /// Chat bubble message — 16 / Semibold / white
+  static TextStyle get chatBubbleMessage => const TextStyle(
+    fontFamily: FontFamily.sFProDisplay,
+    fontWeight: FontWeight.w600,
+    fontSize: 16,
+    height: 24 / 16,
+    letterSpacing: 16 * -0.015,
+    color: ColorName.colorWhite,
+  );
+
+  /// Chat history meta — 14 / Medium / white 60%
+  static TextStyle get chatHistoryMeta => TextStyle(
+    fontFamily: FontFamily.sFProDisplay,
+    fontWeight: FontWeight.w500,
+    fontSize: 14,
+    height: 20 / 14,
+    letterSpacing: 14 * -0.015,
+    color: ColorName.colorWhite.withValues(alpha: 0.6),
+  );
+
+  /// Chat history popup — 15 / Semibold / white
+  static TextStyle get chatHistoryMenuItem => const TextStyle(
+    fontFamily: FontFamily.sFProDisplay,
+    fontWeight: FontWeight.w600,
+    fontSize: 15,
+    height: 22 / 15,
+    letterSpacing: 15 * -0.015,
+    color: ColorName.colorWhite,
+  );
+
+  /// Chat history delete — 15 / Semibold / red
+  static TextStyle get chatHistoryMenuDelete => const TextStyle(
+    fontFamily: FontFamily.sFProDisplay,
+    fontWeight: FontWeight.w600,
+    fontSize: 15,
+    height: 22 / 15,
+    letterSpacing: 15 * -0.015,
+    color: ColorName.colorNegativeV2,
+  );
+
+  /// Latest chats empty title — 20 / Semibold / white
+  static TextStyle get chatHistoryEmptyTitle => const TextStyle(
+    fontFamily: FontFamily.sFProDisplay,
+    fontWeight: FontWeight.w600,
+    fontSize: 20,
+    height: 28 / 20,
+    letterSpacing: -0.5,
+    color: ColorName.colorWhite,
+  );
+
+  /// Latest chats empty subtitle — 15 / Medium / white 60%
+  static TextStyle get chatHistoryEmptySubtitle => TextStyle(
+    fontFamily: FontFamily.sFProDisplay,
+    fontWeight: FontWeight.w500,
+    fontSize: 15,
+    height: 24 / 15,
+    letterSpacing: 15 * -0.015,
+    color: ColorName.colorWhite.withValues(alpha: 0.6),
   );
 }

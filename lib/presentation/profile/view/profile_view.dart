@@ -1,15 +1,21 @@
+import 'dart:io';
+
 import 'package:easy_localization/easy_localization.dart';
+import 'package:fastingapp/core/router/route_paths.dart';
 import 'package:fastingapp/core/theme/app_text_styles.dart';
 import 'package:fastingapp/generated/assets.gen.dart';
 import 'package:fastingapp/generated/colors.gen.dart';
+import 'package:fastingapp/presentation/chat/view/widgets/ai_chat_header_icon.dart';
+import 'package:fastingapp/presentation/profile/view/widgets/profile_menu_card.dart';
+import 'package:fastingapp/presentation/profile/view/widgets/profile_section.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:go_router/go_router.dart';
 
 part 'mixin/profile_view_mixin.dart';
 part 'widgets/profile_header.dart';
-part 'widgets/profile_menu_card.dart';
 part 'widgets/profile_premium_card.dart';
-part 'widgets/profile_section.dart';
 
 /// Profil sekmesi.
 final class ProfileView extends StatefulWidget {
@@ -20,21 +26,39 @@ final class ProfileView extends StatefulWidget {
 }
 
 class _ProfileViewState extends State<ProfileView> with ProfileViewMixin {
+  Widget _profileSwitch({
+    required bool value,
+    required ValueChanged<bool> onChanged,
+  }) {
+    return Transform.scale(
+      scale: 0.85,
+      alignment: Alignment.centerRight,
+      child: CupertinoSwitch(
+        value: value,
+        activeTrackColor: ColorName.colorToggleOn,
+        onChanged: onChanged,
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: ColorName.colorProfileBack,
-      body: SafeArea(
-        child: ListView(
-          physics: const ClampingScrollPhysics(),
-          clipBehavior: Clip.none,
-          padding: const EdgeInsets.fromLTRB(16, 12, 16, 32),
-          children: [
-            const ProfileHeader(
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: SystemUiOverlayStyle.dark,
+      child: Scaffold(
+        backgroundColor: ColorName.colorProfileBack,
+        body: SafeArea(
+          top: false,
+          child: ListView(
+            physics: const ClampingScrollPhysics(),
+            padding: const EdgeInsets.fromLTRB(16, 12, 16, 32),
+            children: [
+            ProfileHeader(
               displayName: 'Atilla E.',
               initials: 'AE',
               streakDays: 3,
               isPremium: true,
+              onChatTapped: onChatTapped,
             ),
             const SizedBox(height: 24),
             ProfileSection(
@@ -50,13 +74,9 @@ class _ProfileViewState extends State<ProfileView> with ProfileViewMixin {
                     icon: Assets.icons.solarBellLineDuotone,
                     title: 'profile.push_notifications'.tr(),
                     subtitle: 'profile.push_notifications_subtitle'.tr(),
-                    trailing: Transform.scale(
-                      scale: 0.8,
-                      child: CupertinoSwitch(
-                        value: pushNotifications,
-                        activeTrackColor: ColorName.colorToggleOn,
-                        onChanged: onPushNotificationsChanged,
-                      ),
+                    trailing: _profileSwitch(
+                      value: pushNotifications,
+                      onChanged: onPushNotificationsChanged,
                     ),
                   ),
                 ],
@@ -81,14 +101,11 @@ class _ProfileViewState extends State<ProfileView> with ProfileViewMixin {
                   ),
                   ProfileMenuRow(
                     icon: Assets.icons.solarHeartLineDuotone,
-                    title: 'profile.sync_apple_health'.tr(),
-                    trailing: Transform.scale(
-                      scale: 0.8,
-                      child: CupertinoSwitch(
-                        value: appleHealthSync,
-                        activeTrackColor: ColorName.colorToggleOn,
-                        onChanged: onAppleHealthChanged,
-                      ),
+                    title: healthSyncTitle,
+                    subtitle: 'profile.health_sync_subtitle'.tr(),
+                    trailing: _profileSwitch(
+                      value: healthSync,
+                      onChanged: onHealthSyncChanged,
                     ),
                   ),
                 ],
@@ -131,6 +148,7 @@ class _ProfileViewState extends State<ProfileView> with ProfileViewMixin {
             ProfileLogoutCard(onTap: onLogOut),
           ],
         ),
+      ),
       ),
     );
   }

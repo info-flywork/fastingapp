@@ -1,4 +1,5 @@
-part of '../profile_view.dart';
+import 'package:fastingapp/core/theme/app_text_styles.dart';
+import 'package:flutter/material.dart';
 
 /// Bölüm başlığı + içerik.
 final class ProfileSection extends StatelessWidget {

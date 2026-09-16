@@ -2,9 +2,8 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:fastingapp/core/router/route_paths.dart';
 import 'package:fastingapp/core/theme/app_text_styles.dart';
 import 'package:fastingapp/core/widgets/app_button.dart';
-import 'package:fastingapp/core/widgets/onboarding/onboarding_chip_option.dart';
+import 'package:fastingapp/core/widgets/onboarding/food_skips_options_list.dart';
 import 'package:fastingapp/core/widgets/onboarding/onboarding_progress_header.dart';
-import 'package:fastingapp/generated/assets.gen.dart';
 import 'package:fastingapp/generated/colors.gen.dart';
 import 'package:fastingapp/presentation/auth/onboard/food_prefs_nav_args.dart';
 import 'package:fastingapp/presentation/auth/onboard/food_skips/bloc/food_skips_bloc.dart';
@@ -13,7 +12,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
 part 'mixin/food_skips_view_mixin.dart';
-part 'widgets/food_skips_options.dart';
 
 /// Onboarding: istemediği yiyecekler (opsiyonel, çoklu seçim).
 final class FoodSkipsView extends StatefulWidget {
@@ -58,8 +56,7 @@ class _FoodSkipsViewState extends State<FoodSkipsView> with FoodSkipsViewMixin {
                     const SizedBox(height: 24),
                     BlocBuilder<FoodSkipsBloc, FoodSkipsState>(
                       builder: (context, state) {
-                        return FoodSkipsOptions(
-                          items: foodSkipOptions,
+                        return FoodSkipsOptionsList(
                           selected: state.selected,
                           onToggle: onFoodToggled,
                         );

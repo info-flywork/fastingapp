@@ -2,7 +2,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:fastingapp/core/router/route_paths.dart';
 import 'package:fastingapp/core/theme/app_text_styles.dart';
 import 'package:fastingapp/core/widgets/app_button.dart';
-import 'package:fastingapp/core/widgets/onboarding/onboarding_plan_option_card.dart';
+import 'package:fastingapp/core/widgets/onboarding/fasting_plan_options_list.dart';
 import 'package:fastingapp/core/widgets/onboarding/onboarding_progress_header.dart';
 import 'package:fastingapp/generated/colors.gen.dart';
 import 'package:fastingapp/presentation/auth/onboard/fasting_plan/bloc/fasting_plan_bloc.dart';
@@ -11,7 +11,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
 part 'mixin/fasting_plan_view_mixin.dart';
-part 'widgets/fasting_plan_options.dart';
 
 /// Onboarding: oruç planı seçimi.
 final class FastingPlanView extends StatefulWidget {
@@ -55,10 +54,10 @@ class _FastingPlanViewState extends State<FastingPlanView>
                     const SizedBox(height: 24),
                     BlocBuilder<FastingPlanBloc, FastingPlanState>(
                       builder: (context, state) {
-                        return FastingPlanOptions(
-                          items: planOptions,
+                        return FastingPlanOptionsList(
                           selected: state.selected,
                           onSelected: onPlanSelected,
+                          showFooter: false,
                         );
                       },
                     ),

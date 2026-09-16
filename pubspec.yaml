@@ -45,6 +45,7 @@ dependencies:
   # In-app purchase (RevenueCat)
   purchases_flutter: ^8.4.1
   purchases_ui_flutter: ^8.4.1
+  image_picker: ^1.2.3
 
 dev_dependencies:
   flutter_test:
@@ -65,6 +66,7 @@ flutter:
   assets:
     - assets/images/
     - assets/icons/
+    - assets/flags/
     - assets/gifs/
     - assets/colors/
     - assets/translations/

@@ -17,4 +17,12 @@ mixin HomeViewMixin on State<HomeView> {
   void onPremiumTapped() {
     context.read<HomeBloc>().add(const HomePremiumTapped());
   }
+
+  void onChatTapped() {
+    context.pushNamed(RoutePaths.chat.name);
+  }
+
+  void onWaterTapped() {
+    context.pushNamed(RoutePaths.water.name);
+  }
 }

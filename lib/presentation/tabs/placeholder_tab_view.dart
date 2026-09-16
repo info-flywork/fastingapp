@@ -14,6 +14,7 @@ final class PlaceholderTabView extends StatelessWidget {
     return Scaffold(
       backgroundColor: ColorName.colorProfileBack,
       body: SafeArea(
+        top: false,
         child: Center(
           child: Text(titleKey.tr(), style: AppTextStyles.homeCardTitle),
         ),

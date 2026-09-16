@@ -2,7 +2,9 @@ part of '../home_view.dart';
 
 /// Su ve adım metrik kartları (yan yana).
 final class HomeMetricCards extends StatelessWidget {
-  const HomeMetricCards({super.key});
+  const HomeMetricCards({required this.onWaterTapped, super.key});
+
+  final VoidCallback onWaterTapped;
 
   @override
   Widget build(BuildContext context) {
@@ -21,6 +23,7 @@ final class HomeMetricCards extends StatelessWidget {
               trackColor: ColorName.colorWaterTrack,
               fillColor: ColorName.colorWaterFill,
               progress: 100 / 2500,
+              onTap: onWaterTapped,
             ),
           ),
           const SizedBox(width: 12),
@@ -54,6 +57,7 @@ final class _MetricCard extends StatelessWidget {
     required this.trackColor,
     required this.fillColor,
     required this.progress,
+    this.onTap,
   });
 
   final AssetGenImage icon;
@@ -65,61 +69,66 @@ final class _MetricCard extends StatelessWidget {
   final Color trackColor;
   final Color fillColor;
   final double progress;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.fromLTRB(12, 12, 12, 14),
-      decoration: BoxDecoration(
-        color: ColorName.colorWhite,
+    return Material(
+      color: ColorName.colorWhite,
+      borderRadius: BorderRadius.circular(16),
+      child: InkWell(
+        onTap: onTap,
         borderRadius: BorderRadius.circular(16),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(12, 12, 12, 14),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              icon.image(width: 28, height: 28, fit: BoxFit.contain),
-              const SizedBox(width: 8),
-              Expanded(
-                child: Text(
-                  labelKey.tr(),
-                  style: AppTextStyles.homeMetricLabel,
+              Row(
+                children: [
+                  icon.image(width: 28, height: 28, fit: BoxFit.contain),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      labelKey.tr(),
+                      style: AppTextStyles.homeMetricLabel,
+                    ),
+                  ),
+                  Icon(
+                    Icons.chevron_right_rounded,
+                    size: 18,
+                    color: ColorName.colorSubtitle.withValues(alpha: 0.4),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
+              Text.rich(
+                TextSpan(
+                  children: [
+                    TextSpan(
+                      text: valueKey.tr(args: ['$value']),
+                      style: AppTextStyles.homeMetricValue,
+                    ),
+                    TextSpan(
+                      text: goalKey.tr(args: ['$goal']),
+                      style: AppTextStyles.homeMetricGoal,
+                    ),
+                  ],
                 ),
               ),
-              Icon(
-                Icons.chevron_right_rounded,
-                size: 18,
-                color: ColorName.colorSubtitle.withValues(alpha: 0.4),
+              const SizedBox(height: 10),
+              ClipRRect(
+                borderRadius: BorderRadius.circular(999),
+                child: LinearProgressIndicator(
+                  value: progress.clamp(0.0, 1.0),
+                  minHeight: 8,
+                  backgroundColor: trackColor,
+                  color: fillColor,
+                ),
               ),
             ],
           ),
-          const SizedBox(height: 12),
-          Text.rich(
-            TextSpan(
-              children: [
-                TextSpan(
-                  text: valueKey.tr(args: ['$value']),
-                  style: AppTextStyles.homeMetricValue,
-                ),
-                TextSpan(
-                  text: goalKey.tr(args: ['$goal']),
-                  style: AppTextStyles.homeMetricGoal,
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 10),
-          ClipRRect(
-            borderRadius: BorderRadius.circular(999),
-            child: LinearProgressIndicator(
-              value: progress.clamp(0.0, 1.0),
-              minHeight: 8,
-              backgroundColor: trackColor,
-              color: fillColor,
-            ),
-          ),
-        ],
+        ),
       ),
     );
   }

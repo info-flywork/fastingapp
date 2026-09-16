@@ -1,4 +1,8 @@
-part of '../profile_view.dart';
+import 'package:easy_localization/easy_localization.dart';
+import 'package:fastingapp/core/theme/app_text_styles.dart';
+import 'package:fastingapp/generated/assets.gen.dart';
+import 'package:fastingapp/generated/colors.gen.dart';
+import 'package:flutter/material.dart';
 
 /// Beyaz menü kartı (Account / Activity / Support).
 final class ProfileMenuCard extends StatelessWidget {
@@ -34,7 +38,7 @@ final class ProfileMenuCard extends StatelessWidget {
 }
 
 /// Switch olmayan satırlarda sağ ok.
-Widget _profileChevron() {
+Widget profileChevron() {
   return Assets.icons.solarAltArrowLeftLinear.svg(
     width: 20,
     height: 20,
@@ -71,45 +75,49 @@ final class ProfileMenuRow extends StatelessWidget {
     final color = iconColor ?? ColorName.colorTitle;
     final showChevron = trailing == null;
 
+    final content = Padding(
+      padding: const EdgeInsets.fromLTRB(12, 14, 12, 14),
+      child: Row(
+        children: [
+          SizedBox(
+            width: 24,
+            height: 24,
+            child: icon.svg(
+              width: 24,
+              height: 24,
+              colorFilter: ColorFilter.mode(color, BlendMode.srcIn),
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: titleStyle ?? AppTextStyles.profileRowTitle,
+                ),
+                if (subtitle != null) ...[
+                  const SizedBox(height: 2),
+                  Text(subtitle!, style: AppTextStyles.profileRowSubtitle),
+                ],
+              ],
+            ),
+          ),
+          if (trailing != null) ...[
+            const SizedBox(width: 8),
+            trailing!,
+          ],
+          if (showChevron) profileChevron(),
+        ],
+      ),
+    );
+
     return Material(
       color: ColorName.colorWhite,
-      child: InkWell(
-        onTap: onTap,
-        child: Padding(
-          padding: EdgeInsets.fromLTRB(12, 14, 12, subtitle != null ? 20 : 14),
-          child: Row(
-            children: [
-              SizedBox(
-                width: 24,
-                height: 24,
-                child: icon.svg(
-                  width: 24,
-                  height: 24,
-                  colorFilter: ColorFilter.mode(color, BlendMode.srcIn),
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      title,
-                      style: titleStyle ?? AppTextStyles.profileRowTitle,
-                    ),
-                    if (subtitle != null) ...[
-                      const SizedBox(height: 2),
-                      Text(subtitle!, style: AppTextStyles.profileRowSubtitle),
-                    ],
-                  ],
-                ),
-              ),
-              if (trailing != null) trailing!,
-              if (showChevron) _profileChevron(),
-            ],
-          ),
-        ),
-      ),
+      child: onTap == null
+          ? content
+          : InkWell(onTap: onTap, child: content),
     );
   }
 }
@@ -162,7 +170,7 @@ final class ProfileLogoutCard extends StatelessWidget {
                     style: AppTextStyles.profileLogout,
                   ),
                 ),
-                _profileChevron(),
+                profileChevron(),
               ],
             ),
           ),

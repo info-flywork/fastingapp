@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:easy_localization/easy_localization.dart';
+import 'package:fastingapp/core/router/route_paths.dart';
 import 'package:fastingapp/core/snackbar/app_snackbar.dart';
 import 'package:fastingapp/core/theme/app_text_styles.dart';
 import 'package:fastingapp/core/utils/enum/snackbar_type.dart';
@@ -9,22 +10,24 @@ import 'package:fastingapp/data/model/user/user.dart';
 import 'package:fastingapp/data/model/user/user_progress.dart';
 import 'package:fastingapp/generated/assets.gen.dart';
 import 'package:fastingapp/generated/colors.gen.dart';
+import 'package:fastingapp/presentation/chat/view/widgets/ai_chat_header_icon.dart';
 import 'package:fastingapp/presentation/home/bloc/home_bloc.dart';
 import 'package:fastingapp/presentation/home/bloc/home_event.dart';
 import 'package:fastingapp/presentation/home/bloc/home_state.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 
 part 'mixin/home_view_mixin.dart';
-part 'widgets/home_loading_body.dart';
-part 'widgets/home_loaded_body.dart';
+part 'widgets/home_challenge_card.dart';
 part 'widgets/home_error_body.dart';
+part 'widgets/home_fasting_card.dart';
+part 'widgets/home_loaded_body.dart';
+part 'widgets/home_loading_body.dart';
+part 'widgets/home_metric_cards.dart';
 part 'widgets/home_top_bar.dart';
 part 'widgets/home_week_strip.dart';
-part 'widgets/home_fasting_card.dart';
-part 'widgets/home_challenge_card.dart';
-part 'widgets/home_metric_cards.dart';
 
 /// Home ekranı. build() sadece iskeleti kurar; state'e göre body döndürür.
 /// (Doküman 15.1)
@@ -55,6 +58,8 @@ class _HomeViewState extends State<HomeView> with HomeViewMixin {
                   progress: progress,
                   isPremium: isPremium,
                   onPremiumTapped: onPremiumTapped,
+                  onChatTapped: onChatTapped,
+                  onWaterTapped: onWaterTapped,
                 ),
               HomeError(:final message) => HomeErrorBody(
                 message: message,

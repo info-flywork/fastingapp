@@ -1,9 +1,8 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:fastingapp/core/router/route_paths.dart';
 import 'package:fastingapp/core/theme/app_text_styles.dart';
-import 'package:fastingapp/core/widgets/onboarding/onboarding_option_card.dart';
+import 'package:fastingapp/core/widgets/onboarding/gender_options_list.dart';
 import 'package:fastingapp/core/widgets/onboarding/onboarding_progress_header.dart';
-import 'package:fastingapp/generated/assets.gen.dart';
 import 'package:fastingapp/generated/colors.gen.dart';
 import 'package:fastingapp/presentation/auth/onboard/about_you/bloc/about_you_bloc.dart';
 import 'package:flutter/material.dart';
@@ -11,7 +10,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
 part 'mixin/about_you_view_mixin.dart';
-part 'widgets/about_you_options.dart';
 
 /// Onboarding: cinsiyet / hakkında bilgi.
 final class AboutYouView extends StatefulWidget {
@@ -51,8 +49,7 @@ class _AboutYouViewState extends State<AboutYouView> with AboutYouViewMixin {
               const SizedBox(height: 24),
               BlocBuilder<AboutYouBloc, AboutYouState>(
                 builder: (context, state) {
-                  return AboutYouOptions(
-                    items: genderOptions,
+                  return GenderOptionsList(
                     selected: state.selected,
                     onSelected: onGenderSelected,
                   );

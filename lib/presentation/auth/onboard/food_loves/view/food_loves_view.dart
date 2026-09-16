@@ -2,9 +2,8 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:fastingapp/core/router/route_paths.dart';
 import 'package:fastingapp/core/theme/app_text_styles.dart';
 import 'package:fastingapp/core/widgets/app_button.dart';
-import 'package:fastingapp/core/widgets/onboarding/onboarding_chip_option.dart';
+import 'package:fastingapp/core/widgets/onboarding/food_loves_options_list.dart';
 import 'package:fastingapp/core/widgets/onboarding/onboarding_progress_header.dart';
-import 'package:fastingapp/generated/assets.gen.dart';
 import 'package:fastingapp/generated/colors.gen.dart';
 import 'package:fastingapp/presentation/auth/onboard/food_loves/bloc/food_loves_bloc.dart';
 import 'package:fastingapp/presentation/auth/onboard/food_prefs_nav_args.dart';
@@ -13,7 +12,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
 part 'mixin/food_loves_view_mixin.dart';
-part 'widgets/food_loves_options.dart';
 
 /// Onboarding: sevilen yiyecekler (çoklu seçim).
 final class FoodLovesView extends StatefulWidget {
@@ -57,8 +55,7 @@ class _FoodLovesViewState extends State<FoodLovesView>
                     const SizedBox(height: 24),
                     BlocBuilder<FoodLovesBloc, FoodLovesState>(
                       builder: (context, state) {
-                        return FoodLovesOptions(
-                          items: foodLoveOptions,
+                        return FoodLovesOptionsList(
                           selected: state.selected,
                           onToggle: onFoodToggled,
                         );

@@ -29,6 +29,7 @@ import 'package:fastingapp/presentation/auth/onboard/starting_point/bloc/startin
 import 'package:fastingapp/presentation/auth/onboard/weight_history/bloc/weight_history_bloc.dart';
 import 'package:fastingapp/presentation/auth/splash/bloc/splash_bloc.dart';
 import 'package:fastingapp/presentation/auth/welcome/bloc/welcome_bloc.dart';
+import 'package:fastingapp/presentation/chat/bloc/chat_session_cubit.dart';
 import 'package:fastingapp/presentation/home/bloc/home_bloc.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:get_it/get_it.dart';
@@ -42,23 +43,16 @@ Future<void> configureDependencies() async {
   getIt
     ..registerLazySingleton<FlutterSecureStorage>(
       () => const FlutterSecureStorage(
-        iOptions: IOSOptions(
-          accessibility: KeychainAccessibility.first_unlock,
-        ),
+        iOptions: IOSOptions(accessibility: KeychainAccessibility.first_unlock),
       ),
     )
-    ..registerLazySingleton<AuthCacheManager>(
-      () => AuthCacheManager(getIt()),
-    )
-    ..registerLazySingleton<SharedPrefManager>(
-      () => SharedPrefManager.instance,
-    )
+    ..registerLazySingleton<AuthCacheManager>(() => AuthCacheManager(getIt()))
+    ..registerLazySingleton<SharedPrefManager>(() => SharedPrefManager.instance)
     ..registerLazySingleton<LocalizationManager>(LocalizationManager.new)
     ..registerLazySingleton<NotificationManager>(NotificationManager.new)
     ..registerLazySingleton<PermissionManager>(PermissionManager.new)
     ..registerLazySingleton<UrlLauncherManager>(UrlLauncherManager.new)
     ..registerLazySingleton<DeviceManager>(DeviceManager.new)
-
     // ── Network ──
     ..registerLazySingleton<Dio>(
       () => DioClient.create(
@@ -67,17 +61,12 @@ Future<void> configureDependencies() async {
         authRepositoryProvider: () => getIt<AuthRepository>(),
       ),
     )
-    ..registerLazySingleton<NetworkManager>(
-      () => NetworkManager(getIt()),
-    )
-
+    ..registerLazySingleton<NetworkManager>(() => NetworkManager(getIt()))
     // ── Repositories / Services ──
     ..registerLazySingleton<AuthRepository>(
       () => AuthRepository(getIt(), getIt(), getIt()),
     )
-    ..registerLazySingleton<UserRepository>(
-      () => UserRepository(getIt()),
-    )
+    ..registerLazySingleton<UserRepository>(() => UserRepository(getIt()))
     ..registerLazySingleton<ProductRepository>(
       () => ProductRepository(getIt(), getIt()),
     )
@@ -88,19 +77,12 @@ Future<void> configureDependencies() async {
       () => ProgressRepository(getIt()),
     )
     ..registerLazySingleton<RevenueCatService>(RevenueCatService.new)
-
     // ── Global BLoCs (singleton) ──
-    ..registerLazySingleton<AuthBloc>(
-      () => AuthBloc(getIt()),
-    )
-
+    ..registerLazySingleton<AuthBloc>(() => AuthBloc(getIt()))
+    ..registerLazySingleton<ChatSessionCubit>(ChatSessionCubit.new)
     // ── Ekran BLoC'ları (factory) ──
-    ..registerFactory<SplashBloc>(
-      () => SplashBloc(getIt()),
-    )
-    ..registerFactory<WelcomeBloc>(
-      () => WelcomeBloc(getIt(), getIt()),
-    )
+    ..registerFactory<SplashBloc>(() => SplashBloc(getIt()))
+    ..registerFactory<WelcomeBloc>(() => WelcomeBloc(getIt(), getIt()))
     ..registerFactory<GoalBloc>(GoalBloc.new)
     ..registerFactory<AboutYouBloc>(AboutYouBloc.new)
     ..registerFactory<StartingPointBloc>(StartingPointBloc.new)
@@ -112,10 +94,6 @@ Future<void> configureDependencies() async {
     ..registerFactory<FastingReasonBloc>(FastingReasonBloc.new)
     ..registerFactory<FastingPlanBloc>(FastingPlanBloc.new)
     ..registerFactory<MealWindowBloc>(MealWindowBloc.new)
-    ..registerFactory<LanguageLevelBloc>(
-      () => LanguageLevelBloc(getIt()),
-    )
-    ..registerFactory<HomeBloc>(
-      () => HomeBloc(getIt(), getIt()),
-    );
+    ..registerFactory<LanguageLevelBloc>(() => LanguageLevelBloc(getIt()))
+    ..registerFactory<HomeBloc>(() => HomeBloc(getIt(), getIt()));
 }

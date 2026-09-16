@@ -103,6 +103,54 @@ final class AppButtonDecoration {
     );
   }
 
+  /// Empty state Back — koyu pill (#1B1B21), 48h.
+  factory AppButtonDecoration.dark() {
+    return AppButtonDecoration(
+      gradient: const LinearGradient(
+        colors: [ColorName.colorButtonDark, ColorName.colorButtonDark],
+      ),
+      borderColor: ColorName.colorWhite.withValues(alpha: 0.15),
+      borderWidth: 1,
+      borderRadius: BorderRadius.circular(99999),
+      height: 48,
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 14),
+      gap: 8,
+      innerShadowColor: ColorName.colorWhite.withValues(alpha: 0.22),
+      innerShadowOffset: const Offset(0, 4),
+      innerShadowBlur: 16,
+      labelColor: ColorName.colorWhite,
+      fontFamily: FontFamily.sFProDisplay,
+      fontWeight: FontWeight.w600,
+      defaultFontSize: 16,
+      lineHeight: 24,
+      letterSpacingPercent: -0.02,
+    );
+  }
+
+  /// Water Reminder CTA — mavi pill (#4682EE), 48h.
+  factory AppButtonDecoration.water() {
+    return AppButtonDecoration(
+      gradient: const LinearGradient(
+        colors: [ColorName.colorWaterAction, ColorName.colorWaterAction],
+      ),
+      borderColor: ColorName.colorWhite.withValues(alpha: 0.15),
+      borderWidth: 1,
+      borderRadius: BorderRadius.circular(99999),
+      height: 48,
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 14),
+      gap: 8,
+      innerShadowColor: ColorName.colorWhite.withValues(alpha: 0.55),
+      innerShadowOffset: const Offset(0, 4),
+      innerShadowBlur: 16,
+      labelColor: ColorName.colorWhite,
+      fontFamily: FontFamily.sFProDisplay,
+      fontWeight: FontWeight.w600,
+      defaultFontSize: 16,
+      lineHeight: 24,
+      letterSpacingPercent: -0.02,
+    );
+  }
+
   final Gradient gradient;
   final Color borderColor;
   final double borderWidth;

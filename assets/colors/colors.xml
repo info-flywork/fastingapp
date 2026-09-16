@@ -9,7 +9,7 @@
   <color name="color_warning_orange">#F39C12</color>
   <color name="color_black">#111111</color>
   <color name="color_white">#FFFFFF</color>
-  <color name="color_profile_back">#F5F7FA</color>
+  <color name="color_profile_back">#F6F6F6</color>
   <color name="color_cta_gradient_top">#C8DBC5</color>
   <color name="color_cta_gradient_bottom">#76AB6E</color>
   <color name="color_title">#09090B</color>
@@ -53,7 +53,19 @@
   <color name="color_week_pill">#EFEFEF</color>
   <color name="color_blood_chip">#E85D5D</color>
   <color name="color_home_chip_bg">#F6F6F6</color>
-  <color name="color_login_bg">#FCFAF4</color>
+  <color name="color_login_bg">#F6F6F6</color>
   <color name="color_premium_card">#86B57F</color>
   <color name="color_toggle_on">#33C658</color>
+  <color name="color_avatar_bg">#0F0F0F</color>
+  <color name="color_negative_v2">#D14B47</color>
+  <color name="color_unit_toggle_bg">#E3E3E3</color>
+  <color name="color_button_dark">#1B1B21</color>
+  <color name="color_chat_surface">#2A2A32</color>
+  <color name="color_chat_user_bubble">#67BA58</color>
+  <color name="color_water_action">#4682EE</color>
+  <color name="color_water_wave_deep">#CCDFFD</color>
+  <color name="color_water_wave_light">#EBF3FF</color>
+  <color name="color_water_ruler_tick">#CFDFEE</color>
+  <color name="color_water_page_fade">#F4F9FF</color>
+  <color name="color_water_glass_tile">#FAFCFF</color>
 </resources>

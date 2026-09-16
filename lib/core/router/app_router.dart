@@ -47,11 +47,27 @@ import 'package:fastingapp/presentation/auth/splash/bloc/splash_event.dart';
 import 'package:fastingapp/presentation/auth/splash/view/splash_view.dart';
 import 'package:fastingapp/presentation/auth/welcome/bloc/welcome_bloc.dart';
 import 'package:fastingapp/presentation/auth/welcome/view/welcome_view.dart';
+import 'package:fastingapp/presentation/chat/latest/view/latest_chats_view.dart';
+import 'package:fastingapp/presentation/chat/view/chat_view.dart';
 import 'package:fastingapp/presentation/home/bloc/home_bloc.dart';
 import 'package:fastingapp/presentation/home/bloc/home_event.dart';
 import 'package:fastingapp/presentation/home/view/home_view.dart';
+import 'package:fastingapp/presentation/profile/edit_profile/view/edit_diet_type_view.dart';
+import 'package:fastingapp/presentation/profile/edit_profile/view/edit_fasting_plan_view.dart';
+import 'package:fastingapp/presentation/profile/edit_profile/view/edit_fasting_target_view.dart';
+import 'package:fastingapp/presentation/profile/edit_profile/view/edit_gender_view.dart';
+import 'package:fastingapp/presentation/profile/edit_profile/view/edit_height_view.dart';
+import 'package:fastingapp/presentation/profile/edit_profile/view/edit_preferred_foods_view.dart';
+import 'package:fastingapp/presentation/profile/edit_profile/view/edit_profile_view.dart';
+import 'package:fastingapp/presentation/profile/edit_profile/view/edit_skipped_foods_view.dart';
+import 'package:fastingapp/presentation/profile/faq/view/faq_view.dart';
+import 'package:fastingapp/presentation/profile/languages/view/languages_view.dart';
+import 'package:fastingapp/presentation/profile/notifications/view/notifications_view.dart';
 import 'package:fastingapp/presentation/profile/view/profile_view.dart';
 import 'package:fastingapp/presentation/tabs/placeholder_tab_view.dart';
+import 'package:fastingapp/presentation/water/reminder/view/water_reminder_view.dart';
+import 'package:fastingapp/presentation/water/reminder/water_reminder_result.dart';
+import 'package:fastingapp/presentation/water/view/water_view.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -292,6 +308,39 @@ final GoRouter appRouter = GoRouter(
         child: const LanguageLevelView(),
       ),
     ),
+    GoRoute(
+      path: RoutePaths.water.path,
+      name: RoutePaths.water.name,
+      parentNavigatorKey: rootNavigatorKey,
+      builder: (context, state) => const WaterView(),
+      routes: [
+        GoRoute(
+          path: RoutePaths.waterReminder.path,
+          name: RoutePaths.waterReminder.name,
+          parentNavigatorKey: rootNavigatorKey,
+          builder: (context, state) {
+            final args = state.extra is WaterReminderArgs
+                ? state.extra! as WaterReminderArgs
+                : null;
+            return WaterReminderView(args: args);
+          },
+        ),
+      ],
+    ),
+    GoRoute(
+      path: RoutePaths.chat.path,
+      name: RoutePaths.chat.name,
+      parentNavigatorKey: rootNavigatorKey,
+      builder: (context, state) => const ChatView(),
+      routes: [
+        GoRoute(
+          path: RoutePaths.latestChats.path,
+          name: RoutePaths.latestChats.name,
+          parentNavigatorKey: rootNavigatorKey,
+          builder: (context, state) => const LatestChatsView(),
+        ),
+      ],
+    ),
     StatefulShellRoute.indexedStack(
       builder: (context, state, navigationShell) =>
           MainWrapper(navigationShell: navigationShell),
@@ -344,6 +393,119 @@ final GoRouter appRouter = GoRouter(
               path: RoutePaths.profile.path,
               name: RoutePaths.profile.name,
               builder: (context, state) => const ProfileView(),
+              routes: [
+                GoRoute(
+                  path: RoutePaths.notifications.path,
+                  name: RoutePaths.notifications.name,
+                  parentNavigatorKey: rootNavigatorKey,
+                  builder: (context, state) => const NotificationsView(),
+                ),
+                GoRoute(
+                  path: RoutePaths.languages.path,
+                  name: RoutePaths.languages.name,
+                  parentNavigatorKey: rootNavigatorKey,
+                  builder: (context, state) => const LanguagesView(),
+                ),
+                GoRoute(
+                  path: RoutePaths.faq.path,
+                  name: RoutePaths.faq.name,
+                  parentNavigatorKey: rootNavigatorKey,
+                  builder: (context, state) => const FaqView(),
+                ),
+                GoRoute(
+                  path: RoutePaths.editProfile.path,
+                  name: RoutePaths.editProfile.name,
+                  parentNavigatorKey: rootNavigatorKey,
+                  builder: (context, state) => const EditProfileView(),
+                  routes: [
+                    GoRoute(
+                      path: RoutePaths.editFastingTarget.path,
+                      name: RoutePaths.editFastingTarget.name,
+                      parentNavigatorKey: rootNavigatorKey,
+                      builder: (context, state) {
+                        final initial = state.extra is OnboardingGoal
+                            ? state.extra! as OnboardingGoal
+                            : null;
+                        return EditFastingTargetView(initial: initial);
+                      },
+                    ),
+                    GoRoute(
+                      path: RoutePaths.editFastingPlan.path,
+                      name: RoutePaths.editFastingPlan.name,
+                      parentNavigatorKey: rootNavigatorKey,
+                      builder: (context, state) {
+                        final initial = state.extra is OnboardingFastingPlan
+                            ? state.extra! as OnboardingFastingPlan
+                            : null;
+                        return EditFastingPlanView(initial: initial);
+                      },
+                    ),
+                    GoRoute(
+                      path: RoutePaths.editGender.path,
+                      name: RoutePaths.editGender.name,
+                      parentNavigatorKey: rootNavigatorKey,
+                      builder: (context, state) {
+                        final initial = state.extra is OnboardingGender
+                            ? state.extra! as OnboardingGender
+                            : null;
+                        return EditGenderView(initial: initial);
+                      },
+                    ),
+                    GoRoute(
+                      path: RoutePaths.editHeight.path,
+                      name: RoutePaths.editHeight.name,
+                      parentNavigatorKey: rootNavigatorKey,
+                      builder: (context, state) {
+                        final extra = state.extra;
+                        if (extra is HeightEditResult) {
+                          return EditHeightView(
+                            initialHeightCm: extra.heightCm,
+                            initialAge: extra.age,
+                          );
+                        }
+                        return const EditHeightView();
+                      },
+                    ),
+                    GoRoute(
+                      path: RoutePaths.editDietType.path,
+                      name: RoutePaths.editDietType.name,
+                      parentNavigatorKey: rootNavigatorKey,
+                      builder: (context, state) {
+                        final initial = state.extra is OnboardingDiet
+                            ? state.extra! as OnboardingDiet
+                            : null;
+                        return EditDietTypeView(initial: initial);
+                      },
+                    ),
+                    GoRoute(
+                      path: RoutePaths.editPreferredFoods.path,
+                      name: RoutePaths.editPreferredFoods.name,
+                      parentNavigatorKey: rootNavigatorKey,
+                      builder: (context, state) {
+                        final initial = state.extra is Set<OnboardingFoodLove>
+                            ? state.extra! as Set<OnboardingFoodLove>
+                            : state.extra is List
+                            ? Set<OnboardingFoodLove>.from(state.extra! as List)
+                            : <OnboardingFoodLove>{};
+                        return EditPreferredFoodsView(initial: initial);
+                      },
+                    ),
+                    GoRoute(
+                      path: RoutePaths.editSkippedFoods.path,
+                      name: RoutePaths.editSkippedFoods.name,
+                      parentNavigatorKey: rootNavigatorKey,
+                      builder: (context, state) {
+                        final initial = state.extra is Set<OnboardingFoodSkip>
+                            ? state.extra! as Set<OnboardingFoodSkip>
+                            : state.extra is List
+                            ? Set<OnboardingFoodSkip>.from(state.extra! as List)
+                            : <OnboardingFoodSkip>{};
+                        return EditSkippedFoodsView(initial: initial);
+                      },
+                    ),
+                  ],
+                ),
+              ],
             ),
           ],
         ),

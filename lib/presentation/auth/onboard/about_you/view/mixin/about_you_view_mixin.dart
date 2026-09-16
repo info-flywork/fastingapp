@@ -1,30 +1,6 @@
 part of '../about_you_view.dart';
 
 mixin AboutYouViewMixin on State<AboutYouView> {
-  List<({OnboardingGender gender, String titleKey, String iconPath})>
-      get genderOptions => [
-            (
-              gender: OnboardingGender.woman,
-              titleKey: 'onboarding.gender_woman',
-              iconPath: Assets.images.woman.path,
-            ),
-            (
-              gender: OnboardingGender.man,
-              titleKey: 'onboarding.gender_man',
-              iconPath: Assets.images.man.path,
-            ),
-            (
-              gender: OnboardingGender.nonBinary,
-              titleKey: 'onboarding.gender_non_binary',
-              iconPath: Assets.images.nonBinary.path,
-            ),
-            (
-              gender: OnboardingGender.preferNotToSay,
-              titleKey: 'onboarding.gender_prefer_not',
-              iconPath: Assets.images.preferNot.path,
-            ),
-          ];
-
   void onBack() {
     context.pop();
   }

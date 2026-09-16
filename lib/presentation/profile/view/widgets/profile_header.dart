@@ -7,6 +7,7 @@ final class ProfileHeader extends StatelessWidget {
     required this.initials,
     required this.streakDays,
     required this.isPremium,
+    required this.onChatTapped,
     super.key,
   });
 
@@ -14,6 +15,7 @@ final class ProfileHeader extends StatelessWidget {
   final String initials;
   final int streakDays;
   final bool isPremium;
+  final VoidCallback onChatTapped;
 
   @override
   Widget build(BuildContext context) {
@@ -51,27 +53,7 @@ final class ProfileHeader extends StatelessWidget {
         ),
         _StreakPill(streakDays: streakDays),
         const SizedBox(width: 10),
-        Container(
-          width: 40,
-          height: 40,
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            color: ColorName.colorWhite,
-            boxShadow: [
-              BoxShadow(
-                color: ColorName.colorBlack.withValues(alpha: 0.05),
-                blurRadius: 4,
-                offset: const Offset(0, 1),
-              ),
-            ],
-          ),
-          clipBehavior: Clip.antiAlias,
-          child: Assets.images.aiChat.image(
-            width: 40,
-            height: 40,
-            fit: BoxFit.cover,
-          ),
-        ),
+        AiChatHeaderIcon(onTap: onChatTapped),
       ],
     );
   }

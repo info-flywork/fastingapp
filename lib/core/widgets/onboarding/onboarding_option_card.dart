@@ -38,8 +38,9 @@ final class OnboardingOptionCard extends StatelessWidget {
           curve: Curves.easeOut,
           padding: s.padding,
           decoration: BoxDecoration(
-            color:
-                isSelected ? s.selectedBackgroundColor : ColorName.colorWhite,
+            color: isSelected
+                ? s.selectedBackgroundColor
+                : ColorName.colorWhite,
             borderRadius: s.borderRadius,
             border: Border.all(
               width: s.borderWidth,
@@ -50,11 +51,7 @@ final class OnboardingOptionCard extends StatelessWidget {
           ),
           child: Row(
             children: [
-              SizedBox(
-                width: s.iconSize,
-                height: s.iconSize,
-                child: icon,
-              ),
+              SizedBox(width: s.iconSize, height: s.iconSize, child: icon),
               SizedBox(width: s.gap),
               Expanded(
                 child: Column(
@@ -89,10 +86,7 @@ final class OnboardingOptionCard extends StatelessWidget {
                 ),
               ),
               SizedBox(width: s.gap),
-              _RadioIndicator(
-                isSelected: isSelected,
-                size: s.radioSize,
-              ),
+              _RadioIndicator(isSelected: isSelected, size: s.radioSize),
             ],
           ),
         ),
@@ -122,10 +116,7 @@ final class _MostPopularBadge extends StatelessWidget {
 }
 
 final class _RadioIndicator extends StatelessWidget {
-  const _RadioIndicator({
-    required this.isSelected,
-    required this.size,
-  });
+  const _RadioIndicator({required this.isSelected, required this.size});
 
   final bool isSelected;
   final double size;
@@ -138,8 +129,9 @@ final class _RadioIndicator extends StatelessWidget {
       height: size,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
-        color:
-            isSelected ? ColorName.colorOptionSelected : ColorName.colorWhite,
+        color: isSelected
+            ? ColorName.colorOptionSelected
+            : ColorName.colorWhite,
         border: Border.all(
           width: 2,
           color: isSelected
