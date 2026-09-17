@@ -103,6 +103,35 @@ final class AppButtonDecoration {
     );
   }
 
+  /// Home challenge "Katıl" — yeşil gradient pill, 40h, inner shadow %22.
+  factory AppButtonDecoration.homeJoin() {
+    return AppButtonDecoration(
+      gradient: const LinearGradient(
+        begin: Alignment.topCenter,
+        end: Alignment.bottomCenter,
+        colors: [
+          ColorName.colorCtaGradientTop,
+          ColorName.colorCtaGradientBottom,
+        ],
+      ),
+      borderColor: ColorName.colorWhite.withValues(alpha: 0.15),
+      borderWidth: 1,
+      borderRadius: BorderRadius.circular(99999),
+      height: 40,
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+      gap: 8,
+      innerShadowColor: ColorName.colorWhite.withValues(alpha: 0.22),
+      innerShadowOffset: const Offset(0, 4),
+      innerShadowBlur: 16,
+      labelColor: ColorName.colorWhite,
+      fontFamily: FontFamily.sFProDisplay,
+      fontWeight: FontWeight.w600,
+      defaultFontSize: 14,
+      lineHeight: 20,
+      letterSpacingPercent: -0.02,
+    );
+  }
+
   /// Empty state Back — koyu pill (#1B1B21), 48h.
   factory AppButtonDecoration.dark() {
     return AppButtonDecoration(
@@ -187,30 +216,40 @@ final class AppButtonDecoration {
       child: ClipRRect(
         borderRadius: borderRadius,
         child: Stack(
-          fit: StackFit.expand,
           children: [
-            DecoratedBox(decoration: BoxDecoration(gradient: gradient)),
-            // Figma inner shadow (y:4, blur:16, white 55%) — üst highlight.
-            IgnorePointer(
-              child: DecoratedBox(
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: const Alignment(0, 0.15),
-                    colors: [
-                      innerShadowColor,
-                      innerShadowColor.withValues(alpha: 0),
-                    ],
+            Positioned.fill(
+              child: DecoratedBox(decoration: BoxDecoration(gradient: gradient)),
+            ),
+            // Figma inner shadow (y:4, blur:16) — üst highlight.
+            Positioned.fill(
+              child: IgnorePointer(
+                child: DecoratedBox(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: const Alignment(0, 0.15),
+                      colors: [
+                        innerShadowColor,
+                        innerShadowColor.withValues(alpha: 0),
+                      ],
+                    ),
                   ),
                 ),
               ),
             ),
-            DecoratedBox(
-              decoration: BoxDecoration(
-                borderRadius: borderRadius,
-                border: Border.all(color: borderColor, width: borderWidth),
+            Padding(
+              padding: padding,
+              child: Center(child: child),
+            ),
+            Positioned.fill(
+              child: IgnorePointer(
+                child: DecoratedBox(
+                  decoration: BoxDecoration(
+                    borderRadius: borderRadius,
+                    border: Border.all(color: borderColor, width: borderWidth),
+                  ),
+                ),
               ),
-              child: Padding(padding: padding, child: child),
             ),
           ],
         ),

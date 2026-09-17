@@ -513,14 +513,14 @@ abstract final class AppTextStyles {
     color: ColorName.colorSubtitle.withValues(alpha: 0.5),
   );
 
-  /// Home challenge eyebrow — 14 / Medium / 50%
-  static TextStyle get homeChallengeEyebrow => TextStyle(
+  /// Home challenge eyebrow — 18 / Semibold / #09090B
+  static TextStyle get homeChallengeEyebrow => const TextStyle(
     fontFamily: FontFamily.sFProDisplay,
-    fontWeight: FontWeight.w500,
-    fontSize: 14,
-    height: 20 / 14,
-    letterSpacing: 14 * -0.015,
-    color: ColorName.colorSubtitle.withValues(alpha: 0.5),
+    fontWeight: FontWeight.w600,
+    fontSize: 18,
+    height: 24 / 18,
+    letterSpacing: -0.5,
+    color: ColorName.colorTitle,
   );
 
   /// Home challenge title — 18 / Semibold
@@ -533,7 +533,7 @@ abstract final class AppTextStyles {
     color: ColorName.colorTitle,
   );
 
-  /// Home challenge subtitle — 14 / Semibold / 60%
+  /// Home challenge subtitle — 14 / Semibold / #3C3C43 @ 60%
   static TextStyle get homeChallengeSubtitle => TextStyle(
     fontFamily: FontFamily.sFProDisplay,
     fontWeight: FontWeight.w600,
@@ -543,14 +543,24 @@ abstract final class AppTextStyles {
     color: ColorName.colorSubtitle.withValues(alpha: 0.6),
   );
 
-  /// Home "already in" — 12 / Semibold
-  static TextStyle get homeAlreadyIn => const TextStyle(
+  /// Home "already in" count — 12 / Semibold / #09090B
+  static TextStyle get homeAlreadyInCount => const TextStyle(
     fontFamily: FontFamily.sFProDisplay,
     fontWeight: FontWeight.w600,
     fontSize: 12,
     height: 16 / 12,
     letterSpacing: -0.5,
     color: ColorName.colorTitle,
+  );
+
+  /// Home "already in" label — 12 / Semibold / #3C3C4399
+  static TextStyle get homeAlreadyIn => const TextStyle(
+    fontFamily: FontFamily.sFProDisplay,
+    fontWeight: FontWeight.w600,
+    fontSize: 12,
+    height: 16 / 12,
+    letterSpacing: -0.5,
+    color: Color(0x993C3C43),
   );
 
   /// Home Join Now — 14 / Semibold / white
@@ -581,6 +591,122 @@ abstract final class AppTextStyles {
     height: 24 / 16,
     letterSpacing: 0.5,
     color: ColorName.colorTextPrimary,
+  );
+
+  /// Home weight records title — 18 / Semibold
+  static TextStyle get homeWeightTitle => const TextStyle(
+    fontFamily: FontFamily.sFProDisplay,
+    fontWeight: FontWeight.w600,
+    fontSize: 18,
+    height: 24 / 18,
+    letterSpacing: -0.5,
+    color: ColorName.colorTitle,
+  );
+
+  /// Home weight current value — 28 / Semibold
+  static TextStyle get homeWeightValue => const TextStyle(
+    fontFamily: FontFamily.sFProDisplay,
+    fontWeight: FontWeight.w600,
+    fontSize: 28,
+    height: 36 / 28,
+    letterSpacing: -0.5,
+    color: ColorName.colorTitle,
+  );
+
+  /// Home weight unit "kg" — 14 / Semibold / #3C3C4399
+  static TextStyle get homeWeightUnit => const TextStyle(
+    fontFamily: FontFamily.sFProDisplay,
+    fontWeight: FontWeight.w600,
+    fontSize: 14,
+    height: 20 / 14,
+    letterSpacing: 14 * -0.015,
+    color: Color(0x993C3C43),
+  );
+
+  /// Home weight Start/Target label — 14 / Semibold / #3C3C4399
+  static TextStyle get homeWeightBoundLabel => const TextStyle(
+    fontFamily: FontFamily.sFProDisplay,
+    fontWeight: FontWeight.w600,
+    fontSize: 14,
+    height: 20 / 14,
+    letterSpacing: 14 * -0.015,
+    color: Color(0x993C3C43),
+  );
+
+  /// Home weight Start/Target value — 14 / Semibold
+  static TextStyle get homeWeightBoundValue => const TextStyle(
+    fontFamily: FontFamily.sFProDisplay,
+    fontWeight: FontWeight.w600,
+    fontSize: 14,
+    height: 20 / 14,
+    letterSpacing: 14 * -0.015,
+    color: ColorName.colorTitle,
+  );
+
+  /// Metabolic Twin title — 18 / Semibold (homeWeightTitle ile aynı)
+  static TextStyle get homeMetabolicTitle => homeWeightTitle;
+
+  /// Metabolic feeling — 16 / Semibold
+  static TextStyle get homeMetabolicFeeling => const TextStyle(
+    fontFamily: FontFamily.sFProDisplay,
+    fontWeight: FontWeight.w600,
+    fontSize: 16,
+    height: 24 / 16,
+    letterSpacing: -0.5,
+    color: ColorName.colorTitle,
+  );
+
+  /// Metabolic subtitle — 14 / Semibold / #3C3C4399
+  static TextStyle get homeMetabolicSubtitle => const TextStyle(
+    fontFamily: FontFamily.sFProDisplay,
+    fontWeight: FontWeight.w600,
+    fontSize: 14,
+    height: 20 / 14,
+    letterSpacing: 14 * -0.015,
+    color: Color(0x993C3C43),
+  );
+
+  /// Metabolic gauge percent — 24 / Semibold
+  static TextStyle get homeMetabolicGaugeValue => const TextStyle(
+    fontFamily: FontFamily.sFProDisplay,
+    fontWeight: FontWeight.w600,
+    fontSize: 24,
+    height: 28 / 24,
+    letterSpacing: -0.67,
+    color: ColorName.colorTitle,
+  );
+
+  /// Metabolic gauge label — 15 / Medium / #3C3C4399
+  static TextStyle get homeMetabolicGaugeLabel => const TextStyle(
+    fontFamily: FontFamily.sFProDisplay,
+    fontWeight: FontWeight.w500,
+    fontSize: 15,
+    height: 20 / 15,
+    letterSpacing: -0.67,
+    color: Color(0x993C3C43),
+  );
+
+  /// Meal Records title — 18 / Semibold
+  static TextStyle get homeMealRecordsTitle => homeWeightTitle;
+
+  /// Meal timestamp — 14 / Semibold / #3C3C4399
+  static TextStyle get homeMealTimestamp => const TextStyle(
+    fontFamily: FontFamily.sFProDisplay,
+    fontWeight: FontWeight.w600,
+    fontSize: 14,
+    height: 20 / 14,
+    letterSpacing: 14 * -0.015,
+    color: Color(0x993C3C43),
+  );
+
+  /// Meal tag pill — 14 / Semibold
+  static TextStyle get homeMealTag => const TextStyle(
+    fontFamily: FontFamily.sFProDisplay,
+    fontWeight: FontWeight.w600,
+    fontSize: 14,
+    height: 24 / 14,
+    letterSpacing: -0.5,
+    color: ColorName.colorTitle,
   );
 
   /// Home metric goal — 16 / Semibold / 60%

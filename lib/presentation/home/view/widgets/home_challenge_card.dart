@@ -18,30 +18,25 @@ final class HomeChallengeCard extends StatelessWidget {
         children: [
           Row(
             children: [
-              Assets.images.challenge.image(width: 20, height: 20),
+              Assets.images.challenge.image(width: 28, height: 28),
               const SizedBox(width: 6),
               Text(
                 'home.active_challenge'.tr(),
                 style: AppTextStyles.homeChallengeEyebrow,
               ),
               const Spacer(),
-              Icon(
-                Icons.chevron_right_rounded,
-                size: 20,
-                color: ColorName.colorSubtitle.withValues(alpha: 0.4),
-              ),
+              Assets.icons.solarAltArrowUpLineDuotoneRight.svg(),
             ],
           ),
           const SizedBox(height: 12),
           Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Assets.images.fastingChallenge.image(
-                width: 64,
-                height: 72,
+                width: 80,
+                height: 80,
                 fit: BoxFit.contain,
               ),
-              const SizedBox(width: 12),
+              const SizedBox(width: 8),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -50,7 +45,7 @@ final class HomeChallengeCard extends StatelessWidget {
                       'home.challenge_title'.tr(),
                       style: AppTextStyles.homeChallengeTitle,
                     ),
-                    const SizedBox(height: 4),
+                    const SizedBox(height: 8),
                     Text(
                       'home.challenge_subtitle'.tr(),
                       style: AppTextStyles.homeChallengeSubtitle,
@@ -61,21 +56,8 @@ final class HomeChallengeCard extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 16),
-          Row(
-            children: [
-              const _AvatarStack(),
-              const SizedBox(width: 8),
-              Expanded(
-                child: Text(
-                  'home.already_in'.tr(args: ['8954']),
-                  style: AppTextStyles.homeAlreadyIn,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ),
-              const SizedBox(width: 8),
-              const _JoinNowButton(),
-            ],
+          const Row(
+            children: [_ParticipantsCluster(), Spacer(), _JoinNowButton()],
           ),
         ],
       ),
@@ -83,8 +65,15 @@ final class HomeChallengeCard extends StatelessWidget {
   }
 }
 
-final class _AvatarStack extends StatelessWidget {
-  const _AvatarStack();
+/// Avatarlar + "kişi katıldı" pill — son avatar pill'in üstüne biner.
+final class _ParticipantsCluster extends StatelessWidget {
+  const _ParticipantsCluster();
+
+  static const _count = '8954';
+  static const _avatarSize = 40.0;
+  static const _avatarOverlap = 12.0;
+  static const _chipHeight = 28.0;
+  static const _chipOverlap = 18.0;
 
   @override
   Widget build(BuildContext context) {
@@ -93,25 +82,64 @@ final class _AvatarStack extends StatelessWidget {
       Assets.images.fastingChallengeUser2,
       Assets.images.fastingChallengeUser3,
     ];
+    const step = _avatarSize - _avatarOverlap;
+    final lastAvatarLeft = (avatars.length - 1) * step;
+    final chipLeft = lastAvatarLeft + _avatarSize - _chipOverlap;
+
+    final full = 'home.already_in'.tr(args: [_count]);
+    final index = full.indexOf(_count);
+
+    final label = index < 0
+        ? Text(
+            full,
+            style: AppTextStyles.homeAlreadyIn,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          )
+        : Text.rich(
+            TextSpan(
+              style: AppTextStyles.homeAlreadyIn,
+              children: [
+                if (index > 0) TextSpan(text: full.substring(0, index)),
+                TextSpan(text: _count, style: AppTextStyles.homeAlreadyInCount),
+                TextSpan(text: full.substring(index + _count.length)),
+              ],
+            ),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          );
 
     return SizedBox(
-      width: 72,
-      height: 28,
+      height: _avatarSize,
       child: Stack(
+        alignment: Alignment.centerLeft,
         children: [
+          // Pill — stack genişliğini belirler; sol kenarı son avatarın altında.
+          Padding(
+            padding: EdgeInsets.only(left: chipLeft),
+            child: Container(
+              height: _chipHeight,
+              padding: const EdgeInsets.fromLTRB(20, 4, 12, 4),
+              alignment: Alignment.center,
+              decoration: BoxDecoration(
+                color: ColorName.colorHomeChipBg,
+                borderRadius: BorderRadius.circular(_chipHeight / 2),
+              ),
+              child: label,
+            ),
+          ),
           for (var i = 0; i < avatars.length; i++)
             Positioned(
-              left: i * 18.0,
+              left: i * step,
+              top: 0,
               child: Container(
-                width: 28,
-                height: 28,
+                width: _avatarSize,
+                height: _avatarSize,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   border: Border.all(color: ColorName.colorWhite, width: 2),
                 ),
-                child: ClipOval(
-                  child: avatars[i].image(fit: BoxFit.cover),
-                ),
+                child: ClipOval(child: avatars[i].image(fit: BoxFit.cover)),
               ),
             ),
         ],
@@ -125,23 +153,12 @@ final class _JoinNowButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      height: 40,
-      padding: const EdgeInsets.symmetric(horizontal: 14),
-      alignment: Alignment.center,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(999),
-        gradient: const LinearGradient(
-          colors: [
-            ColorName.colorCtaGradientTop,
-            ColorName.colorCtaGradientBottom,
-          ],
-        ),
-        border: Border.all(
-          color: ColorName.colorWhite.withValues(alpha: 0.15),
-        ),
-      ),
-      child: Text('home.join_now'.tr(), style: AppTextStyles.homeJoinNow),
+    return AppButton(
+      label: 'home.join_now'.tr(),
+      onPressed: () {},
+      decoration: AppButtonDecoration.homeJoin(),
+      showIcon: false,
+      expand: false,
     );
   }
 }

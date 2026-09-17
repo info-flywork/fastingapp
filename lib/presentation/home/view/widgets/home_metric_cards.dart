@@ -9,21 +9,21 @@ final class HomeMetricCards extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
+      padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
       child: Row(
         children: [
           Expanded(
             child: _MetricCard(
               icon: Assets.images.water,
               labelKey: 'home.water',
-              value: 100,
+              value: 600,
               goal: 2500,
               valueKey: 'home.water_value',
               goalKey: 'home.water_goal',
               trackColor: ColorName.colorWaterTrack,
               fillColor: ColorName.colorWaterFill,
-              progress: 100 / 2500,
-              wavyFill: true,
+              progress: 600 / 2500,
+              liquid: true,
               onTap: onWaterTapped,
             ),
           ),
@@ -58,7 +58,7 @@ final class _MetricCard extends StatelessWidget {
     required this.trackColor,
     required this.fillColor,
     required this.progress,
-    this.wavyFill = false,
+    this.liquid = false,
     this.onTap,
   });
 
@@ -71,7 +71,7 @@ final class _MetricCard extends StatelessWidget {
   final Color trackColor;
   final Color fillColor;
   final double progress;
-  final bool wavyFill;
+  final bool liquid;
   final VoidCallback? onTap;
 
   static const _iconSize = 40.0;
@@ -105,7 +105,7 @@ final class _MetricCard extends StatelessWidget {
                       style: AppTextStyles.homeMetricLabel,
                     ),
                   ),
-                  Icon(
+                  const Icon(
                     Icons.chevron_right_rounded,
                     size: 20,
                     color: ColorName.colorTitle,
@@ -130,12 +130,18 @@ final class _MetricCard extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 12),
-              _MetricProgressBar(
-                progress: progress,
-                trackColor: trackColor,
-                fillColor: fillColor,
-                wavy: wavyFill,
-              ),
+              if (liquid)
+                _AnimatedLiquidBar(
+                  progress: progress,
+                  trackColor: trackColor,
+                  fillColor: fillColor,
+                )
+              else
+                _FlatProgressBar(
+                  progress: progress,
+                  trackColor: trackColor,
+                  fillColor: fillColor,
+                ),
             ],
           ),
         ),
@@ -144,36 +150,30 @@ final class _MetricCard extends StatelessWidget {
   }
 }
 
-/// Figma Frame — 35px capsule track.
-final class _MetricProgressBar extends StatelessWidget {
-  const _MetricProgressBar({
+/// Adım — düz capsule; ilk açılışta dolma animasyonu.
+final class _FlatProgressBar extends StatelessWidget {
+  const _FlatProgressBar({
     required this.progress,
     required this.trackColor,
     required this.fillColor,
-    required this.wavy,
   });
 
   final double progress;
   final Color trackColor;
   final Color fillColor;
-  final bool wavy;
 
   static const height = 35.0;
 
-  /// Figma’dan çıkarılmış dalga ucu (yakın plan) — lojik genişlik.
-  static const _waveLogicalW = 18.0;
-
   @override
   Widget build(BuildContext context) {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final width = constraints.maxWidth;
-        final p = progress.clamp(0.0, 1.0);
-        final target = width * p;
-
+    return TweenAnimationBuilder<double>(
+      tween: Tween(begin: 0, end: progress.clamp(0.0, 1.0)),
+      duration: const Duration(milliseconds: 1100),
+      curve: Curves.easeOutCubic,
+      builder: (context, animatedProgress, _) {
         return SizedBox(
           height: height,
-          width: width,
+          width: double.infinity,
           child: DecoratedBox(
             decoration: BoxDecoration(
               color: trackColor,
@@ -181,20 +181,14 @@ final class _MetricProgressBar extends StatelessWidget {
             ),
             child: ClipRRect(
               borderRadius: BorderRadius.circular(999),
-              child: wavy
-                  ? _WaterWaveFill(
-                      target: target,
-                      fillColor: fillColor,
-                      waveLogicalW: _waveLogicalW,
-                    )
-                  : Align(
-                      alignment: Alignment.centerLeft,
-                      child: SizedBox(
-                        width: target,
-                        height: height,
-                        child: ColoredBox(color: fillColor),
-                      ),
-                    ),
+              child: Align(
+                alignment: Alignment.centerLeft,
+                child: FractionallySizedBox(
+                  widthFactor: animatedProgress,
+                  heightFactor: 1,
+                  child: ColoredBox(color: fillColor),
+                ),
+              ),
             ),
           ),
         );
@@ -203,51 +197,189 @@ final class _MetricProgressBar extends StatelessWidget {
   }
 }
 
-/// Su dolgusu — Figma `water_progress_wave.png` ucu + gerekirse düz gövde.
-final class _WaterWaveFill extends StatelessWidget {
-  const _WaterWaveFill({
-    required this.target,
+/// Su — sıvı dolgu, animasyonlu S-kenar + highlight + hafif kabarcık.
+final class _AnimatedLiquidBar extends StatefulWidget {
+  const _AnimatedLiquidBar({
+    required this.progress,
+    required this.trackColor,
     required this.fillColor,
-    required this.waveLogicalW,
   });
 
-  final double target;
+  final double progress;
+  final Color trackColor;
   final Color fillColor;
-  final double waveLogicalW;
+
+  @override
+  State<_AnimatedLiquidBar> createState() => _AnimatedLiquidBarState();
+}
+
+class _AnimatedLiquidBarState extends State<_AnimatedLiquidBar>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _wave;
+
+  static const height = 35.0;
+
+  @override
+  void initState() {
+    super.initState();
+    _wave = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 2400),
+    )..repeat();
+  }
+
+  @override
+  void dispose() {
+    _wave.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
-    if (target <= 0) return const SizedBox.shrink();
-
-    // Düşük progress: sadece dalga ucu (Figma 100ml).
-    // Yüksek progress: mavi gövde + uçta dalga.
-    final bodyW = math.max(0.0, target - waveLogicalW * 0.65);
-    final waveLeft = bodyW;
-
-    return Stack(
-      clipBehavior: Clip.hardEdge,
-      children: [
-        if (bodyW > 0)
-          Positioned(
-            left: 0,
-            top: 0,
-            bottom: 0,
-            width: bodyW + 4,
-            child: ColoredBox(color: fillColor),
-          ),
-        Positioned(
-          left: waveLeft,
-          top: 0,
-          bottom: 0,
-          child: Image.asset(
-            'assets/images/water_progress_wave.png',
-            height: _MetricProgressBar.height,
-            fit: BoxFit.fitHeight,
-            filterQuality: FilterQuality.high,
-            gaplessPlayback: true,
-          ),
-        ),
-      ],
+    return TweenAnimationBuilder<double>(
+      tween: Tween(begin: 0, end: widget.progress.clamp(0.0, 1.0)),
+      duration: const Duration(milliseconds: 1100),
+      curve: Curves.easeOutCubic,
+      builder: (context, animatedProgress, _) {
+        return AnimatedBuilder(
+          animation: _wave,
+          builder: (context, _) {
+            return SizedBox(
+              height: height,
+              width: double.infinity,
+              child: CustomPaint(
+                painter: _LiquidBarPainter(
+                  progress: animatedProgress,
+                  phase: _wave.value * math.pi * 2,
+                  trackColor: widget.trackColor,
+                  fillColor: widget.fillColor,
+                ),
+              ),
+            );
+          },
+        );
+      },
     );
+  }
+}
+
+final class _LiquidBarPainter extends CustomPainter {
+  const _LiquidBarPainter({
+    required this.progress,
+    required this.phase,
+    required this.trackColor,
+    required this.fillColor,
+  });
+
+  final double progress;
+  final double phase;
+  final Color trackColor;
+  final Color fillColor;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final track = RRect.fromRectAndRadius(
+      Offset.zero & size,
+      Radius.circular(size.height / 2),
+    );
+    canvas.drawRRect(track, Paint()..color = trackColor);
+
+    if (progress <= 0.001) return;
+
+    canvas.save();
+    canvas.clipRRect(track);
+
+    final h = size.height;
+    final fillW = size.width * progress;
+    final amp = math.min(h * 0.28, fillW * 0.45);
+
+    // Sıvı gövde — sağ kenar animasyonlu S.
+    final fillPath = Path()..moveTo(0, 0);
+    const steps = 40;
+    for (var i = 0; i <= steps; i++) {
+      final t = i / steps;
+      final y = h * t;
+      final wave =
+          math.sin(t * math.pi * 1.6 + phase) * amp * 0.55 +
+          math.sin(t * math.pi * 0.8 - phase * 0.7) * amp * 0.25;
+      fillPath.lineTo(fillW + wave, y);
+    }
+    fillPath
+      ..lineTo(0, h)
+      ..close();
+
+    // Dolgu — hafif dikey gradient.
+    final fillPaint = Paint()
+      ..shader = LinearGradient(
+        colors: [
+          Color.lerp(fillColor, const Color(0xFF3A6FD6), 0.12)!,
+          fillColor,
+          Color.lerp(fillColor, Colors.white, 0.12)!,
+        ],
+        stops: const [0.0, 0.55, 1.0],
+      ).createShader(Rect.fromLTWH(0, 0, fillW + amp, h));
+    canvas.drawPath(fillPath, fillPaint);
+
+    // Kenar highlight — beyaz S şerit (animasyonlu).
+    final highlight = Path();
+    for (var i = 0; i <= steps; i++) {
+      final t = i / steps;
+      final y = h * t;
+      final wave =
+          math.sin(t * math.pi * 1.6 + phase) * amp * 0.55 +
+          math.sin(t * math.pi * 0.8 - phase * 0.7) * amp * 0.25;
+      final x = fillW + wave - h * 0.12;
+      if (i == 0) {
+        highlight.moveTo(x, y);
+      } else {
+        highlight.lineTo(x, y);
+      }
+    }
+    canvas.drawPath(
+      highlight,
+      Paint()
+        ..color = const Color(0x99FFFFFF)
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = math.max(2.2, h * 0.08)
+        ..strokeCap = StrokeCap.round
+        ..isAntiAlias = true,
+    );
+
+    // Yüzey parıltısı.
+    canvas.drawRect(
+      Rect.fromLTWH(0, 0, fillW * 0.85, h * 0.28),
+      Paint()
+        ..shader = LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [
+            Colors.white.withValues(alpha: 0.22),
+            Colors.white.withValues(alpha: 0),
+          ],
+        ).createShader(Rect.fromLTWH(0, 0, fillW, h * 0.28)),
+    );
+
+    // Kabarcıklar — dolgu içinde yavaş yükselir.
+    final bubblePaint = Paint()..style = PaintingStyle.fill;
+    for (var i = 0; i < 5; i++) {
+      final seed = i * 17.3;
+      final bx = fillW * (0.12 + (i * 0.15) % 0.7);
+      if (bx > fillW - 4) continue;
+      final rise = ((phase / (math.pi * 2)) + seed * 0.07) % 1.0;
+      final by = h * (1.05 - rise * 1.15);
+      final r = 1.2 + (i % 3) * 0.7;
+      bubblePaint.color = Colors.white.withValues(alpha: 0.18 + (i % 2) * 0.08);
+      canvas.drawCircle(Offset(bx, by), r, bubblePaint);
+    }
+
+    canvas.restore();
+  }
+
+  @override
+  bool shouldRepaint(covariant _LiquidBarPainter oldDelegate) {
+    return oldDelegate.progress != progress ||
+        oldDelegate.phase != phase ||
+        oldDelegate.trackColor != trackColor ||
+        oldDelegate.fillColor != fillColor;
   }
 }

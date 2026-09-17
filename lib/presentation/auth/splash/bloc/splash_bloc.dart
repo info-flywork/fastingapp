@@ -22,7 +22,7 @@ final class SplashBloc extends Bloc<SplashEvent, SplashState> {
     await _waitForAuthResolved();
 
     // Landing (entry) açılış.
-    emit(SplashNavigateTo(RoutePaths.entry.path));
+    emit(SplashNavigateTo(RoutePaths.home.path));
   }
 
   Future<AuthState> _waitForAuthResolved() async {

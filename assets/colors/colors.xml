@@ -68,4 +68,6 @@
   <color name="color_water_ruler_tick">#CFDFEE</color>
   <color name="color_water_page_fade">#F4F9FF</color>
   <color name="color_water_glass_tile">#FAFCFF</color>
+  <color name="color_metabolic_bg">#F9E9E6</color>
+  <color name="color_metabolic_fast">#5F54FF</color>
 </resources>

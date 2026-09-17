@@ -72,6 +72,12 @@ abstract final class ColorName {
   /// Color: #C8DBC5
   static const Color colorMatGreen = Color(0xFFC8DBC5);
 
+  /// Color: #F9E9E6
+  static const Color colorMetabolicBg = Color(0xFFF9E9E6);
+
+  /// Color: #5F54FF
+  static const Color colorMetabolicFast = Color(0xFF5F54FF);
+
   /// Color: #D14B47
   static const Color colorNegativeV2 = Color(0xFFD14B47);
 
@@ -177,11 +183,11 @@ abstract final class ColorName {
   /// Color: #4D87F3
   static const Color colorWaterFill = Color(0xFF4D87F3);
 
-  /// Color: #F4F9FF
-  static const Color colorWaterPageFade = Color(0xFFF4F9FF);
-
   /// Color: #FAFCFF
   static const Color colorWaterGlassTile = Color(0xFFFAFCFF);
+
+  /// Color: #F4F9FF
+  static const Color colorWaterPageFade = Color(0xFFF4F9FF);
 
   /// Color: #CFDFEE
   static const Color colorWaterRulerTick = Color(0xFFCFDFEE);

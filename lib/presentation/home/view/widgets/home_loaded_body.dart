@@ -37,6 +37,9 @@ final class HomeLoadedBody extends StatelessWidget {
           const HomeFastingCard(),
           const HomeChallengeCard(),
           HomeMetricCards(onWaterTapped: onWaterTapped),
+          const HomeWeightCard(),
+          const HomeMetabolicCard(),
+          const HomeMealRecordsCard(),
         ],
       ),
     );

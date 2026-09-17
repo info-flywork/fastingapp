@@ -239,7 +239,22 @@
     "water_goal": " /{} ml",
     "steps": "Schritte",
     "steps_value": "{}",
-    "steps_goal": " /{}"
+    "steps_goal": " /{}",
+    "weight_records": "Gewichtseinträge",
+    "weight_unit": "kg",
+    "weight_start": "Start:",
+    "weight_target": "Ziel:",
+    "metabolic_twin": "Metabolischer Zwilling",
+    "metabolic_feeling": "Fühle mich gut",
+    "metabolic_subtitle": "Fast perfekt — ein Glas Wasser macht’s rund 💧",
+    "metabolic_energy": "Energie",
+    "metabolic_hydration": "Hydration",
+    "metabolic_fast_ready": "Fastenbereit",
+    "meal_records": "Mahlzeiten",
+    "meal_sample_time": "1. Juli, 12:53",
+    "meal_tag_full": "Volle Mahlzeit",
+    "meal_tag_keto": "Ketogen",
+    "save_a_meal": "Mahlzeit speichern"
   },
   "water_page": {
     "today": "Heute",

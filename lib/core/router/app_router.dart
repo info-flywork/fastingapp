@@ -86,7 +86,7 @@ bool _isProtectedRoute(String location) => _protectedPaths.contains(location);
 /// (Doküman 11)
 final GoRouter appRouter = GoRouter(
   navigatorKey: rootNavigatorKey,
-  initialLocation: RoutePaths.entry.path,
+  initialLocation: RoutePaths.home.path,
   refreshListenable: GoRouterRefreshStream(getIt<AuthBloc>().stream),
   redirect: (context, state) {
     final authState = context.read<AuthBloc>().state;

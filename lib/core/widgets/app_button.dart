@@ -69,6 +69,14 @@ final class AppButton extends StatelessWidget {
     final enabled = isEnabled && onPressed != null;
     final iconWidget = _resolveIcon(style);
 
+    final label = Text(
+      this.label,
+      textAlign: TextAlign.center,
+      maxLines: 1,
+      overflow: TextOverflow.ellipsis,
+      style: style.labelStyle(fontSize: fontSize),
+    );
+
     final content = Row(
       mainAxisAlignment: MainAxisAlignment.center,
       mainAxisSize: expand ? MainAxisSize.max : MainAxisSize.min,
@@ -78,15 +86,7 @@ final class AppButton extends StatelessWidget {
           iconWidget,
           SizedBox(width: style.gap),
         ],
-        Flexible(
-          child: Text(
-            label,
-            textAlign: TextAlign.center,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: style.labelStyle(fontSize: fontSize),
-          ),
-        ),
+        if (expand) Flexible(child: label) else label,
         if (iconWidget != null &&
             iconPosition == AppButtonIconPosition.trailing) ...[
           SizedBox(width: style.gap),

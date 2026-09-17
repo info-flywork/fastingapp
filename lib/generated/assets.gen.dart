@@ -168,6 +168,11 @@ class $AssetsIconsGen {
   SvgGenImage get solarAltArrowUpLineDuotone =>
       const SvgGenImage('assets/icons/solar_alt-arrow-up-line-duotone.svg');
 
+  /// File path: assets/icons/solar_alt-arrow-up-line-duotone_right.svg
+  SvgGenImage get solarAltArrowUpLineDuotoneRight => const SvgGenImage(
+    'assets/icons/solar_alt-arrow-up-line-duotone_right.svg',
+  );
+
   /// File path: assets/icons/solar_arrow-left-down-linear.svg
   SvgGenImage get solarArrowLeftDownLinear =>
       const SvgGenImage('assets/icons/solar_arrow-left-down-linear.svg');
@@ -240,17 +245,21 @@ class $AssetsIconsGen {
   SvgGenImage get solarPen2LineDuotone1 =>
       const SvgGenImage('assets/icons/solar_pen-2-line-duotone (1).svg');
 
+  /// File path: assets/icons/solar_pen-2-line-duotone (2).svg
+  SvgGenImage get solarPen2LineDuotone2 =>
+      const SvgGenImage('assets/icons/solar_pen-2-line-duotone (2).svg');
+
   /// File path: assets/icons/solar_pen-2-line-duotone.svg
   SvgGenImage get solarPen2LineDuotone =>
       const SvgGenImage('assets/icons/solar_pen-2-line-duotone.svg');
 
-  /// File path: assets/icons/solar_pen-bold.svg
-  SvgGenImage get solarPenBold =>
-      const SvgGenImage('assets/icons/solar_pen-bold.svg');
-
   /// File path: assets/icons/solar_pen-bold-grey.svg
   SvgGenImage get solarPenBoldGrey =>
       const SvgGenImage('assets/icons/solar_pen-bold-grey.svg');
+
+  /// File path: assets/icons/solar_pen-bold.svg
+  SvgGenImage get solarPenBold =>
+      const SvgGenImage('assets/icons/solar_pen-bold.svg');
 
   /// File path: assets/icons/solar_plain-bold.svg
   SvgGenImage get solarPlainBold =>
@@ -294,6 +303,7 @@ class $AssetsIconsGen {
     icons8Gender,
     solarAltArrowLeftLinear,
     solarAltArrowUpLineDuotone,
+    solarAltArrowUpLineDuotoneRight,
     solarArrowLeftDownLinear,
     solarArrowLeftLinear,
     solarBellBingLineDuotone,
@@ -312,9 +322,10 @@ class $AssetsIconsGen {
     solarHistory2LineDuotone,
     solarLogout2LineDuotone,
     solarPen2LineDuotone1,
+    solarPen2LineDuotone2,
     solarPen2LineDuotone,
-    solarPenBold,
     solarPenBoldGrey,
+    solarPenBold,
     solarPlainBold,
     solarQuestionCircleLineDuotone,
     solarShareLineDuotone,
@@ -332,9 +343,25 @@ class $AssetsImagesGen {
   /// File path: assets/images/1-or-2.png
   AssetGenImage get a1Or2 => const AssetGenImage('assets/images/1-or-2.png');
 
+  /// File path: assets/images/100ml.png
+  AssetGenImage get a100ml => const AssetGenImage('assets/images/100ml.png');
+
+  /// File path: assets/images/200ml.png
+  AssetGenImage get a200ml => const AssetGenImage('assets/images/200ml.png');
+
+  /// File path: assets/images/500ml.png
+  AssetGenImage get a500ml => const AssetGenImage('assets/images/500ml.png');
+
+  /// File path: assets/images/50ml.png
+  AssetGenImage get a50ml => const AssetGenImage('assets/images/50ml.png');
+
   /// File path: assets/images/App Icon.png
   AssetGenImage get appIcon =>
       const AssetGenImage('assets/images/App Icon.png');
+
+  /// File path: assets/images/_debug_bar.png
+  AssetGenImage get aDebugBar =>
+      const AssetGenImage('assets/images/_debug_bar.png');
 
   /// File path: assets/images/ai_chat.png
   AssetGenImage get aiChat => const AssetGenImage('assets/images/ai_chat.png');
@@ -480,12 +507,24 @@ class $AssetsImagesGen {
   AssetGenImage get mascotHiWater =>
       const AssetGenImage('assets/images/mascot_hi_water.png');
 
+  /// File path: assets/images/mascot_metabolic.png
+  AssetGenImage get mascotMetabolic =>
+      const AssetGenImage('assets/images/mascot_metabolic.png');
+
+  /// File path: assets/images/meal_record_emoji.png
+  AssetGenImage get mealRecordEmoji =>
+      const AssetGenImage('assets/images/meal_record_emoji.png');
+
   /// File path: assets/images/meat.png
   AssetGenImage get meat => const AssetGenImage('assets/images/meat.png');
 
   /// File path: assets/images/mediterrian.png
   AssetGenImage get mediterrian =>
       const AssetGenImage('assets/images/mediterrian.png');
+
+  /// File path: assets/images/metabolic.png
+  AssetGenImage get metabolic =>
+      const AssetGenImage('assets/images/metabolic.png');
 
   /// File path: assets/images/motivation.png
   AssetGenImage get motivation =>
@@ -518,6 +557,10 @@ class $AssetsImagesGen {
 
   /// File path: assets/images/onion.png
   AssetGenImage get onion => const AssetGenImage('assets/images/onion.png');
+
+  /// File path: assets/images/orange_bell.png
+  AssetGenImage get orangeBell =>
+      const AssetGenImage('assets/images/orange_bell.png');
 
   /// File path: assets/images/pasta.png
   AssetGenImage get pasta => const AssetGenImage('assets/images/pasta.png');
@@ -571,12 +614,6 @@ class $AssetsImagesGen {
   /// File path: assets/images/seefood.png
   AssetGenImage get seefood => const AssetGenImage('assets/images/seefood.png');
 
-  /// File path: assets/images/spicy.png
-  AssetGenImage get spicy => const AssetGenImage('assets/images/spicy.png');
-
-  /// File path: assets/images/star.png
-  AssetGenImage get star => const AssetGenImage('assets/images/star.png');
-
   /// File path: assets/images/solar_pen-bold.png
   AssetGenImage get solarPenBold =>
       const AssetGenImage('assets/images/solar_pen-bold.png');
@@ -584,6 +621,12 @@ class $AssetsImagesGen {
   /// File path: assets/images/solar_verified-check-bold.png
   AssetGenImage get solarVerifiedCheckBold =>
       const AssetGenImage('assets/images/solar_verified-check-bold.png');
+
+  /// File path: assets/images/spicy.png
+  AssetGenImage get spicy => const AssetGenImage('assets/images/spicy.png');
+
+  /// File path: assets/images/star.png
+  AssetGenImage get star => const AssetGenImage('assets/images/star.png');
 
   /// File path: assets/images/steps.png
   AssetGenImage get steps => const AssetGenImage('assets/images/steps.png');
@@ -628,21 +671,29 @@ class $AssetsImagesGen {
   AssetGenImage get waterBottle300 =>
       const AssetGenImage('assets/images/water_bottle_300.png');
 
-  /// File path: assets/images/500ml.png
+  /// File path: assets/images/water_bottle_500.png
   AssetGenImage get waterBottle500 =>
-      const AssetGenImage('assets/images/500ml.png');
+      const AssetGenImage('assets/images/water_bottle_500.png');
 
-  /// File path: assets/images/50ml.png
-  AssetGenImage get waterGlass50 =>
-      const AssetGenImage('assets/images/50ml.png');
-
-  /// File path: assets/images/100ml.png
+  /// File path: assets/images/water_glass_100.png
   AssetGenImage get waterGlass100 =>
-      const AssetGenImage('assets/images/100ml.png');
+      const AssetGenImage('assets/images/water_glass_100.png');
 
-  /// File path: assets/images/200ml.png
+  /// File path: assets/images/water_glass_200.png
   AssetGenImage get waterGlass200 =>
-      const AssetGenImage('assets/images/200ml.png');
+      const AssetGenImage('assets/images/water_glass_200.png');
+
+  /// File path: assets/images/water_glass_50.png
+  AssetGenImage get waterGlass50 =>
+      const AssetGenImage('assets/images/water_glass_50.png');
+
+  /// File path: assets/images/water_progress_highlight.png
+  AssetGenImage get waterProgressHighlight =>
+      const AssetGenImage('assets/images/water_progress_highlight.png');
+
+  /// File path: assets/images/water_progress_wave.png
+  AssetGenImage get waterProgressWave =>
+      const AssetGenImage('assets/images/water_progress_wave.png');
 
   /// File path: assets/images/water_size_plus.png
   AssetGenImage get waterSizePlus =>
@@ -661,7 +712,12 @@ class $AssetsImagesGen {
   /// List of all assets
   List<AssetGenImage> get values => [
     a1Or2,
+    a100ml,
+    a200ml,
+    a500ml,
+    a50ml,
     appIcon,
+    aDebugBar,
     aiChat,
     avacado,
     beans,
@@ -703,8 +759,11 @@ class $AssetsImagesGen {
     mascotDiver,
     mascotHi,
     mascotHiWater,
+    mascotMetabolic,
+    mealRecordEmoji,
     meat,
     mediterrian,
+    metabolic,
     motivation,
     mushroom,
     nonBinary,
@@ -714,6 +773,7 @@ class $AssetsImagesGen {
     nuts,
     olives,
     onion,
+    orangeBell,
     pasta,
     pescatarian,
     plans,
@@ -729,10 +789,10 @@ class $AssetsImagesGen {
     salata,
     seeStar,
     seefood,
-    spicy,
-    star,
     solarPenBold,
     solarVerifiedCheckBold,
+    spicy,
+    star,
     steps,
     streak,
     streakFlame,
@@ -746,9 +806,11 @@ class $AssetsImagesGen {
     waterBottle,
     waterBottle300,
     waterBottle500,
-    waterGlass50,
     waterGlass100,
     waterGlass200,
+    waterGlass50,
+    waterProgressHighlight,
+    waterProgressWave,
     waterSizePlus,
     weigher,
     weigher2,

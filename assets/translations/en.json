@@ -239,7 +239,22 @@
     "water_goal": " /{} ml",
     "steps": "Steps",
     "steps_value": "{}",
-    "steps_goal": " /{}"
+    "steps_goal": " /{}",
+    "weight_records": "Weight Records",
+    "weight_unit": "kg",
+    "weight_start": "Start:",
+    "weight_target": "Target:",
+    "metabolic_twin": "Metabolic Twin",
+    "metabolic_feeling": "Feeling Good",
+    "metabolic_subtitle": "Almost perfect — a glass of water would seal it 💧",
+    "metabolic_energy": "Energy",
+    "metabolic_hydration": "Hydration",
+    "metabolic_fast_ready": "Fast Ready",
+    "meal_records": "Meal Records",
+    "meal_sample_time": "July 1, 12:53",
+    "meal_tag_full": "Full Meal",
+    "meal_tag_keto": "Ketogenic",
+    "save_a_meal": "Save a meal"
   },
   "water_page": {
     "today": "Today",

@@ -6,6 +6,8 @@ import 'package:fastingapp/core/router/route_paths.dart';
 import 'package:fastingapp/core/snackbar/app_snackbar.dart';
 import 'package:fastingapp/core/theme/app_text_styles.dart';
 import 'package:fastingapp/core/utils/enum/snackbar_type.dart';
+import 'package:fastingapp/core/widgets/app_button.dart';
+import 'package:fastingapp/core/widgets/app_button_decoration.dart';
 import 'package:fastingapp/data/model/user/user.dart';
 import 'package:fastingapp/data/model/user/user_progress.dart';
 import 'package:fastingapp/generated/assets.gen.dart';
@@ -26,8 +28,11 @@ part 'widgets/home_fasting_card.dart';
 part 'widgets/home_loaded_body.dart';
 part 'widgets/home_loading_body.dart';
 part 'widgets/home_metric_cards.dart';
+part 'widgets/home_metabolic_card.dart';
+part 'widgets/home_meal_records_card.dart';
 part 'widgets/home_top_bar.dart';
 part 'widgets/home_week_strip.dart';
+part 'widgets/home_weight_card.dart';
 
 /// Home ekranı. build() sadece iskeleti kurar; state'e göre body döndürür.
 /// (Doküman 15.1)
