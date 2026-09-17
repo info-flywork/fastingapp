@@ -25,4 +25,12 @@ mixin HomeViewMixin on State<HomeView> {
   void onWaterTapped() {
     context.pushNamed(RoutePaths.water.name);
   }
+
+  void onStepsTapped() {
+    context.pushNamed(RoutePaths.steps.name);
+  }
+
+  void onWeightTapped() {
+    context.pushNamed(RoutePaths.bodyHistory.name);
+  }
 }

@@ -21,11 +21,38 @@ abstract final class ColorName {
   /// Color: #E85D5D
   static const Color colorBloodChip = Color(0xFFE85D5D);
 
+  /// Color: #4791E5
+  static const Color colorBmi1 = Color(0xFF4791E5);
+
+  /// Color: #6EAFF2
+  static const Color colorBmi2 = Color(0xFF6EAFF2);
+
+  /// Color: #69D3A5
+  static const Color colorBmi3 = Color(0xFF69D3A5);
+
+  /// Color: #F9D84C
+  static const Color colorBmi4 = Color(0xFFF9D84C);
+
+  /// Color: #F2A35E
+  static const Color colorBmi5 = Color(0xFFF2A35E);
+
+  /// Color: #E4663D
+  static const Color colorBmi6 = Color(0xFFE4663D);
+
+  /// Color: #E64F48
+  static const Color colorBmi7 = Color(0xFFE64F48);
+
+  /// Color: #F6F6F6
+  static const Color colorBodyPageBg = Color(0xFFF6F6F6);
+
   /// Color: #67935F
   static const Color colorBrandStrong = Color(0xFF67935F);
 
   /// Color: #1B1B21
   static const Color colorButtonDark = Color(0xFF1B1B21);
+
+  /// Color: #2C2C2E
+  static const Color colorChartTooltip = Color(0xFF2C2C2E);
 
   /// Color: #2A2A32
   static const Color colorChatSurface = Color(0xFF2A2A32);
@@ -141,8 +168,17 @@ abstract final class ColorName {
   /// Color: #F1F1F1
   static const Color colorRadioBorder = Color(0xFFF1F1F1);
 
+  /// Color: #E8943A
+  static const Color colorStepsAction = Color(0xFFE8943A);
+
   /// Color: #F3A64D
   static const Color colorStepsFill = Color(0xFFF3A64D);
+
+  /// Color: #FFF6EB
+  static const Color colorStepsPageFade = Color(0xFFFFF6EB);
+
+  /// Color: #F7EEDC
+  static const Color colorStepsRingBg = Color(0xFFF7EEDC);
 
   /// Color: #F7EEDC
   static const Color colorStepsTrack = Color(0xFFF7EEDC);

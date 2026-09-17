@@ -221,6 +221,11 @@ class $AssetsIconsGen {
   SvgGenImage get solarDislikeLineDuotone =>
       const SvgGenImage('assets/icons/solar_dislike-line-duotone.svg');
 
+  /// File path: assets/icons/solar_double-alt-arrow-right-line-duotone.svg
+  SvgGenImage get solarDoubleAltArrowRightLineDuotone => const SvgGenImage(
+    'assets/icons/solar_double-alt-arrow-right-line-duotone.svg',
+  );
+
   /// File path: assets/icons/solar_hand-stars-line-duotone.svg
   SvgGenImage get solarHandStarsLineDuotone =>
       const SvgGenImage('assets/icons/solar_hand-stars-line-duotone.svg');
@@ -292,6 +297,9 @@ class $AssetsIconsGen {
   /// File path: assets/icons/uil_plus.svg
   SvgGenImage get uilPlus => const SvgGenImage('assets/icons/uil_plus.svg');
 
+  /// File path: assets/icons/vector_18.svg
+  SvgGenImage get vector18 => const SvgGenImage('assets/icons/vector_18.svg');
+
   /// List of all assets
   List<dynamic> get values => [
     charmMenuKebab,
@@ -316,6 +324,7 @@ class $AssetsIconsGen {
     solarChatRoundDotsBoldSvg,
     solarClockCircleLineDuotone,
     solarDislikeLineDuotone,
+    solarDoubleAltArrowRightLineDuotone,
     solarHandStarsLineDuotone,
     solarHeartLineDuotone,
     solarHistory2LineDuotone1,
@@ -334,6 +343,7 @@ class $AssetsIconsGen {
     solarVerifiedCheckBold,
     solarWeigherLineDuotone,
     uilPlus,
+    vector18,
   ];
 }
 

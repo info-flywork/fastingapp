@@ -64,6 +64,8 @@ import 'package:fastingapp/presentation/profile/faq/view/faq_view.dart';
 import 'package:fastingapp/presentation/profile/languages/view/languages_view.dart';
 import 'package:fastingapp/presentation/profile/notifications/view/notifications_view.dart';
 import 'package:fastingapp/presentation/profile/view/profile_view.dart';
+import 'package:fastingapp/presentation/body_history/view/body_history_view.dart';
+import 'package:fastingapp/presentation/steps/view/steps_view.dart';
 import 'package:fastingapp/presentation/tabs/placeholder_tab_view.dart';
 import 'package:fastingapp/presentation/water/reminder/view/water_reminder_view.dart';
 import 'package:fastingapp/presentation/water/reminder/water_reminder_result.dart';
@@ -326,6 +328,18 @@ final GoRouter appRouter = GoRouter(
           },
         ),
       ],
+    ),
+    GoRoute(
+      path: RoutePaths.steps.path,
+      name: RoutePaths.steps.name,
+      parentNavigatorKey: rootNavigatorKey,
+      builder: (context, state) => const StepsView(),
+    ),
+    GoRoute(
+      path: RoutePaths.bodyHistory.path,
+      name: RoutePaths.bodyHistory.name,
+      parentNavigatorKey: rootNavigatorKey,
+      builder: (context, state) => const BodyHistoryView(),
     ),
     GoRoute(
       path: RoutePaths.chat.path,

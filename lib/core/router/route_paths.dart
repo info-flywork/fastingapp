@@ -35,6 +35,8 @@ enum RoutePaths {
   latestChats('latest', 'latestChats'),
   water('/water', 'water'),
   waterReminder('reminder', 'waterReminder'),
+  steps('/steps', 'steps'),
+  bodyHistory('/body-history', 'bodyHistory'),
   editProfile('edit', 'editProfile'),
   notifications('notifications', 'notifications'),
   languages('languages', 'languages'),

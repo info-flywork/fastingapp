@@ -2,9 +2,14 @@ part of '../home_view.dart';
 
 /// Su ve adım metrik kartları (yan yana).
 final class HomeMetricCards extends StatelessWidget {
-  const HomeMetricCards({required this.onWaterTapped, super.key});
+  const HomeMetricCards({
+    required this.onWaterTapped,
+    required this.onStepsTapped,
+    super.key,
+  });
 
   final VoidCallback onWaterTapped;
+  final VoidCallback onStepsTapped;
 
   @override
   Widget build(BuildContext context) {
@@ -39,6 +44,7 @@ final class HomeMetricCards extends StatelessWidget {
               trackColor: ColorName.colorStepsTrack,
               fillColor: ColorName.colorStepsFill,
               progress: 1000 / 8000,
+              onTap: onStepsTapped,
             ),
           ),
         ],

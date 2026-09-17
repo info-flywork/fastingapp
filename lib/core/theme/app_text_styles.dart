@@ -851,6 +851,263 @@ abstract final class AppTextStyles {
     color: ColorName.colorTitle,
   );
 
+  /// Steps page date — 18 / Semibold
+  static TextStyle get stepsToday => const TextStyle(
+    fontFamily: FontFamily.sFProDisplay,
+    fontWeight: FontWeight.w600,
+    fontSize: 18,
+    height: 24 / 18,
+    letterSpacing: -0.5,
+    color: ColorName.colorTitle,
+  );
+
+  /// Steps hero amount — 48 / Semibold
+  static TextStyle get stepsHeroAmount => const TextStyle(
+    fontFamily: FontFamily.sFProDisplay,
+    fontWeight: FontWeight.w600,
+    fontSize: 48,
+    height: 56 / 48,
+    letterSpacing: -1.0,
+    color: ColorName.colorTitle,
+  );
+
+  /// Steps unit — 20 / Semibold
+  static TextStyle get stepsUnit => const TextStyle(
+    fontFamily: FontFamily.sFProDisplay,
+    fontWeight: FontWeight.w600,
+    fontSize: 20,
+    height: 28 / 20,
+    letterSpacing: -0.4,
+    color: ColorName.colorTitle,
+  );
+
+  /// Steps goal achieved — 18 / Semibold / orange
+  static TextStyle get stepsGoalAchieved => const TextStyle(
+    fontFamily: FontFamily.sFProDisplay,
+    fontWeight: FontWeight.w600,
+    fontSize: 18,
+    height: 24 / 18,
+    letterSpacing: -0.5,
+    color: ColorName.colorStepsAction,
+  );
+
+  /// Steps daily target — 16 / Semibold
+  static TextStyle get stepsDailyTarget => const TextStyle(
+    fontFamily: FontFamily.sFProDisplay,
+    fontWeight: FontWeight.w600,
+    fontSize: 16,
+    height: 21 / 16,
+    letterSpacing: 16 * -0.015,
+    color: ColorName.colorSubtitle,
+  );
+
+  static TextStyle get stepsDailyTargetBold => const TextStyle(
+    fontFamily: FontFamily.sFProDisplay,
+    fontWeight: FontWeight.w700,
+    fontSize: 16,
+    height: 21 / 16,
+    letterSpacing: 16 * -0.015,
+    color: ColorName.colorSubtitle,
+  );
+
+  /// Steps add button label — 14 / white 60%
+  static TextStyle get stepsAddLabel => TextStyle(
+    fontFamily: FontFamily.sFProDisplay,
+    fontWeight: FontWeight(590),
+    fontSize: 14,
+    height: 1,
+    letterSpacing: 14 * -0.015,
+    color: ColorName.colorWhite.withValues(alpha: 0.6),
+  );
+
+  /// Steps stat label — 13 / Medium / secondary 60%
+  static TextStyle get stepsStatLabel => TextStyle(
+    fontFamily: FontFamily.sFProDisplay,
+    fontWeight: FontWeight.w500,
+    fontSize: 13,
+    height: 18 / 13,
+    letterSpacing: 13 * -0.015,
+    color: ColorName.colorSubtitle.withValues(alpha: 0.6),
+  );
+
+  /// Steps stat value — 18 / Semibold
+  static TextStyle get stepsStatValue => const TextStyle(
+    fontFamily: FontFamily.sFProDisplay,
+    fontWeight: FontWeight.w600,
+    fontSize: 18,
+    height: 24 / 18,
+    letterSpacing: -0.3,
+    color: ColorName.colorTitle,
+  );
+
+  /// Steps section title — 18 / Semibold
+  static TextStyle get stepsSectionTitle => const TextStyle(
+    fontFamily: FontFamily.sFProDisplay,
+    fontWeight: FontWeight.w600,
+    fontSize: 18,
+    height: 24 / 18,
+    letterSpacing: -0.4,
+    color: ColorName.colorTitle,
+  );
+
+  /// Steps weekday label — 12 / Medium
+  static TextStyle get stepsWeekday => TextStyle(
+    fontFamily: FontFamily.sFProDisplay,
+    fontWeight: FontWeight.w500,
+    fontSize: 12,
+    height: 16 / 12,
+    letterSpacing: 12 * -0.015,
+    color: ColorName.colorSubtitle.withValues(alpha: 0.55),
+  );
+
+  /// Body History page title — 24 / Semibold
+  static TextStyle get bodyHistoryTitle => const TextStyle(
+    fontFamily: FontFamily.sFProDisplay,
+    fontWeight: FontWeight.w600,
+    fontSize: 24,
+    height: 32 / 24,
+    letterSpacing: -0.5,
+    color: ColorName.colorTitle,
+  );
+
+  /// Body History card section title — 16 / Semibold
+  static TextStyle get bodyCardTitle => const TextStyle(
+    fontFamily: FontFamily.sFProDisplay,
+    fontWeight: FontWeight.w600,
+    fontSize: 16,
+    height: 24 / 16,
+    letterSpacing: -0.5,
+    color: ColorName.colorTitle,
+  );
+
+  /// Body History weight value — 40 / Semibold
+  static TextStyle get bodyWeightValue => const TextStyle(
+    fontFamily: FontFamily.sFProDisplay,
+    fontWeight: FontWeight.w600,
+    fontSize: 40,
+    height: 48 / 40,
+    letterSpacing: -0.8,
+    color: ColorName.colorTitle,
+  );
+
+  /// Body History kg unit — 16 / Semibold / secondary 60%
+  static TextStyle get bodyWeightUnit => TextStyle(
+    fontFamily: FontFamily.sFProDisplay,
+    fontWeight: FontWeight.w600,
+    fontSize: 16,
+    height: 24 / 16,
+    letterSpacing: 16 * -0.015,
+    color: ColorName.colorSubtitle.withValues(alpha: 0.6),
+  );
+
+  /// Body History update button — 16 / Semibold / white
+  static TextStyle get bodyUpdateButton => const TextStyle(
+    fontFamily: FontFamily.sFProDisplay,
+    fontWeight: FontWeight.w600,
+    fontSize: 16,
+    height: 1,
+    letterSpacing: -0.3,
+    color: ColorName.colorWhite,
+  );
+
+  /// Body History bound value — 16 / Semibold
+  static TextStyle get bodyBoundValue => const TextStyle(
+    fontFamily: FontFamily.sFProDisplay,
+    fontWeight: FontWeight.w600,
+    fontSize: 16,
+    height: 22 / 16,
+    letterSpacing: -0.3,
+    color: ColorName.colorTitle,
+  );
+
+  /// Body History bound label — 13 / Medium / secondary 60%
+  static TextStyle get bodyBoundLabel => TextStyle(
+    fontFamily: FontFamily.sFProDisplay,
+    fontWeight: FontWeight.w500,
+    fontSize: 13,
+    height: 18 / 13,
+    letterSpacing: 13 * -0.015,
+    color: ColorName.colorSubtitle.withValues(alpha: 0.6),
+  );
+
+  /// Body History progress % — 16 / Semibold
+  static TextStyle get bodyProgressPercent => const TextStyle(
+    fontFamily: FontFamily.sFProDisplay,
+    fontWeight: FontWeight.w600,
+    fontSize: 16,
+    height: 22 / 16,
+    letterSpacing: -0.3,
+    color: ColorName.colorTitle,
+  );
+
+  /// Body History BMI value — 32 / Semibold
+  static TextStyle get bodyBmiValue => const TextStyle(
+    fontFamily: FontFamily.sFProDisplay,
+    fontWeight: FontWeight.w600,
+    fontSize: 32,
+    height: 40 / 32,
+    letterSpacing: -0.6,
+    color: ColorName.colorTitle,
+  );
+
+  /// Body History BMI status — 16 / Semibold / orange
+  static TextStyle get bodyBmiStatus => const TextStyle(
+    fontFamily: FontFamily.sFProDisplay,
+    fontWeight: FontWeight.w600,
+    fontSize: 16,
+    height: 24 / 16,
+    letterSpacing: -0.3,
+    color: ColorName.colorStepsFill,
+  );
+
+  /// Body History BMI tick — 11 / Semibold / secondary 60%
+  static TextStyle get bodyBmiTick => TextStyle(
+    fontFamily: FontFamily.sFProDisplay,
+    fontWeight: FontWeight.w600,
+    fontSize: 11,
+    height: 16 / 11,
+    letterSpacing: 11 * -0.015,
+    color: ColorName.colorSubtitle.withValues(alpha: 0.6),
+  );
+
+  /// Body History chart axis — 10 / Regular / secondary 60%
+  static TextStyle get bodyChartAxis => TextStyle(
+    fontFamily: FontFamily.sFProDisplay,
+    fontWeight: FontWeight.w400,
+    fontSize: 10,
+    height: 1,
+    color: ColorName.colorSubtitle.withValues(alpha: 0.6),
+  );
+
+  /// Body History segment active — 16 / Semibold
+  static TextStyle get bodySegmentActive => const TextStyle(
+    fontFamily: FontFamily.sFProDisplay,
+    fontWeight: FontWeight.w600,
+    fontSize: 16,
+    height: 24 / 16,
+    letterSpacing: 16 * -0.015,
+    color: ColorName.colorTitle,
+  );
+
+  /// Body History segment idle — 16 / Semibold / secondary 60%
+  static TextStyle get bodySegmentIdle => TextStyle(
+    fontFamily: FontFamily.sFProDisplay,
+    fontWeight: FontWeight.w600,
+    fontSize: 16,
+    height: 24 / 16,
+    letterSpacing: 16 * -0.015,
+    color: ColorName.colorSubtitle.withValues(alpha: 0.6),
+  );
+
+  /// Body History chart tooltip — 13 / Semibold / white
+  static TextStyle get bodyChartTooltip => const TextStyle(
+    fontFamily: FontFamily.sFProDisplay,
+    fontWeight: FontWeight.w600,
+    fontSize: 13,
+    height: 1,
+    color: ColorName.colorWhite,
+  );
+
   /// Bottom nav label — 11 / Semibold
   static TextStyle get navLabel => const TextStyle(
     fontFamily: FontFamily.sFProDisplay,

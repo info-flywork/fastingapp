@@ -2,7 +2,9 @@ part of '../home_view.dart';
 
 /// Home kilo kayıtları kartı — su/adım kartlarının 12px altında.
 final class HomeWeightCard extends StatelessWidget {
-  const HomeWeightCard({super.key});
+  const HomeWeightCard({this.onTap, super.key});
+
+  final VoidCallback? onTap;
 
   static const _currentKg = 102.5;
   static const _startKg = 112.2;
@@ -15,75 +17,79 @@ final class HomeWeightCard extends StatelessWidget {
       1.0,
     );
 
-    return Container(
-      margin: const EdgeInsets.fromLTRB(16, 12, 16, 0),
-      padding: const EdgeInsets.fromLTRB(12, 12, 12, 24),
-      decoration: BoxDecoration(
-        color: ColorName.colorWhite,
-        borderRadius: BorderRadius.circular(16),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Assets.images.weigher2.image(
-                width: 28,
-                height: 28,
-                fit: BoxFit.contain,
-              ),
-              const SizedBox(width: 6),
-              Expanded(
-                child: Text(
-                  'home.weight_records'.tr(),
-                  style: AppTextStyles.homeWeightTitle,
+    return GestureDetector(
+      onTap: onTap,
+      behavior: HitTestBehavior.opaque,
+      child: Container(
+        margin: const EdgeInsets.fromLTRB(16, 12, 16, 0),
+        padding: const EdgeInsets.fromLTRB(12, 12, 12, 24),
+        decoration: BoxDecoration(
+          color: ColorName.colorWhite,
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Assets.images.weigher2.image(
+                  width: 28,
+                  height: 28,
+                  fit: BoxFit.contain,
                 ),
-              ),
-              Assets.icons.solarAltArrowUpLineDuotoneRight.svg(),
-            ],
-          ),
-          const SizedBox(height: 16),
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              Text(_formatKg(_currentKg), style: AppTextStyles.homeWeightValue),
-              Padding(
-                padding: const EdgeInsets.only(left: 4, bottom: 4),
-                child: Text(
-                  'home.weight_unit'.tr(),
-                  style: AppTextStyles.homeWeightUnit,
+                const SizedBox(width: 6),
+                Expanded(
+                  child: Text(
+                    'home.weight_records'.tr(),
+                    style: AppTextStyles.homeWeightTitle,
+                  ),
                 ),
-              ),
-              const Spacer(),
-              Assets.icons.solarPen2LineDuotone2.svg(
-                width: 24,
-                height: 24,
-                colorFilter: const ColorFilter.mode(
-                  ColorName.colorTitle,
-                  BlendMode.srcIn,
+                Assets.icons.solarAltArrowUpLineDuotoneRight.svg(),
+              ],
+            ),
+            const SizedBox(height: 16),
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                Text(_formatKg(_currentKg), style: AppTextStyles.homeWeightValue),
+                Padding(
+                  padding: const EdgeInsets.only(left: 4, bottom: 4),
+                  child: Text(
+                    'home.weight_unit'.tr(),
+                    style: AppTextStyles.homeWeightUnit,
+                  ),
                 ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 16),
-          _WeightProgressBar(progress: progress),
-          const SizedBox(height: 16),
-          const Row(
-            children: [
-              Expanded(
-                child: _WeightBoundLabel(
-                  labelKey: 'home.weight_start',
-                  kg: _startKg,
+                const Spacer(),
+                Assets.icons.solarPen2LineDuotone2.svg(
+                  width: 24,
+                  height: 24,
+                  colorFilter: const ColorFilter.mode(
+                    ColorName.colorTitle,
+                    BlendMode.srcIn,
+                  ),
                 ),
-              ),
-              _WeightBoundLabel(
-                labelKey: 'home.weight_target',
-                kg: _targetKg,
-                alignEnd: true,
-              ),
-            ],
-          ),
-        ],
+              ],
+            ),
+            const SizedBox(height: 16),
+            _WeightProgressBar(progress: progress),
+            const SizedBox(height: 16),
+            const Row(
+              children: [
+                Expanded(
+                  child: _WeightBoundLabel(
+                    labelKey: 'home.weight_start',
+                    kg: _startKg,
+                  ),
+                ),
+                _WeightBoundLabel(
+                  labelKey: 'home.weight_target',
+                  kg: _targetKg,
+                  alignEnd: true,
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }
