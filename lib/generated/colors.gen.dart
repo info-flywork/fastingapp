@@ -21,6 +21,9 @@ abstract final class ColorName {
   /// Color: #E85D5D
   static const Color colorBloodChip = Color(0xFFE85D5D);
 
+  /// Color: #4664F6
+  static const Color colorBmi0 = Color(0xFF4664F6);
+
   /// Color: #4791E5
   static const Color colorBmi1 = Color(0xFF4791E5);
 

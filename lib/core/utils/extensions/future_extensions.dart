@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:fastingapp/core/dialogs/app_dialogs.dart';
 import 'package:fastingapp/core/widgets/app_loading.dart';
 import 'package:flutter/material.dart';
 
@@ -10,10 +11,10 @@ import 'package:flutter/material.dart';
 extension FutureLoadingExtension<T> on Future<T> {
   Future<T> withLoading(BuildContext context) async {
     unawaited(
-      showDialog<void>(
+      AppDialogs.instance.showNormalDialog<void>(
         context: context,
         barrierDismissible: false,
-        builder: (_) => const PopScope(
+        child: const PopScope(
           canPop: false,
           child: LoadingDialog(),
         ),

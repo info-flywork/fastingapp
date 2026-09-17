@@ -970,6 +970,16 @@ abstract final class AppTextStyles {
     color: ColorName.colorTitle,
   );
 
+  /// Weight History card title — 18 / Semibold
+  static TextStyle get bodyHistoryTitleSmall => const TextStyle(
+    fontFamily: FontFamily.sFProDisplay,
+    fontWeight: FontWeight.w600,
+    fontSize: 18,
+    height: 24 / 18,
+    letterSpacing: -0.5,
+    color: ColorName.colorTitle,
+  );
+
   /// Body History card section title — 16 / Semibold
   static TextStyle get bodyCardTitle => const TextStyle(
     fontFamily: FontFamily.sFProDisplay,

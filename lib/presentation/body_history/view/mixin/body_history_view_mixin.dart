@@ -79,7 +79,12 @@ mixin BodyHistoryViewMixin on State<BodyHistoryView> {
     });
   }
 
-  void onEditTargetTapped() {
-    // Mock: hedef düzenleme sonra bağlanacak.
+  Future<void> onEditTargetTapped() async {
+    final result = await AppDialogs.instance.showEditWeight(
+      context,
+      initialWeightKg: targetKg,
+    );
+    if (result == null || !mounted) return;
+    setState(() => targetKg = result.weightKg);
   }
 }

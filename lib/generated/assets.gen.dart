@@ -222,9 +222,15 @@ class $AssetsIconsGen {
       const SvgGenImage('assets/icons/solar_dislike-line-duotone.svg');
 
   /// File path: assets/icons/solar_double-alt-arrow-right-line-duotone.svg
-  SvgGenImage get solarDoubleAltArrowRightLineDuotone => const SvgGenImage(
+  SvgGenImage get solarDoubleAltArrowRightLineDuotoneSvg => const SvgGenImage(
     'assets/icons/solar_double-alt-arrow-right-line-duotone.svg',
   );
+
+  /// File path: assets/icons/solar_double_alt_arrow_right_line_duotone.png
+  AssetGenImage get solarDoubleAltArrowRightLineDuotonePng =>
+      const AssetGenImage(
+        'assets/icons/solar_double_alt_arrow_right_line_duotone.png',
+      );
 
   /// File path: assets/icons/solar_hand-stars-line-duotone.svg
   SvgGenImage get solarHandStarsLineDuotone =>
@@ -324,7 +330,8 @@ class $AssetsIconsGen {
     solarChatRoundDotsBoldSvg,
     solarClockCircleLineDuotone,
     solarDislikeLineDuotone,
-    solarDoubleAltArrowRightLineDuotone,
+    solarDoubleAltArrowRightLineDuotoneSvg,
+    solarDoubleAltArrowRightLineDuotonePng,
     solarHandStarsLineDuotone,
     solarHeartLineDuotone,
     solarHistory2LineDuotone1,
@@ -700,6 +707,10 @@ class $AssetsImagesGen {
   AssetGenImage get unhappyv2 =>
       const AssetGenImage('assets/images/unhappyv2.png');
 
+  /// File path: assets/images/vector_18_bmi.png
+  AssetGenImage get vector18Bmi =>
+      const AssetGenImage('assets/images/vector_18_bmi.png');
+
   /// File path: assets/images/vegetarian.png
   AssetGenImage get vegetarian =>
       const AssetGenImage('assets/images/vegetarian.png');
@@ -855,6 +866,7 @@ class $AssetsImagesGen {
     trip,
     unhappy,
     unhappyv2,
+    vector18Bmi,
     vegetarian,
     water,
     waterBottle,

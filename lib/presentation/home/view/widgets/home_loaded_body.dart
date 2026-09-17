@@ -13,6 +13,7 @@ final class HomeLoadedBody extends StatelessWidget {
     required this.onWaterTapped,
     required this.onStepsTapped,
     required this.onWeightTapped,
+    required this.onWeightEditTapped,
     super.key,
   });
 
@@ -24,6 +25,7 @@ final class HomeLoadedBody extends StatelessWidget {
   final VoidCallback onWaterTapped;
   final VoidCallback onStepsTapped;
   final VoidCallback onWeightTapped;
+  final VoidCallback onWeightEditTapped;
 
   static const _itemCount = 9;
 
@@ -57,7 +59,10 @@ final class HomeLoadedBody extends StatelessWidget {
         onWaterTapped: onWaterTapped,
         onStepsTapped: onStepsTapped,
       ),
-      5 => HomeWeightCard(onTap: onWeightTapped),
+      5 => HomeWeightCard(
+        onTap: onWeightTapped,
+        onEditTap: onWeightEditTapped,
+      ),
       6 => const HomeMetabolicCard(),
       7 => const HomeMealRecordsCard(),
       8 => const HomeHungerTrackerCard(),

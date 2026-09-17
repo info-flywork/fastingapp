@@ -2,12 +2,14 @@ import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:easy_localization/easy_localization.dart';
+import 'package:fastingapp/core/dialogs/app_dialogs.dart';
 import 'package:fastingapp/core/router/route_paths.dart';
 import 'package:fastingapp/core/snackbar/app_snackbar.dart';
 import 'package:fastingapp/core/theme/app_text_styles.dart';
 import 'package:fastingapp/core/utils/enum/snackbar_type.dart';
 import 'package:fastingapp/core/widgets/app_button.dart';
 import 'package:fastingapp/core/widgets/app_button_decoration.dart';
+import 'package:fastingapp/core/widgets/weight_progress_bar.dart';
 import 'package:fastingapp/data/model/user/user.dart';
 import 'package:fastingapp/data/model/user/user_progress.dart';
 import 'package:fastingapp/generated/assets.gen.dart';
@@ -68,6 +70,7 @@ class _HomeViewState extends State<HomeView> with HomeViewMixin {
                   onWaterTapped: onWaterTapped,
                   onStepsTapped: onStepsTapped,
                   onWeightTapped: onWeightTapped,
+                  onWeightEditTapped: onWeightEditTapped,
                 ),
               HomeError(:final message) => HomeErrorBody(
                 message: message,

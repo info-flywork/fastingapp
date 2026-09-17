@@ -305,7 +305,7 @@
     "week": "Hafta",
     "month": "Ay",
     "unit": "kg",
-    "progress_percent": "%{}"
+    "progress_percent": "{}%"
   },
   "water_reminder": {
     "title": "Su Hatırlatıcı",

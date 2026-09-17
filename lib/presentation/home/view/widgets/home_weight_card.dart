@@ -2,17 +2,18 @@ part of '../home_view.dart';
 
 /// Home kilo kayıtları kartı — su/adım kartlarının 12px altında.
 final class HomeWeightCard extends StatelessWidget {
-  const HomeWeightCard({this.onTap, super.key});
+  const HomeWeightCard({this.onTap, this.onEditTap, super.key});
 
   final VoidCallback? onTap;
+  final VoidCallback? onEditTap;
 
-  static const _currentKg = 102.5;
+  static const currentKg = 102.5;
   static const _startKg = 112.2;
   static const _targetKg = 75.2;
 
   @override
   Widget build(BuildContext context) {
-    final progress = ((_startKg - _currentKg) / (_startKg - _targetKg)).clamp(
+    final progress = ((_startKg - currentKg) / (_startKg - _targetKg)).clamp(
       0.0,
       1.0,
     );
@@ -51,7 +52,10 @@ final class HomeWeightCard extends StatelessWidget {
             Row(
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
-                Text(_formatKg(_currentKg), style: AppTextStyles.homeWeightValue),
+                Text(
+                  _formatKg(currentKg),
+                  style: AppTextStyles.homeWeightValue,
+                ),
                 Padding(
                   padding: const EdgeInsets.only(left: 4, bottom: 4),
                   child: Text(
@@ -60,18 +64,21 @@ final class HomeWeightCard extends StatelessWidget {
                   ),
                 ),
                 const Spacer(),
-                Assets.icons.solarPen2LineDuotone2.svg(
-                  width: 24,
-                  height: 24,
-                  colorFilter: const ColorFilter.mode(
-                    ColorName.colorTitle,
-                    BlendMode.srcIn,
+                GestureDetector(
+                  onTap: onEditTap,
+                  behavior: HitTestBehavior.opaque,
+                  child: Padding(
+                    padding: const EdgeInsets.all(4),
+                    child: Assets.icons.solarPen2LineDuotone2.svg(
+                      width: 24,
+                      height: 24,
+                    ),
                   ),
                 ),
               ],
             ),
             const SizedBox(height: 16),
-            _WeightProgressBar(progress: progress),
+            WeightProgressBar(progress: progress),
             const SizedBox(height: 16),
             const Row(
               children: [
@@ -129,46 +136,6 @@ final class _WeightBoundLabel extends StatelessWidget {
       textAlign: alignEnd ? TextAlign.end : TextAlign.start,
       maxLines: 1,
       overflow: TextOverflow.ellipsis,
-    );
-  }
-}
-
-final class _WeightProgressBar extends StatelessWidget {
-  const _WeightProgressBar({required this.progress});
-
-  final double progress;
-
-  static const _height = 20.0;
-
-  @override
-  Widget build(BuildContext context) {
-    return TweenAnimationBuilder<double>(
-      tween: Tween(begin: 0, end: progress.clamp(0.0, 1.0)),
-      duration: const Duration(milliseconds: 1100),
-      curve: Curves.easeOutCubic,
-      builder: (context, animatedProgress, _) {
-        return SizedBox(
-          height: _height,
-          width: double.infinity,
-          child: DecoratedBox(
-            decoration: BoxDecoration(
-              color: ColorName.colorStepsTrack,
-              borderRadius: BorderRadius.circular(99999),
-            ),
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(99999),
-              child: Align(
-                alignment: Alignment.centerLeft,
-                child: FractionallySizedBox(
-                  widthFactor: animatedProgress,
-                  heightFactor: 1,
-                  child: const ColoredBox(color: ColorName.colorStepsFill),
-                ),
-              ),
-            ),
-          ),
-        );
-      },
     );
   }
 }

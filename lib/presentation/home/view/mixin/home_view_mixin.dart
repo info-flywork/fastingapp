@@ -33,4 +33,11 @@ mixin HomeViewMixin on State<HomeView> {
   void onWeightTapped() {
     context.pushNamed(RoutePaths.bodyHistory.name);
   }
+
+  Future<void> onWeightEditTapped() async {
+    await AppDialogs.instance.showEditWeight(
+      context,
+      initialWeightKg: HomeWeightCard.currentKg,
+    );
+  }
 }

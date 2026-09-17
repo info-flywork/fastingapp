@@ -75,6 +75,7 @@
   <color name="color_metabolic_fast">#5F54FF</color>
   <color name="color_hunger_green">#E7F3E9</color>
   <color name="color_body_page_bg">#F6F6F6</color>
+  <color name="color_bmi_0">#4664F6</color>
   <color name="color_bmi_1">#4791E5</color>
   <color name="color_bmi_2">#6EAFF2</color>
   <color name="color_bmi_3">#69D3A5</color>
