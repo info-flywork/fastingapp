@@ -709,6 +709,29 @@ abstract final class AppTextStyles {
     color: ColorName.colorTitle,
   );
 
+  /// Hunger Tracker title — 18 / Semibold
+  static TextStyle get homeHungerTitle => homeWeightTitle;
+
+  /// Hunger question — 16 / Semibold
+  static TextStyle get homeHungerQuestion => const TextStyle(
+    fontFamily: FontFamily.sFProDisplay,
+    fontWeight: FontWeight.w600,
+    fontSize: 16,
+    height: 24 / 16,
+    letterSpacing: -0.5,
+    color: ColorName.colorTitle,
+  );
+
+  /// Hunger subtitle — 14 / Semibold / #3C3C4399
+  static TextStyle get homeHungerSubtitle => const TextStyle(
+    fontFamily: FontFamily.sFProDisplay,
+    fontWeight: FontWeight.w600,
+    fontSize: 14,
+    height: 20 / 14,
+    letterSpacing: 14 * -0.015,
+    color: Color(0x993C3C43),
+  );
+
   /// Home metric goal — 16 / Semibold / 60%
   static TextStyle get homeMetricGoal => TextStyle(
     fontFamily: FontFamily.sFProDisplay,

@@ -378,6 +378,15 @@ class $AssetsImagesGen {
   /// File path: assets/images/bowel.png
   AssetGenImage get bowel => const AssetGenImage('assets/images/bowel.png');
 
+  /// File path: assets/images/brain.png
+  AssetGenImage get brain => const AssetGenImage('assets/images/brain.png');
+
+  /// File path: assets/images/brocc.png
+  AssetGenImage get brocc => const AssetGenImage('assets/images/brocc.png');
+
+  /// File path: assets/images/broccv2.png
+  AssetGenImage get broccv2 => const AssetGenImage('assets/images/broccv2.png');
+
   /// File path: assets/images/brocolies.png
   AssetGenImage get brocolies =>
       const AssetGenImage('assets/images/brocolies.png');
@@ -385,6 +394,13 @@ class $AssetsImagesGen {
   /// File path: assets/images/building.png
   AssetGenImage get building =>
       const AssetGenImage('assets/images/building.png');
+
+  /// File path: assets/images/burger.png
+  AssetGenImage get burger => const AssetGenImage('assets/images/burger.png');
+
+  /// File path: assets/images/burgerv2.png
+  AssetGenImage get burgerv2 =>
+      const AssetGenImage('assets/images/burgerv2.png');
 
   /// File path: assets/images/busy.png
   AssetGenImage get busy => const AssetGenImage('assets/images/busy.png');
@@ -468,6 +484,10 @@ class $AssetsImagesGen {
 
   /// File path: assets/images/home.png
   AssetGenImage get home => const AssetGenImage('assets/images/home.png');
+
+  /// File path: assets/images/hunger-tracker.png
+  AssetGenImage get hungerTracker =>
+      const AssetGenImage('assets/images/hunger-tracker.png');
 
   /// File path: assets/images/insights.png
   AssetGenImage get insights =>
@@ -649,12 +669,26 @@ class $AssetsImagesGen {
   /// File path: assets/images/tirtil.png
   AssetGenImage get tirtil => const AssetGenImage('assets/images/tirtil.png');
 
+  /// File path: assets/images/tongue.png
+  AssetGenImage get tongue => const AssetGenImage('assets/images/tongue.png');
+
+  /// File path: assets/images/tonguev2.png
+  AssetGenImage get tonguev2 =>
+      const AssetGenImage('assets/images/tonguev2.png');
+
   /// File path: assets/images/toospicy.png
   AssetGenImage get toospicy =>
       const AssetGenImage('assets/images/toospicy.png');
 
   /// File path: assets/images/trip.png
   AssetGenImage get trip => const AssetGenImage('assets/images/trip.png');
+
+  /// File path: assets/images/unhappy.png
+  AssetGenImage get unhappy => const AssetGenImage('assets/images/unhappy.png');
+
+  /// File path: assets/images/unhappyv2.png
+  AssetGenImage get unhappyv2 =>
+      const AssetGenImage('assets/images/unhappyv2.png');
 
   /// File path: assets/images/vegetarian.png
   AssetGenImage get vegetarian =>
@@ -723,8 +757,13 @@ class $AssetsImagesGen {
     beans,
     blood,
     bowel,
+    brain,
+    brocc,
+    broccv2,
     brocolies,
     building,
+    burger,
+    burgerv2,
     busy,
     challenge,
     cheese,
@@ -749,6 +788,7 @@ class $AssetsImagesGen {
     greenTick,
     healty,
     home,
+    hungerTracker,
     insights,
     lawCarb,
     loginv2,
@@ -799,8 +839,12 @@ class $AssetsImagesGen {
     sweethies,
     timeCook,
     tirtil,
+    tongue,
+    tonguev2,
     toospicy,
     trip,
+    unhappy,
+    unhappyv2,
     vegetarian,
     water,
     waterBottle,

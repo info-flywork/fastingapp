@@ -7,7 +7,7 @@ final class HomeMealRecordsCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: const EdgeInsets.fromLTRB(16, 12, 16, 24),
+      margin: const EdgeInsets.fromLTRB(16, 12, 16, 0),
       padding: const EdgeInsets.fromLTRB(12, 12, 12, 24),
       decoration: BoxDecoration(
         color: ColorName.colorWhite,
@@ -65,15 +65,20 @@ final class _MealTimeline extends StatelessWidget {
             child: Column(
               children: [
                 Container(
-                  width: _dotSize,
-                  height: _dotSize,
-                  decoration: const BoxDecoration(
-                    color: _lineColor,
+                  width: _dotSize * 1.5,
+                  height: _dotSize * 1.5,
+                  decoration: BoxDecoration(
+                    color: _lineColor.withValues(alpha: 0.4),
                     shape: BoxShape.circle,
                   ),
                 ),
                 Expanded(
-                  child: Center(child: Container(width: 2, color: _lineColor)),
+                  child: Center(
+                    child: Container(
+                      width: 1.5,
+                      color: _lineColor.withValues(alpha: 0.4),
+                    ),
+                  ),
                 ),
               ],
             ),

@@ -30,6 +30,7 @@ part 'widgets/home_loading_body.dart';
 part 'widgets/home_metric_cards.dart';
 part 'widgets/home_metabolic_card.dart';
 part 'widgets/home_meal_records_card.dart';
+part 'widgets/home_hunger_tracker_card.dart';
 part 'widgets/home_top_bar.dart';
 part 'widgets/home_week_strip.dart';
 part 'widgets/home_weight_card.dart';

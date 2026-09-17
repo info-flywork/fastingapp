@@ -87,6 +87,7 @@ class _NotificationsViewState extends State<NotificationsView>
                               children: [
                                 for (final item in items)
                                   NotificationCard(
+                                    key: ValueKey(item.id),
                                     item: item,
                                     onDismissed: () => onDismiss(item.id),
                                   ),

@@ -254,7 +254,11 @@
     "meal_sample_time": "1 Temmuz, 12:53",
     "meal_tag_full": "Tam Öğün",
     "meal_tag_keto": "Ketojenik",
-    "save_a_meal": "Öğün kaydet"
+    "save_a_meal": "Öğün kaydet",
+    "hunger_tracker": "Açlık Takibi",
+    "hunger_question": "Gerçekten aç mısın?",
+    "hunger_subtitle": "“Duygusal açlık” seni yanıltabilir. Farkı öğren, sonra nasıl hissettiğini kaydet.",
+    "log_hunger": "Açlık seviyemi kaydet"
   },
   "water_page": {
     "today": "Bugün",

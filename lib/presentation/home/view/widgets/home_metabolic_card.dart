@@ -32,9 +32,8 @@ final class HomeMetabolicCard extends StatelessWidget {
               Assets.icons.solarAltArrowUpLineDuotoneRight.svg(),
             ],
           ),
-          const SizedBox(height: 16),
           const _MascotStage(),
-          const SizedBox(height: 16),
+          const SizedBox(height: 12),
           Text(
             'home.metabolic_feeling'.tr(),
             style: AppTextStyles.homeMetabolicFeeling,

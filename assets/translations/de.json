@@ -254,7 +254,11 @@
     "meal_sample_time": "1. Juli, 12:53",
     "meal_tag_full": "Volle Mahlzeit",
     "meal_tag_keto": "Ketogen",
-    "save_a_meal": "Mahlzeit speichern"
+    "save_a_meal": "Mahlzeit speichern",
+    "hunger_tracker": "Hunger-Tracker",
+    "hunger_question": "Hast du wirklich Hunger?",
+    "hunger_subtitle": "„Emotionaler Hunger“ kann täuschen. Lerne den Unterschied und protokolliere dein Gefühl.",
+    "log_hunger": "Hungerlevel speichern"
   },
   "water_page": {
     "today": "Heute",

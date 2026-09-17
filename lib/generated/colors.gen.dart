@@ -63,6 +63,9 @@ abstract final class ColorName {
   /// Color: #F6F6F6
   static const Color colorHomeChipBg = Color(0xFFF6F6F6);
 
+  /// Color: #E7F3E9
+  static const Color colorHungerGreen = Color(0xFFE7F3E9);
+
   /// Color: #FFEAA8
   static const Color colorJourneyGoalWeight = Color(0xFFFFEAA8);
 

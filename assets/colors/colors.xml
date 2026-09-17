@@ -70,4 +70,5 @@
   <color name="color_water_glass_tile">#FAFCFF</color>
   <color name="color_metabolic_bg">#F9E9E6</color>
   <color name="color_metabolic_fast">#5F54FF</color>
+  <color name="color_hunger_green">#E7F3E9</color>
 </resources>

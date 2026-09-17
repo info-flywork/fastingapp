@@ -254,7 +254,11 @@
     "meal_sample_time": "July 1, 12:53",
     "meal_tag_full": "Full Meal",
     "meal_tag_keto": "Ketogenic",
-    "save_a_meal": "Save a meal"
+    "save_a_meal": "Save a meal",
+    "hunger_tracker": "Hunger Tracker",
+    "hunger_question": "Are you actually hungry?",
+    "hunger_subtitle": "“Emotional hunger” can mislead you. Learn the difference, then log how you feel.",
+    "log_hunger": "Log my hunger level"
   },
   "water_page": {
     "today": "Today",
