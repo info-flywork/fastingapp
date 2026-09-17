@@ -33,7 +33,6 @@ final class HomeHungerTrackerCard extends StatelessWidget {
               Assets.icons.solarAltArrowUpLineDuotoneRight.svg(),
             ],
           ),
-          const SizedBox(height: 16),
           const _HungerStrip(),
           const SizedBox(height: 16),
           Text(
@@ -64,11 +63,11 @@ final class _HungerStrip extends StatelessWidget {
   const _HungerStrip();
 
   static const _stripH = 80.0;
-  static const _stageH = 140.0;
-  static const _mascotSize = 155.0;
+  static const _stageH = 135.0;
+  static const _mascotSize = 160.0;
 
   /// Bacakları stage altında kesmek için.
-  static const _clipLegsBy = 26.0;
+  static const _clipLegsBy = 25.0;
 
   @override
   Widget build(BuildContext context) {
@@ -80,7 +79,7 @@ final class _HungerStrip extends StatelessWidget {
         children: [
           // #F9E9E6 | #E7F3E9 — Figma şerit (80h, radius 14)
           SizedBox(
-            height: _stripH,
+            height: _stripH + 10,
             width: double.infinity,
             child: ClipRRect(
               borderRadius: BorderRadius.circular(14),
@@ -97,7 +96,7 @@ final class _HungerStrip extends StatelessWidget {
           Positioned(
             left: 12,
             right: 12,
-            bottom: (_stripH - 40) / 2,
+            bottom: (_stripH - 40) / 2 + 5,
             child: Row(
               children: [
                 Assets.images.burgerv2.image(
