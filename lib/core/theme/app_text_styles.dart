@@ -709,6 +709,66 @@ abstract final class AppTextStyles {
     color: ColorName.colorTitle,
   );
 
+  /// Meal Records detay tarih başlığı — 18 / Semibold
+  static TextStyle get mealRecordsDateTitle => const TextStyle(
+    fontFamily: FontFamily.sFProDisplay,
+    fontWeight: FontWeight.w600,
+    fontSize: 24,
+    height: 24 / 24,
+    letterSpacing: 24 * -0.015,
+    color: ColorName.colorTitle,
+  );
+
+  /// Meal detail section title — 20 / Semibold
+  static TextStyle get mealDetailSectionTitle => const TextStyle(
+    fontFamily: FontFamily.sFProDisplay,
+    fontWeight: FontWeight.w600,
+    fontSize: 20,
+    height: 28 / 20,
+    letterSpacing: 20 * -0.015,
+    color: ColorName.colorTitle,
+  );
+
+  /// Meal detail row label — 16 / Semibold
+  static TextStyle get mealDetailRowLabel => const TextStyle(
+    fontFamily: FontFamily.sFProDisplay,
+    fontWeight: FontWeight.w600,
+    fontSize: 16,
+    height: 24 / 16,
+    letterSpacing: 16 * -0.015,
+    color: ColorName.colorTitle,
+  );
+
+  /// Meal detail time value — 16 / Semibold / positive green
+  static TextStyle get mealDetailTimeValue => const TextStyle(
+    fontFamily: FontFamily.sFProDisplay,
+    fontWeight: FontWeight.w600,
+    fontSize: 16,
+    height: 24 / 16,
+    letterSpacing: 16 * -0.015,
+    color: ColorName.colorMealPositive,
+  );
+
+  /// Meal detail note text — 16 / Medium
+  static TextStyle get mealDetailNoteText => const TextStyle(
+    fontFamily: FontFamily.sFProDisplay,
+    fontWeight: FontWeight.w500,
+    fontSize: 16,
+    height: 24 / 16,
+    letterSpacing: 16 * -0.015,
+    color: ColorName.colorTitle,
+  );
+
+  /// Meal detail note hint — 16 / Medium / secondary 60%
+  static TextStyle get mealDetailNoteHint => TextStyle(
+    fontFamily: FontFamily.sFProDisplay,
+    fontWeight: FontWeight.w500,
+    fontSize: 16,
+    height: 24 / 16,
+    letterSpacing: 16 * -0.015,
+    color: ColorName.colorSubtitle.withValues(alpha: 0.6),
+  );
+
   /// Hunger Tracker title — 18 / Semibold
   static TextStyle get homeHungerTitle => homeWeightTitle;
 
@@ -804,7 +864,7 @@ abstract final class AppTextStyles {
   /// Water add button label — 14 / w590 / line 14 / white 60%
   static TextStyle get waterAddLabel => TextStyle(
     fontFamily: FontFamily.sFProDisplay,
-    fontWeight: FontWeight(590),
+    fontWeight: const FontWeight(590),
     fontSize: 14,
     height: 1,
     letterSpacing: 14 * -0.015,
@@ -814,7 +874,7 @@ abstract final class AppTextStyles {
   /// Water reminder row label — 18 / Semibold / secondary 60%
   static TextStyle get waterReminderLabel => TextStyle(
     fontFamily: FontFamily.sFProDisplay,
-    fontWeight: FontWeight(590),
+    fontWeight: const FontWeight(590),
     fontSize: 18,
     height: 24 / 18,
     letterSpacing: 18 * -0.015,
@@ -913,7 +973,7 @@ abstract final class AppTextStyles {
   /// Steps add button label — 14 / white 60%
   static TextStyle get stepsAddLabel => TextStyle(
     fontFamily: FontFamily.sFProDisplay,
-    fontWeight: FontWeight(590),
+    fontWeight: const FontWeight(590),
     fontSize: 14,
     height: 1,
     letterSpacing: 14 * -0.015,
@@ -1470,9 +1530,9 @@ abstract final class AppTextStyles {
   static TextStyle get notificationsEmptyTitle => const TextStyle(
     fontFamily: FontFamily.sFProDisplay,
     fontWeight: FontWeight.w600,
-    fontSize: 18,
-    height: 24 / 18,
-    letterSpacing: 18 * -0.015,
+    fontSize: 24,
+    height: 24 / 24,
+    letterSpacing: 24 * -0.015,
     color: ColorName.colorTitle,
   );
 
@@ -1615,4 +1675,247 @@ abstract final class AppTextStyles {
     letterSpacing: 15 * -0.015,
     color: ColorName.colorWhite.withValues(alpha: 0.6),
   );
+
+  /// Plans page title — "Fasting Plans" — 24 / Semibold
+  static TextStyle get plansPageTitle => const TextStyle(
+    fontFamily: FontFamily.sFProDisplay,
+    fontWeight: FontWeight.w600,
+    fontSize: 24,
+    height: 32 / 24,
+    letterSpacing: -0.5,
+    color: ColorName.colorTitle,
+  );
+
+  /// Plans section title — "Beginner Level" — 20 / Semibold
+  static TextStyle get plansSectionTitle => const TextStyle(
+    fontFamily: FontFamily.sFProDisplay,
+    fontWeight: FontWeight.w600,
+    fontSize: 20,
+    height: 28 / 20,
+    letterSpacing: 20 * -0.055,
+    color: ColorName.colorTitle,
+  );
+
+  /// Plans section subtitle rest — 16 / Medium / 60%
+  static TextStyle get plansSectionSubtitle => TextStyle(
+    fontFamily: FontFamily.sFProDisplay,
+    fontWeight: FontWeight.w500,
+    fontSize: 16,
+    height: 24 / 16,
+    letterSpacing: -0.5,
+    color: ColorName.colorSubtitle.withValues(alpha: 0.6),
+  );
+
+  /// Plans section subtitle emphasis — 16 / Bold / 60%
+  static TextStyle get plansSectionSubtitleEmphasis =>
+      plansSectionSubtitle.copyWith(fontWeight: FontWeight.w700);
+
+  /// Plans card chip — "Skip the breakfast" — 14 / Semibold
+  static TextStyle get plansChipLabel => const TextStyle(
+    fontFamily: FontFamily.sFProDisplay,
+    fontWeight: FontWeight.w600,
+    fontSize: 14,
+    height: 16 / 14,
+    letterSpacing: -0.5,
+  );
+
+  /// Plans card watermark digit — 104 / Heavy / 22%
+  static TextStyle get plansCardWatermark => const TextStyle(
+    fontFamily: FontFamily.sFProDisplay,
+    fontWeight: FontWeight.w800,
+    fontSize: 104,
+    height: 144 / 104,
+    letterSpacing: 104 * -0.015,
+  );
+
+  /// Plan detail page title — 24 / Semibold
+  static TextStyle get planDetailTitle => const TextStyle(
+    fontFamily: FontFamily.sFProDisplay,
+    fontWeight: FontWeight.w600,
+    fontSize: 24,
+    height: 32 / 24,
+    letterSpacing: 24 * -0.055,
+    color: ColorName.colorTitle,
+  );
+
+  /// Plan detail ratio — "16-8" — 42 / Semibold
+  static TextStyle get planDetailRatio => const TextStyle(
+    fontFamily: FontFamily.sFProDisplay,
+    fontWeight: FontWeight.w600,
+    fontSize: 42,
+    height: 1,
+    letterSpacing: -0.67,
+    color: ColorName.colorTitle,
+  );
+
+  /// Plan detail legend — 15 / Medium / 60%
+  static TextStyle get planDetailLegend => TextStyle(
+    fontFamily: FontFamily.sFProDisplay,
+    fontWeight: FontWeight.w500,
+    fontSize: 15,
+    height: 24 / 15,
+    letterSpacing: 15 * -0.015,
+    color: ColorName.colorSubtitle.withValues(alpha: 0.6),
+  );
+
+  /// Plan detail time label — "Fasting Ends:" — 12 / Semibold / 60%
+  static TextStyle get planDetailTimeLabel => TextStyle(
+    fontFamily: FontFamily.sFProDisplay,
+    fontWeight: FontWeight.w600,
+    fontSize: 12,
+    height: 16 / 12,
+    letterSpacing: 12 * -0.015,
+    color: ColorName.colorSubtitle.withValues(alpha: 0.6),
+  );
+
+  /// Plan detail time value — "12:00" — 16 / Semibold
+  static TextStyle get planDetailTimeValue => const TextStyle(
+    fontFamily: FontFamily.sFProDisplay,
+    fontWeight: FontWeight.w600,
+    fontSize: 16,
+    height: 24 / 16,
+    letterSpacing: 16 * -0.015,
+    color: ColorName.colorTitle,
+  );
+
+  /// Plan detail change — 16 / Semibold
+  static TextStyle get planDetailChange => const TextStyle(
+    fontFamily: FontFamily.sFProDisplay,
+    fontWeight: FontWeight.w600,
+    fontSize: 16,
+    height: 24 / 16,
+    letterSpacing: 16 * -0.015,
+    color: ColorName.colorTitle,
+  );
+
+  /// Plan detail hour / day axis — 12 / Medium / 60%
+  static TextStyle get planDetailAxis => TextStyle(
+    fontFamily: FontFamily.sFProDisplay,
+    fontWeight: FontWeight.w500,
+    fontSize: 12,
+    height: 16 / 12,
+    color: ColorName.colorSubtitle.withValues(alpha: 0.6),
+  );
+
+  /// Hunger tracker page title — 36 / Bold
+  static TextStyle get hungerTrackerTitle => const TextStyle(
+    fontFamily: FontFamily.sFProDisplay,
+    fontWeight: FontWeight.w700,
+    fontSize: 36,
+    height: 1,
+    letterSpacing: 36 * -0.02,
+    color: ColorName.colorTitle,
+  );
+
+  /// Hunger tracker page subtitle — 16 / Medium / 35%
+  static TextStyle get hungerTrackerSubtitle => TextStyle(
+    fontFamily: FontFamily.sFProDisplay,
+    fontWeight: FontWeight.w500,
+    fontSize: 16,
+    height: 24 / 16,
+    letterSpacing: 16 * -0.02,
+    color: ColorName.colorTitle.withValues(alpha: 0.35),
+  );
+
+  /// Hunger action card title — 20 / Semibold
+  static TextStyle get hungerActionTitle => const TextStyle(
+    fontFamily: FontFamily.sFProDisplay,
+    fontWeight: FontWeight.w600,
+    fontSize: 20,
+    height: 24 / 20,
+    letterSpacing: 20 * -0.015,
+    color: ColorName.colorTitle,
+  );
+
+  /// Hunger action card subtitle — 16 / Medium / 60%
+  static TextStyle get hungerActionSubtitle => TextStyle(
+    fontFamily: FontFamily.sFProDisplay,
+    fontWeight: FontWeight.w500,
+    fontSize: 16,
+    height: 20 / 16,
+    letterSpacing: 16 * -0.015,
+    color: ColorName.colorSubtitle.withValues(alpha: 0.6),
+  );
+
+  /// Common symptoms title — 20 / Semibold
+  static TextStyle get hungerSymptomsTitle => const TextStyle(
+    fontFamily: FontFamily.sFProDisplay,
+    fontWeight: FontWeight.w600,
+    fontSize: 20,
+    height: 28 / 20,
+    letterSpacing: 20 * -0.015,
+    color: ColorName.colorTitle,
+  );
+
+  /// Select any hint — 14 / Semibold / 60%
+  static TextStyle get hungerSymptomsHint => TextStyle(
+    fontFamily: FontFamily.sFProDisplay,
+    fontWeight: FontWeight.w600,
+    fontSize: 14,
+    height: 28 / 14,
+    letterSpacing: 14 * -0.015,
+    color: ColorName.colorSubtitle.withValues(alpha: 0.6),
+  );
+
+  /// Symptom chip label — 16 / Semibold
+  static TextStyle get hungerSymptomLabel => const TextStyle(
+    fontFamily: FontFamily.sFProDisplay,
+    fontWeight: FontWeight.w600,
+    fontSize: 16,
+    height: 20 / 16,
+    letterSpacing: 16 * -0.015,
+    color: ColorName.colorTitle,
+  );
+
+  /// Mascot speech bubble — 13 / Semibold
+  static TextStyle get hungerBubble => const TextStyle(
+    fontFamily: FontFamily.sFProDisplay,
+    fontWeight: FontWeight.w600,
+    fontSize: 13,
+    height: 16 / 13,
+    color: ColorName.colorBrandStrong,
+  );
+
+  /// Hunger check title — 24 / Bold
+  static TextStyle get hungerCheckTitle => const TextStyle(
+    fontFamily: FontFamily.sFProDisplay,
+    fontWeight: FontWeight.w700,
+    fontSize: 24,
+    height: 36 / 24,
+    letterSpacing: 24 * -0.02,
+    color: ColorName.colorTitle,
+  );
+
+  /// Hunger check subtitle — 16 / Medium / 35%
+  static TextStyle get hungerCheckSubtitle => TextStyle(
+    fontFamily: FontFamily.sFProDisplay,
+    fontWeight: FontWeight.w500,
+    fontSize: 16,
+    height: 24 / 16,
+    letterSpacing: 16 * -0.02,
+    color: ColorName.colorTitle.withValues(alpha: 0.35),
+  );
+
+  /// Quick / Full Check card title — 18 / Semibold
+  static TextStyle get hungerCheckCardTitle => const TextStyle(
+    fontFamily: FontFamily.sFProDisplay,
+    fontWeight: FontWeight.w600,
+    fontSize: 18,
+    height: 24 / 18,
+    letterSpacing: 18 * -0.015,
+    color: ColorName.colorTitle,
+  );
+
+  /// Check card meta / tip — 15 / Medium / 60%
+  static TextStyle get hungerCheckCardMeta => TextStyle(
+    fontFamily: FontFamily.sFProDisplay,
+    fontWeight: FontWeight.w500,
+    fontSize: 15,
+    height: 20 / 15,
+    letterSpacing: 15 * -0.015,
+    color: ColorName.colorSubtitle.withValues(alpha: 0.6),
+  );
+
+  /// Tip banner text — same as card meta
+  static TextStyle get hungerCheckTip => hungerCheckCardMeta;
 }

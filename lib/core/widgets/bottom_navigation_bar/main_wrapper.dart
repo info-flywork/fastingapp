@@ -13,10 +13,13 @@ final class MainWrapper extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isPlansTab = navigationShell.currentIndex == 3;
+
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: SystemUiOverlayStyle.dark,
       child: Scaffold(
-        backgroundColor: ColorName.colorProfileBack,
+        backgroundColor:
+            isPlansTab ? ColorName.colorWhite : ColorName.colorProfileBack,
         body: SafeArea(
           bottom: false,
           child: navigationShell,

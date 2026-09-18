@@ -71,6 +71,8 @@ class _HomeViewState extends State<HomeView> with HomeViewMixin {
                   onStepsTapped: onStepsTapped,
                   onWeightTapped: onWeightTapped,
                   onWeightEditTapped: onWeightEditTapped,
+                  onMealRecordsTapped: onMealRecordsTapped,
+                  onHungerTrackerTapped: onHungerTrackerTapped,
                 ),
               HomeError(:final message) => HomeErrorBody(
                 message: message,

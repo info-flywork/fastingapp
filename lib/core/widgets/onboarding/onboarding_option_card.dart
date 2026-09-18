@@ -11,6 +11,7 @@ final class OnboardingOptionCard extends StatelessWidget {
     required this.isSelected,
     required this.onTap,
     this.subtitle,
+    this.subtitleMaxLines = 5,
     this.badge,
     this.style,
     super.key,
@@ -18,6 +19,7 @@ final class OnboardingOptionCard extends StatelessWidget {
 
   final String title;
   final String? subtitle;
+  final int subtitleMaxLines;
   final Widget icon;
   final bool isSelected;
   final VoidCallback onTap;
@@ -78,7 +80,7 @@ final class OnboardingOptionCard extends StatelessWidget {
                       Text(
                         subtitle!,
                         style: AppTextStyles.optionSubtitle,
-                        maxLines: 2,
+                        maxLines: subtitleMaxLines,
                         overflow: TextOverflow.ellipsis,
                       ),
                     ],

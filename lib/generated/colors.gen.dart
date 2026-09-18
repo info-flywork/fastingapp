@@ -96,6 +96,12 @@ abstract final class ColorName {
   /// Color: #E7F3E9
   static const Color colorHungerGreen = Color(0xFFE7F3E9);
 
+  /// Color: #F0F7FE
+  static const Color colorHungerHistoryBg = Color(0xFFF0F7FE);
+
+  /// Color: #ECF5E7
+  static const Color colorHungerTipBg = Color(0xFFECF5E7);
+
   /// Color: #FFEAA8
   static const Color colorJourneyGoalWeight = Color(0xFFFFEAA8);
 
@@ -104,6 +110,12 @@ abstract final class ColorName {
 
   /// Color: #C8DBC5
   static const Color colorMatGreen = Color(0xFFC8DBC5);
+
+  /// Color: #FCF7EF
+  static const Color colorMealCream = Color(0xFFFCF7EF);
+
+  /// Color: #7ACE6B
+  static const Color colorMealPositive = Color(0xFF7ACE6B);
 
   /// Color: #F9E9E6
   static const Color colorMetabolicBg = Color(0xFFF9E9E6);
@@ -126,6 +138,9 @@ abstract final class ColorName {
   /// Color: #96BD8F
   static const Color colorOptionSelected = Color(0xFF96BD8F);
 
+  /// Color: #E3E3E3
+  static const Color colorPlanArcTrack = Color(0xFFE3E3E3);
+
   /// Color: #C78131
   static const Color colorPlanBadgeAdvanced = Color(0xFFC78131);
 
@@ -144,8 +159,38 @@ abstract final class ColorName {
   /// Color: #58A2AC
   static const Color colorPlanBadgeSteady = Color(0xFF58A2AC);
 
+  /// Color: #D8D8DC
+  static const Color colorPlanBoltInactive = Color(0xFFD8D8DC);
+
   /// Color: #6CD597
   static const Color colorPlanBuildFill = Color(0xFF6CD597);
+
+  /// Color: #EAF5FE
+  static const Color colorPlanChipBreakfastBg = Color(0xFFEAF5FE);
+
+  /// Color: #6A9CF8
+  static const Color colorPlanChipBreakfastText = Color(0xFF6A9CF8);
+
+  /// Color: #FCF5E8
+  static const Color colorPlanChipDinnerBg = Color(0xFFFCF5E8);
+
+  /// Color: #ECB34D
+  static const Color colorPlanChipDinnerText = Color(0xFFECB34D);
+
+  /// Color: #F0BC11
+  static const Color colorPlanCrown = Color(0xFFF0BC11);
+
+  /// Color: #FCEDB5
+  static const Color colorPlanFasting = Color(0xFFFCEDB5);
+
+  /// Color: #F8F3A9
+  static const Color colorPlanFastingBar = Color(0xFFF8F3A9);
+
+  /// Color: #6B73CE
+  static const Color colorPlanLockedOverlay = Color(0xFF6B73CE);
+
+  /// Color: #1F5A1A
+  static const Color colorPlanPen = Color(0xFF1F5A1A);
 
   /// Color: #86B57F
   static const Color colorPremiumCard = Color(0xFF86B57F);

@@ -1,4 +1,6 @@
 import 'package:fastingapp/core/dialogs/dialog_handler.dart';
+import 'package:fastingapp/core/dialogs/widgets/fasting_time_dialog.dart';
+import 'package:fastingapp/core/dialogs/widgets/meal_date_picker_dialog.dart';
 import 'package:fastingapp/core/dialogs/widgets/sign_out_dialog.dart';
 import 'package:fastingapp/core/dialogs/widgets/water_edit_dialog.dart';
 import 'package:fastingapp/core/dialogs/widgets/weight_edit_dialog.dart';
@@ -34,6 +36,20 @@ final class AppDialogs extends DialogHandler {
     );
   }
 
+  Future<MealDatePickerResult?> showMealDatePicker(
+    BuildContext context, {
+    required DateTime initialDate,
+    bool includeTime = false,
+  }) {
+    return showNormalDialog<MealDatePickerResult>(
+      context: context,
+      child: MealDatePickerDialog(
+        initialDate: initialDate,
+        includeTime: includeTime,
+      ),
+    );
+  }
+
   Future<WaterValueEditResult?> showEditWaterValue(
     BuildContext context, {
     required String titleKey,
@@ -61,6 +77,24 @@ final class AppDialogs extends DialogHandler {
     return showNormalDialog<WaterUnitEditResult>(
       context: context,
       child: WaterUnitEditDialog(initialUnit: initialUnit),
+    );
+  }
+
+  Future<FastingTimeResult?> showFastingTime(
+    BuildContext context, {
+    required int startHour,
+    required int startMinute,
+    required int endHour,
+    required int endMinute,
+  }) {
+    return showNormalDialog<FastingTimeResult>(
+      context: context,
+      child: FastingTimeDialog(
+        initialStartHour: startHour,
+        initialStartMinute: startMinute,
+        initialEndHour: endHour,
+        initialEndMinute: endMinute,
+      ),
     );
   }
 }

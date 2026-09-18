@@ -34,6 +34,14 @@ mixin HomeViewMixin on State<HomeView> {
     context.pushNamed(RoutePaths.bodyHistory.name);
   }
 
+  void onMealRecordsTapped() {
+    context.pushNamed(RoutePaths.mealRecords.name);
+  }
+
+  void onHungerTrackerTapped() {
+    context.pushNamed(RoutePaths.hungerTracker.name);
+  }
+
   Future<void> onWeightEditTapped() async {
     await AppDialogs.instance.showEditWeight(
       context,

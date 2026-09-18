@@ -47,11 +47,24 @@ import 'package:fastingapp/presentation/auth/splash/bloc/splash_event.dart';
 import 'package:fastingapp/presentation/auth/splash/view/splash_view.dart';
 import 'package:fastingapp/presentation/auth/welcome/bloc/welcome_bloc.dart';
 import 'package:fastingapp/presentation/auth/welcome/view/welcome_view.dart';
+import 'package:fastingapp/presentation/body_history/view/body_history_view.dart';
 import 'package:fastingapp/presentation/chat/latest/view/latest_chats_view.dart';
 import 'package:fastingapp/presentation/chat/view/chat_view.dart';
 import 'package:fastingapp/presentation/home/bloc/home_bloc.dart';
 import 'package:fastingapp/presentation/home/bloc/home_event.dart';
 import 'package:fastingapp/presentation/home/view/home_view.dart';
+import 'package:fastingapp/presentation/hunger_tracker/hunger_symptom.dart';
+import 'package:fastingapp/presentation/hunger_tracker/view/hunger_check_view.dart';
+import 'package:fastingapp/presentation/hunger_tracker/view/hunger_first_question_view.dart';
+import 'package:fastingapp/presentation/hunger_tracker/view/hunger_second_question_view.dart';
+import 'package:fastingapp/presentation/hunger_tracker/view/hunger_third_question_view.dart';
+import 'package:fastingapp/presentation/hunger_tracker/view/hunger_tracker_view.dart';
+import 'package:fastingapp/presentation/meal_records/view/meal_detail_view.dart';
+import 'package:fastingapp/presentation/meal_records/view/meal_records_view.dart';
+import 'package:fastingapp/presentation/plans/plan_detail_args.dart';
+import 'package:fastingapp/presentation/plans/plans_catalog.dart';
+import 'package:fastingapp/presentation/plans/view/plan_detail_view.dart';
+import 'package:fastingapp/presentation/plans/view/plans_view.dart';
 import 'package:fastingapp/presentation/profile/edit_profile/view/edit_diet_type_view.dart';
 import 'package:fastingapp/presentation/profile/edit_profile/view/edit_fasting_plan_view.dart';
 import 'package:fastingapp/presentation/profile/edit_profile/view/edit_fasting_target_view.dart';
@@ -64,7 +77,6 @@ import 'package:fastingapp/presentation/profile/faq/view/faq_view.dart';
 import 'package:fastingapp/presentation/profile/languages/view/languages_view.dart';
 import 'package:fastingapp/presentation/profile/notifications/view/notifications_view.dart';
 import 'package:fastingapp/presentation/profile/view/profile_view.dart';
-import 'package:fastingapp/presentation/body_history/view/body_history_view.dart';
 import 'package:fastingapp/presentation/steps/view/steps_view.dart';
 import 'package:fastingapp/presentation/tabs/placeholder_tab_view.dart';
 import 'package:fastingapp/presentation/water/reminder/view/water_reminder_view.dart';
@@ -342,6 +354,79 @@ final GoRouter appRouter = GoRouter(
       builder: (context, state) => const BodyHistoryView(),
     ),
     GoRoute(
+      path: RoutePaths.mealRecords.path,
+      name: RoutePaths.mealRecords.name,
+      parentNavigatorKey: rootNavigatorKey,
+      builder: (context, state) => const MealRecordsView(),
+    ),
+    GoRoute(
+      path: RoutePaths.mealDetail.path,
+      name: RoutePaths.mealDetail.name,
+      parentNavigatorKey: rootNavigatorKey,
+      builder: (context, state) => const MealDetailView(),
+    ),
+    GoRoute(
+      path: RoutePaths.hungerTracker.path,
+      name: RoutePaths.hungerTracker.name,
+      parentNavigatorKey: rootNavigatorKey,
+      builder: (context, state) => const HungerTrackerView(),
+    ),
+    GoRoute(
+      path: RoutePaths.hungerCheck.path,
+      name: RoutePaths.hungerCheck.name,
+      parentNavigatorKey: rootNavigatorKey,
+      builder: (context, state) {
+        final args = state.extra is HungerFlowArgs
+            ? state.extra! as HungerFlowArgs
+            : const HungerFlowArgs();
+        return HungerCheckView(args: args);
+      },
+    ),
+    GoRoute(
+      path: RoutePaths.hungerFirstQuestion.path,
+      name: RoutePaths.hungerFirstQuestion.name,
+      parentNavigatorKey: rootNavigatorKey,
+      builder: (context, state) {
+        final args = state.extra is HungerFlowArgs
+            ? state.extra! as HungerFlowArgs
+            : const HungerFlowArgs();
+        return HungerFirstQuestionView(args: args);
+      },
+    ),
+    GoRoute(
+      path: RoutePaths.hungerSecondQuestion.path,
+      name: RoutePaths.hungerSecondQuestion.name,
+      parentNavigatorKey: rootNavigatorKey,
+      builder: (context, state) {
+        final args = state.extra is HungerFlowArgs
+            ? state.extra! as HungerFlowArgs
+            : const HungerFlowArgs();
+        return HungerSecondQuestionView(args: args);
+      },
+    ),
+    GoRoute(
+      path: RoutePaths.hungerThirdQuestion.path,
+      name: RoutePaths.hungerThirdQuestion.name,
+      parentNavigatorKey: rootNavigatorKey,
+      builder: (context, state) {
+        final args = state.extra is HungerFlowArgs
+            ? state.extra! as HungerFlowArgs
+            : const HungerFlowArgs();
+        return HungerThirdQuestionView(args: args);
+      },
+    ),
+    GoRoute(
+      path: RoutePaths.planDetail.path,
+      name: RoutePaths.planDetail.name,
+      parentNavigatorKey: rootNavigatorKey,
+      builder: (context, state) {
+        final args = state.extra is PlanDetailArgs
+            ? state.extra! as PlanDetailArgs
+            : PlanDetailArgs(plan: PlansCatalog.beginnerRow1.first);
+        return PlanDetailView(args: args);
+      },
+    ),
+    GoRoute(
       path: RoutePaths.chat.path,
       name: RoutePaths.chat.name,
       parentNavigatorKey: rootNavigatorKey,
@@ -384,20 +469,19 @@ final GoRouter appRouter = GoRouter(
         StatefulShellBranch(
           routes: [
             GoRoute(
-              path: RoutePaths.plans.path,
-              name: RoutePaths.plans.name,
+              path: RoutePaths.mochiWorld.path,
+              name: RoutePaths.mochiWorld.name,
               builder: (context, state) =>
-                  const PlaceholderTabView(titleKey: 'home.nav_plans'),
+                  const PlaceholderTabView(titleKey: 'home.nav_mochi_world'),
             ),
           ],
         ),
         StatefulShellBranch(
           routes: [
             GoRoute(
-              path: RoutePaths.insights.path,
-              name: RoutePaths.insights.name,
-              builder: (context, state) =>
-                  const PlaceholderTabView(titleKey: 'home.nav_insights'),
+              path: RoutePaths.plans.path,
+              name: RoutePaths.plans.name,
+              builder: (context, state) => const PlansView(),
             ),
           ],
         ),

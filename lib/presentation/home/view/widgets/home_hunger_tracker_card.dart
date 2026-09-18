@@ -2,58 +2,63 @@ part of '../home_view.dart';
 
 /// Home Hunger Tracker kartı — meal records'ın altında.
 final class HomeHungerTrackerCard extends StatelessWidget {
-  const HomeHungerTrackerCard({super.key});
+  const HomeHungerTrackerCard({required this.onTap, super.key});
+
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.fromLTRB(16, 12, 16, 24),
-      padding: const EdgeInsets.fromLTRB(12, 12, 12, 24),
-      decoration: BoxDecoration(
-        color: ColorName.colorWhite,
-        borderRadius: BorderRadius.circular(16),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Row(
-            children: [
-              Assets.images.brain.image(
-                width: 28,
-                height: 28,
-                fit: BoxFit.contain,
-              ),
-              const SizedBox(width: 6),
-              Expanded(
-                child: Text(
-                  'home.hunger_tracker'.tr(),
-                  style: AppTextStyles.homeHungerTitle,
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        margin: const EdgeInsets.fromLTRB(16, 12, 16, 24),
+        padding: const EdgeInsets.fromLTRB(12, 12, 12, 24),
+        decoration: BoxDecoration(
+          color: ColorName.colorWhite,
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Row(
+              children: [
+                Assets.images.brain.image(
+                  width: 28,
+                  height: 28,
+                  fit: BoxFit.contain,
                 ),
-              ),
-              Assets.icons.solarAltArrowUpLineDuotoneRight.svg(),
-            ],
-          ),
-          const _HungerStrip(),
-          const SizedBox(height: 16),
-          Text(
-            'home.hunger_question'.tr(),
-            style: AppTextStyles.homeHungerQuestion,
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: 4),
-          Text(
-            'home.hunger_subtitle'.tr(),
-            style: AppTextStyles.homeHungerSubtitle,
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: 16),
-          AppButton(
-            label: 'home.log_hunger'.tr(),
-            onPressed: () {},
-            decoration: AppButtonDecoration.homeJoin(),
-            showIcon: false,
-          ),
-        ],
+                const SizedBox(width: 6),
+                Expanded(
+                  child: Text(
+                    'home.hunger_tracker'.tr(),
+                    style: AppTextStyles.homeHungerTitle,
+                  ),
+                ),
+                Assets.icons.solarAltArrowUpLineDuotoneRight.svg(),
+              ],
+            ),
+            const _HungerStrip(),
+            const SizedBox(height: 16),
+            Text(
+              'home.hunger_question'.tr(),
+              style: AppTextStyles.homeHungerQuestion,
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 4),
+            Text(
+              'home.hunger_subtitle'.tr(),
+              style: AppTextStyles.homeHungerSubtitle,
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 16),
+            AppButton(
+              label: 'home.log_hunger'.tr(),
+              onPressed: onTap,
+              decoration: AppButtonDecoration.homeJoin(),
+              showIcon: false,
+            ),
+          ],
+        ),
       ),
     );
   }

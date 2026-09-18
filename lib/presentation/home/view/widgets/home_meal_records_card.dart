@@ -2,47 +2,53 @@ part of '../home_view.dart';
 
 /// Home öğün kayıtları kartı — metabolic kartının altında.
 final class HomeMealRecordsCard extends StatelessWidget {
-  const HomeMealRecordsCard({super.key});
+  const HomeMealRecordsCard({this.onTap, super.key});
+
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.fromLTRB(16, 12, 16, 0),
-      padding: const EdgeInsets.fromLTRB(12, 12, 12, 24),
-      decoration: BoxDecoration(
-        color: ColorName.colorWhite,
-        borderRadius: BorderRadius.circular(16),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Row(
-            children: [
-              Assets.images.orangeBell.image(
-                width: 28,
-                height: 28,
-                fit: BoxFit.contain,
-              ),
-              const SizedBox(width: 8),
-              Expanded(
-                child: Text(
-                  'home.meal_records'.tr(),
-                  style: AppTextStyles.homeMealRecordsTitle,
+    return GestureDetector(
+      onTap: onTap,
+      behavior: HitTestBehavior.opaque,
+      child: Container(
+        margin: const EdgeInsets.fromLTRB(16, 12, 16, 0),
+        padding: const EdgeInsets.fromLTRB(12, 12, 12, 24),
+        decoration: BoxDecoration(
+          color: ColorName.colorWhite,
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Row(
+              children: [
+                Assets.images.orangeBell.image(
+                  width: 28,
+                  height: 28,
+                  fit: BoxFit.contain,
                 ),
-              ),
-              Assets.icons.solarAltArrowUpLineDuotoneRight.svg(),
-            ],
-          ),
-          const SizedBox(height: 16),
-          const _MealTimeline(),
-          const SizedBox(height: 16),
-          AppButton(
-            label: 'home.save_a_meal'.tr(),
-            onPressed: () {},
-            decoration: AppButtonDecoration.homeJoin(),
-            showIcon: false,
-          ),
-        ],
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    'home.meal_records'.tr(),
+                    style: AppTextStyles.homeMealRecordsTitle,
+                  ),
+                ),
+                Assets.icons.solarAltArrowUpLineDuotoneRight.svg(),
+              ],
+            ),
+            const SizedBox(height: 16),
+            const _MealTimeline(),
+            const SizedBox(height: 16),
+            AppButton(
+              label: 'home.save_a_meal'.tr(),
+              onPressed: onTap,
+              decoration: AppButtonDecoration.homeJoin(),
+              showIcon: false,
+            ),
+          ],
+        ),
       ),
     );
   }

@@ -160,6 +160,9 @@ class $AssetsIconsGen {
   SvgGenImage get icons8Gender =>
       const SvgGenImage('assets/icons/icons8_gender.svg');
 
+  /// File path: assets/icons/riiight.svg
+  SvgGenImage get riiight => const SvgGenImage('assets/icons/riiight.svg');
+
   /// File path: assets/icons/solar_alt-arrow-left-linear.svg
   SvgGenImage get solarAltArrowLeftLinear =>
       const SvgGenImage('assets/icons/solar_alt-arrow-left-linear.svg');
@@ -192,6 +195,10 @@ class $AssetsIconsGen {
   /// File path: assets/icons/solar_calendar-date-line-duotone.svg
   SvgGenImage get solarCalendarDateLineDuotone =>
       const SvgGenImage('assets/icons/solar_calendar-date-line-duotone.svg');
+
+  /// File path: assets/icons/solar_calendar-mark-line-duotone.svg
+  SvgGenImage get solarCalendarMarkLineDuotone =>
+      const SvgGenImage('assets/icons/solar_calendar-mark-line-duotone.svg');
 
   /// File path: assets/icons/solar_cart-3-line-duotone.svg
   SvgGenImage get solarCart3LineDuotone =>
@@ -315,6 +322,7 @@ class $AssetsIconsGen {
     hugeiconsTranslate,
     icRoundMinus,
     icons8Gender,
+    riiight,
     solarAltArrowLeftLinear,
     solarAltArrowUpLineDuotone,
     solarAltArrowUpLineDuotoneRight,
@@ -323,6 +331,7 @@ class $AssetsIconsGen {
     solarBellBingLineDuotone,
     solarBellLineDuotone,
     solarCalendarDateLineDuotone,
+    solarCalendarMarkLineDuotone,
     solarCart3LineDuotone,
     solarChartLineDuotone,
     solarChatDotsLineDuotone,
@@ -383,6 +392,13 @@ class $AssetsImagesGen {
   /// File path: assets/images/ai_chat.png
   AssetGenImage get aiChat => const AssetGenImage('assets/images/ai_chat.png');
 
+  /// File path: assets/images/analytics.png
+  AssetGenImage get analytics =>
+      const AssetGenImage('assets/images/analytics.png');
+
+  /// File path: assets/images/apple.png
+  AssetGenImage get apple => const AssetGenImage('assets/images/apple.png');
+
   /// File path: assets/images/avacado.png
   AssetGenImage get avacado => const AssetGenImage('assets/images/avacado.png');
 
@@ -432,6 +448,9 @@ class $AssetsImagesGen {
   /// File path: assets/images/chicken.png
   AssetGenImage get chicken => const AssetGenImage('assets/images/chicken.png');
 
+  /// File path: assets/images/clock.png
+  AssetGenImage get clock => const AssetGenImage('assets/images/clock.png');
+
   /// File path: assets/images/confidence.png
   AssetGenImage get confidence =>
       const AssetGenImage('assets/images/confidence.png');
@@ -445,6 +464,10 @@ class $AssetsImagesGen {
 
   /// File path: assets/images/date.png
   AssetGenImage get date => const AssetGenImage('assets/images/date.png');
+
+  /// File path: assets/images/dizzinies.png
+  AssetGenImage get dizzinies =>
+      const AssetGenImage('assets/images/dizzinies.png');
 
   /// File path: assets/images/dumble.png
   AssetGenImage get dumble => const AssetGenImage('assets/images/dumble.png');
@@ -479,6 +502,13 @@ class $AssetsImagesGen {
   AssetGenImage get fastingChallengeUser3 =>
       const AssetGenImage('assets/images/fasting_challenge_user_3.png');
 
+  /// File path: assets/images/fatigue.png
+  AssetGenImage get fatigue => const AssetGenImage('assets/images/fatigue.png');
+
+  /// File path: assets/images/first_question.png
+  AssetGenImage get firstQuestion =>
+      const AssetGenImage('assets/images/first_question.png');
+
   /// File path: assets/images/fish.png
   AssetGenImage get fish => const AssetGenImage('assets/images/fish.png');
 
@@ -488,6 +518,16 @@ class $AssetsImagesGen {
   /// File path: assets/images/fruit.png
   AssetGenImage get fruit => const AssetGenImage('assets/images/fruit.png');
 
+  /// File path: assets/images/full_check.png
+  AssetGenImage get fullCheck =>
+      const AssetGenImage('assets/images/full_check.png');
+
+  /// File path: assets/images/good.png
+  AssetGenImage get good => const AssetGenImage('assets/images/good.png');
+
+  /// File path: assets/images/goodv2.png
+  AssetGenImage get goodv2 => const AssetGenImage('assets/images/goodv2.png');
+
   /// File path: assets/images/green_apple.png
   AssetGenImage get greenApple =>
       const AssetGenImage('assets/images/green_apple.png');
@@ -496,8 +536,24 @@ class $AssetsImagesGen {
   AssetGenImage get greenTick =>
       const AssetGenImage('assets/images/green_tick.png');
 
+  /// File path: assets/images/green_tick3d.png
+  AssetGenImage get greenTick3d =>
+      const AssetGenImage('assets/images/green_tick3d.png');
+
+  /// File path: assets/images/green_tick_filled.png
+  AssetGenImage get greenTickFilled =>
+      const AssetGenImage('assets/images/green_tick_filled.png');
+
   /// File path: assets/images/healty.png
   AssetGenImage get healty => const AssetGenImage('assets/images/healty.png');
+
+  /// File path: assets/images/high_carb.png
+  AssetGenImage get highCarb =>
+      const AssetGenImage('assets/images/high_carb.png');
+
+  /// File path: assets/images/high_carbv2.png
+  AssetGenImage get highCarbv2 =>
+      const AssetGenImage('assets/images/high_carbv2.png');
 
   /// File path: assets/images/home.png
   AssetGenImage get home => const AssetGenImage('assets/images/home.png');
@@ -510,12 +566,31 @@ class $AssetsImagesGen {
   AssetGenImage get insights =>
       const AssetGenImage('assets/images/insights.png');
 
+  /// File path: assets/images/king_sl.png
+  AssetGenImage get kingSl => const AssetGenImage('assets/images/king_sl.png');
+
   /// File path: assets/images/law-carb.png
   AssetGenImage get lawCarb =>
       const AssetGenImage('assets/images/law-carb.png');
 
+  /// File path: assets/images/lightning.png
+  AssetGenImage get lightning =>
+      const AssetGenImage('assets/images/lightning.png');
+
+  /// File path: assets/images/listen_your_body.png
+  AssetGenImage get listenYourBody =>
+      const AssetGenImage('assets/images/listen_your_body.png');
+
   /// File path: assets/images/loginv2.png
   AssetGenImage get loginv2 => const AssetGenImage('assets/images/loginv2.png');
+
+  /// File path: assets/images/low_Carb.png
+  AssetGenImage get lowCarb =>
+      const AssetGenImage('assets/images/low_Carb.png');
+
+  /// File path: assets/images/low_carbv2.png
+  AssetGenImage get lowCarbv2 =>
+      const AssetGenImage('assets/images/low_carbv2.png');
 
   /// File path: assets/images/man.png
   AssetGenImage get man => const AssetGenImage('assets/images/man.png');
@@ -548,6 +623,10 @@ class $AssetsImagesGen {
   AssetGenImage get mascotMetabolic =>
       const AssetGenImage('assets/images/mascot_metabolic.png');
 
+  /// File path: assets/images/mascot_search.png
+  AssetGenImage get mascotSearch =>
+      const AssetGenImage('assets/images/mascot_search.png');
+
   /// File path: assets/images/meal_record_emoji.png
   AssetGenImage get mealRecordEmoji =>
       const AssetGenImage('assets/images/meal_record_emoji.png');
@@ -559,9 +638,28 @@ class $AssetsImagesGen {
   AssetGenImage get mediterrian =>
       const AssetGenImage('assets/images/mediterrian.png');
 
+  /// File path: assets/images/meh.png
+  AssetGenImage get meh => const AssetGenImage('assets/images/meh.png');
+
+  /// File path: assets/images/mehv2.png
+  AssetGenImage get mehv2 => const AssetGenImage('assets/images/mehv2.png');
+
   /// File path: assets/images/metabolic.png
   AssetGenImage get metabolic =>
       const AssetGenImage('assets/images/metabolic.png');
+
+  /// File path: assets/images/mixed.png
+  AssetGenImage get mixed => const AssetGenImage('assets/images/mixed.png');
+
+  /// File path: assets/images/mixedv2.png
+  AssetGenImage get mixedv2 => const AssetGenImage('assets/images/mixedv2.png');
+
+  /// File path: assets/images/mochi_worl_v2.png
+  AssetGenImage get mochiWorlV2 =>
+      const AssetGenImage('assets/images/mochi_worl_v2.png');
+
+  /// File path: assets/images/mood.png
+  AssetGenImage get mood => const AssetGenImage('assets/images/mood.png');
 
   /// File path: assets/images/motivation.png
   AssetGenImage get motivation =>
@@ -571,12 +669,27 @@ class $AssetsImagesGen {
   AssetGenImage get mushroom =>
       const AssetGenImage('assets/images/mushroom.png');
 
+  /// File path: assets/images/nausea.png
+  AssetGenImage get nausea => const AssetGenImage('assets/images/nausea.png');
+
   /// File path: assets/images/non-binary.png
   AssetGenImage get nonBinary =>
       const AssetGenImage('assets/images/non-binary.png');
 
   /// File path: assets/images/noodles.png
   AssetGenImage get noodles => const AssetGenImage('assets/images/noodles.png');
+
+  /// File path: assets/images/not_sure.png
+  AssetGenImage get notSure =>
+      const AssetGenImage('assets/images/not_sure.png');
+
+  /// File path: assets/images/not_surev2.png
+  AssetGenImage get notSurev2 =>
+      const AssetGenImage('assets/images/not_surev2.png');
+
+  /// File path: assets/images/nothing_physical.png
+  AssetGenImage get nothingPhysical =>
+      const AssetGenImage('assets/images/nothing_physical.png');
 
   /// File path: assets/images/notificatio.png
   AssetGenImage get notificatio =>
@@ -598,6 +711,10 @@ class $AssetsImagesGen {
   /// File path: assets/images/orange_bell.png
   AssetGenImage get orangeBell =>
       const AssetGenImage('assets/images/orange_bell.png');
+
+  /// File path: assets/images/orange_bellv2.png
+  AssetGenImage get orangeBellv2 =>
+      const AssetGenImage('assets/images/orange_bellv2.png');
 
   /// File path: assets/images/pasta.png
   AssetGenImage get pasta => const AssetGenImage('assets/images/pasta.png');
@@ -641,8 +758,15 @@ class $AssetsImagesGen {
   /// File path: assets/images/rice.png
   AssetGenImage get rice => const AssetGenImage('assets/images/rice.png');
 
+  /// File path: assets/images/riiight.png
+  AssetGenImage get riiight => const AssetGenImage('assets/images/riiight.png');
+
   /// File path: assets/images/salata.png
   AssetGenImage get salata => const AssetGenImage('assets/images/salata.png');
+
+  /// File path: assets/images/second_question.png
+  AssetGenImage get secondQuestion =>
+      const AssetGenImage('assets/images/second_question.png');
 
   /// File path: assets/images/see_star.png
   AssetGenImage get seeStar =>
@@ -650,6 +774,10 @@ class $AssetsImagesGen {
 
   /// File path: assets/images/seefood.png
   AssetGenImage get seefood => const AssetGenImage('assets/images/seefood.png');
+
+  /// File path: assets/images/solar_pen-bold (1).png
+  AssetGenImage get solarPenBold1 =>
+      const AssetGenImage('assets/images/solar_pen-bold (1).png');
 
   /// File path: assets/images/solar_pen-bold.png
   AssetGenImage get solarPenBold =>
@@ -668,6 +796,9 @@ class $AssetsImagesGen {
   /// File path: assets/images/steps.png
   AssetGenImage get steps => const AssetGenImage('assets/images/steps.png');
 
+  /// File path: assets/images/stomach.png
+  AssetGenImage get stomach => const AssetGenImage('assets/images/stomach.png');
+
   /// File path: assets/images/streak.png
   AssetGenImage get streak => const AssetGenImage('assets/images/streak.png');
 
@@ -678,6 +809,10 @@ class $AssetsImagesGen {
   /// File path: assets/images/sweethies.png
   AssetGenImage get sweethies =>
       const AssetGenImage('assets/images/sweethies.png');
+
+  /// File path: assets/images/third_s-question.png
+  AssetGenImage get thirdSQuestion =>
+      const AssetGenImage('assets/images/third_s-question.png');
 
   /// File path: assets/images/time-cook.png
   AssetGenImage get timeCook =>
@@ -696,6 +831,9 @@ class $AssetsImagesGen {
   /// File path: assets/images/toospicy.png
   AssetGenImage get toospicy =>
       const AssetGenImage('assets/images/toospicy.png');
+
+  /// File path: assets/images/tree.png
+  AssetGenImage get tree => const AssetGenImage('assets/images/tree.png');
 
   /// File path: assets/images/trip.png
   AssetGenImage get trip => const AssetGenImage('assets/images/trip.png');
@@ -754,6 +892,10 @@ class $AssetsImagesGen {
   AssetGenImage get waterSizePlus =>
       const AssetGenImage('assets/images/water_size_plus.png');
 
+  /// File path: assets/images/weakness.png
+  AssetGenImage get weakness =>
+      const AssetGenImage('assets/images/weakness.png');
+
   /// File path: assets/images/weigher.png
   AssetGenImage get weigher => const AssetGenImage('assets/images/weigher.png');
 
@@ -763,6 +905,16 @@ class $AssetsImagesGen {
 
   /// File path: assets/images/woman.png
   AssetGenImage get woman => const AssetGenImage('assets/images/woman.png');
+
+  /// File path: assets/images/world.png
+  AssetGenImage get world => const AssetGenImage('assets/images/world.png');
+
+  /// File path: assets/images/yellow_lightning.png
+  AssetGenImage get yellowLightning =>
+      const AssetGenImage('assets/images/yellow_lightning.png');
+
+  /// File path: assets/images/zzz.png
+  AssetGenImage get zzz => const AssetGenImage('assets/images/zzz.png');
 
   /// List of all assets
   List<AssetGenImage> get values => [
@@ -774,6 +926,8 @@ class $AssetsImagesGen {
     appIcon,
     aDebugBar,
     aiChat,
+    analytics,
+    apple,
     avacado,
     beans,
     blood,
@@ -789,10 +943,12 @@ class $AssetsImagesGen {
     challenge,
     cheese,
     chicken,
+    clock,
     confidence,
     confusing,
     dairy,
     date,
+    dizzinies,
     dumble,
     eggplant,
     eggs,
@@ -802,17 +958,31 @@ class $AssetsImagesGen {
     fastingChallengeUser1,
     fastingChallengeUser2,
     fastingChallengeUser3,
+    fatigue,
+    firstQuestion,
     fish,
     fork,
     fruit,
+    fullCheck,
+    good,
+    goodv2,
     greenApple,
     greenTick,
+    greenTick3d,
+    greenTickFilled,
     healty,
+    highCarb,
+    highCarbv2,
     home,
     hungerTracker,
     insights,
+    kingSl,
     lawCarb,
+    lightning,
+    listenYourBody,
     loginv2,
+    lowCarb,
+    lowCarbv2,
     man,
     mascotChat,
     mascotChatPp,
@@ -821,20 +991,32 @@ class $AssetsImagesGen {
     mascotHi,
     mascotHiWater,
     mascotMetabolic,
+    mascotSearch,
     mealRecordEmoji,
     meat,
     mediterrian,
+    meh,
+    mehv2,
     metabolic,
+    mixed,
+    mixedv2,
+    mochiWorlV2,
+    mood,
     motivation,
     mushroom,
+    nausea,
     nonBinary,
     noodles,
+    notSure,
+    notSurev2,
+    nothingPhysical,
     notificatio,
     notificationEmptyBell,
     nuts,
     olives,
     onion,
     orangeBell,
+    orangeBellv2,
     pasta,
     pescatarian,
     plans,
@@ -847,22 +1029,28 @@ class $AssetsImagesGen {
     progressHead,
     restrictive,
     rice,
+    riiight,
     salata,
+    secondQuestion,
     seeStar,
     seefood,
+    solarPenBold1,
     solarPenBold,
     solarVerifiedCheckBold,
     spicy,
     star,
     steps,
+    stomach,
     streak,
     streakFlame,
     sweethies,
+    thirdSQuestion,
     timeCook,
     tirtil,
     tongue,
     tonguev2,
     toospicy,
+    tree,
     trip,
     unhappy,
     unhappyv2,
@@ -878,9 +1066,13 @@ class $AssetsImagesGen {
     waterProgressHighlight,
     waterProgressWave,
     waterSizePlus,
+    weakness,
     weigher,
     weigher2,
     woman,
+    world,
+    yellowLightning,
+    zzz,
   ];
 }
 
