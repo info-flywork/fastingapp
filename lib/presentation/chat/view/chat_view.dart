@@ -85,10 +85,7 @@ class _ChatViewState extends State<ChatView> {
         ),
         const SizedBox(height: 24),
         for (final key in _suggestions) ...[
-          _SuggestionChip(
-            label: key.tr(),
-            onTap: () => _onSuggestionTap(key),
-          ),
+          _SuggestionChip(label: key.tr(), onTap: () => _onSuggestionTap(key)),
           const SizedBox(height: 10),
         ],
       ],

@@ -318,6 +318,66 @@
     "opt_fatigue": "Müdigkeit",
     "opt_nothing": "Nichts Körperliches"
   },
+  "hunger_fourth_question_page": {
+    "title_line1": "Wonach hast du",
+    "title_line2": "gerade richtig",
+    "title_line3": "Lust?",
+    "opt_almost_any": "Fast alles",
+    "opt_sweet": "Etwas Süßes",
+    "opt_fast_food": "Fast Food / Salziges",
+    "opt_not_sure": "Unsicher",
+    "result": "Mein Ergebnis"
+  },
+  "hunger_result_page": {
+    "physical_badge": "KÖRPERLICHER HUNGER",
+    "physical_title": "Dein Körper braucht wahrscheinlich Essen.",
+    "physical_body": "Deine Antworten deuten auf körperlichen Hunger hin. Zeit für etwas Ausgewogenes.",
+    "physical_rec_title": "Mochis Empfehlungen",
+    "physical_rec_1": "Wähle eine nahrhafte Mahlzeit",
+    "physical_rec_2": "Protein, Ballaststoffe und gesunde Fette",
+    "physical_rec_3": "Achtsam essen und genießen",
+    "emotional_badge": "EMOTIONALER HUNGER",
+    "emotional_title": "Das könnte emotionaler Hunger sein.",
+    "emotional_body": "Deine Antworten deuten eher auf Verlangen, Langeweile oder Emotion als auf körperlichen Hunger hin.",
+    "emotional_rec_title": "Mochis sanfte Tipps",
+    "emotional_rec_1": "Trink etwas Wasser",
+    "emotional_rec_2": "Mach 5 Minuten Pause",
+    "emotional_rec_3": "Kurze Atemübung machen",
+    "emotional_rec_4": "Sprich mit Mochi, wenn du Support willst",
+    "primary": "Log this hunger",
+    "secondary": "Mit Mochi sprechen"
+  },
+  "hunger_log_page": {
+    "title_line1": "In deinem Tracker",
+    "title_line2": "speichern",
+    "subtitle": "So versteht Mochi deine Muster mit der Zeit besser",
+    "hunger_type": "Hungerart",
+    "type_physical": "Körperlicher Hunger",
+    "type_emotional": "Emotionaler Hunger",
+    "time": "Zeit",
+    "today": "Heute",
+    "notes": "Notizen (optional)",
+    "notes_hint": "Wie fühlst du dich? Was geht dir durch den Kopf?",
+    "save": "Eintrag speichern",
+    "skip": "Für jetzt überspringen"
+  },
+  "hunger_success_page": {
+    "title": "Super gemacht!",
+    "body": "Du bist besser im Einklang mit deinem Körper. Jeder Check-in hilft dir, gesündere Gewohnheiten aufzubauen! 💚",
+    "insights": "Sieh deine Hungermuster in den Insights",
+    "home": "Zurück zur Startseite"
+  },
+  "hunger_history_log_page": {
+    "title": "Hunger-Log",
+    "subtitle": "Verstehe deinen Hunger, Check-in für Check-in",
+    "checkins_today": "{count} Check-ins heute",
+    "checkins_breakdown": "{physical} Körperlich - {emotional} Emotional",
+    "filter_all": "Alle",
+    "filter_physical": "Körperlich",
+    "filter_emotional": "Emotional",
+    "today": "Heute",
+    "log": "Hunger loggen"
+  },
   "meal_records_page": {
     "today": "Heute",
     "yesterday": "Gestern",

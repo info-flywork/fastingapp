@@ -11,6 +11,6 @@ mixin HungerCheckViewMixin on State<HungerCheckView> {
   }
 
   void onFullCheckTapped() {
-    // Full check detay kaydı — sonraki adım.
+    context.pushNamed(RoutePaths.hungerHistoryLog.name);
   }
 }

@@ -1918,4 +1918,228 @@ abstract final class AppTextStyles {
 
   /// Tip banner text — same as card meta
   static TextStyle get hungerCheckTip => hungerCheckCardMeta;
+
+  /// Result badge — 16 / Bold / 36
+  static TextStyle get hungerResultBadge => const TextStyle(
+    fontFamily: FontFamily.sFProDisplay,
+    fontWeight: FontWeight.w700,
+    fontSize: 16,
+    height: 36 / 16,
+    letterSpacing: 16 * -0.02,
+  );
+
+  /// Result headline — 32 / Bold / 36
+  static TextStyle get hungerResultTitle => const TextStyle(
+    fontFamily: FontFamily.sFProDisplay,
+    fontWeight: FontWeight.w700,
+    fontSize: 32,
+    height: 36 / 32,
+    letterSpacing: 32 * -0.02,
+    color: ColorName.colorTitle,
+  );
+
+  /// Result body — 16 / Medium / 20 / 60%
+  static TextStyle get hungerResultBody => TextStyle(
+    fontFamily: FontFamily.sFProDisplay,
+    fontWeight: FontWeight.w500,
+    fontSize: 16,
+    height: 20 / 16,
+    letterSpacing: 16 * -0.02,
+    color: ColorName.colorSubtitle.withValues(alpha: 0.6),
+  );
+
+  /// Result rec title — 16 / Semibold / 20
+  static TextStyle get hungerResultRecTitle => const TextStyle(
+    fontFamily: FontFamily.sFProDisplay,
+    fontWeight: FontWeight.w600,
+    fontSize: 16,
+    height: 20 / 16,
+    letterSpacing: 16 * -0.02,
+  );
+
+  /// Result rec item — 16 / Semibold / 20
+  static TextStyle get hungerResultRecItem => const TextStyle(
+    fontFamily: FontFamily.sFProDisplay,
+    fontWeight: FontWeight.w600,
+    fontSize: 16,
+    height: 20 / 16,
+    letterSpacing: 16 * -0.02,
+    color: ColorName.colorBlack,
+  );
+
+  /// Result secondary CTA — 16 / Medium / 20
+  static TextStyle get hungerResultSecondary => const TextStyle(
+    fontFamily: FontFamily.sFProDisplay,
+    fontWeight: FontWeight.w500,
+    fontSize: 16,
+    height: 20 / 16,
+    letterSpacing: 16 * -0.02,
+    color: ColorName.colorBlack,
+  );
+
+  /// Log page subtitle — 16 / Medium / 60%
+  static TextStyle get hungerLogSubtitle => TextStyle(
+    fontFamily: FontFamily.sFProDisplay,
+    fontWeight: FontWeight.w500,
+    fontSize: 16,
+    height: 20 / 16,
+    letterSpacing: 16 * -0.015,
+    color: ColorName.colorSubtitle.withValues(alpha: 0.6),
+  );
+
+  /// Log card label — 15 / Medium / 60%
+  static TextStyle get hungerLogCardLabel => TextStyle(
+    fontFamily: FontFamily.sFProDisplay,
+    fontWeight: FontWeight.w500,
+    fontSize: 15,
+    height: 20 / 15,
+    letterSpacing: 15 * -0.015,
+    color: ColorName.colorSubtitle.withValues(alpha: 0.6),
+  );
+
+  /// Log card value — 18 / Semibold
+  static TextStyle get hungerLogCardValue => const TextStyle(
+    fontFamily: FontFamily.sFProDisplay,
+    fontWeight: FontWeight.w600,
+    fontSize: 18,
+    height: 24 / 18,
+    letterSpacing: 18 * -0.015,
+    color: ColorName.colorTitle,
+  );
+
+  /// Notes hint — 15 / Medium / #9A9B9C
+  static TextStyle get hungerLogNotesHint => const TextStyle(
+    fontFamily: FontFamily.sFProDisplay,
+    fontWeight: FontWeight.w500,
+    fontSize: 15,
+    height: 20 / 15,
+    letterSpacing: 15 * -0.015,
+    color: ColorName.colorHungerNotesHint,
+  );
+
+  /// Notes input — 15 / Medium
+  static TextStyle get hungerLogNotesInput => const TextStyle(
+    fontFamily: FontFamily.sFProDisplay,
+    fontWeight: FontWeight.w500,
+    fontSize: 15,
+    height: 20 / 15,
+    letterSpacing: 15 * -0.015,
+    color: ColorName.colorTitle,
+  );
+
+  /// Success insights card text — 20 / Medium
+  static TextStyle get hungerSuccessInsights => const TextStyle(
+    fontFamily: FontFamily.sFProDisplay,
+    fontWeight: FontWeight.w500,
+    fontSize: 20,
+    height: 24 / 20,
+    letterSpacing: 20 * -0.02,
+    color: ColorName.colorBlack,
+  );
+
+  /// History log title — 36 / Bold
+  static TextStyle get hungerHistoryLogTitle => const TextStyle(
+    fontFamily: FontFamily.sFProDisplay,
+    fontWeight: FontWeight.w700,
+    fontSize: 36,
+    height: 36 / 36,
+    letterSpacing: 36 * -0.02,
+    color: ColorName.colorTitle,
+  );
+
+  /// History log subtitle — 16 / Medium / 35%
+  static TextStyle get hungerHistoryLogSubtitle => TextStyle(
+    fontFamily: FontFamily.sFProDisplay,
+    fontWeight: FontWeight.w500,
+    fontSize: 16,
+    height: 24 / 16,
+    letterSpacing: 16 * -0.02,
+    color: ColorName.colorTitle.withValues(alpha: 0.35),
+  );
+
+  /// Weekday label — 12 / Medium / 60%
+  static TextStyle get hungerHistoryWeekday => TextStyle(
+    fontFamily: FontFamily.sFProDisplay,
+    fontWeight: FontWeight.w500,
+    fontSize: 12,
+    height: 16 / 12,
+    letterSpacing: 12 * -0.015,
+    color: ColorName.colorSubtitle.withValues(alpha: 0.6),
+  );
+
+  /// Day number — 14 / Semibold
+  static TextStyle get hungerHistoryDay => const TextStyle(
+    fontFamily: FontFamily.sFProDisplay,
+    fontWeight: FontWeight.w600,
+    fontSize: 14,
+    height: 18 / 14,
+    letterSpacing: 14 * -0.015,
+    color: ColorName.colorTitle,
+  );
+
+  /// Hours pill active — 12 / Semibold white
+  static TextStyle get hungerHistoryHoursActive => const TextStyle(
+    fontFamily: FontFamily.sFProDisplay,
+    fontWeight: FontWeight.w600,
+    fontSize: 12,
+    height: 16 / 12,
+    color: ColorName.colorWhite,
+  );
+
+  /// Hours pill idle — 12 / Medium
+  static TextStyle get hungerHistoryHoursIdle => TextStyle(
+    fontFamily: FontFamily.sFProDisplay,
+    fontWeight: FontWeight.w500,
+    fontSize: 12,
+    height: 16 / 12,
+    color: ColorName.colorSubtitle.withValues(alpha: 0.5),
+  );
+
+  /// Check-ins title — 16 / Medium
+  static TextStyle get hungerHistoryCheckinsTitle => const TextStyle(
+    fontFamily: FontFamily.sFProDisplay,
+    fontWeight: FontWeight.w500,
+    fontSize: 16,
+    height: 20 / 16,
+    letterSpacing: 16 * -0.015,
+    color: ColorName.colorBlack,
+  );
+
+  /// Check-ins sub — 12 / Medium / 60%
+  static TextStyle get hungerHistoryCheckinsSub => TextStyle(
+    fontFamily: FontFamily.sFProDisplay,
+    fontWeight: FontWeight.w500,
+    fontSize: 12,
+    height: 20 / 12,
+    letterSpacing: 12 * -0.015,
+    color: ColorName.colorSubtitle.withValues(alpha: 0.6),
+  );
+
+  /// Filter active — 14 / Semibold
+  static TextStyle get hungerHistoryFilterActive => const TextStyle(
+    fontFamily: FontFamily.sFProDisplay,
+    fontWeight: FontWeight.w600,
+    fontSize: 14,
+    height: 18 / 14,
+    color: ColorName.colorTitle,
+  );
+
+  /// Filter idle — 14 / Medium / 60%
+  static TextStyle get hungerHistoryFilterIdle => TextStyle(
+    fontFamily: FontFamily.sFProDisplay,
+    fontWeight: FontWeight.w500,
+    fontSize: 14,
+    height: 18 / 14,
+    color: ColorName.colorSubtitle.withValues(alpha: 0.6),
+  );
+
+  /// Section title Today — 18 / Semibold
+  static TextStyle get hungerHistorySectionTitle => const TextStyle(
+    fontFamily: FontFamily.sFProDisplay,
+    fontWeight: FontWeight.w600,
+    fontSize: 18,
+    height: 24 / 18,
+    letterSpacing: -0.5,
+    color: ColorName.colorTitle,
+  );
 }

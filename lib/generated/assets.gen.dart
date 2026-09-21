@@ -392,6 +392,10 @@ class $AssetsImagesGen {
   /// File path: assets/images/ai_chat.png
   AssetGenImage get aiChat => const AssetGenImage('assets/images/ai_chat.png');
 
+  /// File path: assets/images/almost_any.png
+  AssetGenImage get almostAny =>
+      const AssetGenImage('assets/images/almost_any.png');
+
   /// File path: assets/images/analytics.png
   AssetGenImage get analytics =>
       const AssetGenImage('assets/images/analytics.png');
@@ -407,6 +411,14 @@ class $AssetsImagesGen {
 
   /// File path: assets/images/blood.png
   AssetGenImage get blood => const AssetGenImage('assets/images/blood.png');
+
+  /// File path: assets/images/blue_book.png
+  AssetGenImage get blueBook =>
+      const AssetGenImage('assets/images/blue_book.png');
+
+  /// File path: assets/images/blue_clock.png
+  AssetGenImage get blueClock =>
+      const AssetGenImage('assets/images/blue_clock.png');
 
   /// File path: assets/images/bowel.png
   AssetGenImage get bowel => const AssetGenImage('assets/images/bowel.png');
@@ -469,6 +481,9 @@ class $AssetsImagesGen {
   AssetGenImage get dizzinies =>
       const AssetGenImage('assets/images/dizzinies.png');
 
+  /// File path: assets/images/donut.png
+  AssetGenImage get donut => const AssetGenImage('assets/images/donut.png');
+
   /// File path: assets/images/dumble.png
   AssetGenImage get dumble => const AssetGenImage('assets/images/dumble.png');
 
@@ -478,6 +493,10 @@ class $AssetsImagesGen {
 
   /// File path: assets/images/eggs.png
   AssetGenImage get eggs => const AssetGenImage('assets/images/eggs.png');
+
+  /// File path: assets/images/emotional_hunger.png
+  AssetGenImage get emotionalHunger =>
+      const AssetGenImage('assets/images/emotional_hunger.png');
 
   /// File path: assets/images/everything.png
   AssetGenImage get everything =>
@@ -515,6 +534,14 @@ class $AssetsImagesGen {
   /// File path: assets/images/fork.png
   AssetGenImage get fork => const AssetGenImage('assets/images/fork.png');
 
+  /// File path: assets/images/fourth_question.png
+  AssetGenImage get fourthQuestion =>
+      const AssetGenImage('assets/images/fourth_question.png');
+
+  /// File path: assets/images/fried_potato.png
+  AssetGenImage get friedPotato =>
+      const AssetGenImage('assets/images/fried_potato.png');
+
   /// File path: assets/images/fruit.png
   AssetGenImage get fruit => const AssetGenImage('assets/images/fruit.png');
 
@@ -527,6 +554,10 @@ class $AssetsImagesGen {
 
   /// File path: assets/images/goodv2.png
   AssetGenImage get goodv2 => const AssetGenImage('assets/images/goodv2.png');
+
+  /// File path: assets/images/great_job.png
+  AssetGenImage get greatJob =>
+      const AssetGenImage('assets/images/great_job.png');
 
   /// File path: assets/images/green_apple.png
   AssetGenImage get greenApple =>
@@ -547,6 +578,9 @@ class $AssetsImagesGen {
   /// File path: assets/images/healty.png
   AssetGenImage get healty => const AssetGenImage('assets/images/healty.png');
 
+  /// File path: assets/images/hearttt.png
+  AssetGenImage get hearttt => const AssetGenImage('assets/images/hearttt.png');
+
   /// File path: assets/images/high_carb.png
   AssetGenImage get highCarb =>
       const AssetGenImage('assets/images/high_carb.png');
@@ -562,9 +596,17 @@ class $AssetsImagesGen {
   AssetGenImage get hungerTracker =>
       const AssetGenImage('assets/images/hunger-tracker.png');
 
+  /// File path: assets/images/hunger_log.png
+  AssetGenImage get hungerLog =>
+      const AssetGenImage('assets/images/hunger_log.png');
+
   /// File path: assets/images/insights.png
   AssetGenImage get insights =>
       const AssetGenImage('assets/images/insights.png');
+
+  /// File path: assets/images/insightss.png
+  AssetGenImage get insightss =>
+      const AssetGenImage('assets/images/insightss.png');
 
   /// File path: assets/images/king_sl.png
   AssetGenImage get kingSl => const AssetGenImage('assets/images/king_sl.png');
@@ -573,6 +615,9 @@ class $AssetsImagesGen {
   AssetGenImage get lawCarb =>
       const AssetGenImage('assets/images/law-carb.png');
 
+  /// File path: assets/images/leaf.png
+  AssetGenImage get leaf => const AssetGenImage('assets/images/leaf.png');
+
   /// File path: assets/images/lightning.png
   AssetGenImage get lightning =>
       const AssetGenImage('assets/images/lightning.png');
@@ -580,6 +625,10 @@ class $AssetsImagesGen {
   /// File path: assets/images/listen_your_body.png
   AssetGenImage get listenYourBody =>
       const AssetGenImage('assets/images/listen_your_body.png');
+
+  /// File path: assets/images/log_hunger.png
+  AssetGenImage get logHunger =>
+      const AssetGenImage('assets/images/log_hunger.png');
 
   /// File path: assets/images/loginv2.png
   AssetGenImage get loginv2 => const AssetGenImage('assets/images/loginv2.png');
@@ -723,6 +772,10 @@ class $AssetsImagesGen {
   AssetGenImage get pescatarian =>
       const AssetGenImage('assets/images/pescatarian.png');
 
+  /// File path: assets/images/physical_hunger.png
+  AssetGenImage get physicalHunger =>
+      const AssetGenImage('assets/images/physical_hunger.png');
+
   /// File path: assets/images/plans.png
   AssetGenImage get plans => const AssetGenImage('assets/images/plans.png');
 
@@ -835,6 +888,12 @@ class $AssetsImagesGen {
   /// File path: assets/images/tree.png
   AssetGenImage get tree => const AssetGenImage('assets/images/tree.png');
 
+  /// File path: assets/images/tree2.png
+  AssetGenImage get tree2 => const AssetGenImage('assets/images/tree2.png');
+
+  /// File path: assets/images/tree3.png
+  AssetGenImage get tree3 => const AssetGenImage('assets/images/tree3.png');
+
   /// File path: assets/images/trip.png
   AssetGenImage get trip => const AssetGenImage('assets/images/trip.png');
 
@@ -926,11 +985,14 @@ class $AssetsImagesGen {
     appIcon,
     aDebugBar,
     aiChat,
+    almostAny,
     analytics,
     apple,
     avacado,
     beans,
     blood,
+    blueBook,
+    blueClock,
     bowel,
     brain,
     brocc,
@@ -949,9 +1011,11 @@ class $AssetsImagesGen {
     dairy,
     date,
     dizzinies,
+    donut,
     dumble,
     eggplant,
     eggs,
+    emotionalHunger,
     everything,
     fasting,
     fastingChallenge,
@@ -962,24 +1026,32 @@ class $AssetsImagesGen {
     firstQuestion,
     fish,
     fork,
+    fourthQuestion,
+    friedPotato,
     fruit,
     fullCheck,
     good,
     goodv2,
+    greatJob,
     greenApple,
     greenTick,
     greenTick3d,
     greenTickFilled,
     healty,
+    hearttt,
     highCarb,
     highCarbv2,
     home,
     hungerTracker,
+    hungerLog,
     insights,
+    insightss,
     kingSl,
     lawCarb,
+    leaf,
     lightning,
     listenYourBody,
+    logHunger,
     loginv2,
     lowCarb,
     lowCarbv2,
@@ -1019,6 +1091,7 @@ class $AssetsImagesGen {
     orangeBellv2,
     pasta,
     pescatarian,
+    physicalHunger,
     plans,
     plant,
     pleteu,
@@ -1051,6 +1124,8 @@ class $AssetsImagesGen {
     tonguev2,
     toospicy,
     tree,
+    tree2,
+    tree3,
     trip,
     unhappy,
     unhappyv2,

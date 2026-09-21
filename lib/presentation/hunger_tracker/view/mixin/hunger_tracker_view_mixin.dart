@@ -26,7 +26,7 @@ mixin HungerTrackerViewMixin on State<HungerTrackerView> {
   void onHungryNowTapped() => _openHungerCheck();
 
   void onHistoryTapped() {
-    // Geçmiş ekranı için yer tutucu.
+    context.pushNamed(RoutePaths.hungerHistoryLog.name);
   }
 
   void onNextTapped() {

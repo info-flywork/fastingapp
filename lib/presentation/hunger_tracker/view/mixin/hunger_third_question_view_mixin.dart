@@ -21,6 +21,9 @@ mixin HungerThirdQuestionViewMixin on State<HungerThirdQuestionView> {
 
   void onNextTapped() {
     if (selected.isEmpty) return;
-    // Dördüncü soru — yer tutucu.
+    context.pushNamed(
+      RoutePaths.hungerFourthQuestion.name,
+      extra: widget.args,
+    );
   }
 }

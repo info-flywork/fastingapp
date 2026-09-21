@@ -158,10 +158,13 @@ final class _MealEntryCard extends StatelessWidget {
             ),
           ),
           const SizedBox(width: 8),
-          Assets.images.mealRecordEmoji.image(
-            width: 36,
-            height: 36,
-            fit: BoxFit.contain,
+          Padding(
+            padding: const EdgeInsets.only(top: 24),
+            child: Assets.images.mealRecordEmoji.image(
+              width: 36,
+              height: 36,
+              fit: BoxFit.contain,
+            ),
           ),
         ],
       ),

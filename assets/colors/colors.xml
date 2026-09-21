@@ -79,6 +79,16 @@
   <color name="color_hunger_history_bg">#F0F7FE</color>
   <color name="color_hunger_tip_bg">#ECF5E7</color>
   <color name="color_meal_positive">#7ACE6B</color>
+  <color name="color_emotional_hunger_bg">#FCF5F2</color>
+  <color name="color_hunger_result_card">#FFFDFC</color>
+  <color name="color_hunger_notes_field">#F6F7F8</color>
+  <color name="color_hunger_notes_hint">#9A9B9C</color>
+  <color name="color_hunger_insights_card">#F2F8FC</color>
+  <color name="color_physical_hunger_badge_text">#54894B</color>
+  <color name="color_physical_hunger_rec_title">#53AB43</color>
+  <color name="color_emotional_hunger_badge">#CE6B6B</color>
+  <color name="color_emotional_hunger_badge_text">#B23333</color>
+  <color name="color_emotional_hunger_rec_title">#AB4343</color>
   <color name="color_plan_chip_breakfast_bg">#EAF5FE</color>
   <color name="color_plan_chip_breakfast_text">#6A9CF8</color>
   <color name="color_plan_chip_dinner_bg">#FCF5E8</color>

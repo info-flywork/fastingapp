@@ -318,6 +318,66 @@
     "opt_fatigue": "Fatigue",
     "opt_nothing": "Nothing physical"
   },
+  "hunger_fourth_question_page": {
+    "title_line1": "What kind of food",
+    "title_line2": "are you craving",
+    "title_line3": "right now?",
+    "opt_almost_any": "Almost anything",
+    "opt_sweet": "Something sweet",
+    "opt_fast_food": "Fast food / salty foods",
+    "opt_not_sure": "Not Sure",
+    "result": "Get My Result"
+  },
+  "hunger_result_page": {
+    "physical_badge": "PHYSICAL HUNGER",
+    "physical_title": "Your body is probably asking for food.",
+    "physical_body": "Your answers suggest this is likely physical hunger. It’s a good time to nourish your body with something balanced",
+    "physical_rec_title": "Mochi’s Recommendations",
+    "physical_rec_1": "Choose a wholesome meal",
+    "physical_rec_2": "Include protein, fiber and healthy fats",
+    "physical_rec_3": "Eat mindfully and enjoy",
+    "emotional_badge": "EMOTIONAL HUNGER",
+    "emotional_title": "This might be emotional hunger.",
+    "emotional_body": "Your answers suggest this may be more about a craving, boredom or emotion than physical hunger.",
+    "emotional_rec_title": "Mochi’s Gentle Suggestions",
+    "emotional_rec_1": "Try drinking some water",
+    "emotional_rec_2": "Take a 5-minute break",
+    "emotional_rec_3": "Do a quick breathing exercise",
+    "emotional_rec_4": "Talk to Mochi if you want support",
+    "primary": "Log this hunger",
+    "secondary": "Talk to Mochi"
+  },
+  "hunger_log_page": {
+    "title_line1": "Save to your",
+    "title_line2": "tracker",
+    "subtitle": "This will help Mochi understand your patterns over time",
+    "hunger_type": "Hunger Type",
+    "type_physical": "Physical Hunger",
+    "type_emotional": "Emotional Hunger",
+    "time": "Time",
+    "today": "Today",
+    "notes": "Notes (optional)",
+    "notes_hint": "How are you feeling? What’s on your mind?",
+    "save": "Save Entry",
+    "skip": "Skip for now"
+  },
+  "hunger_success_page": {
+    "title": "Great job!",
+    "body": "You’re more in tune with your body. Every check-in helps you build healthier habits! 💚",
+    "insights": "See your hunger patterns in insights",
+    "home": "Back to Home"
+  },
+  "hunger_history_log_page": {
+    "title": "Hunger Log",
+    "subtitle": "Understand your hunger, on check-in at a time",
+    "checkins_today": "{count} check-ins today",
+    "checkins_breakdown": "{physical} Physical - {emotional} Emotional",
+    "filter_all": "All",
+    "filter_physical": "Physical",
+    "filter_emotional": "Emotional",
+    "today": "Today",
+    "log": "Log My Hunger"
+  },
   "meal_records_page": {
     "today": "Today",
     "yesterday": "Yesterday",

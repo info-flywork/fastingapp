@@ -318,6 +318,66 @@
     "opt_fatigue": "Yorgunluk",
     "opt_nothing": "Bir şey yok"
   },
+  "hunger_fourth_question_page": {
+    "title_line1": "Şu an ne tür",
+    "title_line2": "bir yemek",
+    "title_line3": "istiyorsun?",
+    "opt_almost_any": "Neredeyse her şey",
+    "opt_sweet": "Tatlı bir şey",
+    "opt_fast_food": "Fast food / tuzlu",
+    "opt_not_sure": "Emin değilim",
+    "result": "Sonucumu Gör"
+  },
+  "hunger_result_page": {
+    "physical_badge": "FİZİKSEL AÇLIK",
+    "physical_title": "Bedenin muhtemelen yemek istiyor.",
+    "physical_body": "Cevapların bunun muhtemelen fiziksel açlık olduğunu gösteriyor. Dengeli bir şeylerle bedenini beslemek için iyi bir zaman.",
+    "physical_rec_title": "Mochi’nin Önerileri",
+    "physical_rec_1": "Sağlıklı bir öğün seç",
+    "physical_rec_2": "Protein, lif ve sağlıklı yağlar ekle",
+    "physical_rec_3": "Bilinçli ye ve tadını çıkar",
+    "emotional_badge": "DUYGUSAL AÇLIK",
+    "emotional_title": "Bu duygusal açlık olabilir.",
+    "emotional_body": "Cevapların bunun fiziksel açlıktan çok bir istek, sıkıntı veya duyguyla ilgili olabileceğini gösteriyor.",
+    "emotional_rec_title": "Mochi’nin Nazik Önerileri",
+    "emotional_rec_1": "Biraz su içmeyi dene",
+    "emotional_rec_2": "5 dakikalık bir mola ver",
+    "emotional_rec_3": "Hızlı bir nefes egzersizi yap",
+    "emotional_rec_4": "Destek istersen Mochi ile konuş",
+    "primary": "Log this hunger",
+    "secondary": "Mochi ile konuş"
+  },
+  "hunger_log_page": {
+    "title_line1": "Takibine",
+    "title_line2": "kaydet",
+    "subtitle": "Bu, Mochi’nin zamanla\ndesenlerini anlamasına\nyardımcı olur",
+    "hunger_type": "Açlık Tipi",
+    "type_physical": "Fiziksel Açlık",
+    "type_emotional": "Duygusal Açlık",
+    "time": "Zaman",
+    "today": "Bugün",
+    "notes": "Notlar (opsiyonel)",
+    "notes_hint": "Nasıl hissediyorsun? Aklında ne var?",
+    "save": "Kaydı Kaydet",
+    "skip": "Şimdilik geç"
+  },
+  "hunger_success_page": {
+    "title": "Harika iş!",
+    "body": "Bedeninle daha uyumlusun. Her check-in daha sağlıklı alışkanlıklar kurmana yardımcı olur! 💚",
+    "insights": "Açlık desenlerini içgörülerde gör",
+    "home": "Ana Sayfaya Dön"
+  },
+  "hunger_history_log_page": {
+    "title": "Açlık Günlüğü",
+    "subtitle": "Açlığını anla, her check-in’de bir adım",
+    "checkins_today": "Bugün {count} check-in",
+    "checkins_breakdown": "{physical} Fiziksel - {emotional} Duygusal",
+    "filter_all": "Tümü",
+    "filter_physical": "Fiziksel",
+    "filter_emotional": "Duygusal",
+    "today": "Bugün",
+    "log": "Açlığımı Kaydet"
+  },
   "meal_records_page": {
     "today": "Bugün",
     "yesterday": "Dün",

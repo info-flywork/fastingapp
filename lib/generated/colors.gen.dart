@@ -78,6 +78,18 @@ abstract final class ColorName {
   /// Color: #C8DBC5
   static const Color colorCtaGradientTop = Color(0xFFC8DBC5);
 
+  /// Color: #CE6B6B
+  static const Color colorEmotionalHungerBadge = Color(0xFFCE6B6B);
+
+  /// Color: #B23333
+  static const Color colorEmotionalHungerBadgeText = Color(0xFFB23333);
+
+  /// Color: #FCF5F2
+  static const Color colorEmotionalHungerBg = Color(0xFFFCF5F2);
+
+  /// Color: #AB4343
+  static const Color colorEmotionalHungerRecTitle = Color(0xFFAB4343);
+
   /// Color: #E30A17
   static const Color colorErrorRed = Color(0xFFE30A17);
 
@@ -98,6 +110,18 @@ abstract final class ColorName {
 
   /// Color: #F0F7FE
   static const Color colorHungerHistoryBg = Color(0xFFF0F7FE);
+
+  /// Color: #F2F8FC
+  static const Color colorHungerInsightsCard = Color(0xFFF2F8FC);
+
+  /// Color: #F6F7F8
+  static const Color colorHungerNotesField = Color(0xFFF6F7F8);
+
+  /// Color: #9A9B9C
+  static const Color colorHungerNotesHint = Color(0xFF9A9B9C);
+
+  /// Color: #FFFDFC
+  static const Color colorHungerResultCard = Color(0xFFFFFDFC);
 
   /// Color: #ECF5E7
   static const Color colorHungerTipBg = Color(0xFFECF5E7);
@@ -137,6 +161,12 @@ abstract final class ColorName {
 
   /// Color: #96BD8F
   static const Color colorOptionSelected = Color(0xFF96BD8F);
+
+  /// Color: #54894B
+  static const Color colorPhysicalHungerBadgeText = Color(0xFF54894B);
+
+  /// Color: #53AB43
+  static const Color colorPhysicalHungerRecTitle = Color(0xFF53AB43);
 
   /// Color: #E3E3E3
   static const Color colorPlanArcTrack = Color(0xFFE3E3E3);

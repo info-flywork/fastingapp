@@ -53,10 +53,16 @@ import 'package:fastingapp/presentation/chat/view/chat_view.dart';
 import 'package:fastingapp/presentation/home/bloc/home_bloc.dart';
 import 'package:fastingapp/presentation/home/bloc/home_event.dart';
 import 'package:fastingapp/presentation/home/view/home_view.dart';
+import 'package:fastingapp/presentation/hunger_tracker/hunger_result_type.dart';
 import 'package:fastingapp/presentation/hunger_tracker/hunger_symptom.dart';
 import 'package:fastingapp/presentation/hunger_tracker/view/hunger_check_view.dart';
 import 'package:fastingapp/presentation/hunger_tracker/view/hunger_first_question_view.dart';
+import 'package:fastingapp/presentation/hunger_tracker/view/hunger_fourth_question_view.dart';
+import 'package:fastingapp/presentation/hunger_tracker/view/hunger_history_log_view.dart';
+import 'package:fastingapp/presentation/hunger_tracker/view/hunger_log_view.dart';
+import 'package:fastingapp/presentation/hunger_tracker/view/hunger_result_view.dart';
 import 'package:fastingapp/presentation/hunger_tracker/view/hunger_second_question_view.dart';
+import 'package:fastingapp/presentation/hunger_tracker/view/hunger_success_view.dart';
 import 'package:fastingapp/presentation/hunger_tracker/view/hunger_third_question_view.dart';
 import 'package:fastingapp/presentation/hunger_tracker/view/hunger_tracker_view.dart';
 import 'package:fastingapp/presentation/meal_records/view/meal_detail_view.dart';
@@ -414,6 +420,51 @@ final GoRouter appRouter = GoRouter(
             : const HungerFlowArgs();
         return HungerThirdQuestionView(args: args);
       },
+    ),
+    GoRoute(
+      path: RoutePaths.hungerFourthQuestion.path,
+      name: RoutePaths.hungerFourthQuestion.name,
+      parentNavigatorKey: rootNavigatorKey,
+      builder: (context, state) {
+        final args = state.extra is HungerFlowArgs
+            ? state.extra! as HungerFlowArgs
+            : const HungerFlowArgs();
+        return HungerFourthQuestionView(args: args);
+      },
+    ),
+    GoRoute(
+      path: RoutePaths.hungerResult.path,
+      name: RoutePaths.hungerResult.name,
+      parentNavigatorKey: rootNavigatorKey,
+      builder: (context, state) {
+        final type = state.extra is HungerResultType
+            ? state.extra! as HungerResultType
+            : HungerResultType.physical;
+        return HungerResultView(type: type);
+      },
+    ),
+    GoRoute(
+      path: RoutePaths.hungerLog.path,
+      name: RoutePaths.hungerLog.name,
+      parentNavigatorKey: rootNavigatorKey,
+      builder: (context, state) {
+        final type = state.extra is HungerResultType
+            ? state.extra! as HungerResultType
+            : HungerResultType.physical;
+        return HungerLogView(type: type);
+      },
+    ),
+    GoRoute(
+      path: RoutePaths.hungerSuccess.path,
+      name: RoutePaths.hungerSuccess.name,
+      parentNavigatorKey: rootNavigatorKey,
+      builder: (context, state) => const HungerSuccessView(),
+    ),
+    GoRoute(
+      path: RoutePaths.hungerHistoryLog.path,
+      name: RoutePaths.hungerHistoryLog.name,
+      parentNavigatorKey: rootNavigatorKey,
+      builder: (context, state) => const HungerHistoryLogView(),
     ),
     GoRoute(
       path: RoutePaths.planDetail.path,

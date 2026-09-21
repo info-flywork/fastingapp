@@ -55,6 +55,35 @@ final class AppButtonDecoration {
     );
   }
 
+  /// Hunger result — Figma 48h pill (#C8DBC5 → #76AB6E).
+  factory AppButtonDecoration.hungerResult() {
+    return AppButtonDecoration(
+      gradient: const LinearGradient(
+        begin: Alignment.topCenter,
+        end: Alignment.bottomCenter,
+        colors: [
+          ColorName.colorCtaGradientTop,
+          ColorName.colorCtaGradientBottom,
+        ],
+      ),
+      borderColor: ColorName.colorWhite.withValues(alpha: 0.15),
+      borderWidth: 1,
+      borderRadius: BorderRadius.circular(99999),
+      height: 48,
+      padding: const EdgeInsets.symmetric(horizontal: 10),
+      gap: 8,
+      innerShadowColor: ColorName.colorWhite.withValues(alpha: 0.55),
+      innerShadowOffset: const Offset(0, 4),
+      innerShadowBlur: 16,
+      labelColor: ColorName.colorWhite,
+      fontFamily: FontFamily.sFProDisplay,
+      fontWeight: FontWeight.w600,
+      defaultFontSize: 18,
+      lineHeight: 22,
+      letterSpacingPercent: -0.02,
+    );
+  }
+
   /// Highlight ekranları: beyaz pill, koyu yazı.
   factory AppButtonDecoration.onLight() {
     return AppButtonDecoration(
