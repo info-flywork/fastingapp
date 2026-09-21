@@ -487,11 +487,14 @@
     "get_premium": "Premium Al",
     "activity_data": "Aktivite & Veri",
     "weight_loss_tracker": "Kilo Takibi",
+    "calories_tracker": "Kalori Takibi",
+    "sleep_tracker": "Uyku Takibi",
     "fasting_history": "Oruç Geçmişi",
     "sync_apple_health": "Apple Health ile Senkronize Et",
     "sync_google_fit": "Google Fit ile Senkronize Et",
     "health_sync_subtitle": "Oruç hatırlatmaları ve streak uyarıları",
     "support_app": "Destek & Uygulama",
+    "insights": "İçgörüler",
     "notification_inbox": "Bildirim Kutusu",
     "language": "Dil",
     "faq": "SSS",
@@ -624,5 +627,21 @@
     "detail_fri": "Cum",
     "detail_sat": "Cmt",
     "detail_sun": "Paz"
+  },
+  "calories_page": {
+    "eaten": "Yenilen {}",
+    "kcal_over": "kcal fazla",
+    "calorie_tracking": "Kalori Takibi",
+    "carbs": "Karbonhidrat",
+    "protein": "Protein",
+    "fat": "Yağ",
+    "protein_tracker": "Protein Tracker",
+    "burned": "Yakılan",
+    "kcal": "kcal",
+    "start": "Başlangıç:",
+    "goal": "Hedef:",
+    "add_daily_manual": "Günlük Manuel Ekle",
+    "manual_value": "{} kcal",
+    "calculate": "Kalori Hesapla"
   }
 }

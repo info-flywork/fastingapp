@@ -25,6 +25,9 @@ final class AppBottomNav extends StatelessWidget {
   static const _mochiIndex = 2;
   static const _barColor = ColorName.colorWhite;
 
+  /// SafeArea altı hariç bar yüksekliği — scroll içerik padding'i için.
+  static const barClearance = _bumpHeight + 10 + _iconSize + 4 + 16;
+
   @override
   Widget build(BuildContext context) {
     final bottom = MediaQuery.paddingOf(context).bottom;
@@ -187,7 +190,7 @@ final class _NavTile extends StatelessWidget {
   }
 }
 
-/// 68px genişlik × 20px yükseklik — geniş daireden kesilmiş bombeli kapak.
+/// 68px genişlik × bombeli kapak — AA fringe'i outset fill ile kapatır.
 final class _NavBarBumpPainter extends CustomPainter {
   const _NavBarBumpPainter({
     required this.bumpWidth,
@@ -204,15 +207,23 @@ final class _NavBarBumpPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final path = _buildPath(size);
+    final fill = Paint()
+      ..color = color
+      ..style = PaintingStyle.fill
+      ..isAntiAlias = true;
+
+    // Beyaz path #F6F6F6 zeminde AA ile gri saçak bırakır.
+    // BlurStyle.solid şekli opak büyütür; saçak zemine karışmadan örtülür.
+    final outset = Paint()
+      ..color = color
+      ..style = PaintingStyle.fill
+      ..isAntiAlias = true
+      ..maskFilter = const MaskFilter.blur(BlurStyle.solid, 1.5);
 
     canvas
-      ..drawShadow(path, ColorName.colorBlack.withValues(alpha: 0.12), 14, true)
-      ..drawPath(
-        path,
-        Paint()
-          ..color = color
-          ..style = PaintingStyle.fill,
-      );
+      ..drawPath(path, outset)
+      ..drawPath(path.shift(const Offset(0, -1)), fill)
+      ..drawPath(path, fill);
   }
 
   Path _buildPath(Size size) {

@@ -2142,4 +2142,74 @@ abstract final class AppTextStyles {
     letterSpacing: -0.5,
     color: ColorName.colorTitle,
   );
+
+  /// Calories header "Eated 3,143" — 16 / Semibold / #76AB6E
+  static TextStyle get caloriesEatenLabel => const TextStyle(
+    fontFamily: FontFamily.sFProDisplay,
+    fontWeight: FontWeight.w600,
+    fontSize: 16,
+    height: 24 / 16,
+    letterSpacing: -0.5,
+    color: ColorName.colorCaloriesEaten,
+  );
+
+  /// Calories hero number — 82 / Semibold / #76AB6E
+  static TextStyle get caloriesHeroValue => const TextStyle(
+    fontFamily: FontFamily.sFProDisplay,
+    fontWeight: FontWeight.w600,
+    fontSize: 82,
+    height: 90 / 82,
+    letterSpacing: -0.5,
+    color: ColorName.colorCaloriesEaten,
+  );
+
+  /// Calories "kcal over" — 16 / Semibold / #84C27A
+  static TextStyle get caloriesOverLabel => const TextStyle(
+    fontFamily: FontFamily.sFProDisplay,
+    fontWeight: FontWeight.w600,
+    fontSize: 16,
+    height: 24 / 16,
+    letterSpacing: -0.5,
+    color: ColorName.colorCaloriesOver,
+  );
+
+  /// Calories card title — 20 / Semibold
+  static TextStyle get caloriesCardTitle => const TextStyle(
+    fontFamily: FontFamily.sFProDisplay,
+    fontWeight: FontWeight.w600,
+    fontSize: 20,
+    height: 28 / 20,
+    letterSpacing: 20 * -0.015,
+    color: ColorName.colorTitle,
+  );
+
+  /// Calories burned value — 28 / Semibold
+  static TextStyle get caloriesBurnedValue => const TextStyle(
+    fontFamily: FontFamily.sFProDisplay,
+    fontWeight: FontWeight.w600,
+    fontSize: 28,
+    height: 36 / 28,
+    letterSpacing: -0.5,
+    color: ColorName.colorTitle,
+  );
+
+  /// Calories burned unit — 14 / Semibold / 60%
+  static TextStyle get caloriesBurnedUnit => TextStyle(
+    fontFamily: FontFamily.sFProDisplay,
+    fontWeight: FontWeight.w600,
+    fontSize: 14,
+    height: 20 / 14,
+    letterSpacing: 14 * -0.015,
+    color: ColorName.colorSubtitle.withValues(alpha: 0.6),
+  );
+
+  /// Macro gauge value — 20 / Semibold
+  static TextStyle get caloriesMacroValue => const TextStyle(
+    fontFamily: FontFamily.sFProDisplay,
+    fontWeight: FontWeight.w600,
+    fontSize: 20,
+    height: 24 / 20,
+    letterSpacing: -0.5,
+    color: ColorName.colorTitle,
+  );
 }

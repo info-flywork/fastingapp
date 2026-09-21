@@ -487,11 +487,14 @@
     "get_premium": "Premium holen",
     "activity_data": "Aktivität & Daten",
     "weight_loss_tracker": "Gewichtsabnahme-Tracker",
+    "calories_tracker": "Kalorien-Tracker",
+    "sleep_tracker": "Schlaf-Tracker",
     "fasting_history": "Fastenverlauf",
     "sync_apple_health": "Mit Apple Health synchronisieren",
     "sync_google_fit": "Mit Google Fit synchronisieren",
     "health_sync_subtitle": "Fasten-Erinnerungen & Streak-Nudges",
     "support_app": "Support & App",
+    "insights": "Einblicke",
     "notification_inbox": "Benachrichtigungs-Posteingang",
     "language": "Sprache",
     "faq": "FAQ",
@@ -624,5 +627,21 @@
     "detail_fri": "Fr",
     "detail_sat": "Sa",
     "detail_sun": "So"
+  },
+  "calories_page": {
+    "eaten": "Gegessen {}",
+    "kcal_over": "kcal darüber",
+    "calorie_tracking": "Kalorien-Tracking",
+    "carbs": "Kohlenhydrate",
+    "protein": "Protein",
+    "fat": "Fett",
+    "protein_tracker": "Protein-Tracker",
+    "burned": "Verbrannt",
+    "kcal": "kcal",
+    "start": "Start:",
+    "goal": "Ziel:",
+    "add_daily_manual": "Täglich manuell hinzufügen",
+    "manual_value": "{} kcal",
+    "calculate": "Kalorien berechnen"
   }
 }

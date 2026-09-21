@@ -37,9 +37,9 @@ final class HomeLoadedBody extends StatelessWidget {
   Widget build(BuildContext context) {
     return SafeArea(
       top: false,
-      bottom: false,
       child: ListView.builder(
         physics: const ClampingScrollPhysics(),
+        padding: const EdgeInsets.only(bottom: AppBottomNav.barClearance),
         // Ekran dışındakiler tutulmasın; tekrar görünce yeniden build.
         addAutomaticKeepAlives: false,
         itemCount: _itemCount,

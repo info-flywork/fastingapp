@@ -54,6 +54,12 @@ abstract final class ColorName {
   /// Color: #1B1B21
   static const Color colorButtonDark = Color(0xFF1B1B21);
 
+  /// Color: #76AB6E
+  static const Color colorCaloriesEaten = Color(0xFF76AB6E);
+
+  /// Color: #84C27A
+  static const Color colorCaloriesOver = Color(0xFF84C27A);
+
   /// Color: #2C2C2E
   static const Color colorChartTooltip = Color(0xFF2C2C2E);
 

@@ -23,9 +23,19 @@ mixin ProfileViewMixin on State<ProfileView> {
 
   void onGetPremium() {}
 
-  void onWeightLossTracker() {}
+  void onWeightLossTracker() {
+    context.pushNamed(RoutePaths.bodyHistory.name);
+  }
+
+  void onCaloriesTracker() {
+    context.pushNamed(RoutePaths.caloriesTracker.name);
+  }
+
+  void onSleepTracker() {}
 
   void onFastingHistory() {}
+
+  void onInsights() {}
 
   void onNotificationInbox() {
     context.pushNamed(RoutePaths.notifications.name);

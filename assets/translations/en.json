@@ -487,11 +487,14 @@
     "get_premium": "Get Premium",
     "activity_data": "Activity & Data",
     "weight_loss_tracker": "Weight Loss Tracker",
+    "calories_tracker": "Calories Tracker",
+    "sleep_tracker": "Sleep Tracker",
     "fasting_history": "Fasting History",
     "sync_apple_health": "Sync with Apple Health",
     "sync_google_fit": "Sync with Google Fit",
     "health_sync_subtitle": "Fasting reminders & streak nudges",
     "support_app": "Support & App",
+    "insights": "Insights",
     "notification_inbox": "Notification Inbox",
     "language": "Language",
     "faq": "FAQ",
@@ -624,5 +627,21 @@
     "detail_fri": "Fri",
     "detail_sat": "Sat",
     "detail_sun": "Sun"
+  },
+  "calories_page": {
+    "eaten": "Eated {}",
+    "kcal_over": "kcal over",
+    "calorie_tracking": "Calorie Tracking",
+    "carbs": "Carbs",
+    "protein": "Protein",
+    "fat": "Fat",
+    "protein_tracker": "Protein Tracker",
+    "burned": "Burned",
+    "kcal": "kcal",
+    "start": "Start:",
+    "goal": "Goal:",
+    "add_daily_manual": "Add Daily Manual",
+    "manual_value": "{} kcal",
+    "calculate": "Calculate Calories"
   }
 }

@@ -20,17 +20,27 @@ final class MainWrapper extends StatelessWidget {
       child: Scaffold(
         backgroundColor:
             isPlansTab ? ColorName.colorWhite : ColorName.colorProfileBack,
-        body: SafeArea(
-          bottom: false,
-          child: navigationShell,
-        ),
-        extendBody: true,
-        bottomNavigationBar: AppBottomNav(
-          currentIndex: navigationShell.currentIndex,
-          onTap: (index) => navigationShell.goBranch(
-            index,
-            initialLocation: index == navigationShell.currentIndex,
-          ),
+        // Scaffold bottomNavigationBar slot'u bazen 1px saçak bırakır;
+        // nav'ı body Stack içinde çiziyoruz.
+        body: Stack(
+          children: [
+            SafeArea(
+              bottom: false,
+              child: navigationShell,
+            ),
+            Positioned(
+              left: 0,
+              right: 0,
+              bottom: 0,
+              child: AppBottomNav(
+                currentIndex: navigationShell.currentIndex,
+                onTap: (index) => navigationShell.goBranch(
+                  index,
+                  initialLocation: index == navigationShell.currentIndex,
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );

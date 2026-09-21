@@ -133,6 +133,13 @@ class $AssetsGifsGen {
 class $AssetsIconsGen {
   const $AssetsIconsGen();
 
+  /// File path: assets/icons/archive_book.svg
+  SvgGenImage get archiveBook =>
+      const SvgGenImage('assets/icons/archive_book.svg');
+
+  /// File path: assets/icons/calories.svg
+  SvgGenImage get calories => const SvgGenImage('assets/icons/calories.svg');
+
   /// File path: assets/icons/charm_menu-kebab.svg
   SvgGenImage get charmMenuKebab =>
       const SvgGenImage('assets/icons/charm_menu-kebab.svg');
@@ -162,6 +169,9 @@ class $AssetsIconsGen {
 
   /// File path: assets/icons/riiight.svg
   SvgGenImage get riiight => const SvgGenImage('assets/icons/riiight.svg');
+
+  /// File path: assets/icons/sleep.svg
+  SvgGenImage get sleep => const SvgGenImage('assets/icons/sleep.svg');
 
   /// File path: assets/icons/solar_alt-arrow-left-linear.svg
   SvgGenImage get solarAltArrowLeftLinear =>
@@ -315,6 +325,8 @@ class $AssetsIconsGen {
 
   /// List of all assets
   List<dynamic> get values => [
+    archiveBook,
+    calories,
     charmMenuKebab,
     googleG,
     healthiconsHeightOutline,
@@ -323,6 +335,7 @@ class $AssetsIconsGen {
     icRoundMinus,
     icons8Gender,
     riiight,
+    sleep,
     solarAltArrowLeftLinear,
     solarAltArrowUpLineDuotone,
     solarAltArrowUpLineDuotoneRight,
@@ -450,6 +463,10 @@ class $AssetsImagesGen {
   /// File path: assets/images/busy.png
   AssetGenImage get busy => const AssetGenImage('assets/images/busy.png');
 
+  /// File path: assets/images/calories_tracker.png
+  AssetGenImage get caloriesTracker =>
+      const AssetGenImage('assets/images/calories_tracker.png');
+
   /// File path: assets/images/challenge.png
   AssetGenImage get challenge =>
       const AssetGenImage('assets/images/challenge.png');
@@ -531,6 +548,10 @@ class $AssetsImagesGen {
   /// File path: assets/images/fish.png
   AssetGenImage get fish => const AssetGenImage('assets/images/fish.png');
 
+  /// File path: assets/images/flame_calories.png
+  AssetGenImage get flameCalories =>
+      const AssetGenImage('assets/images/flame_calories.png');
+
   /// File path: assets/images/fork.png
   AssetGenImage get fork => const AssetGenImage('assets/images/fork.png');
 
@@ -574,6 +595,10 @@ class $AssetsImagesGen {
   /// File path: assets/images/green_tick_filled.png
   AssetGenImage get greenTickFilled =>
       const AssetGenImage('assets/images/green_tick_filled.png');
+
+  /// File path: assets/images/header_back.png
+  AssetGenImage get headerBack =>
+      const AssetGenImage('assets/images/header_back.png');
 
   /// File path: assets/images/healty.png
   AssetGenImage get healty => const AssetGenImage('assets/images/healty.png');
@@ -1002,6 +1027,7 @@ class $AssetsImagesGen {
     burger,
     burgerv2,
     busy,
+    caloriesTracker,
     challenge,
     cheese,
     chicken,
@@ -1025,6 +1051,7 @@ class $AssetsImagesGen {
     fatigue,
     firstQuestion,
     fish,
+    flameCalories,
     fork,
     fourthQuestion,
     friedPotato,
@@ -1037,6 +1064,7 @@ class $AssetsImagesGen {
     greenTick,
     greenTick3d,
     greenTickFilled,
+    headerBack,
     healty,
     hearttt,
     highCarb,

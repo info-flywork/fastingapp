@@ -48,6 +48,7 @@ import 'package:fastingapp/presentation/auth/splash/view/splash_view.dart';
 import 'package:fastingapp/presentation/auth/welcome/bloc/welcome_bloc.dart';
 import 'package:fastingapp/presentation/auth/welcome/view/welcome_view.dart';
 import 'package:fastingapp/presentation/body_history/view/body_history_view.dart';
+import 'package:fastingapp/presentation/calories_tracker/view/calories_tracker_view.dart';
 import 'package:fastingapp/presentation/chat/latest/view/latest_chats_view.dart';
 import 'package:fastingapp/presentation/chat/view/chat_view.dart';
 import 'package:fastingapp/presentation/home/bloc/home_bloc.dart';
@@ -358,6 +359,12 @@ final GoRouter appRouter = GoRouter(
       name: RoutePaths.bodyHistory.name,
       parentNavigatorKey: rootNavigatorKey,
       builder: (context, state) => const BodyHistoryView(),
+    ),
+    GoRoute(
+      path: RoutePaths.caloriesTracker.path,
+      name: RoutePaths.caloriesTracker.name,
+      parentNavigatorKey: rootNavigatorKey,
+      builder: (context, state) => const CaloriesTrackerView(),
     ),
     GoRoute(
       path: RoutePaths.mealRecords.path,

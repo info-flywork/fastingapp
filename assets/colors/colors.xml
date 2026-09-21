@@ -84,6 +84,8 @@
   <color name="color_hunger_notes_field">#F6F7F8</color>
   <color name="color_hunger_notes_hint">#9A9B9C</color>
   <color name="color_hunger_insights_card">#F2F8FC</color>
+  <color name="color_calories_eaten">#76AB6E</color>
+  <color name="color_calories_over">#84C27A</color>
   <color name="color_physical_hunger_badge_text">#54894B</color>
   <color name="color_physical_hunger_rec_title">#53AB43</color>
   <color name="color_emotional_hunger_badge">#CE6B6B</color>

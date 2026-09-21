@@ -38,6 +38,7 @@ enum RoutePaths {
   waterReminder('reminder', 'waterReminder'),
   steps('/steps', 'steps'),
   bodyHistory('/body-history', 'bodyHistory'),
+  caloriesTracker('/calories-tracker', 'caloriesTracker'),
   mealRecords('/meal-records', 'mealRecords'),
   mealDetail('/meal-detail', 'mealDetail'),
   hungerTracker('/hunger-tracker', 'hungerTracker'),
