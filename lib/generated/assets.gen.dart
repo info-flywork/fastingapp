@@ -422,6 +422,9 @@ class $AssetsImagesGen {
   /// File path: assets/images/beans.png
   AssetGenImage get beans => const AssetGenImage('assets/images/beans.png');
 
+  /// File path: assets/images/bedtime.png
+  AssetGenImage get bedtime => const AssetGenImage('assets/images/bedtime.png');
+
   /// File path: assets/images/blood.png
   AssetGenImage get blood => const AssetGenImage('assets/images/blood.png');
 
@@ -466,6 +469,9 @@ class $AssetsImagesGen {
   /// File path: assets/images/calories_tracker.png
   AssetGenImage get caloriesTracker =>
       const AssetGenImage('assets/images/calories_tracker.png');
+
+  /// File path: assets/images/carbs.png
+  AssetGenImage get carbs => const AssetGenImage('assets/images/carbs.png');
 
   /// File path: assets/images/challenge.png
   AssetGenImage get challenge =>
@@ -570,6 +576,9 @@ class $AssetsImagesGen {
   AssetGenImage get fullCheck =>
       const AssetGenImage('assets/images/full_check.png');
 
+  /// File path: assets/images/goal.png
+  AssetGenImage get goal => const AssetGenImage('assets/images/goal.png');
+
   /// File path: assets/images/good.png
   AssetGenImage get good => const AssetGenImage('assets/images/good.png');
 
@@ -595,6 +604,10 @@ class $AssetsImagesGen {
   /// File path: assets/images/green_tick_filled.png
   AssetGenImage get greenTickFilled =>
       const AssetGenImage('assets/images/green_tick_filled.png');
+
+  /// File path: assets/images/grilled_salad.png
+  AssetGenImage get grilledSalad =>
+      const AssetGenImage('assets/images/grilled_salad.png');
 
   /// File path: assets/images/header_back.png
   AssetGenImage get headerBack =>
@@ -776,6 +789,9 @@ class $AssetsImagesGen {
   /// File path: assets/images/nuts.png
   AssetGenImage get nuts => const AssetGenImage('assets/images/nuts.png');
 
+  /// File path: assets/images/olive.png
+  AssetGenImage get olive => const AssetGenImage('assets/images/olive.png');
+
   /// File path: assets/images/olives.png
   AssetGenImage get olives => const AssetGenImage('assets/images/olives.png');
 
@@ -829,6 +845,9 @@ class $AssetsImagesGen {
   AssetGenImage get progressHead =>
       const AssetGenImage('assets/images/progress_head.png');
 
+  /// File path: assets/images/protein.png
+  AssetGenImage get protein => const AssetGenImage('assets/images/protein.png');
+
   /// File path: assets/images/restrictive.png
   AssetGenImage get restrictive =>
       const AssetGenImage('assets/images/restrictive.png');
@@ -841,6 +860,10 @@ class $AssetsImagesGen {
 
   /// File path: assets/images/salata.png
   AssetGenImage get salata => const AssetGenImage('assets/images/salata.png');
+
+  /// File path: assets/images/scramlbed_eggs.png
+  AssetGenImage get scramlbedEggs =>
+      const AssetGenImage('assets/images/scramlbed_eggs.png');
 
   /// File path: assets/images/second_question.png
   AssetGenImage get secondQuestion =>
@@ -887,6 +910,10 @@ class $AssetsImagesGen {
   /// File path: assets/images/sweethies.png
   AssetGenImage get sweethies =>
       const AssetGenImage('assets/images/sweethies.png');
+
+  /// File path: assets/images/take_photo.png
+  AssetGenImage get takePhoto =>
+      const AssetGenImage('assets/images/take_photo.png');
 
   /// File path: assets/images/third_s-question.png
   AssetGenImage get thirdSQuestion =>
@@ -936,6 +963,9 @@ class $AssetsImagesGen {
   /// File path: assets/images/vegetarian.png
   AssetGenImage get vegetarian =>
       const AssetGenImage('assets/images/vegetarian.png');
+
+  /// File path: assets/images/wake.png
+  AssetGenImage get wake => const AssetGenImage('assets/images/wake.png');
 
   /// File path: assets/images/water.png
   AssetGenImage get water => const AssetGenImage('assets/images/water.png');
@@ -997,6 +1027,9 @@ class $AssetsImagesGen {
   AssetGenImage get yellowLightning =>
       const AssetGenImage('assets/images/yellow_lightning.png');
 
+  /// File path: assets/images/yogurt.png
+  AssetGenImage get yogurt => const AssetGenImage('assets/images/yogurt.png');
+
   /// File path: assets/images/zzz.png
   AssetGenImage get zzz => const AssetGenImage('assets/images/zzz.png');
 
@@ -1015,6 +1048,7 @@ class $AssetsImagesGen {
     apple,
     avacado,
     beans,
+    bedtime,
     blood,
     blueBook,
     blueClock,
@@ -1028,6 +1062,7 @@ class $AssetsImagesGen {
     burgerv2,
     busy,
     caloriesTracker,
+    carbs,
     challenge,
     cheese,
     chicken,
@@ -1057,6 +1092,7 @@ class $AssetsImagesGen {
     friedPotato,
     fruit,
     fullCheck,
+    goal,
     good,
     goodv2,
     greatJob,
@@ -1064,6 +1100,7 @@ class $AssetsImagesGen {
     greenTick,
     greenTick3d,
     greenTickFilled,
+    grilledSalad,
     headerBack,
     healty,
     hearttt,
@@ -1113,6 +1150,7 @@ class $AssetsImagesGen {
     notificatio,
     notificationEmptyBell,
     nuts,
+    olive,
     olives,
     onion,
     orangeBell,
@@ -1128,10 +1166,12 @@ class $AssetsImagesGen {
     proReading,
     profile,
     progressHead,
+    protein,
     restrictive,
     rice,
     riiight,
     salata,
+    scramlbedEggs,
     secondQuestion,
     seeStar,
     seefood,
@@ -1145,6 +1185,7 @@ class $AssetsImagesGen {
     streak,
     streakFlame,
     sweethies,
+    takePhoto,
     thirdSQuestion,
     timeCook,
     tirtil,
@@ -1159,6 +1200,7 @@ class $AssetsImagesGen {
     unhappyv2,
     vector18Bmi,
     vegetarian,
+    wake,
     water,
     waterBottle,
     waterBottle300,
@@ -1175,6 +1217,7 @@ class $AssetsImagesGen {
     woman,
     world,
     yellowLightning,
+    yogurt,
     zzz,
   ];
 }

@@ -643,5 +643,63 @@
     "add_daily_manual": "Add Daily Manual",
     "manual_value": "{} kcal",
     "calculate": "Calculate Calories"
+  },
+  "calories_camera": {
+    "no_camera": "No camera found on this device.",
+    "init_failed": "Couldn't open the camera.",
+    "capture_failed": "Couldn't take the photo."
+  },
+  "calories_result": {
+    "meal_title": "Grilled Chicken and Roasted Vegetables",
+    "kcal": "550 kcal",
+    "protein": "Protein",
+    "carbs": "Carbs",
+    "fats": "Fats",
+    "protein_value": "27g",
+    "carbs_value": "64g",
+    "fats_value": "22g",
+    "recalculate": "Calculate calories again"
+  },
+  "sleep_page": {
+    "title": "Sleep",
+    "last_night": "Last Night",
+    "duration": "7h 30m",
+    "bedtime": "Bedtime",
+    "bedtime_value": "23:00",
+    "wake_up": "Wake up",
+    "wake_up_value": "6:30",
+    "wakeup": "Wakeup",
+    "wakeup_value": "06:30",
+    "goal": "Goal",
+    "goal_value": "7.5h",
+    "schedule": "Sleep Schedulee",
+    "day_mon": "Mon",
+    "day_tue": "Tue",
+    "day_wed": "Wed",
+    "day_thu": "Thu",
+    "day_fri": "Fri",
+    "day_sat": "Sat",
+    "day_sun": "Sun"
+  },
+  "protein_page": {
+    "title": "Protein Tracker",
+    "current": "75",
+    "goal": "/ 120g",
+    "today": "Today's Meals",
+    "week": "This Week",
+    "calculate": "Calculate",
+    "grams": "{}g",
+    "meal_eggs_title": "Scrambled Eggs & Toast",
+    "meal_eggs_meta": "12:15 Breakfast",
+    "meal_eggs_protein": "22g",
+    "meal_eggs_kcal": "380 kcal",
+    "meal_salad_title": "Grilled Chicken Salad",
+    "meal_salad_meta": "14:30 Lunch",
+    "meal_salad_protein": "38g",
+    "meal_salad_kcal": "450 kcal",
+    "meal_yogurt_title": "Yogurt & Nuts",
+    "meal_yogurt_meta": "17:00 Snack",
+    "meal_yogurt_protein": "15g",
+    "meal_yogurt_kcal": "220 kcal"
   }
 }

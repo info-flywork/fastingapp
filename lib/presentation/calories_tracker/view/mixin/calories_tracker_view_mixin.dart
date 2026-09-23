@@ -23,7 +23,11 @@ mixin CaloriesTrackerViewMixin on State<CaloriesTrackerView> {
     });
   }
 
-  void onProteinTracker() {}
+  void onProteinTracker() {
+    context.pushNamed(RoutePaths.proteinTracker.name);
+  }
 
-  void onCalculate() {}
+  void onCalculate() {
+    context.pushNamed(RoutePaths.caloriesCamera.name);
+  }
 }

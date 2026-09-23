@@ -643,5 +643,63 @@
     "add_daily_manual": "Täglich manuell hinzufügen",
     "manual_value": "{} kcal",
     "calculate": "Kalorien berechnen"
+  },
+  "calories_camera": {
+    "no_camera": "Auf diesem Gerät wurde keine Kamera gefunden.",
+    "init_failed": "Kamera konnte nicht geöffnet werden.",
+    "capture_failed": "Foto konnte nicht aufgenommen werden."
+  },
+  "calories_result": {
+    "meal_title": "Gegrilltes Hähnchen und Ofengemüse",
+    "kcal": "550 kcal",
+    "protein": "Protein",
+    "carbs": "Carbs",
+    "fats": "Fats",
+    "protein_value": "27g",
+    "carbs_value": "64g",
+    "fats_value": "22g",
+    "recalculate": "Kalorien neu berechnen"
+  },
+  "sleep_page": {
+    "title": "Schlaf",
+    "last_night": "Letzte Nacht",
+    "duration": "7 Std. 30 Min.",
+    "bedtime": "Schlafenszeit",
+    "bedtime_value": "23:00",
+    "wake_up": "Aufwachen",
+    "wake_up_value": "6:30",
+    "wakeup": "Aufwachen",
+    "wakeup_value": "06:30",
+    "goal": "Ziel",
+    "goal_value": "7,5 Std.",
+    "schedule": "Schlafplan",
+    "day_mon": "Mo",
+    "day_tue": "Di",
+    "day_wed": "Mi",
+    "day_thu": "Do",
+    "day_fri": "Fr",
+    "day_sat": "Sa",
+    "day_sun": "So"
+  },
+  "protein_page": {
+    "title": "Protein-Tracker",
+    "current": "75",
+    "goal": "/ 120g",
+    "today": "Heutige Mahlzeiten",
+    "week": "Diese Woche",
+    "calculate": "Berechnen",
+    "grams": "{}g",
+    "meal_eggs_title": "Rührei und Toast",
+    "meal_eggs_meta": "12:15 Frühstück",
+    "meal_eggs_protein": "22g",
+    "meal_eggs_kcal": "380 kcal",
+    "meal_salad_title": "Gegrillter Hähnchensalat",
+    "meal_salad_meta": "14:30 Mittagessen",
+    "meal_salad_protein": "38g",
+    "meal_salad_kcal": "450 kcal",
+    "meal_yogurt_title": "Joghurt und Nüsse",
+    "meal_yogurt_meta": "17:00 Snack",
+    "meal_yogurt_protein": "15g",
+    "meal_yogurt_kcal": "220 kcal"
   }
 }

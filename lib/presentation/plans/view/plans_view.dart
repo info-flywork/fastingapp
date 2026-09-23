@@ -66,7 +66,7 @@ class _PlansViewState extends State<PlansView> {
                 color: ColorName.colorWhite,
                 child: ListView(
                   physics: const ClampingScrollPhysics(),
-                  padding: EdgeInsets.only(top: 8, bottom: bottom + 100),
+                  padding: EdgeInsets.only(bottom: bottom + 100),
                   children: [
                     _PlansSection(
                       titleKey: 'plans.beginner_title',
@@ -140,7 +140,8 @@ final class _PlansSection extends StatelessWidget {
   final Future<void> Function({
     required PlansCardData data,
     required String detailTitleKey,
-  }) onOpenPlan;
+  })
+  onOpenPlan;
 
   @override
   Widget build(BuildContext context) {
@@ -204,7 +205,8 @@ final class _PlansHorizontalRow extends StatelessWidget {
   final Future<void> Function({
     required PlansCardData data,
     required String detailTitleKey,
-  }) onOpenPlan;
+  })
+  onOpenPlan;
 
   @override
   Widget build(BuildContext context) {
@@ -245,7 +247,8 @@ final class _PlanCard extends StatelessWidget {
   final Future<void> Function({
     required PlansCardData data,
     required String detailTitleKey,
-  }) onOpenPlan;
+  })
+  onOpenPlan;
 
   static const _cardWidth = _kCardWidth - 20;
 

@@ -2212,4 +2212,202 @@ abstract final class AppTextStyles {
     letterSpacing: -0.5,
     color: ColorName.colorTitle,
   );
+
+  /// Result meal title — 24 / Semibold
+  static TextStyle get caloriesResultTitle => const TextStyle(
+    fontFamily: FontFamily.sFProDisplay,
+    fontWeight: FontWeight.w600,
+    fontSize: 24,
+    height: 32 / 24,
+    letterSpacing: -0.5,
+    color: ColorName.colorBlack,
+  );
+
+  /// Result kcal — 24 / Medium / 75%
+  static TextStyle get caloriesResultKcal => TextStyle(
+    fontFamily: FontFamily.sFProDisplay,
+    fontWeight: FontWeight.w500,
+    fontSize: 24,
+    height: 32 / 24,
+    letterSpacing: -0.5,
+    color: ColorName.colorBlack.withValues(alpha: 0.75),
+  );
+
+  /// Result macro label — 20 / Semibold
+  static TextStyle get caloriesResultMacroLabel => const TextStyle(
+    fontFamily: FontFamily.sFProDisplay,
+    fontWeight: FontWeight.w600,
+    fontSize: 20,
+    height: 24 / 20,
+    letterSpacing: 20 * -0.015,
+    color: ColorName.colorTitle,
+  );
+
+  /// Result macro value — 16 / Medium / 60%
+  static TextStyle get caloriesResultMacroValue => TextStyle(
+    fontFamily: FontFamily.sFProDisplay,
+    fontWeight: FontWeight.w500,
+    fontSize: 16,
+    height: 20 / 16,
+    letterSpacing: 16 * -0.015,
+    color: ColorName.colorSubtitle.withValues(alpha: 0.6),
+  );
+
+  /// Sleep title — 24 / Semibold / -5.5%
+  static TextStyle get sleepTitle => const TextStyle(
+    fontFamily: FontFamily.sFProDisplay,
+    fontWeight: FontWeight.w600,
+    fontSize: 24,
+    height: 32 / 24,
+    letterSpacing: 24 * -0.055,
+    color: ColorName.colorTitle,
+  );
+
+  /// Sleep "Last Night" — 16 / Medium / 60%
+  static TextStyle get sleepCaption => TextStyle(
+    fontFamily: FontFamily.sFProDisplay,
+    fontWeight: FontWeight.w500,
+    fontSize: 16,
+    height: 22 / 16,
+    letterSpacing: 16 * -0.015,
+    color: ColorName.colorSubtitle.withValues(alpha: 0.6),
+  );
+
+  /// Sleep duration — 32 / Semibold
+  static TextStyle get sleepDuration => const TextStyle(
+    fontFamily: FontFamily.sFProDisplay,
+    fontWeight: FontWeight.w600,
+    fontSize: 32,
+    height: 40 / 32,
+    letterSpacing: -0.5,
+    color: ColorName.colorTitle,
+  );
+
+  /// Sleep schedule title — 16 / Medium
+  static TextStyle get sleepSectionTitle => const TextStyle(
+    fontFamily: FontFamily.sFProDisplay,
+    fontWeight: FontWeight.w500,
+    fontSize: 16,
+    height: 20 / 16,
+    letterSpacing: 16 * -0.015,
+    color: ColorName.colorBlack,
+  );
+
+  /// Bedtime / Wake up label — 12 / Semibold / 60%
+  static TextStyle get sleepBoundLabel => TextStyle(
+    fontFamily: FontFamily.sFProDisplay,
+    fontWeight: FontWeight.w600,
+    fontSize: 12,
+    height: 16 / 12,
+    letterSpacing: 12 * -0.015,
+    color: ColorName.colorSubtitle.withValues(alpha: 0.6),
+  );
+
+  /// Bedtime / Wake up value — 16 / Semibold
+  static TextStyle get sleepBoundValue => const TextStyle(
+    fontFamily: FontFamily.sFProDisplay,
+    fontWeight: FontWeight.w600,
+    fontSize: 16,
+    height: 24 / 16,
+    letterSpacing: 16 * -0.015,
+    color: ColorName.colorTitle,
+  );
+
+  /// Hour axis — 12 / Medium / 100% / 60%
+  static TextStyle get sleepAxisLabel => TextStyle(
+    fontFamily: FontFamily.sFProDisplay,
+    fontWeight: FontWeight.w500,
+    fontSize: 12,
+    height: 1,
+    color: ColorName.colorSubtitle.withValues(alpha: 0.6),
+  );
+
+  /// Weekday — 12 / Medium / 60%
+  static TextStyle get sleepDayLabel => TextStyle(
+    fontFamily: FontFamily.sFProDisplay,
+    fontWeight: FontWeight.w500,
+    fontSize: 12,
+    height: 16 / 12,
+    color: ColorName.colorSubtitle.withValues(alpha: 0.6),
+  );
+
+  /// Schedule card value — 20 / Semibold
+  static TextStyle get sleepCardValue => const TextStyle(
+    fontFamily: FontFamily.sFProDisplay,
+    fontWeight: FontWeight.w600,
+    fontSize: 20,
+    height: 24 / 20,
+    letterSpacing: 20 * -0.015,
+    color: ColorName.colorTitle,
+  );
+
+  /// Protein hero — 64 / Bold
+  static TextStyle get proteinHero => const TextStyle(
+    fontFamily: FontFamily.sFProDisplay,
+    fontWeight: FontWeight.w700,
+    fontSize: 64,
+    height: 70 / 64,
+    letterSpacing: -0.67,
+    color: ColorName.colorTitle,
+  );
+
+  /// Protein hedef — 20 / Semibold / 60%
+  static TextStyle get proteinGoal => TextStyle(
+    fontFamily: FontFamily.sFProDisplay,
+    fontWeight: FontWeight.w600,
+    fontSize: 20,
+    height: 24 / 20,
+    letterSpacing: 20 * -0.015,
+    color: ColorName.colorSubtitle.withValues(alpha: 0.6),
+  );
+
+  /// Öğün adı — 18 / Semibold
+  static TextStyle get proteinMealTitle => const TextStyle(
+    fontFamily: FontFamily.sFProDisplay,
+    fontWeight: FontWeight.w600,
+    fontSize: 18,
+    height: 24 / 18,
+    letterSpacing: 18 * -0.015,
+    color: ColorName.colorTitle,
+  );
+
+  /// Öğün saati — 15 / Medium / 60%
+  static TextStyle get proteinMealMeta => TextStyle(
+    fontFamily: FontFamily.sFProDisplay,
+    fontWeight: FontWeight.w500,
+    fontSize: 15,
+    height: 20 / 15,
+    letterSpacing: 15 * -0.015,
+    color: ColorName.colorSubtitle.withValues(alpha: 0.6),
+  );
+
+  /// Öğün proteini — 16 / Bold
+  static TextStyle get proteinMealGrams => const TextStyle(
+    fontFamily: FontFamily.sFProDisplay,
+    fontWeight: FontWeight.w700,
+    fontSize: 16,
+    height: 20 / 16,
+    letterSpacing: 16 * -0.015,
+    color: ColorName.colorProteinGrams,
+  );
+
+  /// Öğün kalori — 14 / Semibold / 50%
+  static TextStyle get proteinMealKcal => TextStyle(
+    fontFamily: FontFamily.sFProDisplay,
+    fontWeight: FontWeight.w600,
+    fontSize: 14,
+    height: 1,
+    letterSpacing: 14 * -0.015,
+    color: ColorName.colorBlack.withValues(alpha: 0.5),
+  );
+
+  /// Schedule card label — 16 / Medium / 60%
+  static TextStyle get sleepCardLabel => TextStyle(
+    fontFamily: FontFamily.sFProDisplay,
+    fontWeight: FontWeight.w500,
+    fontSize: 16,
+    height: 20 / 16,
+    letterSpacing: 16 * -0.015,
+    color: ColorName.colorSubtitle.withValues(alpha: 0.6),
+  );
 }

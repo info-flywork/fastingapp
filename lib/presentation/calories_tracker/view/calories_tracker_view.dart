@@ -1,4 +1,7 @@
+import 'dart:math' as math;
+
 import 'package:easy_localization/easy_localization.dart';
+import 'package:fastingapp/core/router/route_paths.dart';
 import 'package:fastingapp/core/theme/app_text_styles.dart';
 import 'package:fastingapp/core/widgets/app_button.dart';
 import 'package:fastingapp/core/widgets/app_button_decoration.dart';
@@ -9,6 +12,7 @@ import 'package:fastingapp/generated/assets.gen.dart';
 import 'package:fastingapp/generated/colors.gen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:go_router/go_router.dart';
 
 part 'mixin/calories_tracker_view_mixin.dart';
 
@@ -28,58 +32,100 @@ class _CaloriesTrackerViewState extends State<CaloriesTrackerView>
   Widget build(BuildContext context) {
     final top = MediaQuery.paddingOf(context).top;
     final bottom = MediaQuery.paddingOf(context).bottom;
+    final width = MediaQuery.sizeOf(context).width;
+    final headerHeight = width * _CaloriesHeader.imageAspect;
 
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: SystemUiOverlayStyle.dark,
       child: Scaffold(
         backgroundColor: ColorName.colorBodyPageBg,
-        body: SingleChildScrollView(
-          physics: const ClampingScrollPhysics(),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              _CaloriesHeader(
-                topInset: top,
-                eatenKcal: eatenKcal,
-                overKcal: overKcal,
-              ),
-              Transform.translate(
-                offset: const Offset(0, -_cardOverlap),
-                child: Padding(
-                  padding: EdgeInsets.fromLTRB(16, top + 18, 16, 0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      _CalorieTrackingCard(onProteinTracker: onProteinTracker),
-                      const SizedBox(height: 16),
-                      AppButton(
-                        label: 'calories_page.protein_tracker'.tr(),
-                        onPressed: onProteinTracker,
-                        decoration: AppButtonDecoration.dark(),
-                        showIcon: false,
+        body: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Expanded(
+              child: SingleChildScrollView(
+                physics: const ClampingScrollPhysics(),
+                child: Stack(
+                  clipBehavior: Clip.none,
+                  children: [
+                    Positioned(
+                      top: 0,
+                      left: 0,
+                      right: 0,
+                      child: _CaloriesHeader(
+                        topInset: top,
+                        eatenKcal: eatenKcal,
+                        overKcal: overKcal,
+                        height: headerHeight,
                       ),
-                      const SizedBox(height: 16),
-                      const _BurnedCard(),
-                      const SizedBox(height: 20),
-                      OnboardingStepperField(
-                        label: 'calories_page.add_daily_manual'.tr(),
-                        displayValue: '$manualKcal',
-                        unit: 'calories_page.kcal'.tr(),
-                        onDecrement: onManualDecrement,
-                        onIncrement: onManualIncrement,
-                      ),
-                      const SizedBox(height: 20),
-                      AppButton(
-                        label: 'calories_page.calculate'.tr(),
-                        onPressed: onCalculate,
-                        decoration: AppButtonDecoration.primary(),
-                      ),
-                    ],
-                  ),
+                    ),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        SizedBox(height: headerHeight - _cardOverlap + 24),
+                        Padding(
+                          padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              const _CalorieTrackingCard(),
+                              const SizedBox(height: 16),
+                              AppButton(
+                                label: 'calories_page.protein_tracker'.tr(),
+                                onPressed: onProteinTracker,
+                                decoration: AppButtonDecoration.dark(),
+                                showIcon: false,
+                              ),
+                              const SizedBox(height: 16),
+                              const _BurnedCard(),
+                              const SizedBox(height: 20),
+                              OnboardingStepperField(
+                                label: 'calories_page.add_daily_manual'.tr(),
+                                displayValue: '$manualKcal',
+                                unit: 'calories_page.kcal'.tr(),
+                                onDecrement: onManualDecrement,
+                                onIncrement: onManualIncrement,
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
                 ),
               ),
-            ],
-          ),
+            ),
+            _CalculateBar(
+              bottomInset: math.max(bottom, 24),
+              onCalculate: onCalculate,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Figma Frame 48096339 — üst radius 32, pad 16/16/24/16.
+final class _CalculateBar extends StatelessWidget {
+  const _CalculateBar({required this.bottomInset, required this.onCalculate});
+
+  final double bottomInset;
+  final VoidCallback onCalculate;
+
+  @override
+  Widget build(BuildContext context) {
+    return DecoratedBox(
+      decoration: const BoxDecoration(
+        color: ColorName.colorWhite,
+        borderRadius: BorderRadius.vertical(top: Radius.circular(32)),
+      ),
+      child: Padding(
+        padding: EdgeInsets.fromLTRB(16, 16, 16, bottomInset),
+        child: AppButton(
+          label: 'calories_page.calculate'.tr(),
+          onPressed: onCalculate,
+          decoration: AppButtonDecoration.hungerResult(),
         ),
       ),
     );
@@ -91,28 +137,32 @@ final class _CaloriesHeader extends StatelessWidget {
     required this.topInset,
     required this.eatenKcal,
     required this.overKcal,
+    required this.height,
   });
 
   final double topInset;
   final int eatenKcal;
   final int overKcal;
+  final double height;
 
-  static const _headerHeight = 176.0;
   static const _mascotSize = 168.0;
+
+  /// header_back.png — 1448×1086
+  static const imageAspect = 1086 / 1448;
 
   @override
   Widget build(BuildContext context) {
     final eatenFormatted = NumberFormat('#,###').format(eatenKcal);
 
     return SizedBox(
-      height: _headerHeight + topInset,
+      height: height,
       width: double.infinity,
       child: Stack(
         clipBehavior: Clip.none,
         children: [
           Positioned.fill(
             child: Assets.images.headerBack.image(
-              fit: BoxFit.cover,
+              fit: BoxFit.fitWidth,
               alignment: Alignment.topCenter,
             ),
           ),
@@ -120,7 +170,7 @@ final class _CaloriesHeader extends StatelessWidget {
             right: 8,
             top: topInset,
             child: Transform.scale(
-              scale: 1.2,
+              scale: 1.1,
               child: Assets.images.caloriesTracker.image(
                 width: _mascotSize,
                 height: _mascotSize,
@@ -164,9 +214,7 @@ final class _CaloriesHeader extends StatelessWidget {
 }
 
 final class _CalorieTrackingCard extends StatelessWidget {
-  const _CalorieTrackingCard({required this.onProteinTracker});
-
-  final VoidCallback onProteinTracker;
+  const _CalorieTrackingCard();
 
   @override
   Widget build(BuildContext context) {

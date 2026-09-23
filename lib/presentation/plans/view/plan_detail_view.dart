@@ -5,6 +5,7 @@ import 'package:fastingapp/core/dialogs/app_dialogs.dart';
 import 'package:fastingapp/core/theme/app_text_styles.dart';
 import 'package:fastingapp/core/widgets/app_button.dart';
 import 'package:fastingapp/core/widgets/app_button_decoration.dart';
+import 'package:fastingapp/core/widgets/horseshoe_arc.dart';
 import 'package:fastingapp/generated/assets.gen.dart';
 import 'package:fastingapp/generated/colors.gen.dart';
 import 'package:fastingapp/presentation/plans/plan_detail_args.dart';
@@ -15,13 +16,6 @@ import 'package:go_router/go_router.dart';
 part 'mixin/plan_detail_view_mixin.dart';
 
 const _kHeaderHeight = 56.0;
-
-/// Figma Ellipse: 336×336, stroke ≈ 26
-const _kArcDiameter = 300.0;
-const _kArcStroke = 26.0;
-
-/// Figma: 250° yay, altta açık horseshoe.
-const _kArcSweepDegrees = 250.0;
 
 /// Oruç planı detay — haftalık beginner plan ekranı.
 final class PlanDetailView extends StatefulWidget {
@@ -185,10 +179,8 @@ final class _PlanArcSection extends StatelessWidget {
   final VoidCallback onChange;
 
   /// Yay uçlarının yatay inset'i (dairenin başlangıç/bitiş noktaları).
-  static double get _endpointInset {
-    const r = (_kArcDiameter - _kArcStroke) / 2;
-    return (_kArcDiameter / 2) + r * math.cos(_PlanArcPainter.startRad);
-  }
+  static double get _endpointInset =>
+      HorseshoeArc.endpointInset(HorseshoeArc.diameterDefault);
 
   @override
   Widget build(BuildContext context) {
@@ -197,24 +189,16 @@ final class _PlanArcSection extends StatelessWidget {
     final tipInset = _endpointInset;
 
     return SizedBox(
-      width: _kArcDiameter,
+      width: HorseshoeArc.diameterDefault,
       child: Column(
         children: [
           SizedBox(
-            width: _kArcDiameter,
-            height: _kArcDiameter * 0.82,
+            width: HorseshoeArc.diameterDefault,
+            height: HorseshoeArc.diameterDefault * 0.82,
             child: Stack(
               alignment: Alignment.center,
               children: [
-                Positioned(
-                  top: 0,
-                  left: 0,
-                  right: 0,
-                  height: _kArcDiameter,
-                  child: CustomPaint(
-                    painter: _PlanArcPainter(eatFraction: eatFraction),
-                  ),
-                ),
+                HorseshoeArc(progress: eatFraction),
                 Padding(
                   padding: const EdgeInsets.only(top: 36),
                   child: Column(
@@ -299,57 +283,6 @@ final class _LegendDot extends StatelessWidget {
   }
 }
 
-/// 250° horseshoe gösterge — alt açık, yeşil sol uçtan başlar (Figma).
-final class _PlanArcPainter extends CustomPainter {
-  const _PlanArcPainter({required this.eatFraction});
-
-  final double eatFraction;
-
-  static const double _sweepRad = _kArcSweepDegrees * math.pi / 180;
-  static const double _gapRad = (360 - _kArcSweepDegrees) * math.pi / 180;
-
-  /// Flutter: 0=sağ, saat yönü pozitif. Alt merkez = π/2.
-  static const double startRad = (math.pi / 2) + (_gapRad / 2);
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    const stroke = _kArcStroke;
-    final center = Offset(size.width / 2, size.height / 2);
-    final radius = (math.min(size.width, size.height) - stroke) / 2;
-    final rect = Rect.fromCircle(center: center, radius: radius);
-
-    final trackPaint = Paint()
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = stroke + 4
-      ..strokeCap = StrokeCap.round
-      ..color = ColorName.colorPlanArcTrack;
-
-    canvas.drawArc(rect, startRad, _sweepRad, false, trackPaint);
-
-    final fastingPaint = Paint()
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = stroke
-      ..strokeCap = StrokeCap.round
-      ..color = ColorName.colorPlanFasting;
-
-    canvas.drawArc(rect, startRad, _sweepRad, false, fastingPaint);
-
-    final eatSweep = _sweepRad * eatFraction.clamp(0.05, 0.95);
-    final eatingPaint = Paint()
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = stroke
-      ..strokeCap = StrokeCap.round
-      ..color = ColorName.colorMealPositive;
-
-    canvas.drawArc(rect, startRad, eatSweep, false, eatingPaint);
-  }
-
-  @override
-  bool shouldRepaint(covariant _PlanArcPainter oldDelegate) {
-    return oldDelegate.eatFraction != eatFraction;
-  }
-}
-
 final class _PlanTimeRow extends StatelessWidget {
   const _PlanTimeRow({
     required this.tipInset,
@@ -367,7 +300,7 @@ final class _PlanTimeRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      width: _kArcDiameter,
+      width: HorseshoeArc.diameterDefault,
       height: 44,
       child: Stack(
         clipBehavior: Clip.none,
@@ -420,7 +353,7 @@ final class _PlanTimeRow extends StatelessWidget {
           ),
           // Sağ blok: merkezi sağ yay ucunda.
           Positioned(
-            left: _kArcDiameter - tipInset,
+            left: HorseshoeArc.diameterDefault - tipInset,
             child: FractionalTranslation(
               translation: const Offset(-0.5, 0),
               child: Column(

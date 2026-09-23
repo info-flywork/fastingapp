@@ -50,7 +50,7 @@
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
 	<key>NSCameraUsageDescription</key>
-	<string>Profile photo can be taken with the camera.</string>
+	<string>Camera is used for profile photos and calorie food scanning.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>Profile photo can be chosen from your photo library.</string>
 	<key>UILaunchStoryboardName</key>

@@ -31,7 +31,9 @@ mixin ProfileViewMixin on State<ProfileView> {
     context.pushNamed(RoutePaths.caloriesTracker.name);
   }
 
-  void onSleepTracker() {}
+  void onSleepTracker() {
+    context.pushNamed(RoutePaths.sleep.name);
+  }
 
   void onFastingHistory() {}
 

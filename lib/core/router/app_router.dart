@@ -48,6 +48,8 @@ import 'package:fastingapp/presentation/auth/splash/view/splash_view.dart';
 import 'package:fastingapp/presentation/auth/welcome/bloc/welcome_bloc.dart';
 import 'package:fastingapp/presentation/auth/welcome/view/welcome_view.dart';
 import 'package:fastingapp/presentation/body_history/view/body_history_view.dart';
+import 'package:fastingapp/presentation/calories_tracker/view/calories_camera_view.dart';
+import 'package:fastingapp/presentation/calories_tracker/view/calories_result_view.dart';
 import 'package:fastingapp/presentation/calories_tracker/view/calories_tracker_view.dart';
 import 'package:fastingapp/presentation/chat/latest/view/latest_chats_view.dart';
 import 'package:fastingapp/presentation/chat/view/chat_view.dart';
@@ -84,6 +86,8 @@ import 'package:fastingapp/presentation/profile/faq/view/faq_view.dart';
 import 'package:fastingapp/presentation/profile/languages/view/languages_view.dart';
 import 'package:fastingapp/presentation/profile/notifications/view/notifications_view.dart';
 import 'package:fastingapp/presentation/profile/view/profile_view.dart';
+import 'package:fastingapp/presentation/protein_tracker/view/protein_tracker_view.dart';
+import 'package:fastingapp/presentation/sleep/view/sleep_view.dart';
 import 'package:fastingapp/presentation/steps/view/steps_view.dart';
 import 'package:fastingapp/presentation/tabs/placeholder_tab_view.dart';
 import 'package:fastingapp/presentation/water/reminder/view/water_reminder_view.dart';
@@ -365,6 +369,33 @@ final GoRouter appRouter = GoRouter(
       name: RoutePaths.caloriesTracker.name,
       parentNavigatorKey: rootNavigatorKey,
       builder: (context, state) => const CaloriesTrackerView(),
+    ),
+    GoRoute(
+      path: RoutePaths.caloriesCamera.path,
+      name: RoutePaths.caloriesCamera.name,
+      parentNavigatorKey: rootNavigatorKey,
+      builder: (context, state) => const CaloriesCameraView(),
+    ),
+    GoRoute(
+      path: RoutePaths.caloriesResult.path,
+      name: RoutePaths.caloriesResult.name,
+      parentNavigatorKey: rootNavigatorKey,
+      builder: (context, state) {
+        final photoPath = state.extra is String ? state.extra! as String : '';
+        return CaloriesResultView(photoPath: photoPath);
+      },
+    ),
+    GoRoute(
+      path: RoutePaths.proteinTracker.path,
+      name: RoutePaths.proteinTracker.name,
+      parentNavigatorKey: rootNavigatorKey,
+      builder: (context, state) => const ProteinTrackerView(),
+    ),
+    GoRoute(
+      path: RoutePaths.sleep.path,
+      name: RoutePaths.sleep.name,
+      parentNavigatorKey: rootNavigatorKey,
+      builder: (context, state) => const SleepView(),
     ),
     GoRoute(
       path: RoutePaths.mealRecords.path,

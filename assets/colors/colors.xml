@@ -111,4 +111,5 @@
   <color name="color_bmi_6">#E4663D</color>
   <color name="color_bmi_7">#E64F48</color>
   <color name="color_chart_tooltip">#2C2C2E</color>
+  <color name="color_protein_grams">#E74D3D</color>
 </resources>

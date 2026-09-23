@@ -249,6 +249,9 @@ abstract final class ColorName {
   /// Color: #EBD3AC
   static const Color colorProgressFillStart = Color(0xFFEBD3AC);
 
+  /// Color: #E74D3D
+  static const Color colorProteinGrams = Color(0xFFE74D3D);
+
   /// Color: #F1F1F1
   static const Color colorRadioBorder = Color(0xFFF1F1F1);
 
