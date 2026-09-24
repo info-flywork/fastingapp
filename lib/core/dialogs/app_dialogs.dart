@@ -1,4 +1,5 @@
 import 'package:fastingapp/core/dialogs/dialog_handler.dart';
+import 'package:fastingapp/core/dialogs/widgets/end_fast_dialog.dart';
 import 'package:fastingapp/core/dialogs/widgets/fasting_time_dialog.dart';
 import 'package:fastingapp/core/dialogs/widgets/meal_date_picker_dialog.dart';
 import 'package:fastingapp/core/dialogs/widgets/sign_out_dialog.dart';
@@ -77,6 +78,13 @@ final class AppDialogs extends DialogHandler {
     return showNormalDialog<WaterUnitEditResult>(
       context: context,
       child: WaterUnitEditDialog(initialUnit: initialUnit),
+    );
+  }
+
+  Future<bool?> showEndFast(BuildContext context) {
+    return showNormalDialog<bool>(
+      context: context,
+      child: const EndFastDialog(),
     );
   }
 

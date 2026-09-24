@@ -12,6 +12,7 @@ mixin WaterViewMixin on State<WaterView>, TickerProvider {
   late int addMl;
   late int currentMl;
   late int dailyGoalMl;
+  late DateTime selectedDate;
 
   late AnimationController fillController;
   late AnimationController waveController;
@@ -36,6 +37,7 @@ mixin WaterViewMixin on State<WaterView>, TickerProvider {
     addMl = 300;
     currentMl = widget.initialMl;
     dailyGoalMl = widget.dailyGoalMl;
+    selectedDate = DateUtils.dateOnly(DateTime.now());
 
     fillController = AnimationController(
       vsync: this,
@@ -62,6 +64,27 @@ mixin WaterViewMixin on State<WaterView>, TickerProvider {
     reconcileBubbles();
     animateFillTo(progress, from: 0);
     fillController.forward();
+  }
+
+  String waterDateLabel(BuildContext context) {
+    final today = DateUtils.dateOnly(DateTime.now());
+    if (DateUtils.isSameDay(selectedDate, today)) {
+      return 'water_page.today'.tr();
+    }
+    final yesterday = today.subtract(const Duration(days: 1));
+    if (DateUtils.isSameDay(selectedDate, yesterday)) {
+      return 'water_page.yesterday'.tr();
+    }
+    return DateFormat.MMMd(context.locale.toString()).format(selectedDate);
+  }
+
+  Future<void> onWaterDateTapped() async {
+    final result = await AppDialogs.instance.showMealDatePicker(
+      context,
+      initialDate: selectedDate,
+    );
+    if (result == null || !mounted) return;
+    setState(() => selectedDate = DateUtils.dateOnly(result.date));
   }
 
   void disposeWaterControllers() {

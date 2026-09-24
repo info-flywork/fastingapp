@@ -54,6 +54,12 @@ import 'package:fastingapp/presentation/calories_tracker/view/calories_tracker_v
 import 'package:fastingapp/presentation/chat/latest/view/latest_chats_view.dart';
 import 'package:fastingapp/presentation/chat/view/chat_view.dart';
 import 'package:fastingapp/presentation/fasting/view/eating_window_view.dart';
+import 'package:fastingapp/presentation/fasting/view/fasting_body_status_view.dart';
+import 'package:fastingapp/presentation/fasting/view/fasting_breath_view.dart';
+import 'package:fastingapp/presentation/fasting/view/fasting_quick_walk_view.dart';
+import 'package:fastingapp/presentation/fasting/view/fasting_sip_challenge_view.dart';
+import 'package:fastingapp/presentation/fasting/view/fasting_struggle_advice_view.dart';
+import 'package:fastingapp/presentation/fasting/view/fasting_struggle_view.dart';
 import 'package:fastingapp/presentation/fasting/view/fasting_view.dart';
 import 'package:fastingapp/presentation/home/bloc/home_bloc.dart';
 import 'package:fastingapp/presentation/home/bloc/home_event.dart';
@@ -407,6 +413,66 @@ final GoRouter appRouter = GoRouter(
       name: RoutePaths.eatingWindow.name,
       parentNavigatorKey: rootNavigatorKey,
       builder: (context, state) => const EatingWindowView(),
+    ),
+    GoRoute(
+      path: RoutePaths.bodyStatus.path,
+      name: RoutePaths.bodyStatus.name,
+      parentNavigatorKey: rootNavigatorKey,
+      builder: (context, state) => const FastingBodyStatusView(),
+    ),
+    GoRoute(
+      path: RoutePaths.fastingStruggle.path,
+      name: RoutePaths.fastingStruggle.name,
+      parentNavigatorKey: rootNavigatorKey,
+      builder: (context, state) => const FastingStruggleView(),
+    ),
+    GoRoute(
+      path: RoutePaths.fastingStruggleAdvice.path,
+      name: RoutePaths.fastingStruggleAdvice.name,
+      parentNavigatorKey: rootNavigatorKey,
+      builder: (context, state) {
+        final extra = state.extra;
+        final args = extra is FastingStruggleAdviceArgs
+            ? extra
+            : const FastingStruggleAdviceArgs(
+                bodyKey: 'fasting_struggle.hungry_body',
+                reason: FastingStruggleReason.hungry,
+              );
+        return FastingStruggleAdviceView(args: args);
+      },
+    ),
+    GoRoute(
+      path: RoutePaths.fastingSipChallenge.path,
+      name: RoutePaths.fastingSipChallenge.name,
+      parentNavigatorKey: rootNavigatorKey,
+      builder: (context, state) {
+        final bodyKey = state.extra as String?;
+        return FastingSipChallengeView(
+          bodyKey: bodyKey ?? 'fasting_struggle.hungry_body',
+        );
+      },
+    ),
+    GoRoute(
+      path: RoutePaths.fastingQuickWalk.path,
+      name: RoutePaths.fastingQuickWalk.name,
+      parentNavigatorKey: rootNavigatorKey,
+      builder: (context, state) {
+        final bodyKey = state.extra as String?;
+        return FastingQuickWalkView(
+          bodyKey: bodyKey ?? 'fasting_struggle.energy_body',
+        );
+      },
+    ),
+    GoRoute(
+      path: RoutePaths.fastingBreath.path,
+      name: RoutePaths.fastingBreath.name,
+      parentNavigatorKey: rootNavigatorKey,
+      builder: (context, state) {
+        final bodyKey = state.extra as String?;
+        return FastingBreathView(
+          bodyKey: bodyKey ?? 'fasting_struggle.craving_body',
+        );
+      },
     ),
     GoRoute(
       path: RoutePaths.insights.path,

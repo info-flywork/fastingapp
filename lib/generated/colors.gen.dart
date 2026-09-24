@@ -99,6 +99,12 @@ abstract final class ColorName {
   /// Color: #AB4343
   static const Color colorEmotionalHungerRecTitle = Color(0xFFAB4343);
 
+  /// Color: #D9E1E7
+  static const Color colorEndFastCancelBottom = Color(0xFFD9E1E7);
+
+  /// Color: #EBF1F6
+  static const Color colorEndFastCancelTop = Color(0xFFEBF1F6);
+
   /// Color: #E30A17
   static const Color colorErrorRed = Color(0xFFE30A17);
 

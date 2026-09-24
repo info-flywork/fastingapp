@@ -202,6 +202,8 @@ class _WaterViewState extends State<WaterView>
                         child: _WaterHeader(
                           onBack: () => context.pop(),
                           onReminder: openReminder,
+                          dateLabel: waterDateLabel(context),
+                          onDateTap: onWaterDateTapped,
                         ),
                       ),
                       Expanded(
@@ -246,15 +248,22 @@ class _WaterViewState extends State<WaterView>
 }
 
 final class _WaterHeader extends StatelessWidget {
-  const _WaterHeader({required this.onBack, required this.onReminder});
+  const _WaterHeader({
+    required this.onBack,
+    required this.onReminder,
+    required this.dateLabel,
+    required this.onDateTap,
+  });
 
   final VoidCallback onBack;
   final VoidCallback onReminder;
+  final String dateLabel;
+  final VoidCallback onDateTap;
 
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16),
+      padding: const EdgeInsets.fromLTRB(32, 16, 16, 0),
       child: Row(
         children: [
           _CircleIconButton(onTap: onBack, child: _backIcon()),
@@ -266,7 +275,17 @@ final class _WaterHeader extends StatelessWidget {
                   Icons.chevron_left_rounded,
                   color: ColorName.colorTitle.withValues(alpha: 0.35),
                 ),
-                Text('water_page.today'.tr(), style: AppTextStyles.waterToday),
+                GestureDetector(
+                  onTap: onDateTap,
+                  behavior: HitTestBehavior.opaque,
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 4,
+                      vertical: 8,
+                    ),
+                    child: Text(dateLabel, style: AppTextStyles.waterToday),
+                  ),
+                ),
                 Icon(
                   Icons.chevron_right_rounded,
                   color: ColorName.colorTitle.withValues(alpha: 0.35),
@@ -274,6 +293,7 @@ final class _WaterHeader extends StatelessWidget {
               ],
             ),
           ),
+          const SizedBox(width: 16),
           _CircleIconButton(
             onTap: onReminder,
             child: Assets.icons.solarBellBingLineDuotone.svg(

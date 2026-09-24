@@ -161,6 +161,59 @@ final class AppButtonDecoration {
     );
   }
 
+  /// Orucu bitir iptali — açık gri gradient pill, 40h.
+  factory AppButtonDecoration.endFastCancel() {
+    return AppButtonDecoration(
+      gradient: const LinearGradient(
+        begin: Alignment.topCenter,
+        end: Alignment.bottomCenter,
+        colors: [
+          ColorName.colorEndFastCancelTop,
+          ColorName.colorEndFastCancelBottom,
+        ],
+      ),
+      borderColor: ColorName.colorWhite.withValues(alpha: 0.15),
+      borderWidth: 1,
+      borderRadius: BorderRadius.circular(99999),
+      height: 40,
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+      gap: 8,
+      innerShadowColor: ColorName.colorWhite.withValues(alpha: 0.22),
+      innerShadowOffset: const Offset(0, 4),
+      innerShadowBlur: 16,
+      labelColor: ColorName.colorTitle,
+      fontFamily: FontFamily.sFProDisplay,
+      fontWeight: FontWeight.w600,
+      defaultFontSize: 14,
+      lineHeight: 20,
+      letterSpacingPercent: -0.02,
+    );
+  }
+
+  /// Yürüyüş durdur — kırmızı pill, 40h.
+  factory AppButtonDecoration.errorStop() {
+    return AppButtonDecoration(
+      gradient: const LinearGradient(
+        colors: [ColorName.colorProteinGrams, ColorName.colorProteinGrams],
+      ),
+      borderColor: ColorName.colorWhite.withValues(alpha: 0.15),
+      borderWidth: 1,
+      borderRadius: BorderRadius.circular(99999),
+      height: 40,
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+      gap: 8,
+      innerShadowColor: ColorName.colorWhite.withValues(alpha: 0.22),
+      innerShadowOffset: const Offset(0, 4),
+      innerShadowBlur: 16,
+      labelColor: ColorName.colorWhite,
+      fontFamily: FontFamily.sFProDisplay,
+      fontWeight: FontWeight.w600,
+      defaultFontSize: 14,
+      lineHeight: 20,
+      letterSpacingPercent: -0.02,
+    );
+  }
+
   /// Oruç başlangıç saati — yeşil gradient pill, 48h.
   factory AppButtonDecoration.fastingStartConfirm() {
     return AppButtonDecoration(
@@ -190,11 +243,59 @@ final class AppButtonDecoration {
     );
   }
 
+  /// Oruç — "I'm Struggling" kırmızı pill (#CC655A), 48h.
+  factory AppButtonDecoration.fastingStruggle() {
+    return AppButtonDecoration(
+      gradient: const LinearGradient(
+        colors: [ColorName.colorOptionNegative, ColorName.colorOptionNegative],
+      ),
+      borderColor: ColorName.colorWhite.withValues(alpha: 0.15),
+      borderWidth: 1,
+      borderRadius: BorderRadius.circular(99999),
+      height: 48,
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 14),
+      gap: 8,
+      innerShadowColor: ColorName.colorWhite.withValues(alpha: 0.22),
+      innerShadowOffset: const Offset(0, 4),
+      innerShadowBlur: 16,
+      labelColor: ColorName.colorWhite,
+      fontFamily: FontFamily.sFProDisplay,
+      fontWeight: FontWeight.w700,
+      defaultFontSize: 16,
+      lineHeight: 24,
+      letterSpacingPercent: -0.02,
+    );
+  }
+
   /// Oruç başlat — düz yeşil pill (#7ACE6B), 48h, kalın yazı.
   factory AppButtonDecoration.fastingStart() {
     return AppButtonDecoration(
       gradient: const LinearGradient(
         colors: [ColorName.colorMealPositive, ColorName.colorMealPositive],
+      ),
+      borderColor: ColorName.colorWhite.withValues(alpha: 0.15),
+      borderWidth: 1,
+      borderRadius: BorderRadius.circular(99999),
+      height: 48,
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 14),
+      gap: 8,
+      innerShadowColor: ColorName.colorWhite.withValues(alpha: 0.22),
+      innerShadowOffset: const Offset(0, 4),
+      innerShadowBlur: 16,
+      labelColor: ColorName.colorWhite,
+      fontFamily: FontFamily.sFProDisplay,
+      fontWeight: FontWeight.w700,
+      defaultFontSize: 16,
+      lineHeight: 24,
+      letterSpacingPercent: -0.02,
+    );
+  }
+
+  /// Başka aktivite — koyu pill (#1B1B21), 48h, kalın yazı.
+  factory AppButtonDecoration.fastingAnother() {
+    return AppButtonDecoration(
+      gradient: const LinearGradient(
+        colors: [ColorName.colorButtonDark, ColorName.colorButtonDark],
       ),
       borderColor: ColorName.colorWhite.withValues(alpha: 0.15),
       borderWidth: 1,

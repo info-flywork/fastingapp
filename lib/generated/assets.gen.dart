@@ -167,6 +167,9 @@ class $AssetsIconsGen {
   SvgGenImage get icons8Gender =>
       const SvgGenImage('assets/icons/icons8_gender.svg');
 
+  /// File path: assets/icons/left-arrow.svg
+  SvgGenImage get leftArrow => const SvgGenImage('assets/icons/left-arrow.svg');
+
   /// File path: assets/icons/riiight.svg
   SvgGenImage get riiight => const SvgGenImage('assets/icons/riiight.svg');
 
@@ -196,6 +199,14 @@ class $AssetsIconsGen {
   /// File path: assets/icons/solar_arrow-left-linear.svg
   SvgGenImage get solarArrowLeftLinear =>
       const SvgGenImage('assets/icons/solar_arrow-left-linear.svg');
+
+  /// File path: assets/icons/solar_arrow-left-linear (1).png
+  AssetGenImage get solarArrowLeftLinear1 =>
+      const AssetGenImage('assets/icons/solar_arrow-left-linear (1).png');
+
+  /// File path: assets/icons/solar_arrow-left-linear (2).svg
+  SvgGenImage get solarArrowLeftLinear2 =>
+      const SvgGenImage('assets/icons/solar_arrow-left-linear (2).svg');
 
   /// File path: assets/icons/solar_bell-bing-line-duotone.svg
   SvgGenImage get solarBellBingLineDuotone =>
@@ -342,6 +353,7 @@ class $AssetsIconsGen {
     hugeiconsTranslate,
     icRoundMinus,
     icons8Gender,
+    leftArrow,
     riiight,
     searchh,
     sleep,
@@ -350,6 +362,8 @@ class $AssetsIconsGen {
     solarAltArrowUpLineDuotoneRight,
     solarArrowLeftDownLinear,
     solarArrowLeftLinear,
+    solarArrowLeftLinear1,
+    solarArrowLeftLinear2,
     solarBellBingLineDuotone,
     solarBellLineDuotone,
     solarCalendarDateLineDuotone,
@@ -392,17 +406,71 @@ class $AssetsImagesGen {
   /// File path: assets/images/1-or-2.png
   AssetGenImage get a1Or2 => const AssetGenImage('assets/images/1-or-2.png');
 
+  /// File path: assets/images/1.png
+  AssetGenImage get a1 => const AssetGenImage('assets/images/1.png');
+
   /// File path: assets/images/100ml.png
   AssetGenImage get a100ml => const AssetGenImage('assets/images/100ml.png');
 
+  /// File path: assets/images/1_light.png
+  AssetGenImage get a1Light => const AssetGenImage('assets/images/1_light.png');
+
+  /// File path: assets/images/2.png
+  AssetGenImage get a2 => const AssetGenImage('assets/images/2.png');
+
   /// File path: assets/images/200ml.png
   AssetGenImage get a200ml => const AssetGenImage('assets/images/200ml.png');
+
+  /// File path: assets/images/2_light.png
+  AssetGenImage get a2Light => const AssetGenImage('assets/images/2_light.png');
+
+  /// File path: assets/images/3.png
+  AssetGenImage get a3 => const AssetGenImage('assets/images/3.png');
+
+  /// File path: assets/images/3_light.png
+  AssetGenImage get a3Light => const AssetGenImage('assets/images/3_light.png');
+
+  /// File path: assets/images/4.png
+  AssetGenImage get a4 => const AssetGenImage('assets/images/4.png');
+
+  /// File path: assets/images/4_light.png
+  AssetGenImage get a4Light => const AssetGenImage('assets/images/4_light.png');
+
+  /// File path: assets/images/5.png
+  AssetGenImage get a5 => const AssetGenImage('assets/images/5.png');
 
   /// File path: assets/images/500ml.png
   AssetGenImage get a500ml => const AssetGenImage('assets/images/500ml.png');
 
   /// File path: assets/images/50ml.png
   AssetGenImage get a50ml => const AssetGenImage('assets/images/50ml.png');
+
+  /// File path: assets/images/5_light.png
+  AssetGenImage get a5Light => const AssetGenImage('assets/images/5_light.png');
+
+  /// File path: assets/images/6.png
+  AssetGenImage get a6 => const AssetGenImage('assets/images/6.png');
+
+  /// File path: assets/images/6_light.png
+  AssetGenImage get a6Light => const AssetGenImage('assets/images/6_light.png');
+
+  /// File path: assets/images/7.png
+  AssetGenImage get a7 => const AssetGenImage('assets/images/7.png');
+
+  /// File path: assets/images/7_light.png
+  AssetGenImage get a7Light => const AssetGenImage('assets/images/7_light.png');
+
+  /// File path: assets/images/8.png
+  AssetGenImage get a8 => const AssetGenImage('assets/images/8.png');
+
+  /// File path: assets/images/8_light.png
+  AssetGenImage get a8Light => const AssetGenImage('assets/images/8_light.png');
+
+  /// File path: assets/images/9.png
+  AssetGenImage get a9 => const AssetGenImage('assets/images/9.png');
+
+  /// File path: assets/images/9_light.png
+  AssetGenImage get a9Light => const AssetGenImage('assets/images/9_light.png');
 
   /// File path: assets/images/App Icon.png
   AssetGenImage get appIcon =>
@@ -435,6 +503,9 @@ class $AssetsImagesGen {
   /// File path: assets/images/bedtime.png
   AssetGenImage get bedtime => const AssetGenImage('assets/images/bedtime.png');
 
+  /// File path: assets/images/blob.png
+  AssetGenImage get blob => const AssetGenImage('assets/images/blob.png');
+
   /// File path: assets/images/blood.png
   AssetGenImage get blood => const AssetGenImage('assets/images/blood.png');
 
@@ -450,6 +521,9 @@ class $AssetsImagesGen {
   AssetGenImage get blueHearth =>
       const AssetGenImage('assets/images/blue_hearth.png');
 
+  /// File path: assets/images/bored.png
+  AssetGenImage get bored => const AssetGenImage('assets/images/bored.png');
+
   /// File path: assets/images/bowel.png
   AssetGenImage get bowel => const AssetGenImage('assets/images/bowel.png');
 
@@ -459,6 +533,9 @@ class $AssetsImagesGen {
   /// File path: assets/images/break_your_fast.png
   AssetGenImage get breakYourFast =>
       const AssetGenImage('assets/images/break_your_fast.png');
+
+  /// File path: assets/images/breathe.png
+  AssetGenImage get breathe => const AssetGenImage('assets/images/breathe.png');
 
   /// File path: assets/images/brocc.png
   AssetGenImage get brocc => const AssetGenImage('assets/images/brocc.png');
@@ -512,6 +589,10 @@ class $AssetsImagesGen {
   AssetGenImage get confusing =>
       const AssetGenImage('assets/images/confusing.png');
 
+  /// File path: assets/images/cravling.png
+  AssetGenImage get cravling =>
+      const AssetGenImage('assets/images/cravling.png');
+
   /// File path: assets/images/dairy.png
   AssetGenImage get dairy => const AssetGenImage('assets/images/dairy.png');
 
@@ -558,6 +639,10 @@ class $AssetsImagesGen {
   /// File path: assets/images/emotional_hunger.png
   AssetGenImage get emotionalHunger =>
       const AssetGenImage('assets/images/emotional_hunger.png');
+
+  /// File path: assets/images/end_fast.png
+  AssetGenImage get endFast =>
+      const AssetGenImage('assets/images/end_fast.png');
 
   /// File path: assets/images/everything.png
   AssetGenImage get everything =>
@@ -679,6 +764,9 @@ class $AssetsImagesGen {
   /// File path: assets/images/human.png
   AssetGenImage get human => const AssetGenImage('assets/images/human.png');
 
+  /// File path: assets/images/hungry.png
+  AssetGenImage get hungry => const AssetGenImage('assets/images/hungry.png');
+
   /// File path: assets/images/hunger-tracker.png
   AssetGenImage get hungerTracker =>
       const AssetGenImage('assets/images/hunger-tracker.png');
@@ -728,6 +816,10 @@ class $AssetsImagesGen {
   /// File path: assets/images/loginv2.png
   AssetGenImage get loginv2 => const AssetGenImage('assets/images/loginv2.png');
 
+  /// File path: assets/images/low_energiy.png
+  AssetGenImage get lowEnergiy =>
+      const AssetGenImage('assets/images/low_energiy.png');
+
   /// File path: assets/images/low_Carb.png
   AssetGenImage get lowCarb =>
       const AssetGenImage('assets/images/low_Carb.png');
@@ -738,6 +830,10 @@ class $AssetsImagesGen {
 
   /// File path: assets/images/man.png
   AssetGenImage get man => const AssetGenImage('assets/images/man.png');
+
+  /// File path: assets/images/mascot_breath.png
+  AssetGenImage get mascotBreath =>
+      const AssetGenImage('assets/images/mascot_breath.png');
 
   /// File path: assets/images/mascot-chat.png
   AssetGenImage get mascotChat =>
@@ -771,6 +867,10 @@ class $AssetsImagesGen {
   AssetGenImage get mascotMetabolic =>
       const AssetGenImage('assets/images/mascot_metabolic.png');
 
+  /// File path: assets/images/mascot_quick_walkt.png
+  AssetGenImage get mascotQuickWalkt =>
+      const AssetGenImage('assets/images/mascot_quick_walkt.png');
+
   /// File path: assets/images/mascot_search.png
   AssetGenImage get mascotSearch =>
       const AssetGenImage('assets/images/mascot_search.png');
@@ -778,6 +878,10 @@ class $AssetsImagesGen {
   /// File path: assets/images/mascot_tip.png
   AssetGenImage get mascotTip =>
       const AssetGenImage('assets/images/mascot_tip.png');
+
+  /// File path: assets/images/mascot_water.png
+  AssetGenImage get mascotWater =>
+      const AssetGenImage('assets/images/mascot_water.png');
 
   /// File path: assets/images/meal_record_emoji.png
   AssetGenImage get mealRecordEmoji =>
@@ -921,6 +1025,10 @@ class $AssetsImagesGen {
   AssetGenImage get purpleStar =>
       const AssetGenImage('assets/images/purple_star.png');
 
+  /// File path: assets/images/quick_walk.png
+  AssetGenImage get quickWalk =>
+      const AssetGenImage('assets/images/quick_walk.png');
+
   /// File path: assets/images/restrictive.png
   AssetGenImage get restrictive =>
       const AssetGenImage('assets/images/restrictive.png');
@@ -980,6 +1088,10 @@ class $AssetsImagesGen {
 
   /// File path: assets/images/stomach.png
   AssetGenImage get stomach => const AssetGenImage('assets/images/stomach.png');
+
+  /// File path: assets/images/stressed.png
+  AssetGenImage get stressed =>
+      const AssetGenImage('assets/images/stressed.png');
 
   /// File path: assets/images/streak.png
   AssetGenImage get streak => const AssetGenImage('assets/images/streak.png');
@@ -1117,10 +1229,28 @@ class $AssetsImagesGen {
   /// List of all assets
   List<AssetGenImage> get values => [
     a1Or2,
+    a1,
     a100ml,
+    a1Light,
+    a2,
     a200ml,
+    a2Light,
+    a3,
+    a3Light,
+    a4,
+    a4Light,
+    a5,
     a500ml,
     a50ml,
+    a5Light,
+    a6,
+    a6Light,
+    a7,
+    a7Light,
+    a8,
+    a8Light,
+    a9,
+    a9Light,
     appIcon,
     aDebugBar,
     aiChat,
@@ -1130,13 +1260,16 @@ class $AssetsImagesGen {
     avacado,
     beans,
     bedtime,
+    blob,
     blood,
     blueBook,
     blueClock,
     blueHearth,
+    bored,
     bowel,
     brain,
     breakYourFast,
+    breathe,
     brocc,
     broccv2,
     brocolies,
@@ -1152,6 +1285,7 @@ class $AssetsImagesGen {
     clock,
     confidence,
     confusing,
+    cravling,
     dairy,
     darkFast,
     darkNextFasting,
@@ -1165,6 +1299,7 @@ class $AssetsImagesGen {
     eggplant,
     eggs,
     emotionalHunger,
+    endFast,
     everything,
     fasting,
     fastingChallenge,
@@ -1198,6 +1333,7 @@ class $AssetsImagesGen {
     highCarbv2,
     home,
     human,
+    hungry,
     hungerTracker,
     hungerLog,
     insights,
@@ -1213,7 +1349,9 @@ class $AssetsImagesGen {
     loginv2,
     lowCarb,
     lowCarbv2,
+    lowEnergiy,
     man,
+    mascotBreath,
     mascotChat,
     mascotChatPp,
     mascotClock,
@@ -1222,8 +1360,10 @@ class $AssetsImagesGen {
     mascotHiWater,
     mascotLearnDetail,
     mascotMetabolic,
+    mascotQuickWalkt,
     mascotSearch,
     mascotTip,
+    mascotWater,
     mealRecordEmoji,
     meat,
     mediterrian,
@@ -1264,6 +1404,7 @@ class $AssetsImagesGen {
     progressHead,
     protein,
     purpleStar,
+    quickWalk,
     restrictive,
     rice,
     riiight,
@@ -1281,6 +1422,7 @@ class $AssetsImagesGen {
     star,
     steps,
     stomach,
+    stressed,
     streak,
     streakFlame,
     sweethies,

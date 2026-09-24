@@ -12,6 +12,8 @@
   <color name="color_profile_back">#F6F6F6</color>
   <color name="color_cta_gradient_top">#C8DBC5</color>
   <color name="color_cta_gradient_bottom">#76AB6E</color>
+  <color name="color_end_fast_cancel_top">#EBF1F6</color>
+  <color name="color_end_fast_cancel_bottom">#D9E1E7</color>
   <color name="color_title">#09090B</color>
   <color name="color_subtitle">#3C3C43</color>
   <color name="color_text_primary">#171717</color>

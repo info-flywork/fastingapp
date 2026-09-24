@@ -2490,6 +2490,115 @@ abstract final class AppTextStyles {
     color: ColorName.colorTitle,
   );
 
+  /// Zorlanma geri — "Back to timer" — 12 / Medium
+  static TextStyle get fastingStruggleBack => TextStyle(
+    fontFamily: FontFamily.sFProDisplay,
+    fontWeight: FontWeight.w500,
+    fontSize: 12,
+    height: 16 / 12,
+    letterSpacing: 12 * -0.025,
+    color: ColorName.colorTextPrimary.withValues(alpha: 0.5),
+  );
+
+  /// Zorlanma başlık — "Hey, squish" — 28 / Semibold
+  static TextStyle get fastingStruggleTitle => const TextStyle(
+    fontFamily: FontFamily.sFProDisplay,
+    fontWeight: FontWeight.w600,
+    fontSize: 28,
+    height: 36 / 28,
+    letterSpacing: -0.5,
+    color: ColorName.colorTitle,
+  );
+
+  /// Zorlanma açıklama — 18 / Medium
+  static TextStyle get fastingStruggleBody => TextStyle(
+    fontFamily: FontFamily.sFProDisplay,
+    fontWeight: FontWeight.w500,
+    fontSize: 18,
+    height: 24 / 18,
+    letterSpacing: -0.5,
+    color: ColorName.colorSubtitle.withValues(alpha: 0.6),
+  );
+
+  /// Zorlanma kart başlığı — 18 / Semibold
+  static TextStyle get fastingStruggleOptionTitle => const TextStyle(
+    fontFamily: FontFamily.sFProDisplay,
+    fontWeight: FontWeight.w600,
+    fontSize: 18,
+    height: 24 / 18,
+    letterSpacing: 18 * -0.015,
+    color: ColorName.colorTitle,
+  );
+
+  /// Yürüyüş sayacı — 24 / Semibold, satır 48, -0.5
+  static TextStyle get fastingWalkClock => const TextStyle(
+    fontFamily: FontFamily.sFProDisplay,
+    fontWeight: FontWeight.w600,
+    fontSize: 24,
+    height: 48 / 24,
+    letterSpacing: -0.5,
+    color: ColorName.colorTitle,
+  );
+
+  /// Orucu bitir başlığı — 24 / Semibold, -0.5
+  static TextStyle get fastingEndTitle => const TextStyle(
+    fontFamily: FontFamily.sFProDisplay,
+    fontWeight: FontWeight.w600,
+    fontSize: 24,
+    height: 32 / 24,
+    letterSpacing: -0.5,
+    color: ColorName.colorTitle,
+  );
+
+  /// Orucu bitir açıklaması — 16 / Semibold, -1.5%
+  static TextStyle get fastingEndBody => TextStyle(
+    fontFamily: FontFamily.sFProDisplay,
+    fontWeight: FontWeight.w600,
+    fontSize: 16,
+    height: 24 / 16,
+    letterSpacing: 16 * -0.015,
+    color: ColorName.colorSubtitle.withValues(alpha: 0.6),
+  );
+
+  /// Nefes sayacı — 40 / Medium, -1.5%
+  static TextStyle get fastingBreathCount => const TextStyle(
+    fontFamily: FontFamily.sFProDisplay,
+    fontWeight: FontWeight.w500,
+    fontSize: 40,
+    height: 44 / 40,
+    letterSpacing: 40 * -0.015,
+    color: ColorName.colorBlack,
+  );
+
+  /// Nefes fazı — 20 / Medium, -1.5%
+  static TextStyle get fastingBreathPhase => TextStyle(
+    fontFamily: FontFamily.sFProDisplay,
+    fontWeight: FontWeight.w500,
+    fontSize: 20,
+    height: 24 / 20,
+    letterSpacing: 20 * -0.015,
+    color: ColorName.colorSubtitle.withValues(alpha: 0.6),
+  );
+
+  /// Yürüyüş toplam süre — 14 / Medium
+  static TextStyle get fastingWalkTotal => TextStyle(
+    fontFamily: FontFamily.sFProDisplay,
+    fontWeight: FontWeight.w500,
+    fontSize: 14,
+    height: 1,
+    color: ColorName.colorSubtitle.withValues(alpha: 0.6),
+  );
+
+  /// Zorlanma kart açıklaması — 15 / Medium
+  static TextStyle get fastingStruggleOptionBody => TextStyle(
+    fontFamily: FontFamily.sFProDisplay,
+    fontWeight: FontWeight.w500,
+    fontSize: 15,
+    height: 20 / 15,
+    letterSpacing: 15 * -0.015,
+    color: ColorName.colorSubtitle.withValues(alpha: 0.6),
+  );
+
   /// Oruç başlangıç tekerleği — 24 / Semibold, -1.5%
   static TextStyle get fastingStartWheel => const TextStyle(
     fontFamily: FontFamily.sFProDisplay,

@@ -11,12 +11,14 @@ import 'package:fastingapp/core/widgets/bottom_navigation_bar/'
 import 'package:fastingapp/core/widgets/horseshoe_arc.dart';
 import 'package:fastingapp/generated/assets.gen.dart';
 import 'package:fastingapp/generated/colors.gen.dart';
+import 'package:fastingapp/presentation/fasting/view/fasting_end_signal.dart';
 import 'package:fastingapp/presentation/fasting/view/fasting_plan_sheet.dart';
 import 'package:fastingapp/presentation/fasting/view/fasting_start_sheet.dart';
 import 'package:fastingapp/presentation/home/view/home_view.dart';
 import 'package:fastingapp/presentation/plans/plans_catalog.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:share_plus/share_plus.dart';
 
 /// Oruç sekmesi — öğün zamanı, horseshoe ve aksiyonlar.
 final class FastingView extends StatefulWidget {
@@ -31,6 +33,29 @@ class _FastingViewState extends State<FastingView> {
   PlansCardData _plan = PlansCatalog.beginnerRow1.first;
   DateTime? _started;
 
+  @override
+  void initState() {
+    super.initState();
+    FastingEndSignal.notifier.addListener(_endFast);
+  }
+
+  @override
+  void dispose() {
+    FastingEndSignal.notifier.removeListener(_endFast);
+    super.dispose();
+  }
+
+  void _endFast() {
+    if (!mounted) return;
+    setState(() => _mealSelected = true);
+  }
+
+  Future<void> _confirmEndFast() async {
+    final confirmed = await AppDialogs.instance.showEndFast(context);
+    if (confirmed != true || !mounted) return;
+    _endFast();
+  }
+
   Future<void> _pickPlan() async {
     final picked = await showModalBottomSheet<PlansCardData>(
       context: context,
@@ -41,6 +66,30 @@ class _FastingViewState extends State<FastingView> {
     );
     if (!mounted || picked == null) return;
     setState(() => _plan = picked);
+  }
+
+  String _shareText() {
+    final started = _startedLabel ?? 'fasting_page.started_value'.tr();
+    final ends = _endsLabel ?? 'fasting_page.ends_value'.tr();
+    if (_mealSelected) {
+      return 'fasting_page.share_meal'.tr(
+        args: [_plan.title, started, ends, '3'],
+      );
+    }
+    final percent = 'fasting_page.share_percent'.tr(args: const ['10']);
+    return 'fasting_page.share_fasting'.tr(
+      args: [_plan.title, '01:44:14', percent, started, ends, '3'],
+    );
+  }
+
+  Future<void> _shareStatus(BuildContext anchor) async {
+    final box = anchor.findRenderObject() as RenderBox?;
+    final origin = box != null && box.hasSize
+        ? box.localToGlobal(Offset.zero) & box.size
+        : null;
+    await SharePlus.instance.share(
+      ShareParams(text: _shareText(), sharePositionOrigin: origin),
+    );
   }
 
   Future<void> _pickStart() async {
@@ -59,6 +108,14 @@ class _FastingViewState extends State<FastingView> {
   int _planHours(String title) {
     final head = title.split('-').first.trim();
     return int.tryParse(head) ?? 16;
+  }
+
+  String? get _startedLabel => _started == null ? null : _boundLabel(_started!);
+
+  String? get _endsLabel {
+    final start = _started;
+    if (start == null) return null;
+    return _boundLabel(start.add(Duration(hours: _planHours(_plan.title))));
   }
 
   String _boundLabel(DateTime value) {
@@ -91,27 +148,58 @@ class _FastingViewState extends State<FastingView> {
             mealSelected: _mealSelected,
             onBodyTap: () => setState(() => _mealSelected = false),
             onMealTap: () => setState(() => _mealSelected = true),
+            onShare: _shareStatus,
           ),
           const SizedBox(height: 20),
-          Text(
-            'fasting_page.meal_time'.tr(),
-            textAlign: TextAlign.center,
-            style: AppTextStyles.fastingMealTitle,
-          ),
-          const SizedBox(height: 12),
-          const _BreakFastCard(),
-          const SizedBox(height: 8),
-          _FastingArc(planTitle: _plan.title, onEditPlan: _pickPlan),
-          const SizedBox(height: 16),
-          _FastingActions(
-            planTitle: _plan.title,
-            started: _started == null ? null : _boundLabel(_started!),
-            ends: _started == null
-                ? null
-                : _boundLabel(
-                    _started!.add(Duration(hours: _planHours(_plan.title))),
+          AnimatedSize(
+            duration: const Duration(milliseconds: 480),
+            curve: Curves.easeOutCubic,
+            alignment: Alignment.topCenter,
+            child: AnimatedSwitcher(
+              duration: const Duration(milliseconds: 480),
+              layoutBuilder: (current, previous) {
+                return ClipRect(
+                  child: Stack(
+                    alignment: Alignment.topCenter,
+                    children: [...previous, if (current != null) current],
                   ),
-            onStart: _pickStart,
+                );
+              },
+              transitionBuilder: (child, animation) {
+                return AnimatedBuilder(
+                  animation: animation,
+                  builder: (context, child) {
+                    final reverse = animation.status == AnimationStatus.reverse;
+                    final toRight = !_mealSelected;
+                    final dx = reverse
+                        ? (toRight ? 1 - animation.value : animation.value - 1)
+                        : (toRight ? animation.value - 1 : 1 - animation.value);
+                    return FractionalTranslation(
+                      translation: Offset(dx, 0),
+                      child: Opacity(opacity: animation.value, child: child),
+                    );
+                  },
+                  child: child,
+                );
+              },
+              child: _mealSelected
+                  ? _MealStage(
+                      key: const ValueKey('meal'),
+                      planTitle: _plan.title,
+                      started: _startedLabel,
+                      ends: _endsLabel,
+                      onEditPlan: _pickPlan,
+                      onStart: _pickStart,
+                    )
+                  : _BodyStage(
+                      key: const ValueKey('body'),
+                      planTitle: _plan.title,
+                      started: _startedLabel,
+                      ends: _endsLabel,
+                      onEditPlan: _pickPlan,
+                      onFinish: _confirmEndFast,
+                    ),
+            ),
           ),
           // Kartların 12px üst boşluğuyla birlikte aralık 16.
           const SizedBox(height: 4),
@@ -146,11 +234,13 @@ final class _ActionRow extends StatelessWidget {
     required this.mealSelected,
     required this.onBodyTap,
     required this.onMealTap,
+    required this.onShare,
   });
 
   final bool mealSelected;
   final VoidCallback onBodyTap;
   final VoidCallback onMealTap;
+  final Future<void> Function(BuildContext anchor) onShare;
 
   @override
   Widget build(BuildContext context) {
@@ -158,8 +248,13 @@ final class _ActionRow extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 16),
       child: Row(
         children: [
-          _CircleButton(
-            child: Assets.icons.solarSquareShareLineLineDuotone.svg(),
+          Builder(
+            builder: (anchor) {
+              return _CircleButton(
+                onTap: () => onShare(anchor),
+                child: Assets.icons.solarSquareShareLineLineDuotone.svg(),
+              );
+            },
           ),
           const Spacer(),
           _ModeToggle(
@@ -339,8 +434,109 @@ final class _ModeSegment extends StatelessWidget {
   }
 }
 
-final class _BreakFastCard extends StatelessWidget {
-  const _BreakFastCard();
+final class _MealStage extends StatelessWidget {
+  const _MealStage({
+    required this.planTitle,
+    required this.started,
+    required this.ends,
+    required this.onEditPlan,
+    required this.onStart,
+    super.key,
+  });
+
+  final String planTitle;
+  final String? started;
+  final String? ends;
+  final VoidCallback onEditPlan;
+  final VoidCallback onStart;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        Text(
+          'fasting_page.meal_time'.tr(),
+          textAlign: TextAlign.center,
+          style: AppTextStyles.fastingMealTitle,
+        ),
+        const SizedBox(height: 12),
+        _StageCard(
+          image: Assets.images.breakYourFast,
+          titleKey: 'fasting_page.break_title',
+          bodyKey: 'fasting_page.break_body',
+          onTap: () => context.pushNamed(RoutePaths.eatingWindow.name),
+        ),
+        const SizedBox(height: 8),
+        _FastingArc(planTitle: planTitle, onEditPlan: onEditPlan),
+        const SizedBox(height: 16),
+        _FastingActions(
+          planTitle: planTitle,
+          started: started,
+          ends: ends,
+          onStart: onStart,
+        ),
+      ],
+    );
+  }
+}
+
+final class _BodyStage extends StatelessWidget {
+  const _BodyStage({
+    required this.planTitle,
+    required this.started,
+    required this.ends,
+    required this.onEditPlan,
+    required this.onFinish,
+    super.key,
+  });
+
+  final String planTitle;
+  final String? started;
+  final String? ends;
+  final VoidCallback onEditPlan;
+  final VoidCallback onFinish;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        _StageCard(
+          image: Assets.images.a1Light,
+          titleKey: 'fasting_page.body_title',
+          bodyKey: 'fasting_page.body_body',
+          onTap: () => context.pushNamed(RoutePaths.bodyStatus.name),
+        ),
+        const SizedBox(height: 8),
+        _FastingArc(
+          planTitle: planTitle,
+          onEditPlan: onEditPlan,
+          bodyMode: true,
+        ),
+        const SizedBox(height: 16),
+        _FastingActions(
+          planTitle: planTitle,
+          started: started,
+          ends: ends,
+          onStart: onFinish,
+          fasting: true,
+        ),
+      ],
+    );
+  }
+}
+
+final class _StageCard extends StatelessWidget {
+  const _StageCard({
+    required this.image,
+    required this.titleKey,
+    required this.bodyKey,
+    this.onTap,
+  });
+
+  final AssetGenImage image;
+  final String titleKey;
+  final String bodyKey;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
@@ -350,28 +546,24 @@ final class _BreakFastCard extends StatelessWidget {
         color: ColorName.colorWhite,
         borderRadius: BorderRadius.circular(16),
         child: InkWell(
-          onTap: () => context.pushNamed(RoutePaths.eatingWindow.name),
+          onTap: onTap,
           borderRadius: BorderRadius.circular(16),
           child: Padding(
             padding: const EdgeInsets.all(12),
             child: Row(
               children: [
-                Assets.images.breakYourFast.image(
-                  width: 48,
-                  height: 48,
-                  fit: BoxFit.contain,
-                ),
+                image.image(width: 48, height: 48, fit: BoxFit.contain),
                 const SizedBox(width: 16),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'fasting_page.break_title'.tr(),
+                        titleKey.tr(),
                         style: AppTextStyles.fastingBreakTitle,
                       ),
                       Text(
-                        'fasting_page.break_body'.tr(),
+                        bodyKey.tr(),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: AppTextStyles.fastingBreakBody,
@@ -394,10 +586,15 @@ final class _BreakFastCard extends StatelessWidget {
 }
 
 final class _FastingArc extends StatelessWidget {
-  const _FastingArc({required this.planTitle, required this.onEditPlan});
+  const _FastingArc({
+    required this.planTitle,
+    required this.onEditPlan,
+    this.bodyMode = false,
+  });
 
   final String planTitle;
   final VoidCallback onEditPlan;
+  final bool bodyMode;
 
   static const _progress = 0.10;
   static const _arcTop = 18.0;
@@ -439,24 +636,48 @@ final class _FastingArc extends StatelessWidget {
                         HorseshoeArc(
                           progress: progress,
                           minProgress: 0,
-                          progressColor: ColorName.colorPlanFasting,
+                          progressColor: bodyMode
+                              ? ColorName.colorMealPositive
+                              : ColorName.colorPlanFasting,
                           trackColor: ColorName.colorUnitToggleBg,
                         ),
                         child!,
-                        _ArcMarker(
-                          center: breakFast,
-                          image: Assets.images.breakYourFast,
-                        ),
-                        _ArcMarker(
-                          center: nourish,
-                          image: Assets.images.darkNorusih,
-                          scale: 1.35,
-                        ),
-                        _ArcMarker(
-                          center: nextFast,
-                          image: Assets.images.darkFast,
-                          scale: 1.25,
-                        ),
+                        if (bodyMode) ...[
+                          _ArcMarker(
+                            center: breakFast,
+                            image: Assets.images.a1Light,
+                          ),
+                          _ArcMarker(
+                            center: _pointOnArc(arcSize, 0.44),
+                            image: Assets.images.a3,
+                            dimmed: true,
+                          ),
+                          _ArcMarker(
+                            center: _pointOnArc(arcSize, 0.66),
+                            image: Assets.images.a4,
+                            dimmed: true,
+                          ),
+                          _ArcMarker(
+                            center: _pointOnArc(arcSize, 0.92),
+                            image: Assets.images.a6,
+                            dimmed: true,
+                          ),
+                        ] else ...[
+                          _ArcMarker(
+                            center: breakFast,
+                            image: Assets.images.breakYourFast,
+                          ),
+                          _ArcMarker(
+                            center: nourish,
+                            image: Assets.images.darkNorusih,
+                            scale: 1.35,
+                          ),
+                          _ArcMarker(
+                            center: nextFast,
+                            image: Assets.images.darkFast,
+                            scale: 1.25,
+                          ),
+                        ],
                       ],
                     ),
                   ),
@@ -553,11 +774,40 @@ final class _PenIcon extends StatelessWidget {
 }
 
 final class _ArcMarker extends StatelessWidget {
-  const _ArcMarker({required this.center, required this.image, this.scale = 1});
+  const _ArcMarker({
+    required this.center,
+    required this.image,
+    this.scale = 1,
+    this.dimmed = false,
+  });
 
   final Offset center;
   final AssetGenImage image;
   final double scale;
+  final bool dimmed;
+
+  static const _gray = ColorFilter.matrix(<double>[
+    0.2126,
+    0.7152,
+    0.0722,
+    0,
+    48,
+    0.2126,
+    0.7152,
+    0.0722,
+    0,
+    48,
+    0.2126,
+    0.7152,
+    0.0722,
+    0,
+    48,
+    0,
+    0,
+    0,
+    0.9,
+    0,
+  ]);
 
   @override
   Widget build(BuildContext context) {
@@ -590,7 +840,12 @@ final class _ArcMarker extends StatelessWidget {
               padding: const EdgeInsets.all(6),
               child: Transform.scale(
                 scale: scale,
-                child: image.image(fit: BoxFit.contain),
+                child: dimmed
+                    ? ColorFiltered(
+                        colorFilter: _gray,
+                        child: image.image(fit: BoxFit.contain),
+                      )
+                    : image.image(fit: BoxFit.contain),
               ),
             ),
           ),
@@ -606,12 +861,14 @@ final class _FastingActions extends StatelessWidget {
     required this.started,
     required this.ends,
     required this.onStart,
+    this.fasting = false,
   });
 
   final String planTitle;
   final String? started;
   final String? ends;
   final VoidCallback onStart;
+  final bool fasting;
 
   @override
   Widget build(BuildContext context) {
@@ -622,11 +879,25 @@ final class _FastingActions extends StatelessWidget {
           _TimeRow(started: started, ends: ends),
           const SizedBox(height: 20),
           AppButton(
-            label: 'fasting_page.start_cta'.tr(args: [planTitle]),
+            label: fasting
+                ? 'fasting_page.finish_early'.tr()
+                : 'fasting_page.start_cta'.tr(args: [planTitle]),
             onPressed: onStart,
             showIcon: false,
-            decoration: AppButtonDecoration.fastingStart(),
+            decoration: fasting
+                ? AppButtonDecoration.dark()
+                : AppButtonDecoration.fastingStart(),
           ),
+          if (fasting) ...[
+            const SizedBox(height: 10),
+            AppButton(
+              label: 'fasting_page.struggling'.tr(),
+              onPressed: () =>
+                  context.pushNamed(RoutePaths.fastingStruggle.name),
+              showIcon: false,
+              decoration: AppButtonDecoration.fastingStruggle(),
+            ),
+          ],
         ],
       ),
     );
