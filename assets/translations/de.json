@@ -701,5 +701,92 @@
     "meal_yogurt_meta": "17:00 Snack",
     "meal_yogurt_protein": "15g",
     "meal_yogurt_kcal": "220 kcal"
+  },
+  "insights_page": {
+    "brand_mochi": "Mochi",
+    "brand_fast": "Fast",
+    "title": "Lerne mit Mochi",
+    "subtitle": "Einfache Antworten für ein gesünderes, glücklicheres Ich.",
+    "search": "Nach einem Thema suchen...",
+    "basics_title": "Fasten-Grundlagen",
+    "basics_body": "Lerne die Grundlagen des Intervallfastens.",
+    "during_title": "Während des Fastens",
+    "during_body": "Tipps, Orientierung und was dich erwartet.",
+    "eating_title": "Essensfenster",
+    "eating_body": "Hol das Beste aus deinen Mahlzeiten.",
+    "health_title": "Gesundheit & Lifestyle",
+    "health_body": "Schlaf, Energie, Mindset und mehr",
+    "tips_title": "Mochis Tipps",
+    "tips_body": "Kurze Ratschläge von deinem Fasten-Buddy.",
+    "banner": "Kleine Schritte. Große Veränderungen!"
+  },
+  "insights_detail": {
+    "author": "- Mochi",
+    "tip_title": "Mochi-Tipp",
+    "basics": {
+      "kicker": "FASTEN-GRUNDLAGEN",
+      "title": "Was ist Intervallfasten?",
+      "subtitle": "Einfache Antworten für ein gesünderes, glücklicheres Ich.",
+      "quote": "Es geht nicht darum, weniger zu essen, sondern zur richtigen Zeit.",
+      "card1_title": "Es kommt darauf an, wann du isst",
+      "card1_body": "Intervallfasten wechselt zwischen Essens- und Fastenzeiten. Es sagt nicht, welche Lebensmittel, sondern wann du isst.",
+      "card2_title": "Dein Essensfenster bleibt",
+      "card2_body": "Deine Lieblingsspeisen kannst du im Essensfenster genießen. Das Fasten gibt deinem Körper Zeit zum Ausruhen und Erholen.",
+      "card3_title": "Es kann deine Gesundheit stützen",
+      "card3_body": "Viele nutzen Intervallfasten, um sich energiegeladener zu fühlen, ein gesundes Gewicht zu halten und ihr Wohlbefinden zu stützen.",
+      "tip": "Starte sanft und finde einen Plan, der zu deinem Leben passt. Beständigkeit zählt mehr als Perfektion."
+    },
+    "during": {
+      "kicker": "WÄHREND DES FASTENS",
+      "title": "Was passiert, während du fastest?",
+      "subtitle": "Ein ruhiger Leitfaden für die Stunden zwischen den Mahlzeiten.",
+      "quote": "Hunger kommt in Wellen. Die meisten gehen vorbei, wenn du ihnen etwas Zeit gibst.",
+      "card1_title": "Die ersten Stunden sind am lautesten",
+      "card1_body": "Dein Körper ist eine Routine gewohnt. Früher Hunger ist oft Gewohnheit, kein Notfall.",
+      "card2_title": "Wasser ist dein einfachster Helfer",
+      "card2_body": "Trink während des Fastens Wasser. Es hält dich angenehm und gibt deinen Händen etwas zu tun.",
+      "card3_title": "Die Energie sinkt, dann wird sie ruhig",
+      "card3_body": "Ein kurzer Spaziergang oder ein paar stille Minuten helfen meist mehr, als auf die Uhr zu sehen.",
+      "tip": "Wenn dir schwindelig ist oder du dich unwohl fühlst, beende das Fasten und iss. Ein guter Plan ist einer, den du morgen wiederholen kannst."
+    },
+    "eating": {
+      "kicker": "ESSENSFENSTER",
+      "title": "Wie nutzt du deine Mahlzeiten?",
+      "subtitle": "Mach die Stunden, in denen du isst, wertvoll.",
+      "quote": "Das Fenster ist keine Ziellinie. Es ist der Ort, an dem du dich mit Sorgfalt auftankst.",
+      "card1_title": "Beginne mit einer richtigen Mahlzeit",
+      "card1_body": "Öffne das Fenster mit Protein, Gemüse und etwas, das du magst. Direkt zu Snacks zu springen macht dich hungriger.",
+      "card2_title": "Du musst Essen nicht verdienen",
+      "card2_body": "Fasten ist keine Strafe. Iss genug, um satt zu sein, nicht um vollgestopft zu sein.",
+      "card3_title": "Lass ein wenig Platz",
+      "card3_body": "Hör auf, wenn du angenehm satt bist. Das nächste Fasten ist leichter, wenn die letzte Mahlzeit freundlich war.",
+      "tip": "Plane die erste Mahlzeit, bevor das Fenster aufgeht. Hungrig zu entscheiden heißt meist, das Nächstbeste zu greifen."
+    },
+    "health": {
+      "kicker": "GESUNDHEIT & LIFESTYLE",
+      "title": "Wie passt Fasten in einen normalen Tag?",
+      "subtitle": "Schlaf, Energie und Stimmung zählen so viel wie die Uhr.",
+      "quote": "Fasten wirkt am besten auf einem Leben, das du wirklich leben kannst.",
+      "card1_title": "Schlaf gehört zum Plan",
+      "card1_body": "Kurze Nächte machen Hunger lauter. Schütze deine Schlafenszeit so, wie du dein Essensfenster schützt.",
+      "card2_title": "Beweg dich, aber zwing dich nicht",
+      "card2_body": "Leichte Bewegung an einem Fastentag reicht. Harte Einheiten hebst du dir für die Zeit nach dem Essen auf.",
+      "card3_title": "Stress nimmt die Ruhe",
+      "card3_body": "Fasten soll keine neue Sorge sein. Ist der Tag schon schwer, ist ein kürzeres Fasten trotzdem ein Gewinn.",
+      "tip": "Kopple das Fasten an eine feste Gewohnheit, etwa einen Morgenspaziergang oder ein Glas Wasser. Ein Anker schlägt einen perfekten Plan."
+    },
+    "tips": {
+      "kicker": "MOCHIS TIPPS",
+      "title": "Woran solltest du dich erinnern?",
+      "subtitle": "Kurze Ratschläge von deinem Fasten-Buddy.",
+      "quote": "Kleine Wiederholungen schlagen eine dramatische erste Woche.",
+      "card1_title": "Wähle ein Fenster, das du schon magst",
+      "card1_body": "Der beste Plan liegt nah an dem, wie du jetzt isst. Verschiebe ihn ein wenig, nicht alles auf einmal.",
+      "card2_title": "Sag es jemandem, oder Mochi",
+      "card2_body": "Ein Plan, den du laut aussprichst, ist leichter zu halten. Schau jeden Tag zur gleichen Zeit nach dir.",
+      "card3_title": "Ein Tag entfällt, dann geht es weiter",
+      "card3_body": "Ein unterbrochenes Fasten setzt dich nicht zurück. Iss, ruh dich aus und öffne das nächste Fenster ohne Rede.",
+      "tip": "Halt das Ziel schlicht und freundlich. Du baust einen Rhythmus, du gewinnst kein Rennen."
+    }
   }
 }

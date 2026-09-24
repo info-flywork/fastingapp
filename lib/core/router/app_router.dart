@@ -68,6 +68,9 @@ import 'package:fastingapp/presentation/hunger_tracker/view/hunger_second_questi
 import 'package:fastingapp/presentation/hunger_tracker/view/hunger_success_view.dart';
 import 'package:fastingapp/presentation/hunger_tracker/view/hunger_third_question_view.dart';
 import 'package:fastingapp/presentation/hunger_tracker/view/hunger_tracker_view.dart';
+import 'package:fastingapp/presentation/insights/insight_topic.dart';
+import 'package:fastingapp/presentation/insights/view/insight_detail_view.dart';
+import 'package:fastingapp/presentation/insights/view/insights_view.dart';
 import 'package:fastingapp/presentation/meal_records/view/meal_detail_view.dart';
 import 'package:fastingapp/presentation/meal_records/view/meal_records_view.dart';
 import 'package:fastingapp/presentation/plans/plan_detail_args.dart';
@@ -396,6 +399,21 @@ final GoRouter appRouter = GoRouter(
       name: RoutePaths.sleep.name,
       parentNavigatorKey: rootNavigatorKey,
       builder: (context, state) => const SleepView(),
+    ),
+    GoRoute(
+      path: RoutePaths.insights.path,
+      name: RoutePaths.insights.name,
+      parentNavigatorKey: rootNavigatorKey,
+      builder: (context, state) => const InsightsView(),
+    ),
+    GoRoute(
+      path: RoutePaths.insightDetail.path,
+      name: RoutePaths.insightDetail.name,
+      parentNavigatorKey: rootNavigatorKey,
+      builder: (context, state) {
+        final topic = InsightTopic.fromName(state.pathParameters['topic']);
+        return InsightDetailView(topic: topic);
+      },
     ),
     GoRoute(
       path: RoutePaths.mealRecords.path,

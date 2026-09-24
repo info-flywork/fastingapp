@@ -2401,6 +2401,85 @@ abstract final class AppTextStyles {
     color: ColorName.colorBlack.withValues(alpha: 0.5),
   );
 
+  /// Insights marka — Baloo 24 / Regular
+  static TextStyle get insightsBrand => const TextStyle(
+    fontFamily: FontFamily.baloo,
+    fontWeight: FontWeight.w400,
+    fontSize: 24,
+    height: 28 / 24,
+    letterSpacing: 24 * -0.015,
+    color: ColorName.colorTitle,
+  );
+
+  /// Learn with Mochi — 36 / Bold
+  static TextStyle get insightsTitle => const TextStyle(
+    fontFamily: FontFamily.sFProDisplay,
+    fontWeight: FontWeight.w700,
+    fontSize: 36,
+    height: 1,
+    letterSpacing: 36 * -0.02,
+    color: ColorName.colorTitle,
+  );
+
+  /// Arama — 16 / Medium
+  static TextStyle get insightsSearch => TextStyle(
+    fontFamily: FontFamily.sFProDisplay,
+    fontWeight: FontWeight.w500,
+    fontSize: 16,
+    height: 24 / 16,
+    letterSpacing: 16 * -0.02,
+    color: ColorName.colorSubtitle.withValues(alpha: 0.6),
+  );
+
+  /// Alt bant — 16 / Semibold
+  static TextStyle get insightsBanner => const TextStyle(
+    fontFamily: FontFamily.sFProDisplay,
+    fontWeight: FontWeight.w600,
+    fontSize: 16,
+    height: 20 / 16,
+    letterSpacing: 16 * -0.015,
+    color: ColorName.colorInsightBannerText,
+  );
+
+  /// Detay üst etiketi — 16 / Semibold
+  static TextStyle get insightDetailKicker => const TextStyle(
+    fontFamily: FontFamily.sFProDisplay,
+    fontWeight: FontWeight.w600,
+    fontSize: 16,
+    height: 20 / 16,
+    letterSpacing: 16 * -0.015,
+    color: ColorName.colorInsightBannerText,
+  );
+
+  /// Alıntı işareti
+  static TextStyle get insightQuoteMark => const TextStyle(
+    fontFamily: FontFamily.annapurnaSIL,
+    fontWeight: FontWeight.w500,
+    fontSize: 56,
+    height: 1,
+    color: ColorName.colorInsightQuote,
+  );
+
+  /// Alıntı sahibi — 16 / Medium
+  static TextStyle get insightQuoteAuthor => const TextStyle(
+    fontFamily: FontFamily.sFProDisplay,
+    fontWeight: FontWeight.w500,
+    fontSize: 16,
+    height: 20 / 16,
+    letterSpacing: 16 * -0.02,
+    color: ColorName.colorInsightQuote,
+  );
+
+  /// Mochi ipucu başlığı — 18 / Semibold
+  static TextStyle get insightTipTitle => const TextStyle(
+    fontFamily: FontFamily.sFProDisplay,
+    fontWeight: FontWeight.w600,
+    fontSize: 18,
+    height: 24 / 18,
+    letterSpacing: 18 * -0.015,
+    color: ColorName.colorInsightBannerText,
+  );
+
   /// Schedule card label — 16 / Medium / 60%
   static TextStyle get sleepCardLabel => TextStyle(
     fontFamily: FontFamily.sFProDisplay,

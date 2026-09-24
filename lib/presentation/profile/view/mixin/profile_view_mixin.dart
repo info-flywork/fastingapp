@@ -37,7 +37,9 @@ mixin ProfileViewMixin on State<ProfileView> {
 
   void onFastingHistory() {}
 
-  void onInsights() {}
+  void onInsights() {
+    context.pushNamed(RoutePaths.insights.name);
+  }
 
   void onNotificationInbox() {
     context.pushNamed(RoutePaths.notifications.name);

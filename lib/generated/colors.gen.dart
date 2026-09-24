@@ -132,6 +132,30 @@ abstract final class ColorName {
   /// Color: #ECF5E7
   static const Color colorHungerTipBg = Color(0xFFECF5E7);
 
+  /// Color: #E3EBE1
+  static const Color colorInsightBanner = Color(0xFFE3EBE1);
+
+  /// Color: #297C3F
+  static const Color colorInsightBannerText = Color(0xFF297C3F);
+
+  /// Color: #FDEBE1
+  static const Color colorInsightDuring = Color(0xFFFDEBE1);
+
+  /// Color: #FFF3D9
+  static const Color colorInsightEating = Color(0xFFFFF3D9);
+
+  /// Color: #E3F1FC
+  static const Color colorInsightHealth = Color(0xFFE3F1FC);
+
+  /// Color: #2E7E20
+  static const Color colorInsightQuote = Color(0xFF2E7E20);
+
+  /// Color: #ECF5E7
+  static const Color colorInsightQuoteBg = Color(0xFFECF5E7);
+
+  /// Color: #EDE5FC
+  static const Color colorInsightTips = Color(0xFFEDE5FC);
+
   /// Color: #FFEAA8
   static const Color colorJourneyGoalWeight = Color(0xFFFFEAA8);
 

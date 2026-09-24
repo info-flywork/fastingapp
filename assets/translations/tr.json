@@ -701,5 +701,92 @@
     "meal_yogurt_meta": "17:00 Atıştırmalık",
     "meal_yogurt_protein": "15g",
     "meal_yogurt_kcal": "220 kcal"
+  },
+  "insights_page": {
+    "brand_mochi": "Mochi",
+    "brand_fast": "Fast",
+    "title": "Mochi ile öğren",
+    "subtitle": "Daha sağlıklı ve mutlu bir sen\niçin sade cevaplar.",
+    "search": "Bir konu ara...",
+    "basics_title": "Oruç Temelleri",
+    "basics_body": "Aralıklı orucun temellerini öğren.",
+    "during_title": "Oruç Sırasında",
+    "during_body": "İpuçları, rehberlik ve neler beklemelisin.",
+    "eating_title": "Yeme Penceresi",
+    "eating_body": "Öğünlerinden en iyi şekilde yararlan.",
+    "health_title": "Sağlık ve Yaşam",
+    "health_body": "Uyku, enerji, zihin ve daha fazlası",
+    "tips_title": "Mochi'nin İpuçları",
+    "tips_body": "Oruç arkadaşından kısa tavsiyeler.",
+    "banner": "Küçük adımlar. Büyük değişimler!"
+  },
+  "insights_detail": {
+    "author": "- Mochi",
+    "tip_title": "Mochi'nin İpucu",
+    "basics": {
+      "kicker": "ORUÇ TEMELLERİ",
+      "title": "Aralıklı oruç nedir?",
+      "subtitle": "Daha sağlıklı ve mutlu bir sen için sade cevaplar.",
+      "quote": "Mesele daha az yemek değil, doğru zamanda yemek.",
+      "card1_title": "Ne zaman yediğin önemli",
+      "card1_body": "Aralıklı oruç, yeme ve oruç dönemleri arasında döner. Hangi yiyecekleri yiyeceğini değil, ne zaman yiyeceğini söyler.",
+      "card2_title": "Yeme penceren duruyor",
+      "card2_body": "Sevdiğin yiyecekleri yeme penceresinde yiyebilirsin. Oruç, bedenine dinlenip toparlanması için zaman verir.",
+      "card3_title": "Sağlığını destekleyebilir",
+      "card3_body": "Birçok kişi daha enerjik hissetmek, sağlıklı kilosunu korumak ve genel iyiliğini desteklemek için aralıklı orucu kullanır.",
+      "tip": "Yavaş başla ve yaşamına uyan bir plan bul. Tutarlılık, kusursuzluktan daha önemli."
+    },
+    "during": {
+      "kicker": "ORUÇ SIRASINDA",
+      "title": "Oruç tutarken ne olur?",
+      "subtitle": "Öğünler arasındaki saatler için sakin bir rehber.",
+      "quote": "Açlık dalgalar halinde gelir. Çoğu, biraz zaman verirsen geçer.",
+      "card1_title": "İlk saatler en gürültülü olanıdır",
+      "card1_body": "Bedenin bir düzene alışkındır. Erken açlık çoğu zaman acil bir ihtiyaç değil, alışkanlıktır.",
+      "card2_title": "Su en kolay yardımcın",
+      "card2_body": "Oruç boyunca su iç. Rahat tutar ve ellerine bir iş verir.",
+      "card3_title": "Enerji düşer, sonra oturur",
+      "card3_body": "Kısa bir yürüyüş ya da birkaç sessiz dakika, saati izlemekten daha çok işe yarar.",
+      "tip": "Başın dönerse ya da kendini kötü hissedersen orucu bitir ve ye. İyi plan, yarın da tekrarlayabildiğin plandır."
+    },
+    "eating": {
+      "kicker": "YEME PENCERESİ",
+      "title": "Öğünleri nasıl kullanmalısın?",
+      "subtitle": "Yediğin saatleri değerli kıl.",
+      "quote": "Pencere bir bitiş çizgisi değil. Kendini özenle doldurduğun yer.",
+      "card1_title": "Gerçek bir öğünle başla",
+      "card1_body": "Pencereyi protein, sebze ve sevdiğin bir şeyle aç. Doğrudan atıştırmalığa geçmek daha aç bırakır.",
+      "card2_title": "Yemeği hak etmek zorunda değilsin",
+      "card2_body": "Oruç bir ceza değil. Tok hissedecek kadar ye, tıka basa değil.",
+      "card3_title": "Biraz boşluk bırak",
+      "card3_body": "Rahatça doyduğunda dur. Son öğün nazikse sonraki oruç daha kolay olur.",
+      "tip": "İlk öğünü pencere açılmadan planla. Açken karar vermek, en yakındakini kapmak demektir."
+    },
+    "health": {
+      "kicker": "SAĞLIK VE YAŞAM",
+      "title": "Oruç normal bir güne nasıl oturur?",
+      "subtitle": "Uyku, enerji ve ruh hali saat kadar önemlidir.",
+      "quote": "Oruç, gerçekten yaşayabildiğin bir hayatın üstünde en iyi çalışır.",
+      "card1_title": "Uyku planın parçası",
+      "card1_body": "Kısa geceler açlığı yükseltir. Yatma saatini, yeme pencereni koruduğun gibi koru.",
+      "card2_title": "Hareket et, zorlama",
+      "card2_body": "Oruç gününde hafif hareket yeter. Zor antrenmanı yemek yedikten sonraya bırak.",
+      "card3_title": "Stres sakinliği bozar",
+      "card3_body": "Oruç yeni bir kaygı olmamalı. Gün zaten ağırsa daha kısa bir oruç da kazanımdır.",
+      "tip": "Orucu tek bir sabit alışkanlıkla eşle, sabah yürüyüşü ya da bir bardak su. Bir çıpa, kusursuz bir programdan iyidir."
+    },
+    "tips": {
+      "kicker": "MOCHI'NİN İPUÇLARI",
+      "title": "Neyi hatırlamalısın?",
+      "subtitle": "Oruç arkadaşından kısa tavsiyeler.",
+      "quote": "Küçük tekrarlar, gösterişli bir ilk haftadan iyidir.",
+      "card1_title": "Zaten sevdiğin bir pencere seç",
+      "card1_body": "En iyi plan, şimdiki yeme düzenine yakındır. Bir anda değil, azıcık kaydır.",
+      "card2_title": "Birine söyle, ya da Mochi'ye",
+      "card2_body": "Sesli söylediğin planı tutmak daha kolay. Her gün aynı saatte kendine bak.",
+      "card3_title": "Bir gün kaçar, sonra devam et",
+      "card3_body": "Bozulan bir oruç seni sıfırlamaz. Ye, dinlen ve sonraki pencereyi nutuk çekmeden aç.",
+      "tip": "Hedefi sade ve nazik tut. Bir yarış kazanmıyorsun, bir ritim kuruyorsun."
+    }
   }
 }

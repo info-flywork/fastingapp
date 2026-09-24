@@ -43,6 +43,8 @@ enum RoutePaths {
   caloriesResult('/calories-result', 'caloriesResult'),
   proteinTracker('/protein-tracker', 'proteinTracker'),
   sleep('/sleep', 'sleep'),
+  insights('/insights', 'insights'),
+  insightDetail('/insight-detail/:topic', 'insightDetail'),
   mealRecords('/meal-records', 'mealRecords'),
   mealDetail('/meal-detail', 'mealDetail'),
   hungerTracker('/hunger-tracker', 'hungerTracker'),

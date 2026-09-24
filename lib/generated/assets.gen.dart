@@ -170,6 +170,9 @@ class $AssetsIconsGen {
   /// File path: assets/icons/riiight.svg
   SvgGenImage get riiight => const SvgGenImage('assets/icons/riiight.svg');
 
+  /// File path: assets/icons/searchh.svg
+  SvgGenImage get searchh => const SvgGenImage('assets/icons/searchh.svg');
+
   /// File path: assets/icons/sleep.svg
   SvgGenImage get sleep => const SvgGenImage('assets/icons/sleep.svg');
 
@@ -335,6 +338,7 @@ class $AssetsIconsGen {
     icRoundMinus,
     icons8Gender,
     riiight,
+    searchh,
     sleep,
     solarAltArrowLeftLinear,
     solarAltArrowUpLineDuotone,
@@ -436,6 +440,10 @@ class $AssetsImagesGen {
   AssetGenImage get blueClock =>
       const AssetGenImage('assets/images/blue_clock.png');
 
+  /// File path: assets/images/blue_hearth.png
+  AssetGenImage get blueHearth =>
+      const AssetGenImage('assets/images/blue_hearth.png');
+
   /// File path: assets/images/bowel.png
   AssetGenImage get bowel => const AssetGenImage('assets/images/bowel.png');
 
@@ -509,6 +517,10 @@ class $AssetsImagesGen {
 
   /// File path: assets/images/dumble.png
   AssetGenImage get dumble => const AssetGenImage('assets/images/dumble.png');
+
+  /// File path: assets/images/eat_window.png
+  AssetGenImage get eatWindow =>
+      const AssetGenImage('assets/images/eat_window.png');
 
   /// File path: assets/images/eggplant.png
   AssetGenImage get eggplant =>
@@ -646,6 +658,10 @@ class $AssetsImagesGen {
   AssetGenImage get insightss =>
       const AssetGenImage('assets/images/insightss.png');
 
+  /// File path: assets/images/insightsss.png
+  AssetGenImage get insightsss =>
+      const AssetGenImage('assets/images/insightsss.png');
+
   /// File path: assets/images/king_sl.png
   AssetGenImage get kingSl => const AssetGenImage('assets/images/king_sl.png');
 
@@ -706,6 +722,10 @@ class $AssetsImagesGen {
   AssetGenImage get mascotHiWater =>
       const AssetGenImage('assets/images/mascot_hi_water.png');
 
+  /// File path: assets/images/mascot_learn_detail.png
+  AssetGenImage get mascotLearnDetail =>
+      const AssetGenImage('assets/images/mascot_learn_detail.png');
+
   /// File path: assets/images/mascot_metabolic.png
   AssetGenImage get mascotMetabolic =>
       const AssetGenImage('assets/images/mascot_metabolic.png');
@@ -713,6 +733,10 @@ class $AssetsImagesGen {
   /// File path: assets/images/mascot_search.png
   AssetGenImage get mascotSearch =>
       const AssetGenImage('assets/images/mascot_search.png');
+
+  /// File path: assets/images/mascot_tip.png
+  AssetGenImage get mascotTip =>
+      const AssetGenImage('assets/images/mascot_tip.png');
 
   /// File path: assets/images/meal_record_emoji.png
   AssetGenImage get mealRecordEmoji =>
@@ -848,6 +872,10 @@ class $AssetsImagesGen {
   /// File path: assets/images/protein.png
   AssetGenImage get protein => const AssetGenImage('assets/images/protein.png');
 
+  /// File path: assets/images/purple_star.png
+  AssetGenImage get purpleStar =>
+      const AssetGenImage('assets/images/purple_star.png');
+
   /// File path: assets/images/restrictive.png
   AssetGenImage get restrictive =>
       const AssetGenImage('assets/images/restrictive.png');
@@ -865,6 +893,10 @@ class $AssetsImagesGen {
   AssetGenImage get scramlbedEggs =>
       const AssetGenImage('assets/images/scramlbed_eggs.png');
 
+  /// File path: assets/images/searchpng.png
+  AssetGenImage get searchpng =>
+      const AssetGenImage('assets/images/searchpng.png');
+
   /// File path: assets/images/second_question.png
   AssetGenImage get secondQuestion =>
       const AssetGenImage('assets/images/second_question.png');
@@ -875,6 +907,10 @@ class $AssetsImagesGen {
 
   /// File path: assets/images/seefood.png
   AssetGenImage get seefood => const AssetGenImage('assets/images/seefood.png');
+
+  /// File path: assets/images/small_steps.png
+  AssetGenImage get smallSteps =>
+      const AssetGenImage('assets/images/small_steps.png');
 
   /// File path: assets/images/solar_pen-bold (1).png
   AssetGenImage get solarPenBold1 =>
@@ -1052,6 +1088,7 @@ class $AssetsImagesGen {
     blood,
     blueBook,
     blueClock,
+    blueHearth,
     bowel,
     brain,
     brocc,
@@ -1074,6 +1111,7 @@ class $AssetsImagesGen {
     dizzinies,
     donut,
     dumble,
+    eatWindow,
     eggplant,
     eggs,
     emotionalHunger,
@@ -1111,6 +1149,7 @@ class $AssetsImagesGen {
     hungerLog,
     insights,
     insightss,
+    insightsss,
     kingSl,
     lawCarb,
     leaf,
@@ -1127,8 +1166,10 @@ class $AssetsImagesGen {
     mascotDiver,
     mascotHi,
     mascotHiWater,
+    mascotLearnDetail,
     mascotMetabolic,
     mascotSearch,
+    mascotTip,
     mealRecordEmoji,
     meat,
     mediterrian,
@@ -1167,14 +1208,17 @@ class $AssetsImagesGen {
     profile,
     progressHead,
     protein,
+    purpleStar,
     restrictive,
     rice,
     riiight,
     salata,
     scramlbedEggs,
+    searchpng,
     secondQuestion,
     seeStar,
     seefood,
+    smallSteps,
     solarPenBold1,
     solarPenBold,
     solarVerifiedCheckBold,

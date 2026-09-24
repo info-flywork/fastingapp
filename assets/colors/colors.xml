@@ -112,4 +112,12 @@
   <color name="color_bmi_7">#E64F48</color>
   <color name="color_chart_tooltip">#2C2C2E</color>
   <color name="color_protein_grams">#E74D3D</color>
+  <color name="color_insight_during">#FDEBE1</color>
+  <color name="color_insight_eating">#FFF3D9</color>
+  <color name="color_insight_health">#E3F1FC</color>
+  <color name="color_insight_tips">#EDE5FC</color>
+  <color name="color_insight_banner">#E3EBE1</color>
+  <color name="color_insight_banner_text">#297C3F</color>
+  <color name="color_insight_quote_bg">#ECF5E7</color>
+  <color name="color_insight_quote">#2E7E20</color>
 </resources>

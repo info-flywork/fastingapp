@@ -701,5 +701,92 @@
     "meal_yogurt_meta": "17:00 Snack",
     "meal_yogurt_protein": "15g",
     "meal_yogurt_kcal": "220 kcal"
+  },
+  "insights_page": {
+    "brand_mochi": "Mochi",
+    "brand_fast": "Fast",
+    "title": "Learn with Mochi",
+    "subtitle": "Simple answers for a healthier, happier you.",
+    "search": "Search for a topic...",
+    "basics_title": "Fasting Basics",
+    "basics_body": "Learn the fundamentals of intermittent fasting.",
+    "during_title": "During Your Fast",
+    "during_body": "Tips, guidance and what to expect.",
+    "eating_title": "Eating Window",
+    "eating_body": "Make the most of your meals.",
+    "health_title": "Health & Lifestyle",
+    "health_body": "Sleep, energy, mindset and more",
+    "tips_title": "Mochi's Tips",
+    "tips_body": "Quick advice from your fasting buddy.",
+    "banner": "Small steps. Big changes!"
+  },
+  "insights_detail": {
+    "author": "- Mochi",
+    "tip_title": "Mochi Tip",
+    "basics": {
+      "kicker": "FASTING BASICS",
+      "title": "What is intermittent fasting?",
+      "subtitle": "Simple answers for a healthier, happier you.",
+      "quote": "It's not about eating less, it's about eating at the right time.",
+      "card1_title": "It's about when you eat",
+      "card1_body": "Intermittent fasting cycles between periods of eating and fasting. It doesn't specify which foods to eat, but when to eat.",
+      "card2_title": "You still have an eating window",
+      "card2_body": "You can enjoy your favorite foods during your eating window, while fasting gives your body time to rest and reset.",
+      "card3_title": "It can support your health",
+      "card3_body": "Many people use intermittent fasting to feel more energetic, maintain a healthy weight, and support overall well-being.",
+      "tip": "Start gently and find a plan that fits your lifestyle. Consistency matters more than perfection!"
+    },
+    "during": {
+      "kicker": "DURING YOUR FAST",
+      "title": "What happens while you fast?",
+      "subtitle": "A calm guide for the hours between meals.",
+      "quote": "Hunger comes in waves. Most of them pass if you give them a little time.",
+      "card1_title": "The first hours are the loudest",
+      "card1_body": "Your body is used to a routine. Early hunger is often habit, not an emergency.",
+      "card2_title": "Water is your easiest ally",
+      "card2_body": "Sip water through the fast. It keeps you comfortable and gives your hands something to do.",
+      "card3_title": "Energy can dip, then steady",
+      "card3_body": "A short walk or a few quiet minutes usually helps more than watching the clock.",
+      "tip": "If you feel dizzy or unwell, end the fast and eat. A good plan is one you can repeat tomorrow."
+    },
+    "eating": {
+      "kicker": "EATING WINDOW",
+      "title": "How should you use your meals?",
+      "subtitle": "Make the hours you eat count.",
+      "quote": "The window is not a finish line. It is where you refuel with care.",
+      "card1_title": "Start with a real meal",
+      "card1_body": "Open the window with protein, plants, and something you enjoy. Skipping straight to snacks leaves you hungrier.",
+      "card2_title": "You do not need to earn food",
+      "card2_body": "Fasting is not a punishment. Eat enough to feel satisfied, not stuffed.",
+      "card3_title": "Leave a little space",
+      "card3_body": "Stop when you are comfortably full. The next fast is easier when the last meal was kind.",
+      "tip": "Plan the first meal before the window opens. Deciding while hungry usually means grabbing whatever is closest."
+    },
+    "health": {
+      "kicker": "HEALTH & LIFESTYLE",
+      "title": "How does fasting fit a normal day?",
+      "subtitle": "Sleep, energy, and mood matter as much as the clock.",
+      "quote": "A fast works best on top of a life you can actually live.",
+      "card1_title": "Sleep is part of the plan",
+      "card1_body": "Short nights make hunger louder. Protect your bedtime the same way you protect your eating window.",
+      "card2_title": "Move, but do not force it",
+      "card2_body": "Light movement on a fasting day is enough. Save hard workouts for when you have eaten.",
+      "card3_title": "Stress undoes the calm",
+      "card3_body": "Fasting should not be another thing to worry about. If a day is already heavy, a shorter fast is still a win.",
+      "tip": "Pair the fast with one steady habit, like a morning walk or a glass of water. One anchor beats a perfect schedule."
+    },
+    "tips": {
+      "kicker": "MOCHI'S TIPS",
+      "title": "What should you remember?",
+      "subtitle": "Short advice from your fasting buddy.",
+      "quote": "Small repeats beat a dramatic first week.",
+      "card1_title": "Pick a window you already like",
+      "card1_body": "The best plan is close to how you already eat. Shift it a little, not all at once.",
+      "card2_title": "Tell someone, or tell Mochi",
+      "card2_body": "A plan you say out loud is easier to keep. Check in with yourself at the same time each day.",
+      "card3_title": "Miss a day, then continue",
+      "card3_body": "One broken fast does not reset you. Eat, rest, and start the next window without a speech.",
+      "tip": "Keep the goal boring and kind. You are building a rhythm, not winning a race."
+    }
   }
 }

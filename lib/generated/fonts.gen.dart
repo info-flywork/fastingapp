@@ -9,6 +9,9 @@
 // ignore_for_file: deprecated_member_use,directives_ordering,implicit_dynamic_list_literal,unnecessary_import
 
 abstract final class FontFamily {
+  /// Font family: AnnapurnaSIL
+  static const String annapurnaSIL = 'AnnapurnaSIL';
+
   /// Font family: Baloo
   static const String baloo = 'Baloo';
 
