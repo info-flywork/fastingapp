@@ -260,6 +260,31 @@
     "hunger_subtitle": "“Emotional hunger” can mislead you. Learn the difference, then log how you feel.",
     "log_hunger": "Log my hunger level"
   },
+  "fasting_page": {
+    "meal_time": "Meal time!",
+    "break_title": "Break Your Fast",
+    "break_body": "Your fast is complete. Now it's time to gently refuel your body with energy and nutrients.",
+    "time_passed": "Time Passed {}%",
+    "started_label": "Fasting Started:",
+    "started_value": "Today, 9:34 AM",
+    "ends_label": "Fasting Ends:",
+    "ends_value": "Today, 08:34 PM",
+    "start_cta": "Start your {} fasting",
+    "start_sheet_title": "When did you start fasting?",
+    "start_sheet_today": "Today",
+    "start_sheet_save": "Save",
+    "save_meal": "Save a meal",
+    "active_challenge": "Active Challenge"
+  },
+  "eating_window": {
+    "title": "Eating Window",
+    "break_title": "Break Your Fast",
+    "break_body": "Your fast is complete. Now it's time to gently refuel your body with energy and nutrients.\n\nStart with easy-to-digest foods like **fruit, steamed vegetables, leafy greens, bone broth, or soup.** These can help your body ease back into eating and support stable blood sugar levels.\n\nAfter fasting, your digestive system may need a little time to adjust, so try not to overload it right away.\n\nTo help prevent bloating or discomfort, avoid fried, greasy, or overly heavy foods when breaking your fast.",
+    "nourish_title": "Keep Nourishing Your Body",
+    "nourish_body": "Now you're free to enjoy your meal. For steady energy and longer-lasting fullness, try pairing carbs with **quality protein and healthy fats.**\n\nTo keep your blood sugar balanced after fasting, avoid loading up on highly processed foods or sugary drinks.\n\nChoose meals that feel satisfying, balanced, and easy on your body.",
+    "next_title": "Prepare for Your Next Fast",
+    "next_body": "Your eating window is almost over. A nourishing final meal can help keep you full and support your body during your next fast.\n\nFocus on foods rich in **protein and fiber**, such as meat, fish, tofu, fruit, vegetables, nuts, and legumes.\n\nThese choices can help you feel satisfied for longer and give your body steady energy as you move into your next fasting period."
+  },
   "hunger_tracker_page": {
     "title": "Hunger Tracker",
     "title_line1": "Hunger",

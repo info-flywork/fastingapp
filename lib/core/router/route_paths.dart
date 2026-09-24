@@ -28,6 +28,7 @@ enum RoutePaths {
   languageLevel('/language-level', 'languageLevel'),
   home('/home', 'home'),
   fasting('/fasting', 'fasting'),
+  eatingWindow('/eating-window', 'eatingWindow'),
   plans('/plans', 'plans'),
   planDetail('/plan-detail', 'planDetail'),
   mochiWorld('/mochi-world', 'mochiWorld'),

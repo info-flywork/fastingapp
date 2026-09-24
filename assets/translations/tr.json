@@ -260,6 +260,31 @@
     "hunger_subtitle": "“Duygusal açlık” seni yanıltabilir. Farkı öğren, sonra nasıl hissettiğini kaydet.",
     "log_hunger": "Açlık seviyemi kaydet"
   },
+  "fasting_page": {
+    "meal_time": "Öğün vakti!",
+    "break_title": "Orucunu boz",
+    "break_body": "Orucun tamamlandı. Şimdi vücudunu enerji ve besinlerle nazikçe yenileme zamanı.",
+    "time_passed": "Geçen süre %{}",
+    "started_label": "Oruç başladı:",
+    "started_value": "Bugün, 09:34",
+    "ends_label": "Oruç bitiyor:",
+    "ends_value": "Bugün, 20:34",
+    "start_cta": "{} orucunu başlat",
+    "start_sheet_title": "Oruca ne zaman başladın?",
+    "start_sheet_today": "Bugün",
+    "start_sheet_save": "Kaydet",
+    "save_meal": "Öğün kaydet",
+    "active_challenge": "Aktif meydan okuma"
+  },
+  "eating_window": {
+    "title": "Öğün Penceresi",
+    "break_title": "Orucunu Boz",
+    "break_body": "Orucun tamamlandı. Şimdi vücudunu enerji ve besinlerle nazikçe yenileme zamanı.\n\n**Meyve, buharda sebze, yeşillik, kemik suyu veya çorba** gibi sindirimi kolay yiyeceklerle başla. Bunlar vücudunun yemeye alışmasına ve kan şekerinin dengede kalmasına yardım eder.\n\nOruçtan sonra sindirim sistemin uyum sağlamak için biraz zamana ihtiyaç duyabilir, bu yüzden hemen yüklenme.\n\nŞişkinliği veya rahatsızlığı önlemek için orucu bozarken kızartma, yağlı ya da çok ağır yiyeceklerden uzak dur.",
+    "nourish_title": "Vücudunu Beslemeye Devam Et",
+    "nourish_body": "Artık öğününün keyfini çıkarabilirsin. Daha dengeli enerji ve daha uzun süre tokluk için karbonhidratları **kaliteli protein ve sağlıklı yağlarla** birlikte al.\n\nOruçtan sonra kan şekerini dengede tutmak için aşırı işlenmiş gıdalardan ve şekerli içeceklerden kaçın.\n\nDoyurucu, dengeli ve vücuduna iyi gelen öğünler seç.",
+    "next_title": "Sonraki Oruca Hazırlan",
+    "next_body": "Öğün penceren bitmek üzere. Besleyici bir son öğün, sonraki oruçta tok kalmana ve vücudunu desteklemeye yardım eder.\n\n**Protein ve lif** açısından zengin yiyeceklere odaklan: et, balık, tofu, meyve, sebze, kuruyemiş ve baklagiller.\n\nBu seçimler daha uzun süre tok hissetmene ve bir sonraki oruç dönemine geçerken enerjinin dengeli kalmasına yardım eder."
+  },
   "hunger_tracker_page": {
     "title": "Açlık Takibi",
     "title_line1": "Açlık",

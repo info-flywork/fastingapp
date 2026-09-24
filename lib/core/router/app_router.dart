@@ -53,6 +53,8 @@ import 'package:fastingapp/presentation/calories_tracker/view/calories_result_vi
 import 'package:fastingapp/presentation/calories_tracker/view/calories_tracker_view.dart';
 import 'package:fastingapp/presentation/chat/latest/view/latest_chats_view.dart';
 import 'package:fastingapp/presentation/chat/view/chat_view.dart';
+import 'package:fastingapp/presentation/fasting/view/eating_window_view.dart';
+import 'package:fastingapp/presentation/fasting/view/fasting_view.dart';
 import 'package:fastingapp/presentation/home/bloc/home_bloc.dart';
 import 'package:fastingapp/presentation/home/bloc/home_event.dart';
 import 'package:fastingapp/presentation/home/view/home_view.dart';
@@ -401,6 +403,12 @@ final GoRouter appRouter = GoRouter(
       builder: (context, state) => const SleepView(),
     ),
     GoRoute(
+      path: RoutePaths.eatingWindow.path,
+      name: RoutePaths.eatingWindow.name,
+      parentNavigatorKey: rootNavigatorKey,
+      builder: (context, state) => const EatingWindowView(),
+    ),
+    GoRoute(
       path: RoutePaths.insights.path,
       name: RoutePaths.insights.name,
       parentNavigatorKey: rootNavigatorKey,
@@ -568,8 +576,7 @@ final GoRouter appRouter = GoRouter(
             GoRoute(
               path: RoutePaths.fasting.path,
               name: RoutePaths.fasting.name,
-              builder: (context, state) =>
-                  const PlaceholderTabView(titleKey: 'home.nav_fasting'),
+              builder: (context, state) => const FastingView(),
             ),
           ],
         ),

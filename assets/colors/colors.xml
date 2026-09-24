@@ -79,6 +79,7 @@
   <color name="color_hunger_history_bg">#F0F7FE</color>
   <color name="color_hunger_tip_bg">#ECF5E7</color>
   <color name="color_meal_positive">#7ACE6B</color>
+  <color name="color_eating_ring">#82D174</color>
   <color name="color_emotional_hunger_bg">#FCF5F2</color>
   <color name="color_hunger_result_card">#FFFDFC</color>
   <color name="color_hunger_notes_field">#F6F7F8</color>

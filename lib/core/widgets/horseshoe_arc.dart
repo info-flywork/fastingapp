@@ -25,8 +25,8 @@ final class HorseshoeArc extends StatelessWidget {
   final double minProgress;
 
   static const diameterDefault = 300.0;
-  static const stroke = 26.0;
-  static const sweepDegrees = 250.0;
+  static const stroke = 28.0;
+  static const sweepDegrees = 235.0;
 
   static const double _sweepRad = sweepDegrees * math.pi / 180;
   static const double _gapRad = (360 - sweepDegrees) * math.pi / 180;
@@ -108,7 +108,7 @@ final class _HorseshoeArcPainter extends CustomPainter {
     final progressSweep = sweepRad * progress.clamp(minProgress, 0.95);
     final progressPaint = Paint()
       ..style = PaintingStyle.stroke
-      ..strokeWidth = stroke
+      ..strokeWidth = stroke + 4
       ..strokeCap = StrokeCap.round
       ..color = progressColor;
 

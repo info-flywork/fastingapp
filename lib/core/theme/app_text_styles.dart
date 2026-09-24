@@ -2480,6 +2480,126 @@ abstract final class AppTextStyles {
     color: ColorName.colorInsightBannerText,
   );
 
+  /// Oruç — "Meal time!" 24 / Semibold
+  static TextStyle get fastingMealTitle => const TextStyle(
+    fontFamily: FontFamily.sFProDisplay,
+    fontWeight: FontWeight.w600,
+    fontSize: 24,
+    height: 32 / 24,
+    letterSpacing: -0.5,
+    color: ColorName.colorTitle,
+  );
+
+  /// Oruç başlangıç tekerleği — 24 / Semibold, -1.5%
+  static TextStyle get fastingStartWheel => const TextStyle(
+    fontFamily: FontFamily.sFProDisplay,
+    fontWeight: FontWeight.w600,
+    fontSize: 24,
+    height: 32 / 24,
+    letterSpacing: 24 * -0.015,
+    color: ColorName.colorTitle,
+  );
+
+  /// Oruç kart başlığı — 16 / Semibold
+  static TextStyle get fastingBreakTitle => const TextStyle(
+    fontFamily: FontFamily.sFProDisplay,
+    fontWeight: FontWeight.w600,
+    fontSize: 16,
+    height: 24 / 16,
+    letterSpacing: -0.5,
+    color: ColorName.colorTitle,
+  );
+
+  /// Oruç kart açıklaması — 14 / Medium / 60%
+  static TextStyle get fastingBreakBody => TextStyle(
+    fontFamily: FontFamily.sFProDisplay,
+    fontWeight: FontWeight.w500,
+    fontSize: 14,
+    height: 20 / 14,
+    letterSpacing: 14 * -0.015,
+    color: ColorName.colorSubtitle.withValues(alpha: 0.6),
+  );
+
+  /// Yay üst etiketi — 16 / Semibold / 60%
+  static TextStyle get fastingTimePassed => TextStyle(
+    fontFamily: FontFamily.sFProDisplay,
+    fontWeight: FontWeight.w600,
+    fontSize: 16,
+    height: 22 / 16,
+    letterSpacing: 16 * -0.015,
+    color: ColorName.colorSubtitle.withValues(alpha: 0.6),
+  );
+
+  /// Yay sayacı — 43 / Semibold
+  static TextStyle get fastingTimer => const TextStyle(
+    fontFamily: FontFamily.sFProDisplay,
+    fontWeight: FontWeight.w600,
+    fontSize: 43,
+    height: 54 / 43,
+    letterSpacing: -0.67,
+    color: ColorName.colorTitle,
+  );
+
+  /// Plan çipi — 21 / Semibold
+  static TextStyle get fastingPlanChip => const TextStyle(
+    fontFamily: FontFamily.sFProDisplay,
+    fontWeight: FontWeight.w600,
+    fontSize: 21,
+    height: 32 / 21,
+    letterSpacing: 21 * -0.015,
+    color: ColorName.colorTitle,
+  );
+
+  /// Başlangıç / bitiş etiketi — 12 / Semibold / 60%
+  static TextStyle get fastingBoundLabel => TextStyle(
+    fontFamily: FontFamily.sFProDisplay,
+    fontWeight: FontWeight.w600,
+    fontSize: 12,
+    height: 16 / 12,
+    letterSpacing: 12 * -0.015,
+    color: ColorName.colorSubtitle.withValues(alpha: 0.6),
+  );
+
+  /// Başlangıç / bitiş saati — 16 / Semibold
+  static TextStyle get fastingBoundValue => const TextStyle(
+    fontFamily: FontFamily.sFProDisplay,
+    fontWeight: FontWeight.w600,
+    fontSize: 16,
+    height: 24 / 16,
+    letterSpacing: 16 * -0.015,
+    color: ColorName.colorTitle,
+  );
+
+  /// Aktif challenge satırı — 16 / Semibold
+  static TextStyle get fastingChallengeTitle => const TextStyle(
+    fontFamily: FontFamily.sFProDisplay,
+    fontWeight: FontWeight.w600,
+    fontSize: 16,
+    height: 24 / 16,
+    letterSpacing: 16 * -0.015,
+    color: ColorName.colorTitle,
+  );
+
+  /// Öğün penceresi gövdesi — 18 / Medium / 60%
+  static TextStyle get eatingWindowBody => TextStyle(
+    fontFamily: FontFamily.sFProDisplay,
+    fontWeight: FontWeight.w500,
+    fontSize: 18,
+    height: 28 / 18,
+    letterSpacing: 18 * -0.015,
+    color: ColorName.colorSubtitle.withValues(alpha: 0.6),
+  );
+
+  /// Öğün penceresi vurgusu — 18 / Bold
+  static TextStyle get eatingWindowBodyStrong => const TextStyle(
+    fontFamily: FontFamily.sFProDisplay,
+    fontWeight: FontWeight.w700,
+    fontSize: 18,
+    height: 28 / 18,
+    letterSpacing: 18 * -0.015,
+    color: ColorName.colorTitle,
+  );
+
   /// Schedule card label — 16 / Medium / 60%
   static TextStyle get sleepCardLabel => TextStyle(
     fontFamily: FontFamily.sFProDisplay,

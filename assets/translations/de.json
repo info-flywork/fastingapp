@@ -260,6 +260,31 @@
     "hunger_subtitle": "„Emotionaler Hunger“ kann täuschen. Lerne den Unterschied und protokolliere dein Gefühl.",
     "log_hunger": "Hungerlevel speichern"
   },
+  "fasting_page": {
+    "meal_time": "Essenszeit!",
+    "break_title": "Beende dein Fasten",
+    "break_body": "Dein Fasten ist vorbei. Jetzt ist es Zeit, deinen Körper sanft mit Energie und Nährstoffen aufzutanken.",
+    "time_passed": "Vergangene Zeit {}%",
+    "started_label": "Fasten begonnen:",
+    "started_value": "Heute, 9:34",
+    "ends_label": "Fasten endet:",
+    "ends_value": "Heute, 20:34",
+    "start_cta": "Starte dein {}-Fasten",
+    "start_sheet_title": "Wann hast du mit dem Fasten begonnen?",
+    "start_sheet_today": "Heute",
+    "start_sheet_save": "Speichern",
+    "save_meal": "Mahlzeit speichern",
+    "active_challenge": "Aktive Challenge"
+  },
+  "eating_window": {
+    "title": "Essensfenster",
+    "break_title": "Beende dein Fasten",
+    "break_body": "Dein Fasten ist vorbei. Jetzt ist es Zeit, deinen Körper sanft mit Energie und Nährstoffen aufzutanken.\n\nBeginne mit leicht verdaulichen Lebensmitteln wie **Obst, gedünstetem Gemüse, Blattgemüse, Knochenbrühe oder Suppe.** So fällt deinem Körper der Übergang leichter und dein Blutzucker bleibt stabiler.\n\nNach dem Fasten braucht dein Verdauungssystem etwas Zeit. Belaste es deshalb nicht sofort.\n\nUm Blähungen oder Unwohlsein zu vermeiden, lass frittierte, fettige oder sehr schwere Speisen weg, wenn du das Fasten brichst.",
+    "nourish_title": "Nähre deinen Körper weiter",
+    "nourish_body": "Jetzt kannst du deine Mahlzeit genießen. Für gleichmäßige Energie und länger anhaltende Sättigung kombiniere Kohlenhydrate mit **hochwertigem Protein und gesunden Fetten.**\n\nDamit dein Blutzucker nach dem Fasten stabil bleibt, meide stark verarbeitete Lebensmittel und zuckerhaltige Getränke.\n\nWähle Mahlzeiten, die sättigen, ausgewogen sind und deinem Körper guttun.",
+    "next_title": "Bereite dich auf das nächste Fasten vor",
+    "next_body": "Dein Essensfenster ist fast vorbei. Eine nahrhafte letzte Mahlzeit hilft dir, satt zu bleiben und deinen Körper beim nächsten Fasten zu unterstützen.\n\nSetze auf Lebensmittel mit viel **Protein und Ballaststoffen**, zum Beispiel Fleisch, Fisch, Tofu, Obst, Gemüse, Nüsse und Hülsenfrüchte.\n\nSo bleibst du länger satt und gehst mit gleichmäßiger Energie in die nächste Fastenphase."
+  },
   "hunger_tracker_page": {
     "title": "Hunger-Tracker",
     "title_line1": "Hunger",

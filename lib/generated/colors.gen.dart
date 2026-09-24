@@ -84,6 +84,9 @@ abstract final class ColorName {
   /// Color: #C8DBC5
   static const Color colorCtaGradientTop = Color(0xFFC8DBC5);
 
+  /// Color: #82D174
+  static const Color colorEatingRing = Color(0xFF82D174);
+
   /// Color: #CE6B6B
   static const Color colorEmotionalHungerBadge = Color(0xFFCE6B6B);
 

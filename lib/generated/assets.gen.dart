@@ -304,6 +304,11 @@ class $AssetsIconsGen {
   SvgGenImage get solarShareLineDuotone =>
       const SvgGenImage('assets/icons/solar_share-line-duotone.svg');
 
+  /// File path: assets/icons/solar_square-share-line-line-duotone.svg
+  SvgGenImage get solarSquareShareLineLineDuotone => const SvgGenImage(
+    'assets/icons/solar_square-share-line-line-duotone.svg',
+  );
+
   /// File path: assets/icons/solar_target-line-duotone.svg
   SvgGenImage get solarTargetLineDuotone =>
       const SvgGenImage('assets/icons/solar_target-line-duotone.svg');
@@ -371,6 +376,7 @@ class $AssetsIconsGen {
     solarPlainBold,
     solarQuestionCircleLineDuotone,
     solarShareLineDuotone,
+    solarSquareShareLineLineDuotone,
     solarTargetLineDuotone,
     solarTrashBinTrashBoldDuotone,
     solarVerifiedCheckBold,
@@ -450,6 +456,10 @@ class $AssetsImagesGen {
   /// File path: assets/images/brain.png
   AssetGenImage get brain => const AssetGenImage('assets/images/brain.png');
 
+  /// File path: assets/images/break_your_fast.png
+  AssetGenImage get breakYourFast =>
+      const AssetGenImage('assets/images/break_your_fast.png');
+
   /// File path: assets/images/brocc.png
   AssetGenImage get brocc => const AssetGenImage('assets/images/brocc.png');
 
@@ -504,6 +514,22 @@ class $AssetsImagesGen {
 
   /// File path: assets/images/dairy.png
   AssetGenImage get dairy => const AssetGenImage('assets/images/dairy.png');
+
+  /// File path: assets/images/dark_fast.png
+  AssetGenImage get darkFast =>
+      const AssetGenImage('assets/images/dark_fast.png');
+
+  /// File path: assets/images/dark_next_fasting.png
+  AssetGenImage get darkNextFasting =>
+      const AssetGenImage('assets/images/dark_next_fasting.png');
+
+  /// File path: assets/images/dark_noruish.png
+  AssetGenImage get darkNoruish =>
+      const AssetGenImage('assets/images/dark_noruish.png');
+
+  /// File path: assets/images/dark_norusih.png
+  AssetGenImage get darkNorusih =>
+      const AssetGenImage('assets/images/dark_norusih.png');
 
   /// File path: assets/images/date.png
   AssetGenImage get date => const AssetGenImage('assets/images/date.png');
@@ -573,6 +599,10 @@ class $AssetsImagesGen {
   /// File path: assets/images/fork.png
   AssetGenImage get fork => const AssetGenImage('assets/images/fork.png');
 
+  /// File path: assets/images/fork_closest.png
+  AssetGenImage get forkClosest =>
+      const AssetGenImage('assets/images/fork_closest.png');
+
   /// File path: assets/images/fourth_question.png
   AssetGenImage get fourthQuestion =>
       const AssetGenImage('assets/images/fourth_question.png');
@@ -604,6 +634,10 @@ class $AssetsImagesGen {
   /// File path: assets/images/green_apple.png
   AssetGenImage get greenApple =>
       const AssetGenImage('assets/images/green_apple.png');
+
+  /// File path: assets/images/green_clock.png
+  AssetGenImage get greenClock =>
+      const AssetGenImage('assets/images/green_clock.png');
 
   /// File path: assets/images/green_tick.png
   AssetGenImage get greenTick =>
@@ -642,6 +676,9 @@ class $AssetsImagesGen {
   /// File path: assets/images/home.png
   AssetGenImage get home => const AssetGenImage('assets/images/home.png');
 
+  /// File path: assets/images/human.png
+  AssetGenImage get human => const AssetGenImage('assets/images/human.png');
+
   /// File path: assets/images/hunger-tracker.png
   AssetGenImage get hungerTracker =>
       const AssetGenImage('assets/images/hunger-tracker.png');
@@ -661,6 +698,10 @@ class $AssetsImagesGen {
   /// File path: assets/images/insightsss.png
   AssetGenImage get insightsss =>
       const AssetGenImage('assets/images/insightsss.png');
+
+  /// File path: assets/images/keep_noruish.png
+  AssetGenImage get keepNoruish =>
+      const AssetGenImage('assets/images/keep_noruish.png');
 
   /// File path: assets/images/king_sl.png
   AssetGenImage get kingSl => const AssetGenImage('assets/images/king_sl.png');
@@ -782,6 +823,10 @@ class $AssetsImagesGen {
 
   /// File path: assets/images/nausea.png
   AssetGenImage get nausea => const AssetGenImage('assets/images/nausea.png');
+
+  /// File path: assets/images/next_fast.png
+  AssetGenImage get nextFast =>
+      const AssetGenImage('assets/images/next_fast.png');
 
   /// File path: assets/images/non-binary.png
   AssetGenImage get nonBinary =>
@@ -1091,6 +1136,7 @@ class $AssetsImagesGen {
     blueHearth,
     bowel,
     brain,
+    breakYourFast,
     brocc,
     broccv2,
     brocolies,
@@ -1107,6 +1153,10 @@ class $AssetsImagesGen {
     confidence,
     confusing,
     dairy,
+    darkFast,
+    darkNextFasting,
+    darkNoruish,
+    darkNorusih,
     date,
     dizzinies,
     donut,
@@ -1126,6 +1176,7 @@ class $AssetsImagesGen {
     fish,
     flameCalories,
     fork,
+    forkClosest,
     fourthQuestion,
     friedPotato,
     fruit,
@@ -1135,6 +1186,7 @@ class $AssetsImagesGen {
     goodv2,
     greatJob,
     greenApple,
+    greenClock,
     greenTick,
     greenTick3d,
     greenTickFilled,
@@ -1145,11 +1197,13 @@ class $AssetsImagesGen {
     highCarb,
     highCarbv2,
     home,
+    human,
     hungerTracker,
     hungerLog,
     insights,
     insightss,
     insightsss,
+    keepNoruish,
     kingSl,
     lawCarb,
     leaf,
@@ -1183,6 +1237,7 @@ class $AssetsImagesGen {
     motivation,
     mushroom,
     nausea,
+    nextFast,
     nonBinary,
     noodles,
     notSure,
