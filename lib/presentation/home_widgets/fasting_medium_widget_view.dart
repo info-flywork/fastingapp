@@ -29,9 +29,9 @@ final class FastingMediumWidgetView extends StatelessWidget {
           color: ColorName.colorWhite,
           child: Stack(
             children: [
-              const Positioned(top: 20, right: 26, child: _Logo()),
+              const Positioned(top: 20, left: 26, child: _Logo()),
               Padding(
-                padding: const EdgeInsets.fromLTRB(26, 52, 26, 16),
+                padding: const EdgeInsets.fromLTRB(26, 56, 26, 16),
                 child: _Copy(
                   headline: headline,
                   timeLabel: timeLabel,
@@ -40,9 +40,9 @@ final class FastingMediumWidgetView extends StatelessWidget {
               ),
               Positioned(
                 right: -4,
-                bottom: -16,
+                bottom: -48,
                 child: Assets.images.widget2.image(
-                  height: 220,
+                  height: 240,
                   fit: BoxFit.contain,
                 ),
               ),
@@ -114,16 +114,16 @@ class _Logo extends StatelessWidget {
 
 const _logo = TextStyle(
   fontFamily: FontFamily.baloo,
-  fontSize: 24,
-  height: 20 / 24,
-  letterSpacing: 24 * -0.015,
+  fontSize: 28,
+  height: 24 / 28,
+  letterSpacing: 28 * -0.015,
 );
 
 const _headline = TextStyle(
   fontFamily: FontFamily.sFProDisplay,
   fontWeight: FontWeight.w600,
-  fontSize: 40,
-  height: 44 / 40,
+  fontSize: 44,
+  height: 48 / 44,
   letterSpacing: -0.5,
   color: ColorName.colorTitle,
 );
@@ -131,7 +131,7 @@ const _headline = TextStyle(
 const _time = TextStyle(
   fontFamily: FontFamily.sFProDisplay,
   fontWeight: FontWeight.w500,
-  fontSize: 22,
+  fontSize: 26,
   height: 1,
   color: ColorName.colorSubtitle,
 );
@@ -139,7 +139,7 @@ const _time = TextStyle(
 const _chip = TextStyle(
   fontFamily: FontFamily.sFProDisplay,
   fontWeight: FontWeight.w500,
-  fontSize: 22,
+  fontSize: 24,
   height: 1,
   color: ColorName.colorSubtitle,
 );

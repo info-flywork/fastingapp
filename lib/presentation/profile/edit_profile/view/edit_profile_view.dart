@@ -46,6 +46,7 @@ class _EditProfileViewState extends State<EditProfileView>
     return Scaffold(
       backgroundColor: ColorName.colorProfileBack,
       body: SafeArea(
+        bottom: false,
         child: ListView(
           physics: const ClampingScrollPhysics(),
           padding: const EdgeInsets.fromLTRB(16, 8, 16, 32),

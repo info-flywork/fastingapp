@@ -674,12 +674,20 @@ class $AssetsImagesGen {
   AssetGenImage get fastingChallengeUser3 =>
       const AssetGenImage('assets/images/fasting_challenge_user_3.png');
 
+  /// File path: assets/images/fast_forecast.png
+  AssetGenImage get fastForecast =>
+      const AssetGenImage('assets/images/fast_forecast.png');
+
   /// File path: assets/images/fatigue.png
   AssetGenImage get fatigue => const AssetGenImage('assets/images/fatigue.png');
 
   /// File path: assets/images/first_question.png
   AssetGenImage get firstQuestion =>
       const AssetGenImage('assets/images/first_question.png');
+
+  /// File path: assets/images/first_time.png
+  AssetGenImage get firstTime =>
+      const AssetGenImage('assets/images/first_time.png');
 
   /// File path: assets/images/fish.png
   AssetGenImage get fish => const AssetGenImage('assets/images/fish.png');
@@ -716,8 +724,15 @@ class $AssetsImagesGen {
   /// File path: assets/images/good.png
   AssetGenImage get good => const AssetGenImage('assets/images/good.png');
 
+  /// File path: assets/images/good_colored.png
+  AssetGenImage get goodColored =>
+      const AssetGenImage('assets/images/good_colored.png');
+
   /// File path: assets/images/goodv2.png
   AssetGenImage get goodv2 => const AssetGenImage('assets/images/goodv2.png');
+
+  /// File path: assets/images/goodv3.png
+  AssetGenImage get goodv3 => const AssetGenImage('assets/images/goodv3.png');
 
   /// File path: assets/images/great_job.png
   AssetGenImage get greatJob =>
@@ -726,6 +741,10 @@ class $AssetsImagesGen {
   /// File path: assets/images/green_apple.png
   AssetGenImage get greenApple =>
       const AssetGenImage('assets/images/green_apple.png');
+
+  /// File path: assets/images/green_book.png
+  AssetGenImage get greenBook =>
+      const AssetGenImage('assets/images/green_book.png');
 
   /// File path: assets/images/green_clock.png
   AssetGenImage get greenClock =>
@@ -770,6 +789,9 @@ class $AssetsImagesGen {
 
   /// File path: assets/images/hours.png
   AssetGenImage get hours => const AssetGenImage('assets/images/hours.png');
+
+  /// File path: assets/images/huh.png
+  AssetGenImage get huh => const AssetGenImage('assets/images/huh.png');
 
   /// File path: assets/images/human.png
   AssetGenImage get human => const AssetGenImage('assets/images/human.png');
@@ -869,6 +891,10 @@ class $AssetsImagesGen {
   AssetGenImage get mascotHiWater =>
       const AssetGenImage('assets/images/mascot_hi_water.png');
 
+  /// File path: assets/images/mascot_hi_without.png
+  AssetGenImage get mascotHiWithout =>
+      const AssetGenImage('assets/images/mascot_hi_without.png');
+
   /// File path: assets/images/mascot_learn_detail.png
   AssetGenImage get mascotLearnDetail =>
       const AssetGenImage('assets/images/mascot_learn_detail.png');
@@ -876,6 +902,10 @@ class $AssetsImagesGen {
   /// File path: assets/images/mascot_metabolic.png
   AssetGenImage get mascotMetabolic =>
       const AssetGenImage('assets/images/mascot_metabolic.png');
+
+  /// File path: assets/images/mascot-omh.png
+  AssetGenImage get mascotOmh =>
+      const AssetGenImage('assets/images/mascot-omh.png');
 
   /// File path: assets/images/mascot_quick_walkt.png
   AssetGenImage get mascotQuickWalkt =>
@@ -893,6 +923,10 @@ class $AssetsImagesGen {
   AssetGenImage get mascotWater =>
       const AssetGenImage('assets/images/mascot_water.png');
 
+  /// File path: assets/images/mascot_widget.png
+  AssetGenImage get mascotWidget =>
+      const AssetGenImage('assets/images/mascot_widget.png');
+
   /// File path: assets/images/meal_record_emoji.png
   AssetGenImage get mealRecordEmoji =>
       const AssetGenImage('assets/images/meal_record_emoji.png');
@@ -907,8 +941,15 @@ class $AssetsImagesGen {
   /// File path: assets/images/meh.png
   AssetGenImage get meh => const AssetGenImage('assets/images/meh.png');
 
+  /// File path: assets/images/meh_colored.png
+  AssetGenImage get mehColored =>
+      const AssetGenImage('assets/images/meh_colored.png');
+
   /// File path: assets/images/mehv2.png
   AssetGenImage get mehv2 => const AssetGenImage('assets/images/mehv2.png');
+
+  /// File path: assets/images/mehv3.png
+  AssetGenImage get mehv3 => const AssetGenImage('assets/images/mehv3.png');
 
   /// File path: assets/images/metabolic.png
   AssetGenImage get metabolic =>
@@ -948,6 +989,9 @@ class $AssetsImagesGen {
 
   /// File path: assets/images/noodles.png
   AssetGenImage get noodles => const AssetGenImage('assets/images/noodles.png');
+
+  /// File path: assets/images/noone.png
+  AssetGenImage get noone => const AssetGenImage('assets/images/noone.png');
 
   /// File path: assets/images/not_sure.png
   AssetGenImage get notSure =>
@@ -1043,6 +1087,10 @@ class $AssetsImagesGen {
   AssetGenImage get restrictive =>
       const AssetGenImage('assets/images/restrictive.png');
 
+  /// File path: assets/images/red_warning.png
+  AssetGenImage get redWarning =>
+      const AssetGenImage('assets/images/red_warning.png');
+
   /// File path: assets/images/rice.png
   AssetGenImage get rice => const AssetGenImage('assets/images/rice.png');
 
@@ -1051,6 +1099,10 @@ class $AssetsImagesGen {
 
   /// File path: assets/images/salata.png
   AssetGenImage get salata => const AssetGenImage('assets/images/salata.png');
+
+  /// File path: assets/images/sand_clock.png
+  AssetGenImage get sandClock =>
+      const AssetGenImage('assets/images/sand_clock.png');
 
   /// File path: assets/images/scramlbed_eggs.png
   AssetGenImage get scramlbedEggs =>
@@ -1102,6 +1154,9 @@ class $AssetsImagesGen {
   /// File path: assets/images/stomach.png
   AssetGenImage get stomach => const AssetGenImage('assets/images/stomach.png');
 
+  /// File path: assets/images/stonks.png
+  AssetGenImage get stonks => const AssetGenImage('assets/images/stonks.png');
+
   /// File path: assets/images/stressed.png
   AssetGenImage get stressed =>
       const AssetGenImage('assets/images/stressed.png');
@@ -1112,6 +1167,13 @@ class $AssetsImagesGen {
   /// File path: assets/images/streak_flame.png
   AssetGenImage get streakFlame =>
       const AssetGenImage('assets/images/streak_flame.png');
+
+  /// File path: assets/images/super.png
+  AssetGenImage get superFace => const AssetGenImage('assets/images/super.png');
+
+  /// File path: assets/images/super_colored.png
+  AssetGenImage get superColored =>
+      const AssetGenImage('assets/images/super_colored.png');
 
   /// File path: assets/images/sweethies.png
   AssetGenImage get sweethies =>
@@ -1142,6 +1204,13 @@ class $AssetsImagesGen {
   /// File path: assets/images/toospicy.png
   AssetGenImage get toospicy =>
       const AssetGenImage('assets/images/toospicy.png');
+
+  /// File path: assets/images/tough.png
+  AssetGenImage get tough => const AssetGenImage('assets/images/tough.png');
+
+  /// File path: assets/images/tough_colored.png
+  AssetGenImage get toughColored =>
+      const AssetGenImage('assets/images/tough_colored.png');
 
   /// File path: assets/images/tree.png
   AssetGenImage get tree => const AssetGenImage('assets/images/tree.png');
@@ -1329,8 +1398,10 @@ class $AssetsImagesGen {
     fastingChallengeUser1,
     fastingChallengeUser2,
     fastingChallengeUser3,
+    fastForecast,
     fatigue,
     firstQuestion,
+    firstTime,
     fish,
     flameCalories,
     fork,
@@ -1341,9 +1412,12 @@ class $AssetsImagesGen {
     fullCheck,
     goal,
     good,
+    goodColored,
     goodv2,
+    goodv3,
     greatJob,
     greenApple,
+    greenBook,
     greenClock,
     greenTick,
     greenTick3d,
@@ -1356,6 +1430,7 @@ class $AssetsImagesGen {
     highCarbv2,
     home,
     hours,
+    huh,
     human,
     hungry,
     hungerTracker,
@@ -1382,17 +1457,22 @@ class $AssetsImagesGen {
     mascotDiver,
     mascotHi,
     mascotHiWater,
+    mascotHiWithout,
     mascotLearnDetail,
     mascotMetabolic,
+    mascotOmh,
     mascotQuickWalkt,
     mascotSearch,
     mascotTip,
     mascotWater,
+    mascotWidget,
     mealRecordEmoji,
     meat,
     mediterrian,
     meh,
+    mehColored,
     mehv2,
+    mehv3,
     metabolic,
     mixed,
     mixedv2,
@@ -1404,6 +1484,7 @@ class $AssetsImagesGen {
     nextFast,
     nonBinary,
     noodles,
+    noone,
     notSure,
     notSurev2,
     nothingPhysical,
@@ -1430,9 +1511,11 @@ class $AssetsImagesGen {
     purpleStar,
     quickWalk,
     restrictive,
+    redWarning,
     rice,
     riiight,
     salata,
+    sandClock,
     scramlbedEggs,
     searchpng,
     secondQuestion,
@@ -1447,9 +1530,12 @@ class $AssetsImagesGen {
     start,
     steps,
     stomach,
+    stonks,
     stressed,
     streak,
     streakFlame,
+    superFace,
+    superColored,
     sweethies,
     takePhoto,
     thirdSQuestion,
@@ -1458,6 +1544,8 @@ class $AssetsImagesGen {
     tongue,
     tonguev2,
     toospicy,
+    tough,
+    toughColored,
     tree,
     tree2,
     tree3,

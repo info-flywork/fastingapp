@@ -1,12 +1,19 @@
+import 'dart:math' as math;
+
 import 'package:easy_localization/easy_localization.dart';
 import 'package:fastingapp/core/dialogs/app_dialogs.dart';
+import 'package:fastingapp/core/router/route_paths.dart';
 import 'package:fastingapp/core/theme/app_text_styles.dart';
+import 'package:fastingapp/core/widgets/app_button.dart';
+import 'package:fastingapp/core/widgets/app_button_decoration.dart';
 import 'package:fastingapp/core/widgets/flip_clock_unit.dart';
 import 'package:fastingapp/core/widgets/weight_progress_bar.dart';
 import 'package:fastingapp/generated/assets.gen.dart';
 import 'package:fastingapp/generated/colors.gen.dart';
+import 'package:fastingapp/presentation/fasting/view/fasting_first_time_view.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:go_router/go_router.dart';
 
 /// Oruç bitirme özeti sayfasına taşınan plan ve süre.
 @immutable
@@ -40,14 +47,22 @@ class _FastingFinishViewState extends State<FastingFinishView> {
 
   late DateTime _start;
   late DateTime _end;
-  var _editingStart = false;
+  var _editingStart = true;
   var _editingEnd = false;
+  var _feeling = _FinishFeeling.superMood;
+  final _notesController = TextEditingController();
 
   @override
   void initState() {
     super.initState();
     _start = widget.args.start;
     _end = widget.args.end;
+  }
+
+  @override
+  void dispose() {
+    _notesController.dispose();
+    super.dispose();
   }
 
   Duration get _elapsed {
@@ -102,74 +117,108 @@ class _FastingFinishViewState extends State<FastingFinishView> {
       value: SystemUiOverlayStyle.dark,
       child: Scaffold(
         backgroundColor: ColorName.colorBodyPageBg,
-        body: SingleChildScrollView(
-          physics: const ClampingScrollPhysics(),
-          child: Stack(
-            clipBehavior: Clip.none,
-            children: [
-              Positioned(
-                top: 0,
-                left: 0,
-                right: 0,
-                child: _FinishHeader(
-                  topInset: top,
-                  elapsed: _elapsed,
-                  height: headerHeight,
-                ),
-              ),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  SizedBox(height: headerHeight - _cardOverlap + 24),
-                  Padding(
-                    padding: EdgeInsets.fromLTRB(16, 0, 16, bottom + 24),
-                    child: Column(
+        body: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Expanded(
+              child: SingleChildScrollView(
+                physics: const ClampingScrollPhysics(),
+                child: Stack(
+                  clipBehavior: Clip.none,
+                  children: [
+                    Positioned(
+                      top: 0,
+                      left: 0,
+                      right: 0,
+                      child: _FinishHeader(
+                        topInset: top,
+                        elapsed: _elapsed,
+                        height: headerHeight,
+                      ),
+                    ),
+                    Column(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
-                        _FastingTimesCard(
-                          planTitle: widget.args.planTitle,
-                          startLabel: _clockLabel(_start),
-                          endLabel: _clockLabel(_end),
-                          editingStart: _editingStart,
-                          editingEnd: _editingEnd,
-                          start: _start,
-                          end: _end,
-                          onToggleStart: _toggleStart,
-                          onToggleEnd: _toggleEnd,
-                          onStartChanged: (value) {
-                            setState(() {
-                              _start = value;
-                              if (!_end.isAfter(_start)) {
-                                _end = _start.add(const Duration(hours: 16));
-                              }
-                            });
-                          },
-                          onEndChanged: (value) {
-                            setState(() {
-                              _end = value.isAfter(_start)
-                                  ? value
-                                  : _start.add(const Duration(minutes: 1));
-                            });
-                          },
-                        ),
-                        const SizedBox(height: 16),
-                        _CurrentWeightCard(
-                          currentKg: _currentKg,
-                          startKg: _startKg,
-                          goalKg: _goalKg,
-                          progress: progress,
-                          onEdit: _editWeight,
+                        SizedBox(height: headerHeight - _cardOverlap + 24),
+                        Padding(
+                          padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              _FastingTimesCard(
+                                planTitle: widget.args.planTitle,
+                                startLabel: _clockLabel(_start),
+                                endLabel: _clockLabel(_end),
+                                editingStart: _editingStart,
+                                editingEnd: _editingEnd,
+                                start: _start,
+                                end: _end,
+                                onToggleStart: _toggleStart,
+                                onToggleEnd: _toggleEnd,
+                                onStartChanged: (value) {
+                                  setState(() {
+                                    _start = value;
+                                    if (!_end.isAfter(_start)) {
+                                      _end = _start.add(
+                                        const Duration(hours: 16),
+                                      );
+                                    }
+                                  });
+                                },
+                                onEndChanged: (value) {
+                                  setState(() {
+                                    _end = value.isAfter(_start)
+                                        ? value
+                                        : _start.add(
+                                            const Duration(minutes: 1),
+                                          );
+                                  });
+                                },
+                              ),
+                              const SizedBox(height: 16),
+                              _CurrentWeightCard(
+                                currentKg: _currentKg,
+                                startKg: _startKg,
+                                goalKg: _goalKg,
+                                progress: progress,
+                                onEdit: _editWeight,
+                              ),
+                              const SizedBox(height: 16),
+                              _FeelingCard(
+                                selected: _feeling,
+                                onSelected: (value) {
+                                  setState(() => _feeling = value);
+                                },
+                              ),
+                              const SizedBox(height: 16),
+                              _NotesCard(controller: _notesController),
+                            ],
+                          ),
                         ),
                       ],
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
-            ],
-          ),
+            ),
+            _FinishBottomBar(
+              bottomInset: math.max(bottom, 24),
+              onSave: () => _onSave(context),
+              onContinue: () => context.pop(false),
+            ),
+          ],
         ),
       ),
     );
+  }
+
+  Future<void> _onSave(BuildContext context) async {
+    final done = await context.pushNamed<bool>(
+      RoutePaths.fastingFirstTime.name,
+      extra: FastingFirstTimeArgs(elapsed: _elapsed),
+    );
+    if (!context.mounted) return;
+    if (done ?? false) context.pop(true);
   }
 }
 
@@ -285,7 +334,7 @@ final class _FastingTimesCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(24),
       ),
       child: Padding(
-        padding: const EdgeInsets.fromLTRB(16, 20, 16, 20),
+        padding: const EdgeInsets.all(20),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
@@ -320,48 +369,74 @@ final class _FastingTimesCard extends StatelessWidget {
                 ),
               ],
             ),
-            const SizedBox(height: 20),
+            const SizedBox(height: 24),
             _TimeRow(
               positive: true,
               label: 'fasting_page.finish_start'.tr(),
               value: startLabel,
               onEdit: onToggleStart,
             ),
-            if (editingStart) ...[
-              const SizedBox(height: 12),
-              _InlineTimePicker(initial: start, onChanged: onStartChanged),
-              const SizedBox(height: 12),
-              DecoratedBox(
-                decoration: BoxDecoration(
-                  color: ColorName.colorFlipClock,
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Padding(
-                  padding: const EdgeInsets.all(8),
-                  child: Text(
-                    'fasting_page.finish_hint'.tr(),
-                    style: AppTextStyles.fastingFinishHint,
-                  ),
-                ),
-              ),
-            ],
-            const SizedBox(height: 16),
+            AnimatedSize(
+              duration: const Duration(milliseconds: 280),
+              curve: Curves.easeOutCubic,
+              alignment: Alignment.topCenter,
+              child: editingStart
+                  ? Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        const SizedBox(height: 12),
+                        _InlineTimePicker(
+                          initial: start,
+                          onChanged: onStartChanged,
+                        ),
+                        const SizedBox(height: 12),
+                        DecoratedBox(
+                          decoration: BoxDecoration(
+                            color: ColorName.colorFlipClock,
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Padding(
+                            padding: const EdgeInsets.all(8),
+                            child: Text(
+                              'fasting_page.finish_hint'.tr(),
+                              style: AppTextStyles.fastingFinishHint,
+                            ),
+                          ),
+                        ),
+                      ],
+                    )
+                  : const SizedBox(width: double.infinity),
+            ),
+            const SizedBox(height: 20),
             Divider(
               height: 1,
               thickness: 1,
               color: ColorName.colorBlack.withValues(alpha: 0.05),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 20),
             _TimeRow(
               positive: false,
               label: 'fasting_page.finish_end'.tr(),
               value: endLabel,
               onEdit: onToggleEnd,
             ),
-            if (editingEnd) ...[
-              const SizedBox(height: 12),
-              _InlineTimePicker(initial: end, onChanged: onEndChanged),
-            ],
+            AnimatedSize(
+              duration: const Duration(milliseconds: 280),
+              curve: Curves.easeOutCubic,
+              alignment: Alignment.topCenter,
+              child: editingEnd
+                  ? Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        const SizedBox(height: 12),
+                        _InlineTimePicker(
+                          initial: end,
+                          onChanged: onEndChanged,
+                        ),
+                      ],
+                    )
+                  : const SizedBox(width: double.infinity),
+            ),
           ],
         ),
       ),
@@ -399,10 +474,15 @@ final class _TimeRow extends StatelessWidget {
           ),
         ),
         const SizedBox(width: 10),
-        Expanded(
-          child: Text(label, style: AppTextStyles.fastingFinishRowLabel),
+        Text(label, style: AppTextStyles.fastingFinishRowLabel),
+        const Spacer(),
+        Text(
+          value,
+          textAlign: TextAlign.end,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: AppTextStyles.fastingFinishRowValue,
         ),
-        Text(value, style: AppTextStyles.fastingFinishRowValue),
         const SizedBox(width: 8),
         GestureDetector(
           onTap: onEdit,
@@ -433,8 +513,12 @@ final class _InlineTimePicker extends StatefulWidget {
 
 class _InlineTimePickerState extends State<_InlineTimePicker> {
   static const _itemExtent = 40.0;
-  static const _pastDays = 14;
-  static const _futureDays = 7;
+  static const _visibleCount = 3;
+  static const _pastDays = 30;
+  static const _futureDays = 14;
+  static const _hourCount = 24;
+  static const _minuteCount = 60;
+  static const _loopPasses = 40;
 
   late final List<DateTime> _dates;
   late final FixedExtentScrollController _dateController;
@@ -443,6 +527,9 @@ class _InlineTimePickerState extends State<_InlineTimePicker> {
   late int _dateIndex;
   late int _hour;
   late int _minute;
+
+  int _toLoopIndex(int value, int itemCount) =>
+      itemCount * (_loopPasses ~/ 2) + value;
 
   @override
   void initState() {
@@ -458,8 +545,12 @@ class _InlineTimePickerState extends State<_InlineTimePicker> {
     _hour = widget.initial.hour;
     _minute = widget.initial.minute;
     _dateController = FixedExtentScrollController(initialItem: _dateIndex);
-    _hourController = FixedExtentScrollController(initialItem: _hour);
-    _minuteController = FixedExtentScrollController(initialItem: _minute);
+    _hourController = FixedExtentScrollController(
+      initialItem: _toLoopIndex(_hour, _hourCount),
+    );
+    _minuteController = FixedExtentScrollController(
+      initialItem: _toLoopIndex(_minute, _minuteCount),
+    );
   }
 
   @override
@@ -480,104 +571,144 @@ class _InlineTimePickerState extends State<_InlineTimePicker> {
     if (DateUtils.isSameDay(day, DateTime.now())) {
       return 'fasting_page.start_sheet_today'.tr();
     }
-    return DateFormat('d MMM E', context.locale.toString()).format(day);
+    return DateFormat('d MMM EEE', context.locale.toString()).format(day);
+  }
+
+  int _signedOffset(int value, int selected, int count) {
+    var delta = (value - selected) % count;
+    final half = count ~/ 2;
+    if (delta > half) delta -= count;
+    if (delta < -half) delta += count;
+    return delta;
   }
 
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: 120,
+      height: _itemExtent * _visibleCount,
       child: Stack(
         alignment: Alignment.center,
         children: [
-          DecoratedBox(
-            decoration: BoxDecoration(
-              color: ColorName.colorFlipClock,
-              borderRadius: BorderRadius.circular(12),
+          IgnorePointer(
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                color: ColorName.colorFlipClock,
+                borderRadius: const BorderRadius.all(Radius.circular(999)),
+                border: Border(
+                  top: BorderSide(
+                    color: ColorName.colorBlack.withValues(alpha: 0.06),
+                  ),
+                  bottom: BorderSide(
+                    color: ColorName.colorBlack.withValues(alpha: 0.06),
+                  ),
+                ),
+              ),
+              child: const SizedBox(width: double.infinity, height: 40),
             ),
-            child: const SizedBox(height: 40, width: double.infinity),
           ),
           Row(
             children: [
               Expanded(
-                flex: 3,
-                child: ListWheelScrollView.useDelegate(
+                child: _FinishColumnWheel(
                   controller: _dateController,
-                  itemExtent: _itemExtent,
-                  physics: const FixedExtentScrollPhysics(),
-                  onSelectedItemChanged: (index) {
+                  childCount: _dates.length,
+                  alignment: Alignment.centerRight,
+                  labelAt: _dateLabel,
+                  offsetAt: (index) => index - _dateIndex,
+                  onSelected: (index) {
                     setState(() => _dateIndex = index);
                     _emit();
                   },
-                  childDelegate: ListWheelChildBuilderDelegate(
-                    childCount: _dates.length,
-                    builder: (context, index) {
-                      final selected = index == _dateIndex;
-                      return Center(
-                        child: Text(
-                          _dateLabel(index),
-                          style: selected
-                              ? AppTextStyles.fastingFinishRowLabel
-                              : AppTextStyles.fastingFinishPickerMuted,
-                        ),
-                      );
-                    },
-                  ),
                 ),
               ),
-              Expanded(
-                child: ListWheelScrollView.useDelegate(
+              const SizedBox(width: 56),
+              SizedBox(
+                width: 36,
+                child: _FinishColumnWheel(
                   controller: _hourController,
-                  itemExtent: _itemExtent,
-                  physics: const FixedExtentScrollPhysics(),
-                  onSelectedItemChanged: (index) {
-                    setState(() => _hour = index);
+                  childCount: _hourCount * _loopPasses,
+                  labelAt: (index) =>
+                      (index % _hourCount).toString().padLeft(2, '0'),
+                  offsetAt: (index) =>
+                      _signedOffset(index % _hourCount, _hour, _hourCount),
+                  onSelected: (index) {
+                    setState(() => _hour = index % _hourCount);
                     _emit();
                   },
-                  childDelegate: ListWheelChildBuilderDelegate(
-                    childCount: 24,
-                    builder: (context, index) {
-                      final selected = index == _hour;
-                      return Center(
-                        child: Text(
-                          index.toString().padLeft(2, '0'),
-                          style: selected
-                              ? AppTextStyles.fastingFinishRowLabel
-                              : AppTextStyles.fastingFinishPickerMuted,
-                        ),
-                      );
-                    },
-                  ),
                 ),
               ),
-              Expanded(
-                child: ListWheelScrollView.useDelegate(
+              const SizedBox(width: 56),
+              SizedBox(
+                width: 36,
+                child: _FinishColumnWheel(
                   controller: _minuteController,
-                  itemExtent: _itemExtent,
-                  physics: const FixedExtentScrollPhysics(),
-                  onSelectedItemChanged: (index) {
-                    setState(() => _minute = index);
+                  childCount: _minuteCount * _loopPasses,
+                  labelAt: (index) =>
+                      (index % _minuteCount).toString().padLeft(2, '0'),
+                  offsetAt: (index) => _signedOffset(
+                    index % _minuteCount,
+                    _minute,
+                    _minuteCount,
+                  ),
+                  onSelected: (index) {
+                    setState(() => _minute = index % _minuteCount);
                     _emit();
                   },
-                  childDelegate: ListWheelChildBuilderDelegate(
-                    childCount: 60,
-                    builder: (context, index) {
-                      final selected = index == _minute;
-                      return Center(
-                        child: Text(
-                          index.toString().padLeft(2, '0'),
-                          style: selected
-                              ? AppTextStyles.fastingFinishRowLabel
-                              : AppTextStyles.fastingFinishPickerMuted,
-                        ),
-                      );
-                    },
-                  ),
                 ),
               ),
             ],
           ),
         ],
+      ),
+    );
+  }
+}
+
+final class _FinishColumnWheel extends StatelessWidget {
+  const _FinishColumnWheel({
+    required this.controller,
+    required this.childCount,
+    required this.labelAt,
+    required this.offsetAt,
+    required this.onSelected,
+    this.alignment = Alignment.center,
+  });
+
+  final FixedExtentScrollController controller;
+  final int childCount;
+  final String Function(int index) labelAt;
+  final int Function(int index) offsetAt;
+  final ValueChanged<int> onSelected;
+  final Alignment alignment;
+
+  static const _itemExtent = 40.0;
+
+  @override
+  Widget build(BuildContext context) {
+    return ListWheelScrollView.useDelegate(
+      controller: controller,
+      itemExtent: _itemExtent,
+      physics: const FixedExtentScrollPhysics(),
+      diameterRatio: 100,
+      perspective: 0.0001,
+      onSelectedItemChanged: onSelected,
+      childDelegate: ListWheelChildBuilderDelegate(
+        childCount: childCount,
+        builder: (context, index) {
+          final offset = offsetAt(index);
+          final selected = offset == 0;
+          return Align(
+            alignment: alignment,
+            child: Text(
+              labelAt(index),
+              maxLines: 1,
+              textAlign: TextAlign.center,
+              style: selected
+                  ? AppTextStyles.fastingFinishRowLabel
+                  : AppTextStyles.fastingFinishPickerMuted,
+            ),
+          );
+        },
       ),
     );
   }
@@ -705,5 +836,242 @@ final class _CurrentWeightCard extends StatelessWidget {
   static String _formatKg(double kg) {
     if (kg == kg.roundToDouble()) return '${kg.toInt()}';
     return kg.toStringAsFixed(1);
+  }
+}
+
+enum _FinishFeeling { tough, meh, good, superMood }
+
+final class _FeelingCard extends StatelessWidget {
+  const _FeelingCard({required this.selected, required this.onSelected});
+
+  final _FinishFeeling selected;
+  final ValueChanged<_FinishFeeling> onSelected;
+
+  @override
+  Widget build(BuildContext context) {
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: ColorName.colorWhite,
+        borderRadius: BorderRadius.circular(24),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Row(
+              children: [
+                Assets.images.goodColored.image(
+                  width: 28,
+                  height: 28,
+                  fit: BoxFit.contain,
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    'fasting_page.finish_feeling'.tr(),
+                    style: AppTextStyles.caloriesCardTitle,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 24),
+            Row(
+              children: [
+                for (final mood in _FinishFeeling.values)
+                  Expanded(
+                    child: _FeelingOption(
+                      mood: mood,
+                      selected: mood == selected,
+                      onTap: () => onSelected(mood),
+                    ),
+                  ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+final class _FeelingOption extends StatelessWidget {
+  const _FeelingOption({
+    required this.mood,
+    required this.selected,
+    required this.onTap,
+  });
+
+  final _FinishFeeling mood;
+  final bool selected;
+  final VoidCallback onTap;
+
+  (AssetGenImage idle, AssetGenImage active, String labelKey) get _data =>
+      switch (mood) {
+        _FinishFeeling.tough => (
+          Assets.images.tough,
+          Assets.images.toughColored,
+          'fasting_page.finish_tough',
+        ),
+        _FinishFeeling.meh => (
+          Assets.images.mehv3,
+          Assets.images.mehColored,
+          'fasting_page.finish_meh',
+        ),
+        _FinishFeeling.good => (
+          Assets.images.goodv3,
+          Assets.images.goodColored,
+          'fasting_page.finish_good',
+        ),
+        _FinishFeeling.superMood => (
+          Assets.images.superFace,
+          Assets.images.superColored,
+          'fasting_page.finish_super',
+        ),
+      };
+
+  @override
+  Widget build(BuildContext context) {
+    final data = _data;
+    final icon = selected ? data.$2 : data.$1;
+    return GestureDetector(
+      onTap: onTap,
+      behavior: HitTestBehavior.opaque,
+      child: Column(
+        children: [
+          icon.image(width: 56, height: 56, fit: BoxFit.contain),
+          const SizedBox(height: 8),
+          Text(
+            data.$3.tr(),
+            textAlign: TextAlign.center,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: selected
+                ? AppTextStyles.fastingFinishRowLabel
+                : AppTextStyles.fastingFinishPickerMuted,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+final class _NotesCard extends StatelessWidget {
+  const _NotesCard({required this.controller});
+
+  final TextEditingController controller;
+
+  @override
+  Widget build(BuildContext context) {
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: ColorName.colorWhite,
+        borderRadius: BorderRadius.circular(24),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Row(
+              children: [
+                Assets.images.greenBook.image(
+                  width: 28,
+                  height: 28,
+                  fit: BoxFit.contain,
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    'fasting_page.finish_notes'.tr(),
+                    style: AppTextStyles.caloriesCardTitle,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 24),
+            SizedBox(
+              height: 82,
+              child: TextField(
+                controller: controller,
+                maxLines: null,
+                expands: true,
+                textAlignVertical: TextAlignVertical.top,
+                style: AppTextStyles.fastingFinishRowLabel,
+                cursorColor: ColorName.colorMealPositive,
+                decoration: InputDecoration(
+                  hintText: 'fasting_page.finish_notes_hint'.tr(),
+                  hintStyle: AppTextStyles.fastingFinishNotesHint,
+                  filled: true,
+                  fillColor: ColorName.colorFlipClock,
+                  contentPadding: const EdgeInsets.all(16),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide.none,
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide.none,
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide.none,
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Figma Frame 48096339 — üst radius 32, pad 16/16/24/16, gap 12.
+final class _FinishBottomBar extends StatelessWidget {
+  const _FinishBottomBar({
+    required this.bottomInset,
+    required this.onSave,
+    required this.onContinue,
+  });
+
+  final double bottomInset;
+  final VoidCallback onSave;
+  final VoidCallback onContinue;
+
+  @override
+  Widget build(BuildContext context) {
+    return DecoratedBox(
+      decoration: const BoxDecoration(
+        color: ColorName.colorWhite,
+        borderRadius: BorderRadius.vertical(top: Radius.circular(32)),
+      ),
+      child: Padding(
+        padding: EdgeInsets.fromLTRB(16, 16, 16, bottomInset),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            AppButton(
+              label: 'fasting_page.finish_save'.tr(),
+              onPressed: onSave,
+              decoration: AppButtonDecoration.hungerResult(),
+            ),
+            const SizedBox(height: 12),
+            GestureDetector(
+              onTap: onContinue,
+              behavior: HitTestBehavior.opaque,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 4),
+                child: Text(
+                  'fasting_page.finish_continue'.tr(),
+                  textAlign: TextAlign.center,
+                  style: AppTextStyles.fastingFinishContinue,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }

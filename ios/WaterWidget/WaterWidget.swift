@@ -117,13 +117,14 @@ struct FastingProvider: TimelineProvider {
 struct FastingWidgetView: View {
   @Environment(\.widgetFamily) private var family
   var entry: FastingEntry
+  var fit: Bool = false
 
   var body: some View {
     let path = family == .systemMedium ? entry.mediumPath : entry.smallPath
     if let path, let image = UIImage(contentsOfFile: path) {
       Image(uiImage: image)
         .resizable()
-        .scaledToFill()
+        .aspectRatio(contentMode: fit ? .fit : .fill)
     } else {
       Color.white
     }
@@ -236,6 +237,141 @@ struct FastingDetailWidget: Widget {
   }
 }
 
+struct FastingPlanProvider: TimelineProvider {
+  func placeholder(in context: Context) -> FastingEntry {
+    FastingEntry(date: Date(), smallPath: nil, mediumPath: nil)
+  }
+
+  func getSnapshot(
+    in context: Context,
+    completion: @escaping (FastingEntry) -> Void
+  ) {
+    completion(load())
+  }
+
+  func getTimeline(
+    in context: Context,
+    completion: @escaping (Timeline<FastingEntry>) -> Void
+  ) {
+    let entry = load()
+    let next = Calendar.current.date(byAdding: .minute, value: 1, to: Date())
+      ?? Date().addingTimeInterval(60)
+    completion(Timeline(entries: [entry], policy: .after(next)))
+  }
+
+  private func load() -> FastingEntry {
+    let data = UserDefaults(suiteName: widgetGroupId)
+    let path = data?.string(forKey: "fasting_widget_plan_image")
+    return FastingEntry(date: Date(), smallPath: path, mediumPath: path)
+  }
+}
+
+struct FastingPlanWidget: Widget {
+  let kind: String = "FastingPlanWidget"
+
+  var body: some WidgetConfiguration {
+    StaticConfiguration(kind: kind, provider: FastingPlanProvider()) { entry in
+      FastingWidgetView(entry: entry)
+        .widgetURL(URL(string: "fastingapp://fasting?homeWidget"))
+        .containerBackground(for: .widget) { Color.clear }
+    }
+    .configurationDisplayName("Bugünün planı")
+    .description("Plan ve oruca başla")
+    .supportedFamilies([.systemMedium])
+    .contentMarginsDisabled()
+  }
+}
+
+struct FastingOmhProvider: TimelineProvider {
+  func placeholder(in context: Context) -> FastingEntry {
+    FastingEntry(date: Date(), smallPath: nil, mediumPath: nil)
+  }
+
+  func getSnapshot(
+    in context: Context,
+    completion: @escaping (FastingEntry) -> Void
+  ) {
+    completion(load())
+  }
+
+  func getTimeline(
+    in context: Context,
+    completion: @escaping (Timeline<FastingEntry>) -> Void
+  ) {
+    let entry = load()
+    let next = Calendar.current.date(byAdding: .minute, value: 1, to: Date())
+      ?? Date().addingTimeInterval(60)
+    completion(Timeline(entries: [entry], policy: .after(next)))
+  }
+
+  private func load() -> FastingEntry {
+    let data = UserDefaults(suiteName: widgetGroupId)
+    let path = data?.string(forKey: "fasting_widget_omh_image")
+    return FastingEntry(date: Date(), smallPath: path, mediumPath: path)
+  }
+}
+
+struct FastingOmhWidget: Widget {
+  let kind: String = "FastingOmhWidget"
+
+  var body: some WidgetConfiguration {
+    StaticConfiguration(kind: kind, provider: FastingOmhProvider()) { entry in
+      FastingWidgetView(entry: entry)
+        .widgetURL(URL(string: "fastingapp://fasting?homeWidget"))
+        .containerBackground(for: .widget) { Color.clear }
+    }
+    .configurationDisplayName("Bugün")
+    .description("Plan ve motivasyon")
+    .supportedFamilies([.systemMedium])
+    .contentMarginsDisabled()
+  }
+}
+
+struct FastingWeekProvider: TimelineProvider {
+  func placeholder(in context: Context) -> FastingEntry {
+    FastingEntry(date: Date(), smallPath: nil, mediumPath: nil)
+  }
+
+  func getSnapshot(
+    in context: Context,
+    completion: @escaping (FastingEntry) -> Void
+  ) {
+    completion(load())
+  }
+
+  func getTimeline(
+    in context: Context,
+    completion: @escaping (Timeline<FastingEntry>) -> Void
+  ) {
+    let entry = load()
+    let next = Calendar.current.date(byAdding: .minute, value: 1, to: Date())
+      ?? Date().addingTimeInterval(60)
+    completion(Timeline(entries: [entry], policy: .after(next)))
+  }
+
+  private func load() -> FastingEntry {
+    let data = UserDefaults(suiteName: widgetGroupId)
+    let path = data?.string(forKey: "fasting_widget_week_image")
+    return FastingEntry(date: Date(), smallPath: path, mediumPath: path)
+  }
+}
+
+struct FastingWeekWidget: Widget {
+  let kind: String = "FastingWeekWidget"
+
+  var body: some WidgetConfiguration {
+    StaticConfiguration(kind: kind, provider: FastingWeekProvider()) { entry in
+      FastingWidgetView(entry: entry)
+        .widgetURL(URL(string: "fastingapp://fasting?homeWidget"))
+        .containerBackground(for: .widget) { Color.clear }
+    }
+    .configurationDisplayName("Bu hafta")
+    .description("Haftalık oruç özeti")
+    .supportedFamilies([.systemMedium])
+    .contentMarginsDisabled()
+  }
+}
+
 @main
 struct MochiWidgets: WidgetBundle {
   var body: some Widget {
@@ -243,5 +379,8 @@ struct MochiWidgets: WidgetBundle {
     FastingWidget()
     FastingCardWidget()
     FastingDetailWidget()
+    FastingPlanWidget()
+    FastingOmhWidget()
+    FastingWeekWidget()
   }
 }

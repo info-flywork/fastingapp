@@ -15,7 +15,9 @@ import 'package:fastingapp/core/widgets/horseshoe_arc.dart';
 import 'package:fastingapp/generated/assets.gen.dart';
 import 'package:fastingapp/generated/colors.gen.dart';
 import 'package:fastingapp/presentation/fasting/view/fasting_end_signal.dart';
+import 'package:fastingapp/presentation/fasting/view/fasting_fast_forecast_card.dart';
 import 'package:fastingapp/presentation/fasting/view/fasting_finish_view.dart';
+import 'package:fastingapp/presentation/fasting/view/fasting_mochi_plan_card.dart';
 import 'package:fastingapp/presentation/fasting/view/fasting_plan_sheet.dart';
 import 'package:fastingapp/presentation/fasting/view/fasting_start_sheet.dart';
 import 'package:fastingapp/presentation/home/view/home_view.dart';
@@ -73,11 +75,11 @@ class _FastingViewState extends State<FastingView> {
           const Duration(hours: 1, minutes: 44, seconds: 14),
         );
     final end = start.add(total);
-    await context.pushNamed(
+    final saved = await context.pushNamed<bool>(
       RoutePaths.fastingFinish.name,
       extra: FastingFinishArgs(planTitle: _plan.title, start: start, end: end),
     );
-    if (!mounted) return;
+    if (!mounted || saved != true) return;
     _endFast();
   }
 
@@ -158,6 +160,13 @@ class _FastingViewState extends State<FastingView> {
       hoursTemplate: 'fasting_page.widget_hours'.tr(context: context),
       praise: 'fasting_page.widget_great'.tr(context: context),
       localeName: context.locale.languageCode,
+      todaysPlanTitle: 'fasting_page.widget_todays_plan'.tr(context: context),
+      startFastingCta: 'fasting_page.widget_start_fasting'.tr(context: context),
+      todayLabel: 'fasting_page.widget_today'.tr(context: context),
+      cheerLabel: 'fasting_page.widget_lets_do_this'.tr(context: context),
+      thisWeekTitle: 'fasting_page.widget_this_week'.tr(context: context),
+      weekCheer: 'fasting_page.widget_keep_going'.tr(context: context),
+      weekdays: 'water_page.weekdays'.tr(context: context),
     );
     unawaited(
       FastingWidgetSync.publish(
@@ -180,6 +189,33 @@ class _FastingViewState extends State<FastingView> {
   int _planHours(String title) {
     final head = title.split('-').first.trim();
     return int.tryParse(head) ?? 16;
+  }
+
+  int _eatHours(String title) {
+    final parts = title.split('-');
+    if (parts.length < 2) return 8;
+    return int.tryParse(parts[1].trim()) ?? 8;
+  }
+
+  String get _mochiStartedClock {
+    final start = _started;
+    if (start != null) {
+      return DateFormat('HH:mm', context.locale.toString()).format(start);
+    }
+    return '20:00';
+  }
+
+  String get _mochiEndsClock {
+    final start = _started;
+    final fast = _planHours(_plan.title);
+    if (start != null) {
+      return DateFormat(
+        'HH:mm',
+        context.locale.toString(),
+      ).format(start.add(Duration(hours: fast)));
+    }
+    final planned = DateTime(2000, 1, 1, 20).add(Duration(hours: fast));
+    return DateFormat('HH:mm').format(planned);
   }
 
   String? get _startedLabel => _started == null ? null : _boundLabel(_started!);
@@ -289,6 +325,8 @@ class _FastingViewState extends State<FastingView> {
           ),
           // Kartların 12px üst boşluğuyla birlikte aralık 16.
           const SizedBox(height: 4),
+          const FastingFastForecastCard(),
+          const SizedBox(height: 4),
           const HomeChallengeCard(),
           const SizedBox(height: 4),
           HomeMetricCards(
@@ -309,6 +347,14 @@ class _FastingViewState extends State<FastingView> {
           HomeHungerTrackerCard(
             onTap: () => context.pushNamed(RoutePaths.hungerTracker.name),
           ),
+          FastingMochiPlanCard(
+            fastHours: _planHours(_plan.title),
+            eatHours: _eatHours(_plan.title),
+            startedLabel: _mochiStartedClock,
+            endsLabel: _mochiEndsClock,
+            onStart: _pickStart,
+          ),
+          const SizedBox(height: 60),
         ],
       ),
     );
@@ -996,8 +1042,8 @@ final class _FastingActions extends StatelessWidget {
             decoration: finishReady
                 ? AppButtonDecoration.fastingStart()
                 : fasting
-                    ? AppButtonDecoration.dark()
-                    : AppButtonDecoration.fastingStart(),
+                ? AppButtonDecoration.dark()
+                : AppButtonDecoration.fastingStart(),
           ),
           if (fasting) ...[
             const SizedBox(height: 10),

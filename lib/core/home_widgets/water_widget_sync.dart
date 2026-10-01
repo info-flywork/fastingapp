@@ -427,6 +427,13 @@ class _WaterWidgetLocaleSyncState extends State<WaterWidgetLocaleSync> {
       hoursTemplate: 'fasting_page.widget_hours'.tr(context: context),
       praise: 'fasting_page.widget_great'.tr(context: context),
       localeName: locale.languageCode,
+      todaysPlanTitle: 'fasting_page.widget_todays_plan'.tr(context: context),
+      startFastingCta: 'fasting_page.widget_start_fasting'.tr(context: context),
+      todayLabel: 'fasting_page.widget_today'.tr(context: context),
+      cheerLabel: 'fasting_page.widget_lets_do_this'.tr(context: context),
+      thisWeekTitle: 'fasting_page.widget_this_week'.tr(context: context),
+      weekCheer: 'fasting_page.widget_keep_going'.tr(context: context),
+      weekdays: 'water_page.weekdays'.tr(context: context),
     );
     unawaited(FastingWidgetSync.refresh());
     unawaited(

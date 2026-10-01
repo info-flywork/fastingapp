@@ -57,6 +57,7 @@ import 'package:fastingapp/presentation/fasting/view/eating_window_view.dart';
 import 'package:fastingapp/presentation/fasting/view/fasting_body_status_view.dart';
 import 'package:fastingapp/presentation/fasting/view/fasting_breath_view.dart';
 import 'package:fastingapp/presentation/fasting/view/fasting_finish_view.dart';
+import 'package:fastingapp/presentation/fasting/view/fasting_first_time_view.dart';
 import 'package:fastingapp/presentation/fasting/view/fasting_quick_walk_view.dart';
 import 'package:fastingapp/presentation/fasting/view/fasting_sip_challenge_view.dart';
 import 'package:fastingapp/presentation/fasting/view/fasting_struggle_advice_view.dart';
@@ -491,6 +492,24 @@ final GoRouter appRouter = GoRouter(
                 end: DateTime.now(),
               );
         return FastingFinishView(args: args);
+      },
+    ),
+    GoRoute(
+      path: RoutePaths.fastingFirstTime.path,
+      name: RoutePaths.fastingFirstTime.name,
+      parentNavigatorKey: rootNavigatorKey,
+      builder: (context, state) {
+        final extra = state.extra;
+        final args = extra is FastingFirstTimeArgs
+            ? extra
+            : const FastingFirstTimeArgs(
+                elapsed: Duration(
+                  hours: 12,
+                  minutes: 12,
+                  seconds: 39,
+                ),
+              );
+        return FastingFirstTimeView(args: args);
       },
     ),
     GoRoute(

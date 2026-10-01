@@ -4,6 +4,9 @@ import 'package:fastingapp/generated/assets.gen.dart';
 import 'package:fastingapp/presentation/home_widgets/fasting_detail_widget_view.dart';
 import 'package:fastingapp/presentation/home_widgets/fasting_home_widget_view.dart';
 import 'package:fastingapp/presentation/home_widgets/fasting_medium_widget_view.dart';
+import 'package:fastingapp/presentation/home_widgets/fasting_omh_widget_view.dart';
+import 'package:fastingapp/presentation/home_widgets/fasting_plan_widget_view.dart';
+import 'package:fastingapp/presentation/home_widgets/fasting_week_widget_view.dart';
 import 'package:flutter/painting.dart';
 import 'package:home_widget/home_widget.dart';
 
@@ -12,6 +15,10 @@ abstract final class FastingWidgetSync {
   static const imageKey = 'fasting_widget_image';
   static const mediumImageKey = 'fasting_widget_medium_image';
   static const detailImageKey = 'fasting_widget_detail_image';
+  static const planImageKey = 'fasting_widget_plan_image';
+  static const omhImageKey = 'fasting_widget_omh_image';
+  static const weekImageKey = 'fasting_widget_week_image';
+  static const weekKey = 'fasting_week';
   static const activeKey = 'fasting_active';
   static const startKey = 'fasting_start_ms';
   static const endKey = 'fasting_end_ms';
@@ -28,6 +35,13 @@ abstract final class FastingWidgetSync {
   static String? _goalCaption;
   static String? _hoursTemplate;
   static String? _praise;
+  static String? _todaysPlanTitle;
+  static String? _startFastingCta;
+  static String? _todayLabel;
+  static String? _cheerLabel;
+  static String? _thisWeekTitle;
+  static String? _weekCheer;
+  static String _weekdays = 'M,T,W,T,F,S,S';
   static String _localeName = 'en';
   static Timer? _ticker;
 
@@ -86,6 +100,13 @@ abstract final class FastingWidgetSync {
     required String hoursTemplate,
     required String praise,
     required String localeName,
+    String? todaysPlanTitle,
+    String? startFastingCta,
+    String? todayLabel,
+    String? cheerLabel,
+    String? thisWeekTitle,
+    String? weekCheer,
+    String? weekdays,
   }) {
     _statusFasting = fasting;
     _statusEating = eating;
@@ -98,6 +119,13 @@ abstract final class FastingWidgetSync {
     _hoursTemplate = hoursTemplate;
     _praise = praise;
     _localeName = localeName;
+    _todaysPlanTitle = todaysPlanTitle ?? _todaysPlanTitle;
+    _startFastingCta = startFastingCta ?? _startFastingCta;
+    _todayLabel = todayLabel ?? _todayLabel;
+    _cheerLabel = cheerLabel ?? _cheerLabel;
+    _thisWeekTitle = thisWeekTitle ?? _thisWeekTitle;
+    _weekCheer = weekCheer ?? _weekCheer;
+    if (weekdays != null && weekdays.isNotEmpty) _weekdays = weekdays;
     _ensureTicker();
   }
 
@@ -199,6 +227,106 @@ abstract final class FastingWidgetSync {
       androidName: 'FastingWidgetDetailProvider',
       iOSName: 'FastingDetailWidget',
     );
+
+    final window = _planWindow(start: start, end: end, hours: hours);
+    await HomeWidget.renderFlutterWidget(
+      FastingPlanWidgetView(
+        title: _todaysPlanTitle ?? "Today's Plan",
+        planLabel: _planLabel ?? '16:8',
+        windowLabel: window,
+        ctaLabel: _startFastingCta ?? 'Start Fasting',
+      ),
+      key: planImageKey,
+      logicalSize: FastingPlanWidgetView.logicalSize,
+      pixelRatio: 2,
+    );
+    await HomeWidget.updateWidget(
+      androidName: 'FastingWidgetPlanProvider',
+      iOSName: 'FastingPlanWidget',
+    );
+    await HomeWidget.renderFlutterWidget(
+      FastingOmhWidgetView(
+        todayLabel: _todayLabel ?? 'Today',
+        planLabel: _planLabel ?? '16:8',
+        windowLabel: window,
+        cheerLabel: _cheerLabel ?? "Let's do this!",
+      ),
+      key: omhImageKey,
+      logicalSize: FastingOmhWidgetView.logicalSize,
+      pixelRatio: 2,
+    );
+    await HomeWidget.updateWidget(
+      androidName: 'FastingWidgetOmhProvider',
+      iOSName: 'FastingOmhWidget',
+    );
+
+    final week = await _weekProgress(isFasting: isFasting, progress: progress);
+    final done = week.where((p) => p > 0).length;
+    await HomeWidget.renderFlutterWidget(
+      FastingWeekWidgetView(
+        title: _thisWeekTitle ?? 'This Week',
+        completedLabel: '$done/7',
+        weekdayLabels: _weekdays.split(','),
+        dayProgress: week,
+        cheerLabel: _weekCheer ?? "Keep going!\nYou're on a roll.",
+      ),
+      key: weekImageKey,
+      logicalSize: FastingWeekWidgetView.logicalSize,
+      pixelRatio: 2,
+    );
+    await HomeWidget.updateWidget(
+      androidName: 'FastingWidgetWeekProvider',
+      iOSName: 'FastingWeekWidget',
+    );
+  }
+
+  static Future<List<double>> _weekProgress({
+    required bool isFasting,
+    required double progress,
+  }) async {
+    final raw = await _readString(weekKey);
+    final saved = _decodeWeek(raw);
+    final today = DateTime.now().weekday - 1;
+    if (isFasting) {
+      final current = progress.clamp(0.0, 1.0);
+      if (current > saved[today]) saved[today] = current;
+    }
+    await HomeWidget.saveWidgetData<String>(weekKey, _encodeWeek(saved));
+    return List<double>.unmodifiable(saved);
+  }
+
+  static List<double> _decodeWeek(String? raw) {
+    const fallback = [0.75, 0.0, 0.6, 0.0, 0.7, 0.7, 0.3];
+    if (raw == null || raw.isEmpty) return List<double>.from(fallback);
+    final parts = raw.split(',');
+    if (parts.length != 7) return List<double>.from(fallback);
+    return [
+      for (final part in parts) (double.tryParse(part) ?? 0).clamp(0.0, 1.0),
+    ];
+  }
+
+  static String _encodeWeek(List<double> week) =>
+      week.map((p) => p.toStringAsFixed(3)).join(',');
+
+  static String _planWindow({
+    required DateTime? start,
+    required DateTime? end,
+    required int hours,
+  }) {
+    final from = start ?? DateTime(2000, 1, 1, 20);
+    final to = end ?? from.add(Duration(hours: hours));
+    return '${_planClock(from)} > ${_planClock(to)}';
+  }
+
+  static String _planClock(DateTime time) {
+    final minute = time.minute.toString().padLeft(2, '0');
+    if (!_localeName.startsWith('en')) {
+      final hour = time.hour.toString().padLeft(2, '0');
+      return '$hour:$minute';
+    }
+    final hour = time.hour % 12 == 0 ? 12 : time.hour % 12;
+    final suffix = time.hour >= 12 ? 'pm' : 'am';
+    return '$hour:$minute $suffix';
   }
 
   static int _goalHours(DateTime? start, DateTime? end) {
@@ -235,6 +363,9 @@ abstract final class FastingWidgetSync {
       _warm(Assets.images.start.provider(), config),
       _warm(Assets.images.end.provider(), config),
       _warm(Assets.images.hours.provider(), config),
+      _warm(Assets.images.mascotWidget.provider(), config),
+      _warm(Assets.images.mascotOmh.provider(), config),
+      _warm(Assets.images.tree.provider(), config),
     ]);
   }
 

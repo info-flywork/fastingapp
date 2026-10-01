@@ -57,7 +57,11 @@ final class HomeChallengeCard extends StatelessWidget {
           ),
           const SizedBox(height: 16),
           const Row(
-            children: [_ParticipantsCluster(), Spacer(), _JoinNowButton()],
+            children: [
+              _ParticipantsCluster(),
+              SizedBox(width: 12),
+              Expanded(child: _JoinNowButton()),
+            ],
           ),
         ],
       ),
@@ -158,7 +162,6 @@ final class _JoinNowButton extends StatelessWidget {
       onPressed: () {},
       decoration: AppButtonDecoration.homeJoin(),
       showIcon: false,
-      expand: false,
     );
   }
 }

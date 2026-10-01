@@ -49,7 +49,7 @@ final class FastingDetailWidgetView extends StatelessWidget {
           borderRadius: const BorderRadius.all(Radius.circular(39)),
           child: Stack(
             children: [
-              const Positioned(top: 20, right: 26, child: _Logo()),
+              const Positioned(top: 20, left: 26, child: _Logo()),
               Padding(
                 padding: const EdgeInsets.fromLTRB(26, 48, 26, 12),
                 child: _Body(
@@ -67,9 +67,9 @@ final class FastingDetailWidgetView extends StatelessWidget {
               ),
               Positioned(
                 right: -4,
-                bottom: -6,
+                bottom: -36,
                 child: Assets.images.widget1.image(
-                  height: 168,
+                  height: 190,
                   fit: BoxFit.contain,
                 ),
               ),
@@ -143,7 +143,7 @@ class _Body extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const SizedBox(height: 28),
+              const SizedBox(height: 4),
               Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -172,9 +172,9 @@ class _Body extends StatelessWidget {
                   ),
                 ],
               ),
-              const Spacer(),
+              const SizedBox(height: 16),
               Padding(
-                padding: const EdgeInsets.only(bottom: 8, right: 150),
+                padding: const EdgeInsets.only(right: 150),
                 child: DecoratedBox(
                   decoration: BoxDecoration(
                     color: ColorName.colorMealPositive.withValues(alpha: 0.3),
@@ -223,7 +223,7 @@ class _Stat extends StatelessWidget {
         padding: const EdgeInsets.all(12),
         child: Column(
           children: [
-            icon.image(height: 36, fit: BoxFit.contain),
+            icon.image(height: 44, fit: BoxFit.contain),
             const SizedBox(height: 6),
             Text(caption, style: _caption, textAlign: TextAlign.center),
             const SizedBox(height: 6),
@@ -295,16 +295,16 @@ class _RingPainter extends CustomPainter {
 
 const _logo = TextStyle(
   fontFamily: FontFamily.baloo,
-  fontSize: 24,
-  height: 20 / 24,
-  letterSpacing: 24 * -0.015,
+  fontSize: 28,
+  height: 24 / 28,
+  letterSpacing: 28 * -0.015,
 );
 
 const _time = TextStyle(
   fontFamily: FontFamily.sFProDisplay,
   fontWeight: FontWeight.w600,
-  fontSize: 40,
-  height: 48 / 40,
+  fontSize: 48,
+  height: 56 / 48,
   letterSpacing: -0.5,
   color: ColorName.colorTitle,
 );
@@ -312,7 +312,7 @@ const _time = TextStyle(
 final _left = TextStyle(
   fontFamily: FontFamily.sFProDisplay,
   fontWeight: FontWeight.w600,
-  fontSize: 16,
+  fontSize: 20,
   height: 1,
   color: ColorName.colorSubtitle.withValues(alpha: 0.6),
 );
@@ -320,7 +320,7 @@ final _left = TextStyle(
 const _caption = TextStyle(
   fontFamily: FontFamily.sFProDisplay,
   fontWeight: FontWeight.w500,
-  fontSize: 14,
+  fontSize: 16,
   height: 1,
   color: ColorName.colorSubtitle,
 );
@@ -328,7 +328,7 @@ const _caption = TextStyle(
 const _value = TextStyle(
   fontFamily: FontFamily.sFProDisplay,
   fontWeight: FontWeight.w700,
-  fontSize: 16,
+  fontSize: 20,
   height: 1,
   letterSpacing: -0.5,
   color: ColorName.colorTitle,
@@ -337,7 +337,7 @@ const _value = TextStyle(
 const _praise = TextStyle(
   fontFamily: FontFamily.sFProDisplay,
   fontWeight: FontWeight.w500,
-  fontSize: 18,
+  fontSize: 20,
   height: 1,
   color: ColorName.colorSubtitle,
 );

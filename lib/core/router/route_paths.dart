@@ -36,6 +36,7 @@ enum RoutePaths {
   fastingQuickWalk('/fasting-quick-walk', 'fastingQuickWalk'),
   fastingBreath('/fasting-breath', 'fastingBreath'),
   fastingFinish('/fasting-finish', 'fastingFinish'),
+  fastingFirstTime('/fasting-first-time', 'fastingFirstTime'),
   plans('/plans', 'plans'),
   planDetail('/plan-detail', 'planDetail'),
   mochiWorld('/mochi-world', 'mochiWorld'),

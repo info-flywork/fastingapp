@@ -2758,4 +2758,174 @@ abstract final class AppTextStyles {
     letterSpacing: 12 * -0.015,
     color: ColorName.colorSubtitle.withValues(alpha: 0.6),
   );
+
+  /// Finish notes field hint — 16 / Medium / 60%
+  static TextStyle get fastingFinishNotesHint => TextStyle(
+    fontFamily: FontFamily.sFProDisplay,
+    fontWeight: FontWeight.w500,
+    fontSize: 16,
+    height: 24 / 16,
+    letterSpacing: 16 * -0.015,
+    color: ColorName.colorSubtitle.withValues(alpha: 0.6),
+  );
+
+  /// Finish continue link — 16 / Semibold / #171717
+  static TextStyle get fastingFinishContinue => const TextStyle(
+    fontFamily: FontFamily.sFProDisplay,
+    fontWeight: FontWeight.w600,
+    fontSize: 16,
+    height: 24 / 16,
+    letterSpacing: 16 * -0.02,
+    color: ColorName.colorTextPrimary,
+  );
+
+  /// First-time total label — 16 / Semibold / −0.5 / #09090B
+  static TextStyle get fastingFirstTimeTotal => const TextStyle(
+    fontFamily: FontFamily.sFProDisplay,
+    fontWeight: FontWeight.w600,
+    fontSize: 16,
+    height: 24 / 16,
+    letterSpacing: -0.5,
+    color: ColorName.colorTitle,
+  );
+
+  /// First-time congrats — 24 / Semibold / −0.5 / #09090B
+  static TextStyle get fastingFirstTimeTitle => const TextStyle(
+    fontFamily: FontFamily.sFProDisplay,
+    fontWeight: FontWeight.w600,
+    fontSize: 24,
+    height: 32 / 24,
+    letterSpacing: -0.5,
+    color: ColorName.colorTitle,
+  );
+
+  /// First-time subtitle — 18 / Medium / −1.5% / secondary 60%
+  static TextStyle get fastingFirstTimeSubtitle => TextStyle(
+    fontFamily: FontFamily.sFProDisplay,
+    fontWeight: FontWeight.w500,
+    fontSize: 18,
+    height: 28 / 18,
+    letterSpacing: 18 * -0.015,
+    color: ColorName.colorSubtitle.withValues(alpha: 0.6),
+  );
+
+  /// Mochi plan title — 16 / Semibold / −0.5 / #09090B
+  static TextStyle get fastingMochiPlanTitle => const TextStyle(
+    fontFamily: FontFamily.sFProDisplay,
+    fontWeight: FontWeight.w600,
+    fontSize: 16,
+    height: 24 / 16,
+    letterSpacing: -0.5,
+    color: ColorName.colorTitle,
+  );
+
+  /// Mochi plan subtitle — 14 / Medium / −1.5% / secondary 60%
+  static TextStyle get fastingMochiPlanSubtitle => TextStyle(
+    fontFamily: FontFamily.sFProDisplay,
+    fontWeight: FontWeight.w500,
+    fontSize: 14,
+    height: 20 / 14,
+    letterSpacing: 14 * -0.015,
+    color: ColorName.colorSubtitle.withValues(alpha: 0.6),
+  );
+
+  /// Mochi plan arc label — 16 / Semibold / secondary 60%
+  static TextStyle get fastingMochiPlanArcLabel => TextStyle(
+    fontFamily: FontFamily.sFProDisplay,
+    fontWeight: FontWeight.w600,
+    fontSize: 16,
+    height: 21.42 / 16.07,
+    letterSpacing: 16.07 * -0.015,
+    color: ColorName.colorSubtitle.withValues(alpha: 0.6),
+  );
+
+  /// Mochi plan duration — 43 / Semibold / −0.67 / #09090B
+  static TextStyle get fastingMochiPlanDuration => const TextStyle(
+    fontFamily: FontFamily.sFProDisplay,
+    fontWeight: FontWeight.w600,
+    fontSize: 40,
+    height: 53.55 / 40,
+    letterSpacing: -0.67,
+    color: ColorName.colorTitle,
+  );
+
+  /// Mochi plan eating chip — 21 / Semibold / −1.5% / #09090B
+  static TextStyle get fastingMochiPlanEating => const TextStyle(
+    fontFamily: FontFamily.sFProDisplay,
+    fontWeight: FontWeight.w600,
+    fontSize: 21.42,
+    height: 32.13 / 21.42,
+    letterSpacing: 21.42 * -0.015,
+    color: ColorName.colorTitle,
+  );
+
+  /// Mochi plan insight — 14 / Medium / −1.5% / secondary 60%
+  static TextStyle get fastingMochiPlanInsight => TextStyle(
+    fontFamily: FontFamily.sFProDisplay,
+    fontWeight: FontWeight.w500,
+    fontSize: 14,
+    height: 20 / 14,
+    letterSpacing: 14 * -0.015,
+    color: ColorName.colorSubtitle.withValues(alpha: 0.6),
+  );
+
+  /// Fast Forecast title — 18 / Semibold / −0.5 / #09090B
+  static TextStyle get fastingForecastTitle => const TextStyle(
+    fontFamily: FontFamily.sFProDisplay,
+    fontWeight: FontWeight.w600,
+    fontSize: 18,
+    height: 24 / 18,
+    letterSpacing: -0.5,
+    color: ColorName.colorTitle,
+  );
+
+  /// Fast Forecast label — 14 / Semibold / −1.5% / secondary 60%
+  static TextStyle get fastingForecastLabel => TextStyle(
+    fontFamily: FontFamily.sFProDisplay,
+    fontWeight: FontWeight.w600,
+    fontSize: 14,
+    height: 20 / 14,
+    letterSpacing: 14 * -0.015,
+    color: ColorName.colorSubtitle.withValues(alpha: 0.6),
+  );
+
+  /// Fast Forecast day value — 18 / Semibold / −0.5 / green
+  static TextStyle get fastingForecastDay => const TextStyle(
+    fontFamily: FontFamily.sFProDisplay,
+    fontWeight: FontWeight.w600,
+    fontSize: 18,
+    height: 24 / 18,
+    letterSpacing: -0.5,
+    color: ColorName.colorMealPositive,
+  );
+
+  /// Fast Forecast confidence — 18 / Semibold / −0.5 / #09090B
+  static TextStyle get fastingForecastConfidence => const TextStyle(
+    fontFamily: FontFamily.sFProDisplay,
+    fontWeight: FontWeight.w600,
+    fontSize: 18,
+    height: 24 / 18,
+    letterSpacing: -0.5,
+    color: ColorName.colorTitle,
+  );
+
+  /// Fast Forecast metric value — 18 / Semibold / −1.5% / black
+  static TextStyle get fastingForecastMetricValue => const TextStyle(
+    fontFamily: FontFamily.sFProDisplay,
+    fontWeight: FontWeight.w600,
+    fontSize: 18,
+    height: 28 / 18,
+    letterSpacing: 18 * -0.015,
+    color: ColorName.colorBlack,
+  );
+
+  /// Fast Forecast metric label — 14 / Semibold / −1.5% / black 65%
+  static TextStyle get fastingForecastMetricLabel => TextStyle(
+    fontFamily: FontFamily.sFProDisplay,
+    fontWeight: FontWeight.w600,
+    fontSize: 14,
+    height: 20 / 14,
+    letterSpacing: 14 * -0.015,
+    color: ColorName.colorBlack.withValues(alpha: 0.65),
+  );
 }

@@ -33,17 +33,17 @@ final class FastingHomeWidgetView extends StatelessWidget {
           color: ColorName.colorWhite,
           child: Stack(
             children: [
-              const Positioned(top: 20, right: 26, child: _Logo()),
+              const Positioned(top: 20, left: 26, child: _Logo()),
               Padding(
-                padding: const EdgeInsets.fromLTRB(26, 52, 26, 18),
+                padding: const EdgeInsets.fromLTRB(26, 56, 26, 18),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Expanded(
                       child: Center(
                         child: SizedBox(
-                          width: 188,
-                          height: 188,
+                          width: 200,
+                          height: 200,
                           child: CustomPaint(
                             painter: _FastingRingPainter(progress: progress),
                             child: Column(
@@ -63,9 +63,9 @@ final class FastingHomeWidgetView extends StatelessWidget {
               ),
               Positioned(
                 right: -8,
-                bottom: -52,
+                bottom: -72,
                 child: Assets.images.widget1.image(
-                  width: 200,
+                  width: 220,
                   fit: BoxFit.contain,
                 ),
               ),
@@ -137,16 +137,16 @@ class _FastingRingPainter extends CustomPainter {
 
 const _logo = TextStyle(
   fontFamily: FontFamily.baloo,
-  fontSize: 24,
-  height: 20 / 24,
-  letterSpacing: 24 * -0.015,
+  fontSize: 28,
+  height: 24 / 28,
+  letterSpacing: 28 * -0.015,
 );
 
 const _time = TextStyle(
   fontFamily: FontFamily.sFProDisplay,
   fontWeight: FontWeight.w600,
-  fontSize: 40,
-  height: 48 / 40,
+  fontSize: 48,
+  height: 56 / 48,
   letterSpacing: -0.5,
   color: ColorName.colorTitle,
 );
@@ -154,7 +154,7 @@ const _time = TextStyle(
 final _left = TextStyle(
   fontFamily: FontFamily.sFProDisplay,
   fontWeight: FontWeight.w500,
-  fontSize: 18,
+  fontSize: 22,
   height: 1,
   color: ColorName.colorSubtitle.withValues(alpha: 0.6),
 );
@@ -162,8 +162,8 @@ final _left = TextStyle(
 const _status = TextStyle(
   fontFamily: FontFamily.sFProDisplay,
   fontWeight: FontWeight.w700,
-  fontSize: 16,
-  height: 24 / 16,
+  fontSize: 20,
+  height: 28 / 20,
   letterSpacing: -0.5,
   color: ColorName.colorTitle,
 );
