@@ -260,6 +260,19 @@
     "hunger_subtitle": "„Emotionaler Hunger“ kann täuschen. Lerne den Unterschied und protokolliere dein Gefühl.",
     "log_hunger": "Hungerlevel speichern"
   },
+  "mochi_world": {
+    "title": "Mochi World",
+    "level": "Level {}",
+    "world_progress": "Weltfortschritt",
+    "forest": "Wald",
+    "lake": "See",
+    "summit": "Gipfel",
+    "garden": "Garten",
+    "forest_progress": "{}/{} Fasten",
+    "lake_progress": "{}/{} Tage",
+    "summit_progress": "{}/{} kg",
+    "garden_progress": "{}/{} Mahlzeiten"
+  },
   "fasting_page": {
     "meal_time": "Essenszeit!",
     "break_title": "Beende dein Fasten",

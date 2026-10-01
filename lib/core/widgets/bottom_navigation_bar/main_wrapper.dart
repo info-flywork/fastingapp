@@ -13,33 +13,39 @@ final class MainWrapper extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isMochiWorldTab = navigationShell.currentIndex == 2;
     final isPlansTab = navigationShell.currentIndex == 3;
 
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: SystemUiOverlayStyle.dark,
       child: Scaffold(
-        backgroundColor:
-            isPlansTab ? ColorName.colorWhite : ColorName.colorProfileBack,
+        backgroundColor: isPlansTab
+            ? ColorName.colorWhite
+            : isMochiWorldTab
+            ? const Color(0xFFB8D9F0)
+            : ColorName.colorProfileBack,
         // Scaffold bottomNavigationBar slot'u bazen 1px saçak bırakır;
         // nav'ı body Stack içinde çiziyoruz.
         body: Stack(
           children: [
             SafeArea(
+              top: !isMochiWorldTab,
               bottom: false,
               child: navigationShell,
             ),
-            Positioned(
-              left: 0,
-              right: 0,
-              bottom: 0,
-              child: AppBottomNav(
-                currentIndex: navigationShell.currentIndex,
-                onTap: (index) => navigationShell.goBranch(
-                  index,
-                  initialLocation: index == navigationShell.currentIndex,
+            if (!isMochiWorldTab)
+              Positioned(
+                left: 0,
+                right: 0,
+                bottom: 0,
+                child: AppBottomNav(
+                  currentIndex: navigationShell.currentIndex,
+                  onTap: (index) => navigationShell.goBranch(
+                    index,
+                    initialLocation: index == navigationShell.currentIndex,
+                  ),
                 ),
               ),
-            ),
           ],
         ),
       ),

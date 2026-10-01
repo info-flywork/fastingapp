@@ -703,9 +703,15 @@ class $AssetsImagesGen {
   AssetGenImage get forkClosest =>
       const AssetGenImage('assets/images/fork_closest.png');
 
+  /// File path: assets/images/forest.png
+  AssetGenImage get forest => const AssetGenImage('assets/images/forest.png');
+
   /// File path: assets/images/fourth_question.png
   AssetGenImage get fourthQuestion =>
       const AssetGenImage('assets/images/fourth_question.png');
+
+  /// File path: assets/images/garden.png
+  AssetGenImage get garden => const AssetGenImage('assets/images/garden.png');
 
   /// File path: assets/images/fried_potato.png
   AssetGenImage get friedPotato =>
@@ -832,6 +838,9 @@ class $AssetsImagesGen {
 
   /// File path: assets/images/leaf.png
   AssetGenImage get leaf => const AssetGenImage('assets/images/leaf.png');
+
+  /// File path: assets/images/lake.png
+  AssetGenImage get lake => const AssetGenImage('assets/images/lake.png');
 
   /// File path: assets/images/lightning.png
   AssetGenImage get lightning =>
@@ -964,6 +973,10 @@ class $AssetsImagesGen {
   /// File path: assets/images/mochi_worl_v2.png
   AssetGenImage get mochiWorlV2 =>
       const AssetGenImage('assets/images/mochi_worl_v2.png');
+
+  /// File path: assets/images/mochi-worlds.png
+  AssetGenImage get mochiWorlds =>
+      const AssetGenImage('assets/images/mochi-worlds.png');
 
   /// File path: assets/images/mood.png
   AssetGenImage get mood => const AssetGenImage('assets/images/mood.png');
@@ -1156,6 +1169,9 @@ class $AssetsImagesGen {
 
   /// File path: assets/images/stonks.png
   AssetGenImage get stonks => const AssetGenImage('assets/images/stonks.png');
+
+  /// File path: assets/images/summit.png
+  AssetGenImage get summit => const AssetGenImage('assets/images/summit.png');
 
   /// File path: assets/images/stressed.png
   AssetGenImage get stressed =>
@@ -1406,7 +1422,9 @@ class $AssetsImagesGen {
     flameCalories,
     fork,
     forkClosest,
+    forest,
     fourthQuestion,
+    garden,
     friedPotato,
     fruit,
     fullCheck,
@@ -1442,6 +1460,7 @@ class $AssetsImagesGen {
     kingSl,
     lawCarb,
     leaf,
+    lake,
     lightning,
     listenYourBody,
     logHunger,
@@ -1477,6 +1496,7 @@ class $AssetsImagesGen {
     mixed,
     mixedv2,
     mochiWorlV2,
+    mochiWorlds,
     mood,
     motivation,
     mushroom,
@@ -1531,6 +1551,7 @@ class $AssetsImagesGen {
     steps,
     stomach,
     stonks,
+    summit,
     stressed,
     streak,
     streakFlame,

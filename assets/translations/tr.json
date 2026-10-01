@@ -260,6 +260,19 @@
     "hunger_subtitle": "“Duygusal açlık” seni yanıltabilir. Farkı öğren, sonra nasıl hissettiğini kaydet.",
     "log_hunger": "Açlık seviyemi kaydet"
   },
+  "mochi_world": {
+    "title": "Mochi World",
+    "level": "Seviye {}",
+    "world_progress": "Dünya İlerlemesi",
+    "forest": "Orman",
+    "lake": "Göl",
+    "summit": "Zirve",
+    "garden": "Bahçe",
+    "forest_progress": "{}/{} oruç",
+    "lake_progress": "{}/{} gün",
+    "summit_progress": "{}/{} kg",
+    "garden_progress": "{}/{} öğün"
+  },
   "fasting_page": {
     "meal_time": "Öğün vakti!",
     "break_title": "Orucunu boz",

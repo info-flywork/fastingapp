@@ -97,12 +97,12 @@ import 'package:fastingapp/presentation/profile/edit_profile/view/edit_profile_v
 import 'package:fastingapp/presentation/profile/edit_profile/view/edit_skipped_foods_view.dart';
 import 'package:fastingapp/presentation/profile/faq/view/faq_view.dart';
 import 'package:fastingapp/presentation/profile/languages/view/languages_view.dart';
+import 'package:fastingapp/presentation/mochi_world/view/mochi_world_view.dart';
 import 'package:fastingapp/presentation/profile/notifications/view/notifications_view.dart';
 import 'package:fastingapp/presentation/profile/view/profile_view.dart';
 import 'package:fastingapp/presentation/protein_tracker/view/protein_tracker_view.dart';
 import 'package:fastingapp/presentation/sleep/view/sleep_view.dart';
 import 'package:fastingapp/presentation/steps/view/steps_view.dart';
-import 'package:fastingapp/presentation/tabs/placeholder_tab_view.dart';
 import 'package:fastingapp/presentation/water/reminder/view/water_reminder_view.dart';
 import 'package:fastingapp/presentation/water/reminder/water_reminder_result.dart';
 import 'package:fastingapp/presentation/water/view/water_view.dart';
@@ -689,8 +689,7 @@ final GoRouter appRouter = GoRouter(
             GoRoute(
               path: RoutePaths.mochiWorld.path,
               name: RoutePaths.mochiWorld.name,
-              builder: (context, state) =>
-                  const PlaceholderTabView(titleKey: 'home.nav_mochi_world'),
+              builder: (context, state) => const MochiWorldView(),
             ),
           ],
         ),
