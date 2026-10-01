@@ -271,7 +271,9 @@
     "forest_progress": "{}/{} fasts",
     "lake_progress": "{}/{} days",
     "summit_progress": "{}/{} kg",
-    "garden_progress": "{}/{} meals"
+    "garden_progress": "{}/{} meals",
+    "explore_hint": "Tap to explore",
+    "immersive_hint": "Tap anywhere to return"
   },
   "fasting_page": {
     "meal_time": "Meal time!",

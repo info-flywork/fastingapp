@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:math' as math;
 import 'dart:ui';
 
@@ -7,11 +8,16 @@ import 'package:fastingapp/core/theme/app_text_styles.dart';
 import 'package:fastingapp/generated/assets.gen.dart';
 import 'package:fastingapp/generated/colors.gen.dart';
 import 'package:fastingapp/generated/fonts.gen.dart';
+import 'package:fastingapp/presentation/mochi_world/model/mochi_world_stage.dart';
+import 'package:fastingapp/presentation/mochi_world/view/widgets/mochi_scene.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 
-/// Mochi World tab — ada, ilerleme ve bölgeler.
+/// Mochi World — yaşayan, yüzen ada. Ortaya dokununca tüm arayüz kaybolur ve
+/// yalnızca animasyonlu arka plan kalır; o sürükleyici modda tüm dünya
+/// durumları sırayla oynatılır.
 final class MochiWorldView extends StatefulWidget {
   const MochiWorldView({super.key});
 
@@ -19,7 +25,24 @@ final class MochiWorldView extends StatefulWidget {
   State<MochiWorldView> createState() => _MochiWorldViewState();
 }
 
-class _MochiWorldViewState extends State<MochiWorldView> {
+class _MochiWorldViewState extends State<MochiWorldView>
+    with SingleTickerProviderStateMixin {
+  /// Tüm animasyonların beslendiği monotonik saat (saniye).
+  final ValueNotifier<double> _clock = ValueNotifier<double>(0);
+  late final Ticker _ticker;
+
+  /// Sürükleyici modda sahneler arası otomatik geçiş zamanlayıcısı.
+  Timer? _cycleTimer;
+  static const _cycleEvery = Duration(seconds: 4);
+
+  bool _immersive = false;
+
+  /// Ekranda gösterilen sahne indisi.
+  int _index = 0;
+
+  /// Kullanıcının dünya ilerleyişi (0..1). TODO: gerçek veriden beslenecek.
+  static const double _worldProgress = 0.12;
+
   static final _zones = <_Zone>[
     _Zone(
       id: _ZoneId.forest,
@@ -59,9 +82,56 @@ class _MochiWorldViewState extends State<MochiWorldView> {
 
   _Zone get _active => _zones.firstWhere((z) => z.id == _selected);
 
+  /// Kullanıcı verisine göre başlangıç sahnesi.
+  int get _dataIndex =>
+      (_worldProgress.clamp(0.0, 1.0) * (kMochiWorldStages.length - 1)).round();
+
+  @override
+  void initState() {
+    super.initState();
+    _index = _dataIndex;
+    _ticker = createTicker((elapsed) {
+      _clock.value = elapsed.inMicroseconds / Duration.microsecondsPerSecond;
+    })..start();
+  }
+
+  @override
+  void dispose() {
+    _cycleTimer?.cancel();
+    _ticker.dispose();
+    _clock.dispose();
+    SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+    super.dispose();
+  }
+
+  void _enterImmersive() {
+    if (_immersive) return;
+    HapticFeedback.lightImpact();
+    SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
+    setState(() => _immersive = true);
+    // Dünya durumlarını sırayla oynat.
+    _cycleTimer = Timer.periodic(_cycleEvery, (_) {
+      if (!mounted) return;
+      setState(() => _index = (_index + 1) % kMochiWorldStages.length);
+    });
+  }
+
+  void _exitImmersive() {
+    if (!_immersive) return;
+    HapticFeedback.selectionClick();
+    _cycleTimer?.cancel();
+    _cycleTimer = null;
+    SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+    setState(() {
+      _immersive = false;
+      _index = _dataIndex;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     final top = MediaQuery.paddingOf(context).top;
+    final stage = kMochiWorldStages[_index];
 
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: SystemUiOverlayStyle.dark,
@@ -70,66 +140,287 @@ class _MochiWorldViewState extends State<MochiWorldView> {
         body: Stack(
           fit: StackFit.expand,
           children: [
-            Positioned.fill(
-              child: Assets.images.mochiWorlds.image(
-                fit: BoxFit.cover,
-                alignment: Alignment.topCenter,
+            // ── Yaşayan arka plan sahnesi (durumlar arası yumuşak geçiş).
+            AnimatedSwitcher(
+              duration: const Duration(milliseconds: 900),
+              switchInCurve: Curves.easeOutCubic,
+              switchOutCurve: Curves.easeInCubic,
+              transitionBuilder: (child, animation) {
+                return FadeTransition(
+                  opacity: animation,
+                  child: ScaleTransition(
+                    scale: Tween<double>(begin: 1.05, end: 1).animate(animation),
+                    child: child,
+                  ),
+                );
+              },
+              child: MochiScene(
+                key: ValueKey(_index),
+                stage: stage,
+                clock: _clock,
               ),
             ),
-            Padding(
-              padding: EdgeInsets.only(
-                top: top + 8,
-                bottom: MediaQuery.paddingOf(context).bottom + 16,
+
+            // ── Tüm ekranı kaplayan dokunma alanı: moda geçiş / çıkış.
+            Positioned.fill(
+              child: GestureDetector(
+                behavior: HitTestBehavior.opaque,
+                onTap: _immersive ? _exitImmersive : _enterImmersive,
               ),
-              child: Column(
-                children: [
-                  const _Header(),
-                  const SizedBox(height: 12),
-                  const Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 16),
-                    child: _WeekCard(),
+            ),
+
+            // ── Arayüz katmanı (sürükleyici modda yumuşakça kaybolur).
+            IgnorePointer(
+              ignoring: _immersive,
+              child: AnimatedOpacity(
+                opacity: _immersive ? 0 : 1,
+                duration: const Duration(milliseconds: 400),
+                curve: Curves.easeOut,
+                child: AnimatedScale(
+                  scale: _immersive ? 0.96 : 1,
+                  duration: const Duration(milliseconds: 400),
+                  curve: Curves.easeOut,
+                  child: _Chrome(
+                    top: top,
+                    bottom: MediaQuery.paddingOf(context).bottom,
+                    zones: _zones,
+                    selected: _selected,
+                    active: _active,
+                    worldProgress: _worldProgress,
+                    onSelect: (id) => setState(() => _selected = id),
+                    onExplore: _enterImmersive,
                   ),
-                  const SizedBox(height: 12),
-                  const Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 16),
-                    child: _WorldProgressCard(progress: 0.12),
+                ),
+              ),
+            ),
+
+            // ── Sürükleyici mod göstergeleri.
+            Positioned.fill(
+              child: IgnorePointer(
+                child: AnimatedOpacity(
+                  opacity: _immersive ? 1 : 0,
+                  duration: const Duration(milliseconds: 500),
+                  child: _ImmersiveHud(
+                    top: top,
+                    bottom: MediaQuery.paddingOf(context).bottom,
+                    index: _index,
+                    count: kMochiWorldStages.length,
                   ),
+                ),
+              ),
+            ),
+
+            // ── Sürükleyici moddan çıkış düğmesi.
+            if (_immersive)
+              Positioned(
+                top: top + 8,
+                right: 12,
+                child: _CircleIconButton(
+                  onTap: _exitImmersive,
+                  child: const Icon(Icons.close_rounded, size: 22),
+                ),
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// ───────────────────────── Sürükleyici mod HUD ─────────────────────────
+
+final class _ImmersiveHud extends StatelessWidget {
+  const _ImmersiveHud({
+    required this.top,
+    required this.bottom,
+    required this.index,
+    required this.count,
+  });
+
+  final double top;
+  final double bottom;
+  final int index;
+  final int count;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: EdgeInsets.only(top: top + 16, bottom: bottom + 24),
+      child: Column(
+        children: [
+          // Üstte nazik ipucu.
+          Center(
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                color: Colors.black.withValues(alpha: 0.22),
+                borderRadius: BorderRadius.circular(999),
+              ),
+              child: Padding(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
+                child: Text(
+                  'mochi_world.immersive_hint'.tr(),
+                  style: _hud,
+                ),
+              ),
+            ),
+          ),
+          const Spacer(),
+          // Altta ilerleme noktaları.
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              for (var i = 0; i < count; i++) ...[
+                if (i > 0) const SizedBox(width: 6),
+                AnimatedContainer(
+                  duration: const Duration(milliseconds: 300),
+                  width: i == index ? 20 : 7,
+                  height: 7,
+                  decoration: BoxDecoration(
+                    color: Colors.white.withValues(alpha: i == index ? 0.95 : 0.5),
+                    borderRadius: BorderRadius.circular(999),
+                    boxShadow: const [
+                      BoxShadow(color: Color(0x33000000), blurRadius: 4),
+                    ],
+                  ),
+                ),
+              ],
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ───────────────────────────── Arayüz ─────────────────────────────
+
+final class _Chrome extends StatelessWidget {
+  const _Chrome({
+    required this.top,
+    required this.bottom,
+    required this.zones,
+    required this.selected,
+    required this.active,
+    required this.worldProgress,
+    required this.onSelect,
+    required this.onExplore,
+  });
+
+  final double top;
+  final double bottom;
+  final List<_Zone> zones;
+  final _ZoneId selected;
+  final _Zone active;
+  final double worldProgress;
+  final ValueChanged<_ZoneId> onSelect;
+  final VoidCallback onExplore;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: EdgeInsets.only(top: top + 8, bottom: bottom + 16),
+      child: Column(
+        children: [
+          const _Header(),
+          const SizedBox(height: 12),
+          const Padding(
+            padding: EdgeInsets.symmetric(horizontal: 16),
+            child: _WeekCard(),
+          ),
+          const SizedBox(height: 12),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: _WorldProgressCard(progress: worldProgress),
+          ),
+          // Orta boşluk: dünyayı keşfetmek için dokunulacak alan.
+          Expanded(
+            child: Center(
+              child: _ExploreHint(onTap: onExplore),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: Row(
+              children: [
+                for (var i = 0; i < zones.length; i++) ...[
+                  if (i > 0) const SizedBox(width: 8),
                   Expanded(
-                    child: Align(
-                      alignment: const Alignment(-0.72, -0.8),
-                      child: Assets.images.mascotHiWithout.image(
-                        height: 155,
-                        fit: BoxFit.contain,
-                      ),
+                    child: _ZoneCard(
+                      zone: zones[i],
+                      selected: zones[i].id == selected,
+                      onTap: () => onSelect(zones[i].id),
                     ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    child: Row(
-                      children: [
-                        for (var i = 0; i < _zones.length; i++) ...[
-                          if (i > 0) const SizedBox(width: 8),
-                          Expanded(
-                            child: _ZoneCard(
-                              zone: _zones[i],
-                              selected: _zones[i].id == _selected,
-                              onTap: () =>
-                                  setState(() => _selected = _zones[i].id),
-                            ),
-                          ),
-                        ],
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    child: _ZoneProgressCard(zone: _active),
                   ),
                 ],
-              ),
+              ],
             ),
-          ],
+          ),
+          const SizedBox(height: 12),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: _ZoneProgressCard(zone: active),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Ortadaki "dünyayı keşfet" ipucu — nazikçe nabız atar.
+final class _ExploreHint extends StatefulWidget {
+  const _ExploreHint({required this.onTap});
+
+  final VoidCallback onTap;
+
+  @override
+  State<_ExploreHint> createState() => _ExploreHintState();
+}
+
+class _ExploreHintState extends State<_ExploreHint>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _c = AnimationController(
+    vsync: this,
+    duration: const Duration(milliseconds: 2200),
+  )..repeat(reverse: true);
+
+  @override
+  void dispose() {
+    _c.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: widget.onTap,
+      behavior: HitTestBehavior.opaque,
+      child: AnimatedBuilder(
+        animation: _c,
+        builder: (context, child) {
+          final v = Curves.easeInOut.transform(_c.value);
+          return Transform.translate(
+            offset: Offset(0, -6 * v),
+            child: Opacity(opacity: 0.75 + 0.25 * v, child: child),
+          );
+        },
+        child: DecoratedBox(
+          decoration: BoxDecoration(
+            color: Colors.black.withValues(alpha: 0.18),
+            borderRadius: BorderRadius.circular(999),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 9),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(Icons.touch_app_rounded,
+                    size: 16, color: Colors.white),
+                const SizedBox(width: 6),
+                Text('mochi_world.explore_hint'.tr(), style: _hud),
+              ],
+            ),
+          ),
         ),
       ),
     );
@@ -167,7 +458,16 @@ final class _Header extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 16),
       child: Row(
         children: [
-          _CircleBackButton(onTap: () => context.go(RoutePaths.home.path)),
+          _CircleIconButton(
+            onTap: () => context.go(RoutePaths.home.path),
+            child: Transform.rotate(
+              angle: math.pi,
+              child: Assets.icons.solarAltArrowUpLineDuotoneRight.svg(
+                width: 20,
+                height: 20,
+              ),
+            ),
+          ),
           Expanded(
             child: Text(
               'mochi_world.title'.tr(),
@@ -191,10 +491,11 @@ final class _Header extends StatelessWidget {
   }
 }
 
-final class _CircleBackButton extends StatelessWidget {
-  const _CircleBackButton({required this.onTap});
+final class _CircleIconButton extends StatelessWidget {
+  const _CircleIconButton({required this.onTap, required this.child});
 
   final VoidCallback onTap;
+  final Widget child;
 
   @override
   Widget build(BuildContext context) {
@@ -208,15 +509,7 @@ final class _CircleBackButton extends StatelessWidget {
         child: SizedBox(
           width: 44,
           height: 44,
-          child: Center(
-            child: Transform.rotate(
-              angle: math.pi,
-              child: Assets.icons.solarAltArrowUpLineDuotoneRight.svg(
-                width: 20,
-                height: 20,
-              ),
-            ),
-          ),
+          child: Center(child: child),
         ),
       ),
     );
@@ -609,6 +902,15 @@ const _zoneTitle = TextStyle(
   height: 20 / 14,
   letterSpacing: -0.5,
   color: ColorName.colorTitle,
+);
+
+const _hud = TextStyle(
+  fontFamily: FontFamily.sFProDisplay,
+  fontWeight: FontWeight.w600,
+  fontSize: 13,
+  height: 1.2,
+  letterSpacing: -0.3,
+  color: Colors.white,
 );
 
 final _zoneMeta = TextStyle(

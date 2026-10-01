@@ -271,7 +271,9 @@
     "forest_progress": "{}/{} oruç",
     "lake_progress": "{}/{} gün",
     "summit_progress": "{}/{} kg",
-    "garden_progress": "{}/{} öğün"
+    "garden_progress": "{}/{} öğün",
+    "explore_hint": "Keşfetmek için dokun",
+    "immersive_hint": "Dönmek için dokun"
   },
   "fasting_page": {
     "meal_time": "Öğün vakti!",
