@@ -10,6 +10,7 @@ import 'package:fastingapp/core/utils/enum/snackbar_type.dart';
 import 'package:fastingapp/core/widgets/app_button.dart';
 import 'package:fastingapp/core/widgets/app_button_decoration.dart';
 import 'package:fastingapp/core/widgets/bottom_navigation_bar/app_bottom_nav.dart';
+import 'package:fastingapp/core/widgets/flip_clock_unit.dart';
 import 'package:fastingapp/core/widgets/weight_progress_bar.dart';
 import 'package:fastingapp/data/model/user/user.dart';
 import 'package:fastingapp/data/model/user/user_progress.dart';

@@ -1,5 +1,6 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:fastingapp/core/di/injection.dart';
+import 'package:fastingapp/core/home_widgets/water_widget_sync.dart';
 import 'package:fastingapp/core/router/app_router.dart';
 import 'package:fastingapp/core/theme/app_theme.dart';
 import 'package:fastingapp/presentation/auth/bloc/auth_bloc.dart';
@@ -28,6 +29,13 @@ final class MyApp extends StatelessWidget {
         localizationsDelegates: context.localizationDelegates,
         supportedLocales: context.supportedLocales,
         locale: context.locale,
+        builder: (context, child) {
+          return WaterWidgetTapHandler(
+            child: WaterWidgetLocaleSync(
+              child: child ?? const SizedBox.shrink(),
+            ),
+          );
+        },
       ),
     );
   }

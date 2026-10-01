@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="water_widget_name">Su</string>
+    <string name="water_widget_description">Günlük su hedefi</string>
+    <string name="water_widget_medium_name">Su kaydı</string>
+    <string name="water_widget_medium_description">Günlük su ve zaman çizelgesi</string>
+    <string name="water_widget_large_name">Su özeti</string>
+    <string name="water_widget_large_description">Haftalık su özeti</string>
+    <string name="fasting_widget_name">Oruç</string>
+    <string name="fasting_widget_description">Kalan oruç süresi</string>
+    <string name="fasting_widget_medium_name">Oruç kartı</string>
+    <string name="fasting_widget_medium_description">Plan ve kalan süre</string>
+    <string name="fasting_widget_detail_name">Oruç özeti</string>
+    <string name="fasting_widget_detail_description">Başlangıç, bitiş ve hedef</string>
+</resources>

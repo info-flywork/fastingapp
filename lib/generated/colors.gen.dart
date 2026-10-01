@@ -108,6 +108,9 @@ abstract final class ColorName {
   /// Color: #E30A17
   static const Color colorErrorRed = Color(0xFFE30A17);
 
+  /// Color: #F8E0B6
+  static const Color colorFastingWidgetChip = Color(0xFFF8E0B6);
+
   /// Color: #F6F6F6
   static const Color colorFlipClock = Color(0xFFF6F6F6);
 

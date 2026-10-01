@@ -56,6 +56,7 @@ import 'package:fastingapp/presentation/chat/view/chat_view.dart';
 import 'package:fastingapp/presentation/fasting/view/eating_window_view.dart';
 import 'package:fastingapp/presentation/fasting/view/fasting_body_status_view.dart';
 import 'package:fastingapp/presentation/fasting/view/fasting_breath_view.dart';
+import 'package:fastingapp/presentation/fasting/view/fasting_finish_view.dart';
 import 'package:fastingapp/presentation/fasting/view/fasting_quick_walk_view.dart';
 import 'package:fastingapp/presentation/fasting/view/fasting_sip_challenge_view.dart';
 import 'package:fastingapp/presentation/fasting/view/fasting_struggle_advice_view.dart';
@@ -472,6 +473,24 @@ final GoRouter appRouter = GoRouter(
         return FastingBreathView(
           bodyKey: bodyKey ?? 'fasting_struggle.craving_body',
         );
+      },
+    ),
+    GoRoute(
+      path: RoutePaths.fastingFinish.path,
+      name: RoutePaths.fastingFinish.name,
+      parentNavigatorKey: rootNavigatorKey,
+      builder: (context, state) {
+        final extra = state.extra;
+        final args = extra is FastingFinishArgs
+            ? extra
+            : FastingFinishArgs(
+                planTitle: '16-8',
+                start: DateTime.now().subtract(
+                  const Duration(hours: 12, minutes: 12, seconds: 39),
+                ),
+                end: DateTime.now(),
+              );
+        return FastingFinishView(args: args);
       },
     ),
     GoRoute(

@@ -5,6 +5,7 @@ import 'dart:ui' show ImageFilter, lerpDouble;
 import 'package:easy_localization/easy_localization.dart';
 import 'package:fastingapp/core/dialogs/app_dialogs.dart';
 import 'package:fastingapp/core/dialogs/widgets/water_edit_dialog.dart';
+import 'package:fastingapp/core/home_widgets/water_widget_sync.dart';
 import 'package:fastingapp/core/router/route_paths.dart';
 import 'package:fastingapp/core/theme/app_text_styles.dart';
 import 'package:fastingapp/generated/assets.gen.dart';
@@ -38,6 +39,7 @@ class _WaterViewState extends State<WaterView>
   void initState() {
     super.initState();
     initWaterControllers();
+    unawaited(bindWaterWidget());
   }
 
   @override

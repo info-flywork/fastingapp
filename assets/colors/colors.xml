@@ -5,6 +5,7 @@
   <color name="color_primary_blue">#89CFF0</color>
   <color name="color_vibrant_blue">#2D9CDB</color>
   <color name="color_error_red">#E30A17</color>
+  <color name="color_fasting_widget_chip">#F8E0B6</color>
   <color name="color_success_green">#00B894</color>
   <color name="color_warning_orange">#F39C12</color>
   <color name="color_black">#111111</color>

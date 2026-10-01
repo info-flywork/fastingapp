@@ -13,6 +13,7 @@ mixin WaterViewMixin on State<WaterView>, TickerProvider {
   late int currentMl;
   late int dailyGoalMl;
   late DateTime selectedDate;
+  final waterSips = <WaterWidgetSip>[];
 
   late AnimationController fillController;
   late AnimationController waveController;
@@ -76,6 +77,48 @@ mixin WaterViewMixin on State<WaterView>, TickerProvider {
       return 'water_page.yesterday'.tr();
     }
     return DateFormat.MMMd(context.locale.toString()).format(selectedDate);
+  }
+
+  Future<void> bindWaterWidget() async {
+    final saved = await WaterWidgetSync.read();
+    if (!mounted) return;
+    if (saved != null) {
+      setState(() {
+        currentMl = saved.currentMl;
+        dailyGoalMl = saved.goalMl;
+        addMl = saved.addMl;
+        waterSips
+          ..clear()
+          ..addAll(saved.sips);
+        reconcileBubbles();
+      });
+      fillController.value = 1;
+      animateFillTo(progress, from: progress);
+    }
+    await pushWaterWidget();
+  }
+
+  Future<void> pushWaterWidget() {
+    return WaterWidgetSync.publish(
+      currentMl: currentMl,
+      goalMl: dailyGoalMl,
+      addMl: addMl,
+      sips: List<WaterWidgetSip>.of(waterSips),
+      goalLabel: 'water_reminder.daily_goal'.tr(context: context),
+      unitLabel: 'water_reminder.unit_ml'.tr(context: context),
+      timelineLabel: 'water_page.timeline'.tr(context: context),
+      addTemplate: 'water_page.widget_add'.tr(context: context),
+      localeName: context.locale.languageCode,
+      largeTitle: 'water_page.widget_title'.tr(context: context),
+      largeSubtitle: 'water_page.widget_subtitle'.tr(context: context),
+      intakeLabel: 'water_page.current_intake'.tr(context: context),
+      percentTemplate: 'water_page.percent_reached'.tr(context: context),
+      weeklyLabel: 'water_page.weekly'.tr(context: context),
+      historyLabel: 'water_page.view_history'.tr(context: context),
+      reminderLabel: 'water_page.next_reminder'.tr(context: context),
+      addWaterLabel: 'water_page.add_water'.tr(context: context),
+      weekdays: 'water_page.weekdays'.tr(context: context),
+    );
   }
 
   Future<void> onWaterDateTapped() async {
@@ -170,6 +213,8 @@ mixin WaterViewMixin on State<WaterView>, TickerProvider {
     final wasGoal = goalReached;
     setState(() {
       currentMl = (currentMl + addMl).clamp(0, 99999);
+      waterSips.add(WaterWidgetSip(ml: addMl, at: DateTime.now()));
+      if (waterSips.length > 3) waterSips.removeAt(0);
       reconcileBubbles();
     });
     if (!wasGoal && goalReached) {
@@ -178,6 +223,7 @@ mixin WaterViewMixin on State<WaterView>, TickerProvider {
       unawaited(celebrationController.forward());
     }
     unawaited(runFillAnimation(progress));
+    unawaited(pushWaterWidget());
   }
 
   void removeWater() {
@@ -185,6 +231,7 @@ mixin WaterViewMixin on State<WaterView>, TickerProvider {
     final wasGoal = goalReached;
     setState(() {
       currentMl = (currentMl - addMl).clamp(0, 99999);
+      if (waterSips.isNotEmpty) waterSips.removeLast();
       reconcileBubbles();
     });
     if (wasGoal && !goalReached) {
@@ -193,6 +240,7 @@ mixin WaterViewMixin on State<WaterView>, TickerProvider {
       resetCelebrationIfNeeded();
     }
     unawaited(runFillAnimation(progress));
+    unawaited(pushWaterWidget());
   }
 
   Future<void> openReminder() async {
@@ -207,6 +255,7 @@ mixin WaterViewMixin on State<WaterView>, TickerProvider {
       reconcileBubbles();
     });
     unawaited(runFillAnimation(progress));
+    unawaited(pushWaterWidget());
   }
 
   Future<void> editDailyGoal() async {
@@ -221,5 +270,6 @@ mixin WaterViewMixin on State<WaterView>, TickerProvider {
     if (result == null || !mounted) return;
     setState(() => dailyGoalMl = result.valueMl);
     unawaited(runFillAnimation(progress));
+    unawaited(pushWaterWidget());
   }
 }

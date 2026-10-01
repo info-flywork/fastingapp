@@ -622,6 +622,10 @@ class $AssetsImagesGen {
   /// File path: assets/images/donut.png
   AssetGenImage get donut => const AssetGenImage('assets/images/donut.png');
 
+  /// File path: assets/images/droplet.png
+  AssetGenImage get droplet =>
+      const AssetGenImage('assets/images/droplet.png');
+
   /// File path: assets/images/dumble.png
   AssetGenImage get dumble => const AssetGenImage('assets/images/dumble.png');
 
@@ -639,6 +643,9 @@ class $AssetsImagesGen {
   /// File path: assets/images/emotional_hunger.png
   AssetGenImage get emotionalHunger =>
       const AssetGenImage('assets/images/emotional_hunger.png');
+
+  /// File path: assets/images/end.png
+  AssetGenImage get end => const AssetGenImage('assets/images/end.png');
 
   /// File path: assets/images/end_fast.png
   AssetGenImage get endFast =>
@@ -760,6 +767,9 @@ class $AssetsImagesGen {
 
   /// File path: assets/images/home.png
   AssetGenImage get home => const AssetGenImage('assets/images/home.png');
+
+  /// File path: assets/images/hours.png
+  AssetGenImage get hours => const AssetGenImage('assets/images/hours.png');
 
   /// File path: assets/images/human.png
   AssetGenImage get human => const AssetGenImage('assets/images/human.png');
@@ -1083,6 +1093,9 @@ class $AssetsImagesGen {
   /// File path: assets/images/star.png
   AssetGenImage get star => const AssetGenImage('assets/images/star.png');
 
+  /// File path: assets/images/start.png
+  AssetGenImage get start => const AssetGenImage('assets/images/start.png');
+
   /// File path: assets/images/steps.png
   AssetGenImage get steps => const AssetGenImage('assets/images/steps.png');
 
@@ -1210,6 +1223,14 @@ class $AssetsImagesGen {
   AssetGenImage get weigher2 =>
       const AssetGenImage('assets/images/weigher_2.png');
 
+  /// File path: assets/images/widget-1.png
+  AssetGenImage get widget1 =>
+      const AssetGenImage('assets/images/widget-1.png');
+
+  /// File path: assets/images/widget-2.png
+  AssetGenImage get widget2 =>
+      const AssetGenImage('assets/images/widget-2.png');
+
   /// File path: assets/images/woman.png
   AssetGenImage get woman => const AssetGenImage('assets/images/woman.png');
 
@@ -1294,11 +1315,13 @@ class $AssetsImagesGen {
     date,
     dizzinies,
     donut,
+    droplet,
     dumble,
     eatWindow,
     eggplant,
     eggs,
     emotionalHunger,
+    end,
     endFast,
     everything,
     fasting,
@@ -1332,6 +1355,7 @@ class $AssetsImagesGen {
     highCarb,
     highCarbv2,
     home,
+    hours,
     human,
     hungry,
     hungerTracker,
@@ -1420,6 +1444,7 @@ class $AssetsImagesGen {
     solarVerifiedCheckBold,
     spicy,
     star,
+    start,
     steps,
     stomach,
     stressed,
@@ -1455,6 +1480,8 @@ class $AssetsImagesGen {
     weakness,
     weigher,
     weigher2,
+    widget1,
+    widget2,
     woman,
     world,
     yellowLightning,

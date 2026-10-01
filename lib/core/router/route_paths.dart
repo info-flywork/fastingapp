@@ -35,6 +35,7 @@ enum RoutePaths {
   fastingSipChallenge('/fasting-sip-challenge', 'fastingSipChallenge'),
   fastingQuickWalk('/fasting-quick-walk', 'fastingQuickWalk'),
   fastingBreath('/fasting-breath', 'fastingBreath'),
+  fastingFinish('/fasting-finish', 'fastingFinish'),
   plans('/plans', 'plans'),
   planDetail('/plan-detail', 'planDetail'),
   mochiWorld('/mochi-world', 'mochiWorld'),

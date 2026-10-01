@@ -2150,7 +2150,7 @@ abstract final class AppTextStyles {
     fontSize: 16,
     height: 24 / 16,
     letterSpacing: -0.5,
-    color: ColorName.colorCaloriesEaten,
+    color: ColorName.colorTitle,
   );
 
   /// Calories hero number — 82 / Semibold / #76AB6E
@@ -2716,6 +2716,46 @@ abstract final class AppTextStyles {
     fontSize: 16,
     height: 20 / 16,
     letterSpacing: 16 * -0.015,
+    color: ColorName.colorSubtitle.withValues(alpha: 0.6),
+  );
+
+  /// Finish fasting row label — 16 / Semibold
+  static TextStyle get fastingFinishRowLabel => const TextStyle(
+    fontFamily: FontFamily.sFProDisplay,
+    fontWeight: FontWeight.w600,
+    fontSize: 16,
+    height: 24 / 16,
+    letterSpacing: 16 * -0.015,
+    color: ColorName.colorTitle,
+  );
+
+  /// Finish fasting time value — 16 / Semibold / positive
+  static TextStyle get fastingFinishRowValue => const TextStyle(
+    fontFamily: FontFamily.sFProDisplay,
+    fontWeight: FontWeight.w600,
+    fontSize: 16,
+    height: 24 / 16,
+    letterSpacing: 16 * -0.015,
+    color: ColorName.colorMealPositive,
+  );
+
+  /// Finish fasting picker muted — 16 / Semibold / 60%
+  static TextStyle get fastingFinishPickerMuted => TextStyle(
+    fontFamily: FontFamily.sFProDisplay,
+    fontWeight: FontWeight.w600,
+    fontSize: 16,
+    height: 24 / 16,
+    letterSpacing: 16 * -0.015,
+    color: ColorName.colorSubtitle.withValues(alpha: 0.6),
+  );
+
+  /// Finish fasting hint — 12 / Medium / 60%
+  static TextStyle get fastingFinishHint => TextStyle(
+    fontFamily: FontFamily.sFProDisplay,
+    fontWeight: FontWeight.w500,
+    fontSize: 12,
+    height: 18 / 12,
+    letterSpacing: 12 * -0.015,
     color: ColorName.colorSubtitle.withValues(alpha: 0.6),
   );
 }
