@@ -1,7 +1,9 @@
 import 'dart:math' as math;
 import 'dart:ui' as ui;
 
+import 'package:fastingapp/presentation/mochi_world/model/mochi_world_layout.dart';
 import 'package:fastingapp/presentation/mochi_world/model/mochi_world_stage.dart';
+import 'package:fastingapp/presentation/mochi_world/view/widgets/mochi_island_element.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
@@ -13,59 +15,125 @@ import 'package:flutter/material.dart';
 /// böylece tüm katmanlar kadrajda senkron akar ve yalnızca bu dinleyici
 /// değiştiğinde yeniden boyanır.
 final class MochiScene extends StatefulWidget {
-  const MochiScene({required this.stage, required this.clock, super.key});
+  const MochiScene({
+    required this.stage,
+    required this.clock,
+    this.placements = const <MochiPlacement>[],
+    super.key,
+  });
 
   final MochiWorldStage stage;
   final ValueListenable<double> clock;
+
+  /// Adada görünen elementler ([mochiCompose] sonucu). Listeye giren
+  /// zıplayarak belirir, çıkan küçülerek kaybolur; kalanlar büyür ya da
+  /// türünü (ör. solgun hâline) değiştirir.
+  final List<MochiPlacement> placements;
 
   @override
   State<MochiScene> createState() => _MochiSceneState();
 }
 
 class _MochiSceneState extends State<MochiScene> {
-  late final List<_Cloud> _cloudsFar;
-  late final List<_Cloud> _cloudsNear;
-  late final List<_Drop> _drops;
-  late final List<_Mote> _motes;
-  late final List<_Bird> _birds;
-  late final List<_Butterfly> _butterflies;
+  late List<_Cloud> _cloudsFar;
+  late List<_Cloud> _cloudsNear;
+  late List<_Drop> _drops;
+  late List<_Mote> _motes;
+  late List<_Bird> _birds;
+  late List<_Butterfly> _butterflies;
+
+  /// Her elementin son bilinen yerleşimi: listeden çıkan element bu yerde
+  /// küçülerek kaybolabilsin.
+  final Map<String, MochiPlacement> _last = {};
 
   @override
   void initState() {
     super.initState();
-    // Görsele göre sabit bir tohum: sahne boyunca parçacık alanı sabit kalsın.
-    final seed = widget.stage.asset.hashCode;
-    final rnd = math.Random(seed);
+    _buildParticles();
+    _remember();
+  }
+
+  @override
+  void didUpdateWidget(covariant MochiScene oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // Ada büyüdükçe (parıltı, kuş, kelebek) parçacık alanını yenile.
+    if (oldWidget.stage != widget.stage) _buildParticles();
+    _remember();
+  }
+
+  void _remember() {
+    for (final p in widget.placements) {
+      _last[p.key] = p;
+    }
+  }
+
+  /// Çizim listesi: görünenler (zemin dokusu önce, arkadan öne) ve
+  /// kaybolmakta olanlar, son yerlerinde.
+  List<({MochiPlacement placement, bool shown, int order})> _drawList() {
+    final shownKeys = {for (final p in widget.placements) p.key};
+    final items = [
+      for (final (i, p) in widget.placements.indexed)
+        (placement: p, shown: true, order: i),
+      for (final p in _last.values)
+        if (!shownKeys.contains(p.key)) (placement: p, shown: false, order: 0),
+    ];
+    items.sort((a, b) {
+      final pa = a.placement;
+      final pb = b.placement;
+      if (pa.decal != pb.decal) return pa.decal ? -1 : 1;
+      return pa.y.compareTo(pb.y);
+    });
+    return items;
+  }
+
+  void _buildParticles() {
+    // Sabit tohumlar; her tür kendi dizisinden beslenir ki birinin sayısı
+    // ya da taban görseli değişince diğerleri yerinden oynamasın.
+    const seed = 0x5EED;
+    math.Random rnd(int salt) => math.Random(seed ^ salt);
     final s = widget.stage;
 
-    _cloudsFar = _makeClouds(rnd, count: 5, near: false);
-    _cloudsNear = _makeClouds(rnd, count: 4, near: true);
+    final clouds = rnd(1);
+    _cloudsFar = _makeClouds(clouds, count: 5, near: false);
+    _cloudsNear = _makeClouds(clouds, count: 4, near: true);
 
     final isWet = s.weather != MochiWeather.sunny;
-    final dropCount = s.weather == MochiWeather.storm
-        ? 150
-        : (isWet ? 90 : 0);
-    _drops = List.generate(dropCount, (_) => _Drop.random(rnd));
+    final dropCount = s.weather == MochiWeather.storm ? 150 : (isWet ? 90 : 0);
+    final drops = rnd(2);
+    _drops = List.generate(dropCount, (_) => _Drop.random(drops));
 
     final moteCount = (s.lushness * 34).round();
-    _motes = List.generate(moteCount, (_) => _Mote.random(rnd));
+    final motes = rnd(3);
+    _motes = List.generate(moteCount, (_) => _Mote.random(motes));
 
+    final birds = rnd(4);
     _birds = s.birds
-        ? List.generate(3, (i) => _Bird.random(rnd, i))
+        ? List.generate(3, (i) => _Bird.random(birds, i))
         : const <_Bird>[];
+    final butterflies = rnd(5);
     _butterflies = s.butterflies
-        ? List.generate(5, (_) => _Butterfly.random(rnd))
+        ? List.generate(5, (_) => _Butterfly.random(butterflies))
         : const <_Butterfly>[];
   }
 
-  List<_Cloud> _makeClouds(math.Random rnd, {required int count, required bool near}) {
-    return List.generate(count, (_) {
+  List<_Cloud> _makeClouds(
+    math.Random rnd, {
+    required int count,
+    required bool near,
+  }) {
+    return List.generate(count, (i) {
       // Bulutlar sağa/sola karışık sürüklensin ("sağa sola gitme" hissi).
       final dir = rnd.nextBool() ? 1.0 : -1.0;
       final baseSpeed = near ? 0.012 : 0.006;
+      // Yalnızca adanın üstündeki ve altındaki gökyüzünde gezinsinler;
+      // adanın önüne geçip elementleri sisli göstermesinler.
+      final below = near && i.isOdd;
+      final fy = below
+          ? 0.78 + rnd.nextDouble() * 0.17
+          : 0.01 + rnd.nextDouble() * (near ? 0.12 : 0.11);
       return _Cloud(
         fx: rnd.nextDouble(),
-        fy: (near ? 0.04 : 0.02) + rnd.nextDouble() * (near ? 0.34 : 0.30),
+        fy: fy,
         scale: (near ? 0.16 : 0.10) + rnd.nextDouble() * (near ? 0.12 : 0.08),
         speed: dir * (baseSpeed + rnd.nextDouble() * baseSpeed),
         opacity: (near ? 0.42 : 0.26) + rnd.nextDouble() * 0.18,
@@ -93,11 +161,14 @@ class _MochiSceneState extends State<MochiScene> {
               asset: s.asset,
               clock: clock,
               lushness: s.lushness,
+              elements: _drawList(),
             ),
           ),
 
           // 2) Uzak bulutlar (yavaş, soluk).
-          CustomPaint(painter: _CloudsPainter(clock: clock, clouds: _cloudsFar)),
+          CustomPaint(
+            painter: _CloudsPainter(clock: clock, clouds: _cloudsFar),
+          ),
 
           // 3) Güneşli sahnelerde yumuşak ışık huzmeleri + sıcak parıltı.
           if (s.weather == MochiWeather.sunny)
@@ -106,7 +177,9 @@ class _MochiSceneState extends State<MochiScene> {
             ),
 
           // 4) Yakın bulutlar (daha hızlı, daha belirgin — paralaks derinlik).
-          CustomPaint(painter: _CloudsPainter(clock: clock, clouds: _cloudsNear)),
+          CustomPaint(
+            painter: _CloudsPainter(clock: clock, clouds: _cloudsNear),
+          ),
 
           // 5) Yağmur / fırtına.
           if (_drops.isNotEmpty)
@@ -120,7 +193,9 @@ class _MochiSceneState extends State<MochiScene> {
 
           // 6) Havada süzülen parıltı tozları (yeşillik arttıkça yoğunlaşır).
           if (_motes.isNotEmpty)
-            CustomPaint(painter: _MotesPainter(clock: clock, motes: _motes)),
+            CustomPaint(
+              painter: _MotesPainter(clock: clock, motes: _motes),
+            ),
 
           // 7) Kelebekler.
           if (_butterflies.isNotEmpty)
@@ -130,14 +205,18 @@ class _MochiSceneState extends State<MochiScene> {
 
           // 8) Kuşlar.
           if (_birds.isNotEmpty)
-            CustomPaint(painter: _BirdPainter(clock: clock, birds: _birds)),
+            CustomPaint(
+              painter: _BirdPainter(clock: clock, birds: _birds),
+            ),
 
           // 9) Gökkuşağı parıltısı (cennet sahnesi).
           if (s.rainbow)
             CustomPaint(painter: _RainbowShimmerPainter(clock: clock)),
 
           // 10) Hava durumuna göre ruh hâli örtüsü + fırtına şimşeği.
-          IgnorePointer(child: _MoodOverlay(stage: s, clock: clock)),
+          IgnorePointer(
+            child: _MoodOverlay(stage: s, clock: clock),
+          ),
         ],
       ),
     );
@@ -164,11 +243,16 @@ final class _FloatingImage extends StatelessWidget {
     required this.asset,
     required this.clock,
     required this.lushness,
+    required this.elements,
   });
 
   final String asset;
   final ValueListenable<double> clock;
   final double lushness;
+  final List<({MochiPlacement placement, bool shown, int order})> elements;
+
+  /// Seviye değişiminde elementlerin büyüme/yer değiştirme süresi.
+  static const _morph = Duration(milliseconds: 900);
 
   @override
   Widget build(BuildContext context) {
@@ -179,6 +263,8 @@ final class _FloatingImage extends StatelessWidget {
         final w = constraints.maxWidth;
         final screenH = constraints.maxHeight;
         final h = w * _kIslandAssetAspect;
+        // Görsel pikselinden ekran noktasına çarpan (941 px genişlik).
+        final scale = w / 941;
 
         // Ada merkezini ekran merkezine oturt.
         final top = screenH / 2 - _kIslandCenter * h;
@@ -188,7 +274,39 @@ final class _FloatingImage extends StatelessWidget {
         final bottomGap = screenH - (top + h) + amp + 8;
         final stretch = math.max(1.0, bottomGap / (_kCleanBottom * h));
 
-        final image = Image.asset(asset, fit: BoxFit.fill);
+        final image = Image.asset(
+          asset,
+          fit: BoxFit.fill,
+          gaplessPlayback: true,
+        );
+
+        // Taban: üst gökyüzü aynası + alt bulut aynası + ada. Sağlık
+        // değişince (yeşil ↔ kuru ↔ çatlak) yumuşakça birbirine geçer.
+        final base = SizedBox(
+          key: ValueKey(asset),
+          width: w,
+          height: screenH,
+          child: Stack(
+            clipBehavior: Clip.none,
+            children: [
+              Positioned(
+                left: 0,
+                width: w,
+                top: top - h,
+                height: h,
+                child: Transform.flip(flipY: true, child: image),
+              ),
+              Positioned(
+                left: 0,
+                width: w,
+                top: top + h,
+                height: h * stretch,
+                child: Transform.flip(flipY: true, child: image),
+              ),
+              Positioned(left: 0, width: w, top: top, height: h, child: image),
+            ],
+          ),
+        );
 
         return ClipRect(
           child: AnimatedBuilder(
@@ -201,30 +319,31 @@ final class _FloatingImage extends StatelessWidget {
             child: Stack(
               clipBehavior: Clip.none,
               children: [
-                // Üst gökyüzü — görselin üst kenarının aynası.
-                Positioned(
-                  left: 0,
-                  width: w,
-                  top: top - h,
-                  height: h,
-                  child: Transform.flip(flipY: true, child: image),
+                Positioned.fill(
+                  child: AnimatedSwitcher(
+                    duration: const Duration(milliseconds: 1200),
+                    switchInCurve: Curves.easeInOut,
+                    switchOutCurve: Curves.easeInOut,
+                    child: base,
+                  ),
                 ),
-                // Alt bulutlar — alt kenarın aynası, hafifçe esnetilmiş.
-                Positioned(
-                  left: 0,
-                  width: w,
-                  top: top + h,
-                  height: h * stretch,
-                  child: Transform.flip(flipY: true, child: image),
-                ),
-                // Ada.
-                Positioned(
-                  left: 0,
-                  width: w,
-                  top: top,
-                  height: h,
-                  child: image,
-                ),
+                // Ada üstündeki elementler (görsel pikseli → ekran).
+                for (final (:placement, :shown, :order) in elements)
+                  AnimatedPositioned(
+                    key: ValueKey(placement.key),
+                    duration: _morph,
+                    curve: Curves.easeInOutCubic,
+                    left: (placement.x - placement.width / 2) * scale,
+                    width: placement.width * scale,
+                    bottom: screenH - (top + placement.y * scale),
+                    child: MochiIslandElement(
+                      placement: placement,
+                      shown: shown,
+                      clock: clock,
+                      // Aynı anda gelenler sırayla zıplasın.
+                      delay: Duration(milliseconds: math.min(order * 55, 700)),
+                    ),
+                  ),
               ],
             ),
           ),
@@ -245,20 +364,20 @@ final class _SkyBackground extends StatelessWidget {
   Widget build(BuildContext context) {
     final colors = switch (weather) {
       MochiWeather.sunny => const [
-          Color(0xFFB8D9F0),
-          Color(0xFFC5E0F2),
-          Color(0xFFB8D9F0),
-        ],
+        Color(0xFFB8D9F0),
+        Color(0xFFC5E0F2),
+        Color(0xFFB8D9F0),
+      ],
       MochiWeather.rainy => const [
-          Color(0xFFBAC4CE),
-          Color(0xFFCAD1D8),
-          Color(0xFFD3D7DB),
-        ],
+        Color(0xFFBAC4CE),
+        Color(0xFFCAD1D8),
+        Color(0xFFD3D7DB),
+      ],
       MochiWeather.storm => const [
-          Color(0xFFA7B0BA),
-          Color(0xFFBFC6CD),
-          Color(0xFFCBCFD3),
-        ],
+        Color(0xFFA7B0BA),
+        Color(0xFFBFC6CD),
+        Color(0xFFCBCFD3),
+      ],
     };
     return DecoratedBox(
       decoration: BoxDecoration(
@@ -294,7 +413,7 @@ final class _Cloud {
 
 final class _CloudsPainter extends CustomPainter {
   _CloudsPainter({required this.clock, required this.clouds})
-      : super(repaint: clock);
+    : super(repaint: clock);
 
   final ValueListenable<double> clock;
   final List<_Cloud> clouds;
@@ -349,13 +468,13 @@ final class _Drop {
   });
 
   factory _Drop.random(math.Random r) => _Drop(
-        fx: r.nextDouble(),
-        fy: r.nextDouble(),
-        len: 0.03 + r.nextDouble() * 0.05,
-        speed: 0.9 + r.nextDouble() * 0.8,
-        thick: 0.8 + r.nextDouble() * 1.4,
-        opacity: 0.18 + r.nextDouble() * 0.28,
-      );
+    fx: r.nextDouble(),
+    fy: r.nextDouble(),
+    len: 0.03 + r.nextDouble() * 0.05,
+    speed: 0.9 + r.nextDouble() * 0.8,
+    thick: 0.8 + r.nextDouble() * 1.4,
+    opacity: 0.18 + r.nextDouble() * 0.28,
+  );
 
   final double fx;
   final double fy;
@@ -367,7 +486,7 @@ final class _Drop {
 
 final class _RainPainter extends CustomPainter {
   _RainPainter({required this.clock, required this.drops, required this.storm})
-      : super(repaint: clock);
+    : super(repaint: clock);
 
   final ValueListenable<double> clock;
   final List<_Drop> drops;
@@ -378,9 +497,7 @@ final class _RainPainter extends CustomPainter {
     final t = clock.value;
     final windDx = storm ? size.width * 0.05 : size.width * 0.025;
     final speedMul = storm ? 1.5 : 1.0;
-    final tint = storm
-        ? const Color(0xFFDCE6F0)
-        : const Color(0xFFEAF2FA);
+    final tint = storm ? const Color(0xFFDCE6F0) : const Color(0xFFEAF2FA);
     for (final d in drops) {
       var fy = (d.fy + d.speed * speedMul * t) % 1.12;
       if (fy < 0) fy += 1.12;
@@ -416,13 +533,13 @@ final class _Mote {
   });
 
   factory _Mote.random(math.Random r) => _Mote(
-        fx: r.nextDouble(),
-        fy: r.nextDouble(),
-        size: 1.0 + r.nextDouble() * 2.4,
-        speed: 0.01 + r.nextDouble() * 0.03,
-        phase: r.nextDouble() * math.pi * 2,
-        warm: r.nextBool(),
-      );
+    fx: r.nextDouble(),
+    fy: r.nextDouble(),
+    size: 1.0 + r.nextDouble() * 2.4,
+    speed: 0.01 + r.nextDouble() * 0.03,
+    phase: r.nextDouble() * math.pi * 2,
+    warm: r.nextBool(),
+  );
 
   final double fx;
   final double fy;
@@ -434,7 +551,7 @@ final class _Mote {
 
 final class _MotesPainter extends CustomPainter {
   _MotesPainter({required this.clock, required this.motes})
-      : super(repaint: clock);
+    : super(repaint: clock);
 
   final ValueListenable<double> clock;
   final List<_Mote> motes;
@@ -467,7 +584,7 @@ final class _MotesPainter extends CustomPainter {
 
 final class _SunRaysPainter extends CustomPainter {
   _SunRaysPainter({required this.clock, required this.lushness})
-      : super(repaint: clock);
+    : super(repaint: clock);
 
   final ValueListenable<double> clock;
   final double lushness;
@@ -526,11 +643,11 @@ final class _Bird {
   });
 
   factory _Bird.random(math.Random r, int i) => _Bird(
-        fy: 0.12 + r.nextDouble() * 0.25,
-        speed: 0.05 + r.nextDouble() * 0.04,
-        scale: 0.6 + r.nextDouble() * 0.6,
-        phase: i * 0.35 + r.nextDouble() * 0.3,
-      );
+    fy: 0.12 + r.nextDouble() * 0.25,
+    speed: 0.05 + r.nextDouble() * 0.04,
+    scale: 0.6 + r.nextDouble() * 0.6,
+    phase: i * 0.35 + r.nextDouble() * 0.3,
+  );
 
   final double fy;
   final double speed;
@@ -540,7 +657,7 @@ final class _Bird {
 
 final class _BirdPainter extends CustomPainter {
   _BirdPainter({required this.clock, required this.birds})
-      : super(repaint: clock);
+    : super(repaint: clock);
 
   final ValueListenable<double> clock;
   final List<_Bird> birds;
@@ -596,14 +713,15 @@ final class _Butterfly {
       Color(0xFFC8A2FF),
       Color(0xFFFFFFFF),
     ];
+    // Adanın çimenli üst yüzeyinin üstünde gezinsinler (ekranın ~%34–58'i).
     return _Butterfly(
-      cx: 0.2 + r.nextDouble() * 0.6,
-      cy: 0.45 + r.nextDouble() * 0.35,
-      rx: 0.08 + r.nextDouble() * 0.14,
-      ry: 0.05 + r.nextDouble() * 0.10,
+      cx: 0.22 + r.nextDouble() * 0.56,
+      cy: 0.38 + r.nextDouble() * 0.16,
+      rx: 0.06 + r.nextDouble() * 0.10,
+      ry: 0.025 + r.nextDouble() * 0.035,
       speed: 0.4 + r.nextDouble() * 0.5,
       phase: r.nextDouble() * math.pi * 2,
-      size: 5.0 + r.nextDouble() * 4.0,
+      size: 4.5 + r.nextDouble() * 2.5,
       color: palette[r.nextInt(palette.length)],
     );
   }
@@ -620,7 +738,7 @@ final class _Butterfly {
 
 final class _ButterflyPainter extends CustomPainter {
   _ButterflyPainter({required this.clock, required this.items})
-      : super(repaint: clock);
+    : super(repaint: clock);
 
   final ValueListenable<double> clock;
   final List<_Butterfly> items;
@@ -633,41 +751,69 @@ final class _ButterflyPainter extends CustomPainter {
       final p = t * b.speed + b.phase;
       final x = (b.cx + b.rx * math.sin(p)) * size.width;
       final y = (b.cy + b.ry * math.sin(p * 2)) * size.height;
-      // Kanat çırpışı: yatay ölçek açılıp kapanır.
-      final flap = (0.25 + 0.75 * math.sin(t * 9 + b.phase).abs());
+      // Kanat çırpışı: kanatlar gövdeden açılıp kapanır; tamamen kapanıp
+      // çizgiye dönüşmesin diye alt sınır var.
+      final flap = 0.45 + 0.55 * math.sin(t * 9 + b.phase).abs();
       final s = b.size;
 
-      final body = Paint()..color = const Color(0xCC3A2E2A);
-      final wing = Paint()..color = b.color.withValues(alpha: 0.92);
+      final body = Paint()..color = const Color(0xE63A2E2A);
+      final upper = Paint()..color = b.color.withValues(alpha: 0.95);
+      final lower = Paint()
+        ..color = Color.lerp(
+          b.color,
+          const Color(0xFF3A2E2A),
+          0.18,
+        )!.withValues(alpha: 0.95);
+      final antenna = Paint()
+        ..color = const Color(0xB33A2E2A)
+        ..strokeWidth = 0.8
+        ..style = PaintingStyle.stroke
+        ..strokeCap = StrokeCap.round;
 
-      canvas.save();
-      canvas.translate(x, y);
-      canvas.rotate(0.3 * math.sin(p));
-      // Sol kanat
-      canvas.save();
-      canvas.scale(flap, 1.0);
-      canvas.drawOval(
-        Rect.fromCenter(center: Offset(-s * 0.7, 0), width: s * 1.3, height: s * 1.7),
-        wing,
-      );
-      canvas.restore();
-      // Sağ kanat
-      canvas.save();
-      canvas.scale(flap, 1.0);
-      canvas.drawOval(
-        Rect.fromCenter(center: Offset(s * 0.7, 0), width: s * 1.3, height: s * 1.7),
-        wing,
-      );
-      canvas.restore();
-      // Gövde
-      canvas.drawRRect(
-        RRect.fromRectAndRadius(
-          Rect.fromCenter(center: Offset.zero, width: s * 0.35, height: s * 1.6),
-          Radius.circular(s * 0.2),
-        ),
-        body,
-      );
-      canvas.restore();
+      canvas
+        ..save()
+        ..translate(x, y)
+        ..rotate(0.25 * math.sin(p));
+      for (final side in const [-1.0, 1.0]) {
+        // Üst kanat: büyük, hafif yukarı eğik.
+        canvas.drawOval(
+          Rect.fromCenter(
+            center: Offset(side * s * 0.75 * flap, -s * 0.35),
+            width: s * 1.5 * flap,
+            height: s * 1.25,
+          ),
+          upper,
+        );
+        // Alt kanat: küçük, biraz koyu.
+        canvas.drawOval(
+          Rect.fromCenter(
+            center: Offset(side * s * 0.55 * flap, s * 0.45),
+            width: s * 1.05 * flap,
+            height: s * 0.9,
+          ),
+          lower,
+        );
+        // Anten.
+        canvas.drawLine(
+          Offset(side * s * 0.08, -s * 0.7),
+          Offset(side * s * 0.4, -s * 1.25),
+          antenna,
+        );
+      }
+      // Gövde.
+      canvas
+        ..drawRRect(
+          RRect.fromRectAndRadius(
+            Rect.fromCenter(
+              center: Offset.zero,
+              width: s * 0.28,
+              height: s * 1.5,
+            ),
+            Radius.circular(s * 0.14),
+          ),
+          body,
+        )
+        ..restore();
     }
   }
 
@@ -738,22 +884,22 @@ final class _MoodOverlay extends StatelessWidget {
   Widget build(BuildContext context) {
     final gradient = switch (stage.weather) {
       MochiWeather.storm => const LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          colors: [Color(0x55424A57), Color(0x00424A57), Color(0x33333A44)],
-          stops: [0, 0.5, 1],
-        ),
+        begin: Alignment.topCenter,
+        end: Alignment.bottomCenter,
+        colors: [Color(0x55424A57), Color(0x00424A57), Color(0x33333A44)],
+        stops: [0, 0.5, 1],
+      ),
       MochiWeather.rainy => const LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          colors: [Color(0x3368788C), Color(0x00000000)],
-        ),
+        begin: Alignment.topCenter,
+        end: Alignment.bottomCenter,
+        colors: [Color(0x3368788C), Color(0x00000000)],
+      ),
       MochiWeather.sunny => const LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [Color(0x1AFFF0C0), Color(0x00000000), Color(0x14FFD9A0)],
-          stops: [0, 0.55, 1],
-        ),
+        begin: Alignment.topLeft,
+        end: Alignment.bottomRight,
+        colors: [Color(0x1AFFF0C0), Color(0x00000000), Color(0x14FFD9A0)],
+        stops: [0, 0.55, 1],
+      ),
     };
 
     final overlay = DecoratedBox(
@@ -772,7 +918,8 @@ final class _MoodOverlay extends StatelessWidget {
         var flash = 0.0;
         if (cycle < 0.18) {
           // Çift çakış, hızlı sönüm.
-          flash = (math.sin(cycle / 0.18 * math.pi * 2).abs()) *
+          flash =
+              (math.sin(cycle / 0.18 * math.pi * 2).abs()) *
               (1 - cycle / 0.18) *
               0.5;
         }

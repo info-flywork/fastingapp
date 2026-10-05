@@ -8,6 +8,7 @@ import 'package:fastingapp/core/theme/app_text_styles.dart';
 import 'package:fastingapp/generated/assets.gen.dart';
 import 'package:fastingapp/generated/colors.gen.dart';
 import 'package:fastingapp/generated/fonts.gen.dart';
+import 'package:fastingapp/presentation/mochi_world/model/mochi_world_layout.dart';
 import 'package:fastingapp/presentation/mochi_world/model/mochi_world_stage.dart';
 import 'package:fastingapp/presentation/mochi_world/view/widgets/mochi_scene.dart';
 import 'package:flutter/material.dart';
@@ -31,17 +32,27 @@ class _MochiWorldViewState extends State<MochiWorldView>
   final ValueNotifier<double> _clock = ValueNotifier<double>(0);
   late final Ticker _ticker;
 
-  /// Sürükleyici modda sahneler arası otomatik geçiş zamanlayıcısı.
-  Timer? _cycleTimer;
-  static const _cycleEvery = Duration(seconds: 4);
+  /// Sürükleyici moddaki durum gösterisinin zamanlayıcısı.
+  Timer? _demoTimer;
+  static const _demoStep = Duration(milliseconds: 4500);
 
   bool _immersive = false;
 
-  /// Ekranda gösterilen sahne indisi.
-  int _index = 0;
+  /// Gösteride ekrandaki durum ([kMochiDemoStates] indisi).
+  int _demoIndex = 0;
+
+  /// Sayfa açılınca ada boş başlar; hemen ardından kullanıcının adası
+  /// elementleri sırayla zıplatarak büyür.
+  bool _opened = false;
+  Timer? _openTimer;
+
+  bool _precached = false;
 
   /// Kullanıcının dünya ilerleyişi (0..1). TODO: gerçek veriden beslenecek.
   static const double _worldProgress = 0.12;
+
+  /// Adanın sağlığı. TODO: aksatılan günlerden (seri kırılması) beslenecek.
+  static const MochiHealth _health = MochiHealth.thriving;
 
   static final _zones = <_Zone>[
     _Zone(
@@ -82,22 +93,68 @@ class _MochiWorldViewState extends State<MochiWorldView>
 
   _Zone get _active => _zones.firstWhere((z) => z.id == _selected);
 
-  /// Kullanıcı verisine göre başlangıç sahnesi.
-  int get _dataIndex =>
-      (_worldProgress.clamp(0.0, 1.0) * (kMochiWorldStages.length - 1)).round();
+  /// Her bölgenin ilerlemesine göre büyüme seviyesi.
+  Map<MochiZone, int> get _dataLevels => {
+    for (final z in _zones)
+      MochiZone.values.byName(z.id.name): mochiZoneLevel(z.ratio),
+  };
+
+  /// Ekrandaki dünya: gösterideyse sıradaki referans durum, değilse
+  /// kullanıcının kendi adası.
+  ({Map<MochiZone, int> levels, MochiHealth health}) get _world {
+    if (_immersive) {
+      final s = kMochiDemoStates[_demoIndex];
+      return (
+        levels: {for (final z in MochiZone.values) z: s.level},
+        health: s.health,
+      );
+    }
+    return (levels: _opened ? _dataLevels : const {}, health: _health);
+  }
+
+  /// Sahnenin ruh hâli: ada büyüdükçe parıltılar artar, çiçeklerle
+  /// kelebekler, ormanla kuşlar gelir; solunca hepsi çekilir.
+  MochiWorldStage _stageFor(int level, MochiHealth health) {
+    final thriving = health == MochiHealth.thriving;
+    return MochiWorldStage(
+      asset: mochiBaseAsset(level, health),
+      weather: mochiWeather(level, health),
+      lushness: thriving ? 0.15 + level * 0.2 : 0.05,
+      butterflies: thriving && level >= 1,
+      birds: thriving && level >= 3,
+      rainbow: thriving && level >= kMochiMaxLevel,
+    );
+  }
 
   @override
   void initState() {
     super.initState();
-    _index = _dataIndex;
     _ticker = createTicker((elapsed) {
       _clock.value = elapsed.inMicroseconds / Duration.microsecondsPerSecond;
     })..start();
+    _openTimer = Timer(const Duration(milliseconds: 350), () {
+      if (mounted) setState(() => _opened = true);
+    });
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_precached) return;
+    _precached = true;
+    // Belirme ve dönüşüm anında görsel çözülürken boş kare kalmasın.
+    for (final kind in MochiElementKind.values) {
+      precacheImage(AssetImage(kind.asset), context);
+    }
+    for (final (:level, :health) in kMochiDemoStates) {
+      precacheImage(AssetImage(mochiBaseAsset(level, health)), context);
+    }
   }
 
   @override
   void dispose() {
-    _cycleTimer?.cancel();
+    _demoTimer?.cancel();
+    _openTimer?.cancel();
     _ticker.dispose();
     _clock.dispose();
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
@@ -108,30 +165,32 @@ class _MochiWorldViewState extends State<MochiWorldView>
     if (_immersive) return;
     HapticFeedback.lightImpact();
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
-    setState(() => _immersive = true);
-    // Dünya durumlarını sırayla oynat.
-    _cycleTimer = Timer.periodic(_cycleEvery, (_) {
+    // Kurak, boş adadan başla; referans sahneleri sırayla dolaş.
+    setState(() {
+      _immersive = true;
+      _demoIndex = 0;
+    });
+    _demoTimer = Timer.periodic(_demoStep, (_) {
       if (!mounted) return;
-      setState(() => _index = (_index + 1) % kMochiWorldStages.length);
+      setState(() => _demoIndex = (_demoIndex + 1) % kMochiDemoStates.length);
     });
   }
 
   void _exitImmersive() {
     if (!_immersive) return;
     HapticFeedback.selectionClick();
-    _cycleTimer?.cancel();
-    _cycleTimer = null;
+    _demoTimer?.cancel();
+    _demoTimer = null;
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
-    setState(() {
-      _immersive = false;
-      _index = _dataIndex;
-    });
+    // Kullanıcının gerçek adasına dön: fazlalar küçülür, eksikler gelir.
+    setState(() => _immersive = false);
   }
 
   @override
   Widget build(BuildContext context) {
     final top = MediaQuery.paddingOf(context).top;
-    final stage = kMochiWorldStages[_index];
+    final world = _world;
+    final level = world.levels.values.fold(0, math.max);
 
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: SystemUiOverlayStyle.dark,
@@ -142,27 +201,12 @@ class _MochiWorldViewState extends State<MochiWorldView>
         body: Stack(
           fit: StackFit.expand,
           children: [
-            // ── Yaşayan arka plan sahnesi (durumlar arası yumuşak geçiş).
-            AnimatedSwitcher(
-              duration: const Duration(milliseconds: 900),
-              switchInCurve: Curves.easeOutCubic,
-              switchOutCurve: Curves.easeInCubic,
-              layoutBuilder: (current, previous) {
-                return Stack(
-                  fit: StackFit.expand,
-                  children: [
-                    ...previous,
-                    if (current != null) Positioned.fill(child: current),
-                  ],
-                );
-              },
-              transitionBuilder: (child, animation) {
-                return FadeTransition(opacity: animation, child: child);
-              },
+            // ── Yaşayan ada: elementler kullanıcı verisiyle şekillenir.
+            Positioned.fill(
               child: MochiScene(
-                key: ValueKey(_index),
-                stage: stage,
+                stage: _stageFor(level, world.health),
                 clock: _clock,
+                placements: mochiCompose(world.levels, world.health),
               ),
             ),
 
@@ -210,8 +254,8 @@ class _MochiWorldViewState extends State<MochiWorldView>
                   child: _ImmersiveHud(
                     top: top,
                     bottom: MediaQuery.paddingOf(context).bottom,
-                    index: _index,
-                    count: kMochiWorldStages.length,
+                    index: _demoIndex,
+                    count: kMochiDemoStates.length,
                   ),
                 ),
               ),

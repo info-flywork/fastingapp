@@ -68,6 +68,7 @@ flutter:
 
   assets:
     - assets/images/
+    - assets/images/mochi/
     - assets/icons/
     - assets/flags/
     - assets/gifs/
