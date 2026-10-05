@@ -81,13 +81,20 @@ class _MochiSceneState extends State<MochiScene> {
     return RepaintBoundary(
       child: Stack(
         fit: StackFit.expand,
+        clipBehavior: Clip.none,
         children: [
           // 0) Gökyüzü zemini — ada tam genişlikte gösterilince üstte/altta
           //    kalan boşluğu havaya uygun temiz bir gradyanla doldurur.
           _SkyBackground(weather: s.weather),
 
-          // 1) Yüzen ada görseli — nazikçe süzülür, sallanır, nefes alır.
-          _FloatingImage(asset: s.asset, clock: clock, lushness: s.lushness),
+          // 1) Yüzen ada — tam genişlik, üst/alt taşma yok; ada optik merkezde.
+          Positioned.fill(
+            child: _FloatingImage(
+              asset: s.asset,
+              clock: clock,
+              lushness: s.lushness,
+            ),
+          ),
 
           // 2) Uzak bulutlar (yavaş, soluk).
           CustomPaint(painter: _CloudsPainter(clock: clock, clouds: _cloudsFar)),
@@ -139,6 +146,19 @@ class _MochiSceneState extends State<MochiScene> {
 
 // ───────────────────────────── Yüzen ada ─────────────────────────────
 
+/// mochi-world-*.png (941×1672) yükseklik / genişlik oranı.
+const _kIslandAssetAspect = 1672 / 941;
+
+/// Adanın (çimen üstü → kaya ucu) dikey merkezi, görsel yüksekliğine oranla.
+const _kIslandCenter = 0.615;
+
+/// Kaya ucunun altında kalan saf bulut/gökyüzü şeridi (≈ satır 1415 → 1672).
+const _kCleanBottom = (1672 - 1415) / 1672;
+
+/// Ada tam genişlikte (sağı/solu kırpılmadan) ve ekranın dikey ortasında
+/// çizilir. Üstte/altta kalan alan, görselin kendi gökyüzü aynalanarak
+/// doldurulur: dikiş satırı birebir aynı piksel olduğundan iz kalmaz ve
+/// ekranın tamamı bulutlu gökyüzü olur.
 final class _FloatingImage extends StatelessWidget {
   const _FloatingImage({
     required this.asset,
@@ -154,30 +174,62 @@ final class _FloatingImage extends StatelessWidget {
   Widget build(BuildContext context) {
     // Daha gür ada daha canlı süzülür.
     final amp = 5.0 + lushness * 7.0;
-    return AnimatedBuilder(
-      animation: clock,
-      builder: (context, child) {
-        final t = clock.value;
-        final dy = math.sin(t * 0.9) * amp;
-        final dx = math.sin(t * 0.4 + 1.3) * (amp * 0.5);
-        final rot = math.sin(t * 0.5) * 0.012;
-        final scale = 1.0 + math.sin(t * 0.7) * 0.006;
-        return Transform(
-          alignment: Alignment.center,
-          transform: Matrix4.identity()
-            ..translate(dx, dy)
-            ..rotateZ(rot)
-            ..scale(scale),
-          child: child,
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final w = constraints.maxWidth;
+        final screenH = constraints.maxHeight;
+        final h = w * _kIslandAssetAspect;
+
+        // Ada merkezini ekran merkezine oturt.
+        final top = screenH / 2 - _kIslandCenter * h;
+
+        // Alttaki boşluğu (süzülme payı dahil) yalnızca temiz bulut şeridi
+        // görünecek kadar esneterek kapat.
+        final bottomGap = screenH - (top + h) + amp + 8;
+        final stretch = math.max(1.0, bottomGap / (_kCleanBottom * h));
+
+        final image = Image.asset(asset, fit: BoxFit.fill);
+
+        return ClipRect(
+          child: AnimatedBuilder(
+            animation: clock,
+            builder: (context, child) {
+              // Yalnızca dikey süzülme: yatay kayma/dönme yanları açardı.
+              final dy = math.sin(clock.value * 0.9) * amp;
+              return Transform.translate(offset: Offset(0, dy), child: child);
+            },
+            child: Stack(
+              clipBehavior: Clip.none,
+              children: [
+                // Üst gökyüzü — görselin üst kenarının aynası.
+                Positioned(
+                  left: 0,
+                  width: w,
+                  top: top - h,
+                  height: h,
+                  child: Transform.flip(flipY: true, child: image),
+                ),
+                // Alt bulutlar — alt kenarın aynası, hafifçe esnetilmiş.
+                Positioned(
+                  left: 0,
+                  width: w,
+                  top: top + h,
+                  height: h * stretch,
+                  child: Transform.flip(flipY: true, child: image),
+                ),
+                // Ada.
+                Positioned(
+                  left: 0,
+                  width: w,
+                  top: top,
+                  height: h,
+                  child: image,
+                ),
+              ],
+            ),
+          ),
         );
       },
-      // Tam genişlik: adanın sağı/solu kesilmesin. Üst/alttaki boşluğu
-      // arkadaki gökyüzü gradyanı doldurur.
-      child: Image.asset(
-        asset,
-        fit: BoxFit.fitWidth,
-        alignment: Alignment.center,
-      ),
     );
   }
 }
@@ -193,9 +245,9 @@ final class _SkyBackground extends StatelessWidget {
   Widget build(BuildContext context) {
     final colors = switch (weather) {
       MochiWeather.sunny => const [
-          Color(0xFFBFDDF4),
-          Color(0xFFDCEAF4),
-          Color(0xFFF3ECE4),
+          Color(0xFFB8D9F0),
+          Color(0xFFC5E0F2),
+          Color(0xFFB8D9F0),
         ],
       MochiWeather.rainy => const [
           Color(0xFFBAC4CE),

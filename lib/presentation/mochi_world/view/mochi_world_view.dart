@@ -137,6 +137,8 @@ class _MochiWorldViewState extends State<MochiWorldView>
       value: SystemUiOverlayStyle.dark,
       child: Scaffold(
         backgroundColor: const Color(0xFFB8D9F0),
+        extendBody: true,
+        resizeToAvoidBottomInset: false,
         body: Stack(
           fit: StackFit.expand,
           children: [
@@ -145,14 +147,17 @@ class _MochiWorldViewState extends State<MochiWorldView>
               duration: const Duration(milliseconds: 900),
               switchInCurve: Curves.easeOutCubic,
               switchOutCurve: Curves.easeInCubic,
-              transitionBuilder: (child, animation) {
-                return FadeTransition(
-                  opacity: animation,
-                  child: ScaleTransition(
-                    scale: Tween<double>(begin: 1.05, end: 1).animate(animation),
-                    child: child,
-                  ),
+              layoutBuilder: (current, previous) {
+                return Stack(
+                  fit: StackFit.expand,
+                  children: [
+                    ...previous,
+                    if (current != null) Positioned.fill(child: current),
+                  ],
                 );
+              },
+              transitionBuilder: (child, animation) {
+                return FadeTransition(opacity: animation, child: child);
               },
               child: MochiScene(
                 key: ValueKey(_index),
@@ -170,25 +175,27 @@ class _MochiWorldViewState extends State<MochiWorldView>
             ),
 
             // ── Arayüz katmanı (sürükleyici modda yumuşakça kaybolur).
-            IgnorePointer(
-              ignoring: _immersive,
-              child: AnimatedOpacity(
-                opacity: _immersive ? 0 : 1,
-                duration: const Duration(milliseconds: 400),
-                curve: Curves.easeOut,
-                child: AnimatedScale(
-                  scale: _immersive ? 0.96 : 1,
+            Positioned.fill(
+              child: IgnorePointer(
+                ignoring: _immersive,
+                child: AnimatedOpacity(
+                  opacity: _immersive ? 0 : 1,
                   duration: const Duration(milliseconds: 400),
                   curve: Curves.easeOut,
-                  child: _Chrome(
-                    top: top,
-                    bottom: MediaQuery.paddingOf(context).bottom,
-                    zones: _zones,
-                    selected: _selected,
-                    active: _active,
-                    worldProgress: _worldProgress,
-                    onSelect: (id) => setState(() => _selected = id),
-                    onExplore: _enterImmersive,
+                  child: AnimatedScale(
+                    scale: _immersive ? 0.96 : 1,
+                    duration: const Duration(milliseconds: 400),
+                    curve: Curves.easeOut,
+                    child: _Chrome(
+                      top: top,
+                      bottom: MediaQuery.paddingOf(context).bottom,
+                      zones: _zones,
+                      selected: _selected,
+                      active: _active,
+                      worldProgress: _worldProgress,
+                      onSelect: (id) => setState(() => _selected = id),
+                      onExplore: _enterImmersive,
+                    ),
                   ),
                 ),
               ),
@@ -256,12 +263,11 @@ final class _ImmersiveHud extends StatelessWidget {
                 borderRadius: BorderRadius.circular(999),
               ),
               child: Padding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
-                child: Text(
-                  'mochi_world.immersive_hint'.tr(),
-                  style: _hud,
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 14,
+                  vertical: 7,
                 ),
+                child: Text('mochi_world.immersive_hint'.tr(), style: _hud),
               ),
             ),
           ),
@@ -277,7 +283,9 @@ final class _ImmersiveHud extends StatelessWidget {
                   width: i == index ? 20 : 7,
                   height: 7,
                   decoration: BoxDecoration(
-                    color: Colors.white.withValues(alpha: i == index ? 0.95 : 0.5),
+                    color: Colors.white.withValues(
+                      alpha: i == index ? 0.95 : 0.5,
+                    ),
                     borderRadius: BorderRadius.circular(999),
                     boxShadow: const [
                       BoxShadow(color: Color(0x33000000), blurRadius: 4),
@@ -318,24 +326,27 @@ final class _Chrome extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final bottomInset = bottom > 0 ? bottom : 6.0;
+
     return Padding(
-      padding: EdgeInsets.only(top: top + 8, bottom: bottom + 16),
+      padding: EdgeInsets.only(top: top, bottom: bottomInset),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           const _Header(),
-          const SizedBox(height: 12),
+          const SizedBox(height: 6),
           const Padding(
             padding: EdgeInsets.symmetric(horizontal: 16),
             child: _WeekCard(),
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 6),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16),
             child: _WorldProgressCard(progress: worldProgress),
           ),
-          // Orta boşluk: dünyayı keşfetmek için dokunulacak alan.
           Expanded(
-            child: Center(
+            child: Align(
+              alignment: const Alignment(0, 0.92),
               child: _ExploreHint(onTap: onExplore),
             ),
           ),
@@ -356,7 +367,7 @@ final class _Chrome extends StatelessWidget {
               ],
             ),
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 6),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16),
             child: _ZoneProgressCard(zone: active),
@@ -414,8 +425,11 @@ class _ExploreHintState extends State<_ExploreHint>
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const Icon(Icons.touch_app_rounded,
-                    size: 16, color: Colors.white),
+                const Icon(
+                  Icons.touch_app_rounded,
+                  size: 16,
+                  color: Colors.white,
+                ),
                 const SizedBox(width: 6),
                 Text('mochi_world.explore_hint'.tr(), style: _hud),
               ],
@@ -506,11 +520,7 @@ final class _CircleIconButton extends StatelessWidget {
       child: InkWell(
         onTap: onTap,
         customBorder: const CircleBorder(),
-        child: SizedBox(
-          width: 44,
-          height: 44,
-          child: Center(child: child),
-        ),
+        child: SizedBox(width: 44, height: 44, child: Center(child: child)),
       ),
     );
   }
