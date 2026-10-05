@@ -82,6 +82,10 @@ class _MochiSceneState extends State<MochiScene> {
       child: Stack(
         fit: StackFit.expand,
         children: [
+          // 0) Gökyüzü zemini — ada tam genişlikte gösterilince üstte/altta
+          //    kalan boşluğu havaya uygun temiz bir gradyanla doldurur.
+          _SkyBackground(weather: s.weather),
+
           // 1) Yüzen ada görseli — nazikçe süzülür, sallanır, nefes alır.
           _FloatingImage(asset: s.asset, clock: clock, lushness: s.lushness),
 
@@ -157,7 +161,7 @@ final class _FloatingImage extends StatelessWidget {
         final dy = math.sin(t * 0.9) * amp;
         final dx = math.sin(t * 0.4 + 1.3) * (amp * 0.5);
         final rot = math.sin(t * 0.5) * 0.012;
-        final scale = 1.08 + math.sin(t * 0.7) * 0.006;
+        final scale = 1.0 + math.sin(t * 0.7) * 0.006;
         return Transform(
           alignment: Alignment.center,
           transform: Matrix4.identity()
@@ -167,8 +171,53 @@ final class _FloatingImage extends StatelessWidget {
           child: child,
         );
       },
-      // Hafif aşırı ölçek: süzülme sırasında kenar boşluğu görünmesin.
-      child: Image.asset(asset, fit: BoxFit.cover, alignment: Alignment.center),
+      // Tam genişlik: adanın sağı/solu kesilmesin. Üst/alttaki boşluğu
+      // arkadaki gökyüzü gradyanı doldurur.
+      child: Image.asset(
+        asset,
+        fit: BoxFit.fitWidth,
+        alignment: Alignment.center,
+      ),
+    );
+  }
+}
+
+/// Havaya göre dikey gökyüzü gradyanı — görselin kenarlarındaki boşlukları
+/// (ada tam genişlikte gösterildiğinde) doğal biçimde doldurur.
+final class _SkyBackground extends StatelessWidget {
+  const _SkyBackground({required this.weather});
+
+  final MochiWeather weather;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = switch (weather) {
+      MochiWeather.sunny => const [
+          Color(0xFFBFDDF4),
+          Color(0xFFDCEAF4),
+          Color(0xFFF3ECE4),
+        ],
+      MochiWeather.rainy => const [
+          Color(0xFFBAC4CE),
+          Color(0xFFCAD1D8),
+          Color(0xFFD3D7DB),
+        ],
+      MochiWeather.storm => const [
+          Color(0xFFA7B0BA),
+          Color(0xFFBFC6CD),
+          Color(0xFFCBCFD3),
+        ],
+    };
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: colors,
+          stops: const [0.0, 0.5, 1.0],
+        ),
+      ),
+      child: const SizedBox.expand(),
     );
   }
 }

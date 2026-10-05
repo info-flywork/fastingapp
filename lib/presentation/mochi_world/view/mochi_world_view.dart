@@ -602,45 +602,73 @@ final class _WeekDay extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final isFuture = date.isAfter(today);
+
     final dayColor = selected
         ? ColorName.colorBrandStrong
         : ColorName.colorSubtitle.withValues(alpha: 0.5);
+    final dateColor = selected || !isFuture
+        ? ColorName.colorTitle
+        : ColorName.colorSubtitle.withValues(alpha: 0.45);
 
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Text(
-          dayKey.tr(),
-          style: AppTextStyles.homeWeekDay.copyWith(color: dayColor),
-        ),
-        const SizedBox(height: 2),
-        Text(
-          '${date.day}',
-          style: AppTextStyles.homeWeekDate.copyWith(
-            color: selected
-                ? ColorName.colorTitle
-                : ColorName.colorSubtitle.withValues(alpha: 0.45),
-            fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
+        Container(
+          width: 40,
+          padding: const EdgeInsets.symmetric(vertical: 6),
+          decoration: BoxDecoration(
+            color: selected ? ColorName.colorWhite : Colors.transparent,
+            borderRadius: BorderRadius.circular(8),
+            boxShadow: selected
+                ? [
+                    BoxShadow(
+                      color: ColorName.colorBlack.withValues(alpha: 0.05),
+                      blurRadius: 4,
+                      offset: const Offset(0, 1),
+                    ),
+                  ]
+                : null,
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                dayKey.tr(),
+                maxLines: 1,
+                softWrap: false,
+                overflow: TextOverflow.clip,
+                style: AppTextStyles.homeWeekDay.copyWith(color: dayColor),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                '${date.day}',
+                style: AppTextStyles.homeWeekDate.copyWith(color: dateColor),
+              ),
+            ],
           ),
         ),
-        const SizedBox(height: 4),
-        DecoratedBox(
+        const SizedBox(height: 6),
+        Container(
+          width: 40,
+          height: 18,
+          alignment: Alignment.center,
+          padding: const EdgeInsets.symmetric(horizontal: 5),
           decoration: BoxDecoration(
             color: hours != null
                 ? ColorName.colorMealPositive
-                : ColorName.colorWhite.withValues(alpha: 0.7),
-            borderRadius: BorderRadius.circular(999),
+                : ColorName.colorBlack.withValues(alpha: 0.05),
+            borderRadius: BorderRadius.circular(6),
           ),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-            child: Text(
-              hours != null ? 'home.week_hours'.tr(args: ['$hours']) : '—',
-              style: _chip.copyWith(
-                color: hours != null
-                    ? ColorName.colorWhite
-                    : ColorName.colorSubtitle.withValues(alpha: 0.45),
-              ),
-            ),
+          child: Text(
+            hours != null ? 'home.week_hours'.tr(args: ['$hours']) : '-',
+            style: hours != null
+                ? AppTextStyles.homeWeekHours
+                : AppTextStyles.homeWeekHours.copyWith(
+                    color: ColorName.colorSubtitle.withValues(alpha: 0.6),
+                  ),
           ),
         ),
       ],
@@ -886,13 +914,6 @@ const _sectionTitle = TextStyle(
   height: 20 / 14,
   letterSpacing: -0.5,
   color: ColorName.colorTitle,
-);
-
-const _chip = TextStyle(
-  fontFamily: FontFamily.sFProDisplay,
-  fontWeight: FontWeight.w600,
-  fontSize: 11,
-  height: 1,
 );
 
 const _zoneTitle = TextStyle(
