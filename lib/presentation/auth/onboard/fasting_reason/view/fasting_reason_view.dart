@@ -1,10 +1,11 @@
 import 'package:easy_localization/easy_localization.dart';
+import 'package:fastingapp/core/remote_images/app_image.dart';
 import 'package:fastingapp/core/router/route_paths.dart';
 import 'package:fastingapp/core/theme/app_text_styles.dart';
 import 'package:fastingapp/core/widgets/app_button.dart';
 import 'package:fastingapp/core/widgets/onboarding/onboarding_option_card.dart';
 import 'package:fastingapp/core/widgets/onboarding/onboarding_progress_header.dart';
-import 'package:fastingapp/generated/assets.gen.dart';
+import 'package:fastingapp/generated/app_images.g.dart';
 import 'package:fastingapp/generated/colors.gen.dart';
 import 'package:fastingapp/presentation/auth/onboard/fasting_reason/bloc/fasting_reason_bloc.dart';
 import 'package:flutter/material.dart';
@@ -72,12 +73,12 @@ class _FastingReasonViewState extends State<FastingReasonView>
                   if (state.targetDate == null) {
                     return const SizedBox.shrink();
                   }
-                        return Padding(
-                          padding: const EdgeInsets.only(top: 80),
-                          child: FastingReasonTargetDate(
-                            dateLabel: formatTargetDate(state.targetDate!),
-                          ),
-                        );
+                  return Padding(
+                    padding: const EdgeInsets.only(top: 80),
+                    child: FastingReasonTargetDate(
+                      dateLabel: formatTargetDate(state.targetDate!),
+                    ),
+                  );
                 },
               ),
               BlocBuilder<FastingReasonBloc, FastingReasonState>(

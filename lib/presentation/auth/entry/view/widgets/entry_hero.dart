@@ -42,7 +42,7 @@ final class EntryHero extends StatelessWidget {
                 // Mascot
                 Positioned(
                   bottom: height * 0.06,
-                  child: Image.asset(
+                  child: appImage(
                     Assets.gifs.mascotWav.path,
                     width: mascotSize,
                     height: mascotSize,
@@ -56,8 +56,8 @@ final class EntryHero extends StatelessWidget {
                   right: width * 0.02,
                   child: Transform.rotate(
                     angle: 10 * math.pi / 180,
-                    child: Image.asset(
-                      Assets.images.dumble.path,
+                    child: appImage(
+                      AppImages.dumble.path,
                       width: width * 0.28,
                       fit: BoxFit.contain,
                     ),
@@ -69,8 +69,8 @@ final class EntryHero extends StatelessWidget {
                   left: 0,
                   child: Transform.rotate(
                     angle: -28 * math.pi / 180,
-                    child: Image.asset(
-                      Assets.images.weigher.path,
+                    child: appImage(
+                      AppImages.weigher.path,
                       width: width * 0.36,
                       fit: BoxFit.contain,
                     ),

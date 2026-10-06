@@ -4,6 +4,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:fastingapp/core/di/injection.dart';
 import 'package:fastingapp/core/router/route_paths.dart';
 import 'package:fastingapp/core/theme/app_text_styles.dart';
+import 'package:fastingapp/generated/app_images.g.dart';
 import 'package:fastingapp/generated/assets.gen.dart';
 import 'package:fastingapp/generated/colors.gen.dart';
 import 'package:fastingapp/presentation/chat/bloc/chat_session_cubit.dart';
@@ -78,10 +79,7 @@ class _ChatViewState extends State<ChatView> {
         ),
         const SizedBox(height: 8),
         Center(
-          child: Assets.images.mascotChat.image(
-            height: 220,
-            fit: BoxFit.contain,
-          ),
+          child: AppImages.mascotChat.image(height: 220, fit: BoxFit.contain),
         ),
         const SizedBox(height: 24),
         for (final key in _suggestions) ...[
@@ -247,7 +245,7 @@ final class _MessageBubble extends StatelessWidget {
         children: [
           if (!isUser) ...[
             ClipOval(
-              child: Assets.images.mascotChatPp.image(
+              child: AppImages.mascotChatPp.image(
                 width: 32,
                 height: 32,
                 fit: BoxFit.cover,
@@ -283,7 +281,7 @@ final class _TypingAvatar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ClipOval(
-      child: Assets.images.mascotChatPp.image(
+      child: AppImages.mascotChatPp.image(
         width: 32,
         height: 32,
         fit: BoxFit.cover,
@@ -398,7 +396,7 @@ final class _ChatHeader extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 ClipOval(
-                  child: Assets.images.mascotChatPp.image(
+                  child: AppImages.mascotChatPp.image(
                     width: 40,
                     height: 40,
                     fit: BoxFit.cover,

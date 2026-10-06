@@ -3,6 +3,7 @@ import 'dart:math' as math;
 import 'package:easy_localization/easy_localization.dart';
 import 'package:fastingapp/core/router/route_paths.dart';
 import 'package:fastingapp/core/theme/app_text_styles.dart';
+import 'package:fastingapp/generated/app_images.g.dart';
 import 'package:fastingapp/generated/assets.gen.dart';
 import 'package:fastingapp/generated/colors.gen.dart';
 import 'package:fastingapp/presentation/hunger_tracker/hunger_result_type.dart';
@@ -75,7 +76,7 @@ class _HungerHistoryLogViewState extends State<HungerHistoryLogView>
                           child: Align(
                             alignment: Alignment.topCenter,
                             heightFactor: 0.75,
-                            child: Assets.images.hungerLog.image(
+                            child: AppImages.hungerLog.image(
                               width: 190,
                               height: 190,
                               fit: BoxFit.contain,
@@ -249,7 +250,7 @@ final class _CheckInsBanner extends StatelessWidget {
       ),
       child: Row(
         children: [
-          Assets.images.tree.image(width: 40, height: 40, fit: BoxFit.contain),
+          AppImages.tree.image(width: 40, height: 40, fit: BoxFit.contain),
           const SizedBox(width: 10),
           Expanded(
             child: Column(
@@ -385,7 +386,7 @@ final class _EntryCard extends StatelessWidget {
       ),
       child: Row(
         children: [
-          (isPhysical ? Assets.images.leaf : Assets.images.hearttt).image(
+          (isPhysical ? AppImages.leaf : AppImages.hearttt).image(
             width: 48,
             height: 48,
             fit: BoxFit.contain,

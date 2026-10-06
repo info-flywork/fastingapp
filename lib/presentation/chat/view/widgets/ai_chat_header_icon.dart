@@ -1,6 +1,7 @@
 import 'dart:math' as math;
 
 import 'package:fastingapp/core/di/injection.dart';
+import 'package:fastingapp/generated/app_images.g.dart';
 import 'package:fastingapp/generated/assets.gen.dart';
 import 'package:fastingapp/generated/colors.gen.dart';
 import 'package:fastingapp/presentation/chat/bloc/chat_session_cubit.dart';
@@ -46,7 +47,7 @@ final class AiChatHeaderIcon extends StatelessWidget {
                       ],
                     ),
                     clipBehavior: Clip.antiAlias,
-                    child: Assets.images.aiChat.image(
+                    child: AppImages.aiChat.image(
                       width: 40,
                       height: 40,
                       fit: BoxFit.cover,
@@ -54,11 +55,7 @@ final class AiChatHeaderIcon extends StatelessWidget {
                   ),
                 ),
                 if (state.isAiTyping)
-                  const Positioned(
-                    right: -2,
-                    top: -4,
-                    child: _TypingBadge(),
-                  ),
+                  const Positioned(right: -2, top: -4, child: _TypingBadge()),
               ],
             ),
           ),

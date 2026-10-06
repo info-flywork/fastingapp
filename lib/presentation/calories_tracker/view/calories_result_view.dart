@@ -2,9 +2,11 @@ import 'dart:io';
 import 'dart:math' as math;
 
 import 'package:easy_localization/easy_localization.dart';
+import 'package:fastingapp/core/remote_images/app_image.dart';
 import 'package:fastingapp/core/theme/app_text_styles.dart';
 import 'package:fastingapp/core/widgets/app_button.dart';
 import 'package:fastingapp/core/widgets/app_button_decoration.dart';
+import 'package:fastingapp/generated/app_images.g.dart';
 import 'package:fastingapp/generated/assets.gen.dart';
 import 'package:fastingapp/generated/colors.gen.dart';
 import 'package:flutter/material.dart';
@@ -123,58 +125,58 @@ final class _ResultSheet extends StatelessWidget {
           child: Padding(
             padding: EdgeInsets.fromLTRB(16, 8, 16, bottomInset),
             child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                'calories_result.meal_title'.tr(),
-                textAlign: TextAlign.center,
-                style: AppTextStyles.caloriesResultTitle,
-              ),
-              const SizedBox(height: 10),
-              Text(
-                'calories_result.kcal'.tr(),
-                textAlign: TextAlign.center,
-                style: AppTextStyles.caloriesResultKcal,
-              ),
-              const SizedBox(height: 10),
-              const Row(
-                children: [
-                  Expanded(
-                    child: _MacroCard(
-                      icon: _MacroIcon.protein,
-                      labelKey: 'calories_result.protein',
-                      valueKey: 'calories_result.protein_value',
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  'calories_result.meal_title'.tr(),
+                  textAlign: TextAlign.center,
+                  style: AppTextStyles.caloriesResultTitle,
+                ),
+                const SizedBox(height: 10),
+                Text(
+                  'calories_result.kcal'.tr(),
+                  textAlign: TextAlign.center,
+                  style: AppTextStyles.caloriesResultKcal,
+                ),
+                const SizedBox(height: 10),
+                const Row(
+                  children: [
+                    Expanded(
+                      child: _MacroCard(
+                        icon: _MacroIcon.protein,
+                        labelKey: 'calories_result.protein',
+                        valueKey: 'calories_result.protein_value',
+                      ),
                     ),
-                  ),
-                  SizedBox(width: 10),
-                  Expanded(
-                    child: _MacroCard(
-                      icon: _MacroIcon.carbs,
-                      labelKey: 'calories_result.carbs',
-                      valueKey: 'calories_result.carbs_value',
+                    SizedBox(width: 10),
+                    Expanded(
+                      child: _MacroCard(
+                        icon: _MacroIcon.carbs,
+                        labelKey: 'calories_result.carbs',
+                        valueKey: 'calories_result.carbs_value',
+                      ),
                     ),
-                  ),
-                  SizedBox(width: 10),
-                  Expanded(
-                    child: _MacroCard(
-                      icon: _MacroIcon.fats,
-                      labelKey: 'calories_result.fats',
-                      valueKey: 'calories_result.fats_value',
+                    SizedBox(width: 10),
+                    Expanded(
+                      child: _MacroCard(
+                        icon: _MacroIcon.fats,
+                        labelKey: 'calories_result.fats',
+                        valueKey: 'calories_result.fats_value',
+                      ),
                     ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 10),
-              AppButton(
-                label: 'calories_result.recalculate'.tr(),
-                onPressed: () => context.pop(),
-                decoration: AppButtonDecoration.hungerResult(),
-              ),
-            ],
+                  ],
+                ),
+                const SizedBox(height: 10),
+                AppButton(
+                  label: 'calories_result.recalculate'.tr(),
+                  onPressed: () => context.pop(),
+                  decoration: AppButtonDecoration.hungerResult(),
+                ),
+              ],
+            ),
           ),
         ),
-      ),
-    ],
+      ],
     );
   }
 }
@@ -226,9 +228,9 @@ final class _MacroCard extends StatelessWidget {
     );
   }
 
-  AssetGenImage get _icon => switch (icon) {
-    _MacroIcon.protein => Assets.images.protein,
-    _MacroIcon.carbs => Assets.images.carbs,
-    _MacroIcon.fats => Assets.images.olive,
+  AppImageAsset get _icon => switch (icon) {
+    _MacroIcon.protein => AppImages.protein,
+    _MacroIcon.carbs => AppImages.carbs,
+    _MacroIcon.fats => AppImages.olive,
   };
 }

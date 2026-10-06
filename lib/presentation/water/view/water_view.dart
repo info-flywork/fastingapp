@@ -8,6 +8,7 @@ import 'package:fastingapp/core/dialogs/widgets/water_edit_dialog.dart';
 import 'package:fastingapp/core/home_widgets/water_widget_sync.dart';
 import 'package:fastingapp/core/router/route_paths.dart';
 import 'package:fastingapp/core/theme/app_text_styles.dart';
+import 'package:fastingapp/generated/app_images.g.dart';
 import 'package:fastingapp/generated/assets.gen.dart';
 import 'package:fastingapp/generated/colors.gen.dart';
 import 'package:fastingapp/presentation/water/reminder/water_reminder_result.dart';
@@ -446,7 +447,7 @@ final class _WaterStats extends StatelessWidget {
                             ColorName.colorWaterAction,
                             BlendMode.srcIn,
                           ),
-                          child: Assets.images.solarPenBold.image(
+                          child: AppImages.solarPenBold.image(
                             width: 24,
                             height: 24,
                           ),
@@ -458,7 +459,7 @@ final class _WaterStats extends StatelessWidget {
                     ignoring: t < 0.99,
                     child: Opacity(
                       opacity: t,
-                      child: Assets.images.solarVerifiedCheckBold.image(
+                      child: AppImages.solarVerifiedCheckBold.image(
                         width: 24,
                         height: 24,
                       ),
@@ -536,12 +537,12 @@ final class _WaterMascot extends StatelessWidget {
         lerpDouble(screenWidth * 0.72, screenWidth * 0.04, entryT) ?? 0;
 
     final image = showDiver
-        ? Assets.images.mascotDiver.image(
+        ? AppImages.mascotDiver.image(
             height: height,
             fit: BoxFit.contain,
             filterQuality: FilterQuality.high,
           )
-        : Assets.images.mascotHiWater.image(
+        : AppImages.mascotHiWater.image(
             height: height,
             fit: BoxFit.contain,
             filterQuality: FilterQuality.high,

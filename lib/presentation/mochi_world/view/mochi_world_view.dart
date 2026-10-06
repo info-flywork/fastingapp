@@ -3,8 +3,10 @@ import 'dart:math' as math;
 import 'dart:ui';
 
 import 'package:easy_localization/easy_localization.dart';
+import 'package:fastingapp/core/remote_images/app_image.dart';
 import 'package:fastingapp/core/router/route_paths.dart';
 import 'package:fastingapp/core/theme/app_text_styles.dart';
+import 'package:fastingapp/generated/app_images.g.dart';
 import 'package:fastingapp/generated/assets.gen.dart';
 import 'package:fastingapp/generated/colors.gen.dart';
 import 'package:fastingapp/generated/fonts.gen.dart';
@@ -55,33 +57,33 @@ class _MochiWorldViewState extends State<MochiWorldView>
   static const MochiHealth _health = MochiHealth.thriving;
 
   static final _zones = <_Zone>[
-    _Zone(
+    const _Zone(
       id: _ZoneId.forest,
-      icon: Assets.images.forest,
+      icon: AppImages.forest,
       titleKey: 'mochi_world.forest',
       progressKey: 'mochi_world.forest_progress',
       current: 3,
       goal: 10,
     ),
-    _Zone(
+    const _Zone(
       id: _ZoneId.lake,
-      icon: Assets.images.lake,
+      icon: AppImages.lake,
       titleKey: 'mochi_world.lake',
       progressKey: 'mochi_world.lake_progress',
       current: 2,
       goal: 7,
     ),
-    _Zone(
+    const _Zone(
       id: _ZoneId.summit,
-      icon: Assets.images.summit,
+      icon: AppImages.summit,
       titleKey: 'mochi_world.summit',
       progressKey: 'mochi_world.summit_progress',
       current: 0,
       goal: 2,
     ),
-    _Zone(
+    const _Zone(
       id: _ZoneId.garden,
-      icon: Assets.images.garden,
+      icon: AppImages.garden,
       titleKey: 'mochi_world.garden',
       progressKey: 'mochi_world.garden_progress',
       current: 3,
@@ -144,10 +146,10 @@ class _MochiWorldViewState extends State<MochiWorldView>
     _precached = true;
     // Belirme ve dönüşüm anında görsel çözülürken boş kare kalmasın.
     for (final kind in MochiElementKind.values) {
-      precacheImage(AssetImage(kind.asset), context);
+      precacheImage(appImageProvider(kind.asset), context);
     }
     for (final (:level, :health) in kMochiDemoStates) {
-      precacheImage(AssetImage(mochiBaseAsset(level, health)), context);
+      precacheImage(appImageProvider(mochiBaseAsset(level, health)), context);
     }
   }
 
@@ -499,7 +501,7 @@ final class _Zone {
   });
 
   final _ZoneId id;
-  final AssetGenImage icon;
+  final AppImageAsset icon;
   final String titleKey;
   final String progressKey;
   final int current;

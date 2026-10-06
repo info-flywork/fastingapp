@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:fastingapp/generated/assets.gen.dart';
+import 'package:fastingapp/generated/app_images.g.dart';
 import 'package:fastingapp/presentation/home_widgets/fasting_detail_widget_view.dart';
 import 'package:fastingapp/presentation/home_widgets/fasting_home_widget_view.dart';
 import 'package:fastingapp/presentation/home_widgets/fasting_medium_widget_view.dart';
@@ -358,14 +358,14 @@ abstract final class FastingWidgetSync {
   static Future<void> _warmAssets() {
     const config = ImageConfiguration(devicePixelRatio: 2);
     return Future.wait([
-      _warm(Assets.images.widget1.provider(), config),
-      _warm(Assets.images.widget2.provider(), config),
-      _warm(Assets.images.start.provider(), config),
-      _warm(Assets.images.end.provider(), config),
-      _warm(Assets.images.hours.provider(), config),
-      _warm(Assets.images.mascotWidget.provider(), config),
-      _warm(Assets.images.mascotOmh.provider(), config),
-      _warm(Assets.images.tree.provider(), config),
+      _warm(AppImages.widget1.provider(), config),
+      _warm(AppImages.widget2.provider(), config),
+      _warm(AppImages.start.provider(), config),
+      _warm(AppImages.end.provider(), config),
+      _warm(AppImages.hours.provider(), config),
+      _warm(AppImages.mascotWidget.provider(), config),
+      _warm(AppImages.mascotOmh.provider(), config),
+      _warm(AppImages.tree.provider(), config),
     ]);
   }
 

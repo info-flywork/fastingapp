@@ -1,10 +1,12 @@
 import 'dart:math' as math;
 
 import 'package:easy_localization/easy_localization.dart';
+import 'package:fastingapp/core/remote_images/app_image.dart';
 import 'package:fastingapp/core/router/route_paths.dart';
 import 'package:fastingapp/core/theme/app_text_styles.dart';
 import 'package:fastingapp/core/widgets/app_button.dart';
 import 'package:fastingapp/core/widgets/app_button_decoration.dart';
+import 'package:fastingapp/generated/app_images.g.dart';
 import 'package:fastingapp/generated/assets.gen.dart';
 import 'package:fastingapp/generated/colors.gen.dart';
 import 'package:fastingapp/presentation/hunger_tracker/hunger_symptom.dart';
@@ -89,7 +91,7 @@ class _HungerThirdQuestionViewState extends State<HungerThirdQuestionView>
                       right: -28,
                       top: -8,
                       child: IgnorePointer(
-                        child: Assets.images.thirdSQuestion.image(
+                        child: AppImages.thirdSQuestion.image(
                           width: 245,
                           height: 245,
                           fit: BoxFit.contain,
@@ -157,36 +159,36 @@ final class _BodyNoticeGrid extends StatelessWidget {
   final Set<HungerBodyNotice> selected;
   final ValueChanged<HungerBodyNotice> onToggle;
 
-  static final _items = <(HungerBodyNotice, String, AssetGenImage)>[
+  static final _items = <(HungerBodyNotice, String, AppImageAsset)>[
     (
       HungerBodyNotice.stomachGrowling,
       'hunger_third_question_page.opt_stomach',
-      Assets.images.stomach,
+      AppImages.stomach,
     ),
     (
       HungerBodyNotice.lowEnergy,
       'hunger_third_question_page.opt_low_energy',
-      Assets.images.yellowLightning,
+      AppImages.yellowLightning,
     ),
     (
       HungerBodyNotice.dizziness,
       'hunger_third_question_page.opt_dizziness',
-      Assets.images.dizzinies,
+      AppImages.dizzinies,
     ),
     (
       HungerBodyNotice.nausea,
       'hunger_third_question_page.opt_nausea',
-      Assets.images.nausea,
+      AppImages.nausea,
     ),
     (
       HungerBodyNotice.fatigue,
       'hunger_third_question_page.opt_fatigue',
-      Assets.images.fatigue,
+      AppImages.fatigue,
     ),
     (
       HungerBodyNotice.nothingPhysical,
       'hunger_third_question_page.opt_nothing',
-      Assets.images.nothingPhysical,
+      AppImages.nothingPhysical,
     ),
   ];
 
@@ -225,7 +227,7 @@ final class _BodyNoticeChip extends StatelessWidget {
   });
 
   final String labelKey;
-  final AssetGenImage icon;
+  final AppImageAsset icon;
   final bool selected;
   final VoidCallback onTap;
 

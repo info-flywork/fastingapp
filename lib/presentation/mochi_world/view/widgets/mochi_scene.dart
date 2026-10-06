@@ -1,6 +1,7 @@
 import 'dart:math' as math;
 import 'dart:ui' as ui;
 
+import 'package:fastingapp/core/remote_images/app_image.dart';
 import 'package:fastingapp/presentation/mochi_world/model/mochi_world_layout.dart';
 import 'package:fastingapp/presentation/mochi_world/model/mochi_world_stage.dart';
 import 'package:fastingapp/presentation/mochi_world/view/widgets/mochi_island_element.dart';
@@ -274,11 +275,7 @@ final class _FloatingImage extends StatelessWidget {
         final bottomGap = screenH - (top + h) + amp + 8;
         final stretch = math.max(1.0, bottomGap / (_kCleanBottom * h));
 
-        final image = Image.asset(
-          asset,
-          fit: BoxFit.fill,
-          gaplessPlayback: true,
-        );
+        final image = appImage(asset, fit: BoxFit.fill, gaplessPlayback: true);
 
         // Taban: üst gökyüzü aynası + alt bulut aynası + ada. Sağlık
         // değişince (yeşil ↔ kuru ↔ çatlak) yumuşakça birbirine geçer.

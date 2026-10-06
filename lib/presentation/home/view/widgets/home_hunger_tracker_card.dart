@@ -22,7 +22,7 @@ final class HomeHungerTrackerCard extends StatelessWidget {
           children: [
             Row(
               children: [
-                Assets.images.brain.image(
+                AppImages.brain.image(
                   width: 28,
                   height: 28,
                   fit: BoxFit.contain,
@@ -104,14 +104,14 @@ final class _HungerStrip extends StatelessWidget {
             bottom: (_stripH - 40) / 2 + 5,
             child: Row(
               children: [
-                Assets.images.burgerv2.image(
+                AppImages.burgerv2.image(
                   width: 40,
                   height: 40,
                   fit: BoxFit.contain,
                 ),
                 const SizedBox(width: 10),
                 _EmojiTile(
-                  child: Assets.images.unhappyv2.image(
+                  child: AppImages.unhappyv2.image(
                     width: 40,
                     height: 40,
                     fit: BoxFit.contain,
@@ -119,14 +119,14 @@ final class _HungerStrip extends StatelessWidget {
                 ),
                 const Spacer(),
                 _EmojiTile(
-                  child: Assets.images.tonguev2.image(
+                  child: AppImages.tonguev2.image(
                     width: 40,
                     height: 40,
                     fit: BoxFit.contain,
                   ),
                 ),
                 const SizedBox(width: 10),
-                Assets.images.broccv2.image(
+                AppImages.broccv2.image(
                   width: 40,
                   height: 40,
                   fit: BoxFit.contain,
@@ -137,7 +137,7 @@ final class _HungerStrip extends StatelessWidget {
           Positioned(
             bottom: -_clipLegsBy,
             child: IgnorePointer(
-              child: Assets.images.hungerTracker.image(
+              child: AppImages.hungerTracker.image(
                 width: _mascotSize,
                 height: _mascotSize,
                 fit: BoxFit.contain,

@@ -14,19 +14,19 @@ mixin WeightHistoryViewMixin on State<WeightHistoryView> {
       history: OnboardingWeightHistory.manyTimes,
       titleKey: 'onboarding.weight_history_many_title',
       subtitleKey: 'onboarding.weight_history_many_subtitle',
-      iconPath: Assets.images.weigher.path,
+      iconPath: AppImages.weigher.path,
     ),
     (
       history: OnboardingWeightHistory.onceOrTwice,
       titleKey: 'onboarding.weight_history_once_title',
       subtitleKey: 'onboarding.weight_history_once_subtitle',
-      iconPath: Assets.images.a1Or2.path,
+      iconPath: AppImages.a1Or2.path,
     ),
     (
       history: OnboardingWeightHistory.firstTime,
       titleKey: 'onboarding.weight_history_first_title',
       subtitleKey: 'onboarding.weight_history_first_subtitle',
-      iconPath: Assets.images.plant.path,
+      iconPath: AppImages.plant.path,
     ),
   ];
 

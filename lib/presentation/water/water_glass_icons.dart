@@ -1,14 +1,15 @@
-import 'package:fastingapp/generated/assets.gen.dart';
+import 'package:fastingapp/core/remote_images/app_image.dart';
+import 'package:fastingapp/generated/app_images.g.dart';
 
 /// Bardak boyutu (ml) → reminder / water view ortak ikonları.
 abstract final class WaterGlassIcons {
-  static AssetGenImage forMl(int ml) {
+  static AppImageAsset forMl(int ml) {
     return switch (ml) {
-      50 => Assets.images.waterGlass50,
-      100 => Assets.images.waterGlass100,
-      200 => Assets.images.waterGlass200,
-      300 => Assets.images.waterBottle300,
-      500 => Assets.images.waterBottle500,
+      50 => AppImages.waterGlass50,
+      100 => AppImages.waterGlass100,
+      200 => AppImages.waterGlass200,
+      300 => AppImages.waterBottle300,
+      500 => AppImages.waterBottle500,
       _ => forMl(_nearestPreset(ml)),
     };
   }

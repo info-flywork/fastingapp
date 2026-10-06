@@ -6,10 +6,7 @@ import 'package:flutter/material.dart';
 
 /// Weight projection ekranındaki eğri grafik.
 final class WeightProjectionChart extends StatelessWidget {
-  const WeightProjectionChart({
-    required this.progress,
-    super.key,
-  });
+  const WeightProjectionChart({required this.progress, super.key});
 
   /// 0–1 çizim ilerlemesi.
   final double progress;
@@ -84,22 +81,14 @@ final class _WeightProjectionChartPainter extends CustomPainter {
 
     if (progress > 0.98) {
       canvas
-        ..drawCircle(
-          end,
-          _endRadius,
-          Paint()..color = ColorName.colorWhite,
-        )
+        ..drawCircle(end, _endRadius, Paint()..color = ColorName.colorWhite)
         ..drawCircle(
           end,
           _endRadius - _endBorder,
           Paint()..color = ColorName.colorWeightProjectionGoalDot,
         );
     } else if (progress > 0.05) {
-      canvas.drawCircle(
-        tip,
-        6,
-        Paint()..color = ColorName.colorWhite,
-      );
+      canvas.drawCircle(tip, 6, Paint()..color = ColorName.colorWhite);
     }
   }
 

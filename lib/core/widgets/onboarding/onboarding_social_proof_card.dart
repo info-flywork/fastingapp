@@ -31,10 +31,7 @@ final class OnboardingSocialProofCard extends StatelessWidget {
             Text(metric, style: AppTextStyles.socialProofMetric),
             const SizedBox(width: 10),
             Flexible(
-              child: Text(
-                caption,
-                style: AppTextStyles.socialProofCaption,
-              ),
+              child: Text(caption, style: AppTextStyles.socialProofCaption),
             ),
           ],
         ),

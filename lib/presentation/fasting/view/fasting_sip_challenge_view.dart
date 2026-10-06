@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:easy_localization/easy_localization.dart';
 import 'package:fastingapp/core/theme/app_text_styles.dart';
+import 'package:fastingapp/generated/app_images.g.dart';
 import 'package:fastingapp/generated/assets.gen.dart';
 import 'package:fastingapp/generated/colors.gen.dart';
 import 'package:fastingapp/presentation/fasting/view/fasting_feeling_better_view.dart';
@@ -64,7 +65,7 @@ class _FastingSipChallengeViewState extends State<FastingSipChallengeView> {
             Center(
               child: Transform.scale(
                 scale: 1.2,
-                child: Assets.images.mascotWater.image(
+                child: AppImages.mascotWater.image(
                   width: 200,
                   height: 200,
                   fit: BoxFit.contain,
@@ -155,11 +156,7 @@ final class _SipCard extends StatelessWidget {
         padding: const EdgeInsets.all(12),
         child: Column(
           children: [
-            Assets.images.blob.image(
-              width: 48,
-              height: 48,
-              fit: BoxFit.contain,
-            ),
+            AppImages.blob.image(width: 48, height: 48, fit: BoxFit.contain),
             const SizedBox(height: 10),
             Text(
               'fasting_struggle.sip_title'.tr(),
@@ -269,7 +266,7 @@ class _SipButtonState extends State<_SipButton>
               height: 72,
               child: Padding(
                 padding: const EdgeInsets.all(12),
-                child: Assets.images.blob.image(fit: BoxFit.contain),
+                child: AppImages.blob.image(fit: BoxFit.contain),
               ),
             ),
           ),

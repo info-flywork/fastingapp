@@ -3,7 +3,7 @@ import 'package:fastingapp/core/theme/app_text_styles.dart';
 import 'package:fastingapp/core/widgets/app_button.dart';
 import 'package:fastingapp/core/widgets/app_button_decoration.dart';
 import 'package:fastingapp/core/widgets/onboarding/onboarding_time_picker.dart';
-import 'package:fastingapp/generated/assets.gen.dart';
+import 'package:fastingapp/generated/app_images.g.dart';
 import 'package:fastingapp/generated/colors.gen.dart';
 import 'package:flutter/material.dart';
 
@@ -134,7 +134,7 @@ class _FastingTimeDialogState extends State<FastingTimeDialog> {
               clipBehavior: Clip.antiAlias,
               child: Padding(
                 padding: const EdgeInsets.all(10),
-                child: Assets.images.clock.image(fit: BoxFit.contain),
+                child: AppImages.clock.image(fit: BoxFit.contain),
               ),
             ),
           ),

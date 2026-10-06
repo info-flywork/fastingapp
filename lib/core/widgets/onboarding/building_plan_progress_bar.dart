@@ -1,4 +1,5 @@
-import 'package:fastingapp/generated/assets.gen.dart';
+import 'package:fastingapp/core/remote_images/app_image.dart';
+import 'package:fastingapp/generated/app_images.g.dart';
 import 'package:fastingapp/generated/colors.gen.dart';
 import 'package:flutter/material.dart';
 
@@ -25,7 +26,10 @@ final class BuildingPlanProgressBar extends StatelessWidget {
         final tip = width * t;
         final fillWidth = tip.clamp(0.0, width);
         // Head merkezi progress ucunda; %100’de sağ kenara oturur (yarı taşabilir).
-        final headLeft = (tip - _headSize / 2).clamp(0.0, width - _headSize / 2);
+        final headLeft = (tip - _headSize / 2).clamp(
+          0.0,
+          width - _headSize / 2,
+        );
         final stackHeight = showHead ? _headSize : _trackHeight;
         final trackTop = (stackHeight - _trackHeight) / 2;
 
@@ -70,8 +74,8 @@ final class BuildingPlanProgressBar extends StatelessWidget {
                 Positioned(
                   left: headLeft,
                   top: 0,
-                  child: Image.asset(
-                    Assets.images.progressHead.path,
+                  child: appImage(
+                    AppImages.progressHead.path,
                     width: _headSize,
                     height: _headSize,
                     fit: BoxFit.contain,

@@ -1,7 +1,9 @@
 import 'dart:math' as math;
 
 import 'package:easy_localization/easy_localization.dart';
+import 'package:fastingapp/core/remote_images/app_image.dart';
 import 'package:fastingapp/core/theme/app_text_styles.dart';
+import 'package:fastingapp/generated/app_images.g.dart';
 import 'package:fastingapp/generated/assets.gen.dart';
 import 'package:fastingapp/generated/colors.gen.dart';
 import 'package:flutter/material.dart';
@@ -126,14 +128,14 @@ final class _Stepper extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final images = [
-      Assets.images.breakYourFast,
-      Assets.images.keepNoruish,
-      Assets.images.nextFast,
+      AppImages.breakYourFast,
+      AppImages.keepNoruish,
+      AppImages.nextFast,
     ];
     final dimmed = [
-      Assets.images.breakYourFast,
-      Assets.images.darkNorusih,
-      Assets.images.darkFast,
+      AppImages.breakYourFast,
+      AppImages.darkNorusih,
+      AppImages.darkFast,
     ];
     // Renkli haller 80. Başlamamış fotoğraflar biraz daha küçük.
     const dimmedScales = [1.0, 0.78, 0.78];
@@ -230,8 +232,8 @@ final class _StepCircle extends StatelessWidget {
     required this.onTap,
   });
 
-  final AssetGenImage colorImage;
-  final AssetGenImage dimmedImage;
+  final AppImageAsset colorImage;
+  final AppImageAsset dimmedImage;
   final bool reached;
   final bool partial;
   final bool ringOnLeft;

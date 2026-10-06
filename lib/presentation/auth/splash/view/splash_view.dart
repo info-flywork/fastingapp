@@ -1,4 +1,4 @@
-import 'package:fastingapp/generated/assets.gen.dart';
+import 'package:fastingapp/generated/app_images.g.dart';
 import 'package:fastingapp/presentation/auth/splash/bloc/splash_bloc.dart';
 import 'package:fastingapp/presentation/auth/splash/bloc/splash_state.dart';
 import 'package:flutter/material.dart';

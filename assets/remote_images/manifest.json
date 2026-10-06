@@ -1,0 +1,1207 @@
+{
+  "version": 1,
+  "baseUrl": "https://mochifast.b-cdn.net/app-images/",
+  "images": {
+    "assets/images/1-or-2.png": {
+      "file": "b0f5c45683d24b83c822.webp",
+      "bytes": 26232,
+      "sha256": "b0f5c45683d24b83c8228f06f3e3586922d0180b938f711ed6539ab0676b1454"
+    },
+    "assets/images/1.png": {
+      "file": "31d89c745b5110255257.webp",
+      "bytes": 72916,
+      "sha256": "31d89c745b51102552579e19cb41b59baae1e42e27f50508c3f65064b8ef9b4b"
+    },
+    "assets/images/1_light.png": {
+      "file": "70e3fc0f5599522fc007.webp",
+      "bytes": 86302,
+      "sha256": "70e3fc0f5599522fc0073ebd4cdb07824c8033567eade584f3af637f3786d54f"
+    },
+    "assets/images/2.png": {
+      "file": "0faf155fee45d6c4a028.webp",
+      "bytes": 74458,
+      "sha256": "0faf155fee45d6c4a028a6e6f4bcd981f87232c0d2771903759873d1249fa49b"
+    },
+    "assets/images/2_light.png": {
+      "file": "99e515293cb2d75260f8.webp",
+      "bytes": 102730,
+      "sha256": "99e515293cb2d75260f83fdf502c55cf29dd75fed0528849dcff6eae83292898"
+    },
+    "assets/images/3.png": {
+      "file": "e5be389349d2b3e6a87b.webp",
+      "bytes": 70896,
+      "sha256": "e5be389349d2b3e6a87b9960c12f064b720a051e666414ff68a56da5f85d0981"
+    },
+    "assets/images/3_light.png": {
+      "file": "1864becefa58158a1a41.webp",
+      "bytes": 93008,
+      "sha256": "1864becefa58158a1a41f499c05e59b0dd35b3d2c778d1a12116facd038922c2"
+    },
+    "assets/images/4.png": {
+      "file": "89d1ef2dab610359e16c.webp",
+      "bytes": 76954,
+      "sha256": "89d1ef2dab610359e16c5e862a659c428418bf608600a86fd90001f11f111baa"
+    },
+    "assets/images/4_light.png": {
+      "file": "3e6dd9a13e9debc564e7.webp",
+      "bytes": 98816,
+      "sha256": "3e6dd9a13e9debc564e712b439017dbebe3bbb92826b0d9203b70740fbfdf7d8"
+    },
+    "assets/images/5.png": {
+      "file": "28da2f63565a14a36454.webp",
+      "bytes": 44766,
+      "sha256": "28da2f63565a14a364542a74a778da2598fb89417fa4e7527f4676491a5a9430"
+    },
+    "assets/images/5_light.png": {
+      "file": "ab45fb88ab30b175beeb.webp",
+      "bytes": 87374,
+      "sha256": "ab45fb88ab30b175beebe86a7a49b826bf8e2046d2766f3cdc1afdc8000479af"
+    },
+    "assets/images/6.png": {
+      "file": "00dc29646bc5648377d2.webp",
+      "bytes": 58716,
+      "sha256": "00dc29646bc5648377d289fc79ae904c84d35faa15c56494010e8d243fef3c3d"
+    },
+    "assets/images/6_light.png": {
+      "file": "7c3c62c2fd502ad0aba5.webp",
+      "bytes": 133594,
+      "sha256": "7c3c62c2fd502ad0aba504ae5f251c121b22fc2b121dbcda16f96a0c4f79704c"
+    },
+    "assets/images/7.png": {
+      "file": "a603c6db32854a92ef06.webp",
+      "bytes": 66652,
+      "sha256": "a603c6db32854a92ef06c0f8f5860d16c3c91eac37195051bae07075ea6762d7"
+    },
+    "assets/images/7_light.png": {
+      "file": "a1827a2363f5c7e8c8db.webp",
+      "bytes": 134584,
+      "sha256": "a1827a2363f5c7e8c8dbaa628f06490e0216d71696cc8081b49f0609d2331dec"
+    },
+    "assets/images/8.png": {
+      "file": "ccb4d86f547f237be820.webp",
+      "bytes": 68950,
+      "sha256": "ccb4d86f547f237be8202eec81e15e829306e8dabee24a5bf76ddfa8db068726"
+    },
+    "assets/images/8_light.png": {
+      "file": "17b625677c014af85e48.webp",
+      "bytes": 82002,
+      "sha256": "17b625677c014af85e489f02e3b0c0e2bc5c24973df373faa426eda59f0bf375"
+    },
+    "assets/images/9.png": {
+      "file": "12a091ea8d9976073a81.webp",
+      "bytes": 62806,
+      "sha256": "12a091ea8d9976073a813f1fef6a9dc71114ff9e9d432564731d7d031d359b9e"
+    },
+    "assets/images/9_light.png": {
+      "file": "37f8b7d1a7a60da9c52f.webp",
+      "bytes": 69354,
+      "sha256": "37f8b7d1a7a60da9c52f78f77b988f5079899d75de553eb034bf6bf1f070c930"
+    },
+    "assets/images/App Icon.png": {
+      "bundled": "assets/images/bundled/app_icon.webp"
+    },
+    "assets/images/ai_chat.png": {
+      "file": "cfc57f784e7fab61677e.webp",
+      "bytes": 51022,
+      "sha256": "cfc57f784e7fab61677ebdf94db8ced1edf37ddb6815a0ee09af3af4e4b2135b"
+    },
+    "assets/images/almost_any.png": {
+      "file": "5653fdc221641ed09d9a.webp",
+      "bytes": 5724,
+      "sha256": "5653fdc221641ed09d9a846b6a38836a3663fc2fde6a511d380f4b505f9a4f50"
+    },
+    "assets/images/analytics.png": {
+      "file": "8ba9bf09c16f5b4b3593.webp",
+      "bytes": 89638,
+      "sha256": "8ba9bf09c16f5b4b3593a978299ea7e9ddb53da5a72e8901cf856058acdf1dcb"
+    },
+    "assets/images/apple.png": {
+      "file": "82d6300b14b10c59b205.webp",
+      "bytes": 1320,
+      "sha256": "82d6300b14b10c59b20535bae9ddadf26511ac4b4a83de6547f720bc7e5601db"
+    },
+    "assets/images/avacado.png": {
+      "file": "da0faf07121f26a40bfd.webp",
+      "bytes": 15648,
+      "sha256": "da0faf07121f26a40bfdfb80f6b51fc7156ebeaccceb4c3fab10f30745120bd1"
+    },
+    "assets/images/beans.png": {
+      "file": "20a639da52bb519f8148.webp",
+      "bytes": 12382,
+      "sha256": "20a639da52bb519f81488271c5b6239e5e8a4aff47b3308f1ca60b70136571e1"
+    },
+    "assets/images/bedtime.png": {
+      "file": "290200799394bc45ca2e.webp",
+      "bytes": 63156,
+      "sha256": "290200799394bc45ca2e3e850a0bd48b90acde8482329dcc0eb36979484cde89"
+    },
+    "assets/images/blob.png": {
+      "file": "736d798257aaf312ee6c.webp",
+      "bytes": 5364,
+      "sha256": "736d798257aaf312ee6c2c8a507ae4eb30dc3b08f226023eec0a709b18fbb8b8"
+    },
+    "assets/images/blood.png": {
+      "file": "abb9c4d1335c96c8b846.webp",
+      "bytes": 39986,
+      "sha256": "abb9c4d1335c96c8b8469049b514a815df21073100ead9a71334068e5f2228e5"
+    },
+    "assets/images/blue_book.png": {
+      "file": "116265542f1f0fed3d08.webp",
+      "bytes": 4112,
+      "sha256": "116265542f1f0fed3d08062743ac98d2ec4c3702514a557cfbd67aaff64f730f"
+    },
+    "assets/images/blue_clock.png": {
+      "file": "0bba6e98adaab3e3ed57.webp",
+      "bytes": 6290,
+      "sha256": "0bba6e98adaab3e3ed579953fba08a7c8545a53cf7b80feccdd4782d73c89172"
+    },
+    "assets/images/blue_hearth.png": {
+      "file": "ecec6a632287f1907cb1.webp",
+      "bytes": 64104,
+      "sha256": "ecec6a632287f1907cb190c907cd47b565d4d3d66f8538c00f1e14ddff5f7dec"
+    },
+    "assets/images/bored.png": {
+      "file": "8600aefb887b2dd9c262.webp",
+      "bytes": 5888,
+      "sha256": "8600aefb887b2dd9c2629928481b355c4fb99c796792f0651a0c119082fbe404"
+    },
+    "assets/images/bowel.png": {
+      "file": "d9833f6425463ecc73dc.webp",
+      "bytes": 44482,
+      "sha256": "d9833f6425463ecc73dc8fa5fdab3d8a35c740ee944137f04cc8b6743617c090"
+    },
+    "assets/images/brain.png": {
+      "file": "2947f32fc0d8915300cc.webp",
+      "bytes": 476,
+      "sha256": "2947f32fc0d8915300cc121b1bea51edf62a8a89e40e14ccbed7d748a4542541"
+    },
+    "assets/images/break_your_fast.png": {
+      "file": "777b2eeabdf789281388.webp",
+      "bytes": 8618,
+      "sha256": "777b2eeabdf789281388e0b4bf1f11248a3589e356b88f00f1f10f08a3f4dbff"
+    },
+    "assets/images/breathe.png": {
+      "file": "b6aa5639aabb99df3d67.webp",
+      "bytes": 7336,
+      "sha256": "b6aa5639aabb99df3d67a6a1189d421b7acdfd0ab029c4124bd8c46a6fc209fa"
+    },
+    "assets/images/broccv2.png": {
+      "file": "cd4391cfa4c5b48425d1.webp",
+      "bytes": 4590,
+      "sha256": "cd4391cfa4c5b48425d19de2f9a7942246562511ef5cb6159c14cfd3301272d1"
+    },
+    "assets/images/brocolies.png": {
+      "file": "01cd1983f7e9cf7b0534.webp",
+      "bytes": 17652,
+      "sha256": "01cd1983f7e9cf7b05342fb4f31a463cb5e426d05bcd3b1ee24e4f7606901e72"
+    },
+    "assets/images/building.png": {
+      "file": "b7c590b618d29b1339c1.webp",
+      "bytes": 68998,
+      "sha256": "b7c590b618d29b1339c19b52134433efe8c305e8fbb01817c57ee42ec1fea85a"
+    },
+    "assets/images/burgerv2.png": {
+      "file": "3f466130e87036442902.webp",
+      "bytes": 5776,
+      "sha256": "3f466130e87036442902b69cba0135c22fe594c57202cae96ba7355900a46102"
+    },
+    "assets/images/busy.png": {
+      "file": "cbf35bffb43945e42d99.webp",
+      "bytes": 15268,
+      "sha256": "cbf35bffb43945e42d9995ace5a4152fd0d073138ce570c78c5f87a83821d8d6"
+    },
+    "assets/images/calories_tracker.png": {
+      "file": "b695165fc2803383d020.webp",
+      "bytes": 51722,
+      "sha256": "b695165fc2803383d020566aeef397a3fd9cfa0e7f334d8ece176a16d0cb7a7d"
+    },
+    "assets/images/carbs.png": {
+      "file": "8d85a9cd8f70b5555478.webp",
+      "bytes": 88904,
+      "sha256": "8d85a9cd8f70b555547872396add32299717482c49830f5bb8be1e79a62ec460"
+    },
+    "assets/images/challenge.png": {
+      "file": "a45788e584e344f29707.webp",
+      "bytes": 43768,
+      "sha256": "a45788e584e344f2970716d5a9c4a7681fbca2af5fca171d3b801a982f4d61b8"
+    },
+    "assets/images/cheese.png": {
+      "file": "7c8029038c51da6f0c03.webp",
+      "bytes": 9252,
+      "sha256": "7c8029038c51da6f0c03378d072b5e1625e30cdb71b357a908e781a1999c395f"
+    },
+    "assets/images/chicken.png": {
+      "file": "58a609b36df74923f4ae.webp",
+      "bytes": 9058,
+      "sha256": "58a609b36df74923f4ae5c5db7c57459f4e8ddbc0926aa2a1a3170d21b6e56d7"
+    },
+    "assets/images/clock.png": {
+      "file": "b8b28016c54199e88e04.webp",
+      "bytes": 36822,
+      "sha256": "b8b28016c54199e88e0495d8cfa95305f8eb9dd811d3f50785dc7adfc3680278"
+    },
+    "assets/images/confidence.png": {
+      "file": "c51cf78591877427e0cc.webp",
+      "bytes": 22712,
+      "sha256": "c51cf78591877427e0cc9c0ac3ba6b7b61d30925091c31a419db66ab363e9a7b"
+    },
+    "assets/images/confusing.png": {
+      "file": "4bb18042ff8649537413.webp",
+      "bytes": 14614,
+      "sha256": "4bb18042ff86495374134c6f69f44fda0c06eaec1b60936b4929de644cb445a3"
+    },
+    "assets/images/cravling.png": {
+      "file": "fa9f8ce28f29642581ac.webp",
+      "bytes": 6816,
+      "sha256": "fa9f8ce28f29642581ac1435140e3474aa89b171c1cc0222b1d119a888fbdf8e"
+    },
+    "assets/images/dairy.png": {
+      "file": "15afeddeac9919886daa.webp",
+      "bytes": 10276,
+      "sha256": "15afeddeac9919886daad5093a31f0635df0908e564031dc17c8fcf20276dea6"
+    },
+    "assets/images/dark_fast.png": {
+      "file": "e12738316b86d1c0fa21.webp",
+      "bytes": 94860,
+      "sha256": "e12738316b86d1c0fa216d036bd9006ed3aa9f5642b142e24839e2169eee0050"
+    },
+    "assets/images/dark_norusih.png": {
+      "file": "49a081d8146240b920fc.webp",
+      "bytes": 125462,
+      "sha256": "49a081d8146240b920fcf07cbb9e8e4fbc67eb65be0ceaece2bbaa3ef59e3f0a"
+    },
+    "assets/images/date.png": {
+      "file": "b5313e77e53d3829d8f2.webp",
+      "bytes": 23102,
+      "sha256": "b5313e77e53d3829d8f2282776553a1695ce3782164a0354847bd57b85a94f95"
+    },
+    "assets/images/dizzinies.png": {
+      "file": "3ee20bf3fa580d6b2d35.webp",
+      "bytes": 152838,
+      "sha256": "3ee20bf3fa580d6b2d3599f39e790a1701c63c37e6bcee01eda8a4e09145499f"
+    },
+    "assets/images/donut.png": {
+      "file": "278f759770339f50ea22.webp",
+      "bytes": 4846,
+      "sha256": "278f759770339f50ea224d27a3edf8b301155f81fc4c9cce636778a8d546446d"
+    },
+    "assets/images/droplet.png": {
+      "file": "dbaa4ea2fdeaf0b8ef39.webp",
+      "bytes": 624,
+      "sha256": "dbaa4ea2fdeaf0b8ef39f44e9ec2a30a6c10e71338183830b05c7e4bd6a1a385"
+    },
+    "assets/images/dumble.png": {
+      "file": "e4fde72666a35217d269.webp",
+      "bytes": 31934,
+      "sha256": "e4fde72666a35217d269cc926e85a05b1629c7d53d0c8daee7b7e779e3166e5f"
+    },
+    "assets/images/eat_window.png": {
+      "file": "28fce720ec44528639ab.webp",
+      "bytes": 113314,
+      "sha256": "28fce720ec44528639abc7f1d481463063612758406c8e414a099994886762f6"
+    },
+    "assets/images/eggplant.png": {
+      "file": "cb5e17568d4e4ce6b425.webp",
+      "bytes": 10766,
+      "sha256": "cb5e17568d4e4ce6b425cd6c8c8dc4a0f01c230322d3cc881775783ced6fcb25"
+    },
+    "assets/images/eggs.png": {
+      "file": "cb3eb9d324a5f427c936.webp",
+      "bytes": 7678,
+      "sha256": "cb3eb9d324a5f427c936b1997d1455e425940e0fc50c2d338d07a6ecd22d3520"
+    },
+    "assets/images/emotional_hunger.png": {
+      "file": "e42f7e20f10ec835a1f7.webp",
+      "bytes": 164560,
+      "sha256": "e42f7e20f10ec835a1f701244dbb9b1e7ad0a0a2b8033dc10d34447666a3bd7c"
+    },
+    "assets/images/end.png": {
+      "file": "cc959019051ca2f45dae.webp",
+      "bytes": 6238,
+      "sha256": "cc959019051ca2f45dae5e1dadb97827d3928df9ac8be4e3fe2e4181dd086711"
+    },
+    "assets/images/end_fast.png": {
+      "file": "d69dcb2683ab29ec17e6.webp",
+      "bytes": 24794,
+      "sha256": "d69dcb2683ab29ec17e69d800f8487938e5032ba9198818ed36ec13812aec91c"
+    },
+    "assets/images/everything.png": {
+      "file": "d3ad63b256c271740244.webp",
+      "bytes": 45796,
+      "sha256": "d3ad63b256c271740244f2cc63e797250ec125cb1658ae0f3823a1038524df55"
+    },
+    "assets/images/fast_forecast.png": {
+      "file": "0ba959e1ed928adf6464.webp",
+      "bytes": 4094,
+      "sha256": "0ba959e1ed928adf6464b1b2d78bee4c5f8ed40db5d65005a638acdc6a7d9d76"
+    },
+    "assets/images/fasting.png": {
+      "file": "8f8de2030a1828c8ef04.webp",
+      "bytes": 39622,
+      "sha256": "8f8de2030a1828c8ef0403185856700e1df5ab44bb8bed1333b04f1b204ec483"
+    },
+    "assets/images/fasting_challenge.png": {
+      "file": "0d458ad93cb9b06fb2e8.webp",
+      "bytes": 112682,
+      "sha256": "0d458ad93cb9b06fb2e8d7aafe9dec79af28b34fbd88a9f2392d3935fb6bd201"
+    },
+    "assets/images/fasting_challenge_user_1.png": {
+      "file": "766a8eb53f125cdfe613.webp",
+      "bytes": 102262,
+      "sha256": "766a8eb53f125cdfe6135e2021a8699da1d3a2c5809d48185f5c182a681ed191"
+    },
+    "assets/images/fasting_challenge_user_2.png": {
+      "file": "1cd21837c34f02ad3be4.webp",
+      "bytes": 83404,
+      "sha256": "1cd21837c34f02ad3be466821b8e60043a54049ee3ebb56415f3910a887f0c67"
+    },
+    "assets/images/fasting_challenge_user_3.png": {
+      "file": "f0406f6ac25bf7f1618d.webp",
+      "bytes": 111770,
+      "sha256": "f0406f6ac25bf7f1618d4fa0d34512eced2c2c9ae55fb088b399a1d46653a6a7"
+    },
+    "assets/images/fatigue.png": {
+      "file": "abfb0d6da221a62c6f04.webp",
+      "bytes": 65882,
+      "sha256": "abfb0d6da221a62c6f04b35d8aa15a7f7790bfc879f92912c5093da6cafc025d"
+    },
+    "assets/images/first_question.png": {
+      "file": "b83a5eeffc4d73587a14.webp",
+      "bytes": 135900,
+      "sha256": "b83a5eeffc4d73587a1472c7cbfdd65ce1da10cc18661abd197c7c72cd78e6e3"
+    },
+    "assets/images/first_time.png": {
+      "file": "76c2b8250d9dc1ba404c.webp",
+      "bytes": 36152,
+      "sha256": "76c2b8250d9dc1ba404cb3ae6303a8c57aee3ddea16db3119cf676334a8a9ccd"
+    },
+    "assets/images/fish.png": {
+      "file": "f2a0782610dd429a65e9.webp",
+      "bytes": 10726,
+      "sha256": "f2a0782610dd429a65e971dd49dd08cad5b60a1e646e026412ba481c10b2e5db"
+    },
+    "assets/images/flame_calories.png": {
+      "file": "b5969f712004a47a4953.webp",
+      "bytes": 83456,
+      "sha256": "b5969f712004a47a4953106090cf5c08da635e8fd5022d16ef43622779b9dcba"
+    },
+    "assets/images/forest.png": {
+      "file": "3dbb2c5c42ddf38b4c4a.webp",
+      "bytes": 4972,
+      "sha256": "3dbb2c5c42ddf38b4c4ab0bc0f473ce46c9e8f5d391db0d865ec71acb1897ec2"
+    },
+    "assets/images/fork.png": {
+      "file": "e47b0762e9c9fae7c413.webp",
+      "bytes": 47254,
+      "sha256": "e47b0762e9c9fae7c4134a67096231571822c04034241257d49cc34c46069674"
+    },
+    "assets/images/fork_closest.png": {
+      "file": "d7b2660e697d074cdf81.webp",
+      "bytes": 5086,
+      "sha256": "d7b2660e697d074cdf81ed331bf4731deba1303779c5cf905c32d852102eb018"
+    },
+    "assets/images/fourth_question.png": {
+      "file": "ab235a66c606859599d0.webp",
+      "bytes": 144036,
+      "sha256": "ab235a66c606859599d0f246d9a3e8b8fa24cb37e037024b66f48edd3b155d04"
+    },
+    "assets/images/fried_potato.png": {
+      "file": "10ad73916fa8798c83c1.webp",
+      "bytes": 4086,
+      "sha256": "10ad73916fa8798c83c126e1d1f51588137afe490beeecbec958cd59a73eb18a"
+    },
+    "assets/images/fruit.png": {
+      "file": "cf93c4a928e8ecee417b.webp",
+      "bytes": 19102,
+      "sha256": "cf93c4a928e8ecee417bd5cced4346d5d0285cd8224fdfcb334f6adba8fc4ffe"
+    },
+    "assets/images/full_check.png": {
+      "file": "91fdffae2a508f927a8a.webp",
+      "bytes": 104568,
+      "sha256": "91fdffae2a508f927a8a1928ee18de3d4d35fdfbbb9f96c143ea37f87024e29c"
+    },
+    "assets/images/garden.png": {
+      "file": "9ae46d8d3bd2e553a66f.webp",
+      "bytes": 5408,
+      "sha256": "9ae46d8d3bd2e553a66f188cfcc4bd0ec6d31c9220d8d7f138d9d25b321d6249"
+    },
+    "assets/images/goal.png": {
+      "file": "c7c0809c6acf8e637715.webp",
+      "bytes": 86460,
+      "sha256": "c7c0809c6acf8e637715eca24b1fda4d9409b0305f8ec8cc61ae5796251595b9"
+    },
+    "assets/images/good_colored.png": {
+      "file": "e7c17f8e6b8fcef01234.webp",
+      "bytes": 37096,
+      "sha256": "e7c17f8e6b8fcef0123495083abc88eb68ef874dac1af516cbb2eec7aab6a60c"
+    },
+    "assets/images/goodv2.png": {
+      "file": "bc8dbe05bacbeaef139f.webp",
+      "bytes": 2550,
+      "sha256": "bc8dbe05bacbeaef139f6026738e7e76a4acdce5d06c5a96a3c928de11df7f1d"
+    },
+    "assets/images/goodv3.png": {
+      "file": "0e63e1113f59d11b3de5.webp",
+      "bytes": 2086,
+      "sha256": "0e63e1113f59d11b3de57d11408349f4dbf7c4cf2d68f15faa382a0f73e960b3"
+    },
+    "assets/images/great_job.png": {
+      "file": "27f2d3b719b0abaaa1fd.webp",
+      "bytes": 190752,
+      "sha256": "27f2d3b719b0abaaa1fd3cc4e8fa5f4dd8a437bbb074db655c1de2a97e404701"
+    },
+    "assets/images/green_apple.png": {
+      "file": "81134b99ca04f674adc9.webp",
+      "bytes": 30146,
+      "sha256": "81134b99ca04f674adc98bf8a80a6464d469325ab99ac3480e18cb6ec3e2b8ea"
+    },
+    "assets/images/green_book.png": {
+      "file": "3e8cbc50c6f8effb836d.webp",
+      "bytes": 3886,
+      "sha256": "3e8cbc50c6f8effb836d99381edf90a2521b289afdc98e2fc786ef67a3c4e456"
+    },
+    "assets/images/green_clock.png": {
+      "file": "1697ddb3e6847fd7fe13.webp",
+      "bytes": 5918,
+      "sha256": "1697ddb3e6847fd7fe13f948ba3cb935523a335e9fd0c2db0b20140225b19245"
+    },
+    "assets/images/green_tick.png": {
+      "file": "760c28b4ff44244df01a.webp",
+      "bytes": 20106,
+      "sha256": "760c28b4ff44244df01ad2729b9208d77ea34ead7b7bd5c2352ab62aee7b692e"
+    },
+    "assets/images/green_tick3d.png": {
+      "file": "c71fdb9f21528a6f152d.webp",
+      "bytes": 4174,
+      "sha256": "c71fdb9f21528a6f152d097417ef9010794a644b524c589f95c7b88ab43ef4ec"
+    },
+    "assets/images/green_tick_filled.png": {
+      "file": "76ccd0533acb2208a44b.webp",
+      "bytes": 730,
+      "sha256": "76ccd0533acb2208a44bba925170a450a2057323092e4c30603fd5c4891a4452"
+    },
+    "assets/images/grilled_salad.png": {
+      "file": "81b124a1cfe12e1cf1bc.webp",
+      "bytes": 12384,
+      "sha256": "81b124a1cfe12e1cf1bc2cc1b1adb40ae560910b72f8833b3b3861cfb723c0ad"
+    },
+    "assets/images/header_back.png": {
+      "file": "caf1b0f038d07924ef6b.webp",
+      "bytes": 14800,
+      "sha256": "caf1b0f038d07924ef6b383b108c63e295989af350ebd235fc2560636c352d95"
+    },
+    "assets/images/healty.png": {
+      "file": "c17954f2d705ae4bb735.webp",
+      "bytes": 23830,
+      "sha256": "c17954f2d705ae4bb7350dfad36e46d48d658d59ae3e26fb409a719203d6883e"
+    },
+    "assets/images/hearttt.png": {
+      "file": "5eb35db866d0b0f2a67e.webp",
+      "bytes": 5796,
+      "sha256": "5eb35db866d0b0f2a67e91b9b3980078174fabbbabcc4b3e0a1a5c7c948d3d81"
+    },
+    "assets/images/high_carbv2.png": {
+      "file": "02bc0a5199d9926e64c6.webp",
+      "bytes": 5452,
+      "sha256": "02bc0a5199d9926e64c6e7557bcbe6438a554b94859fd5f6d432ea1bf29d45a8"
+    },
+    "assets/images/home.png": {
+      "file": "c08a46075e5be3e92147.webp",
+      "bytes": 50498,
+      "sha256": "c08a46075e5be3e92147123a6035436db88f0ea1e643847a803361091a7f9adb"
+    },
+    "assets/images/hours.png": {
+      "file": "106407b28a7fc1dc224a.webp",
+      "bytes": 5870,
+      "sha256": "106407b28a7fc1dc224aac11911ef9a200a595e50eb5e6309e2c2dd247863b87"
+    },
+    "assets/images/huh.png": {
+      "file": "9839da11d07b9c518369.webp",
+      "bytes": 3714,
+      "sha256": "9839da11d07b9c518369f1a03f3601ada95ac5b46a97280b1fb8068928be2efb"
+    },
+    "assets/images/human.png": {
+      "file": "8cee7a9434d4bbee6c51.webp",
+      "bytes": 26224,
+      "sha256": "8cee7a9434d4bbee6c5108a76d405d33e0bebf03182f388d812ca3b19cea58c1"
+    },
+    "assets/images/hunger-tracker.png": {
+      "file": "341adb663ef3008e90b6.webp",
+      "bytes": 45680,
+      "sha256": "341adb663ef3008e90b659c726df766dd31eb0b87445b05f05c6cd44ae5eab02"
+    },
+    "assets/images/hunger_log.png": {
+      "file": "3f8106c96968dd36f1a3.webp",
+      "bytes": 118804,
+      "sha256": "3f8106c96968dd36f1a3d19d513b9835d62a4a2d75ee35427ceb79da5dc59b40"
+    },
+    "assets/images/hungry.png": {
+      "file": "b96793b14fc61adb24ef.webp",
+      "bytes": 7274,
+      "sha256": "b96793b14fc61adb24ef93a119f680c8eeb81f2921603d261eb89492da2660c4"
+    },
+    "assets/images/insightss.png": {
+      "file": "361eacf03dfdd2c9bf77.webp",
+      "bytes": 6594,
+      "sha256": "361eacf03dfdd2c9bf77712568f66fd343ec64129dd137d6ec96c87146a2c6b3"
+    },
+    "assets/images/insightsss.png": {
+      "file": "f5291ca9a05961c0047f.webp",
+      "bytes": 107678,
+      "sha256": "f5291ca9a05961c0047fb974d5e20429846f62d62e101ea087cabbb198f78a67"
+    },
+    "assets/images/keep_noruish.png": {
+      "file": "78436199c39ef88dca67.webp",
+      "bytes": 9508,
+      "sha256": "78436199c39ef88dca6717aca68c223148898e5305e706e6b9a47bbed811fbb6"
+    },
+    "assets/images/king_sl.png": {
+      "file": "984a4d4c33d94944252e.webp",
+      "bytes": 103744,
+      "sha256": "984a4d4c33d94944252ef9224d0496fbe4edba128cf90ea13975df3bcd2e02df"
+    },
+    "assets/images/lake.png": {
+      "file": "3c6cdb4130e61e126df0.webp",
+      "bytes": 3584,
+      "sha256": "3c6cdb4130e61e126df04db467e3706fd07ae23bf64e21f53f1069ec07d72a1f"
+    },
+    "assets/images/law-carb.png": {
+      "file": "92339342674d86ba1fc6.webp",
+      "bytes": 41338,
+      "sha256": "92339342674d86ba1fc64e13b75f6502d06fe4d6a3b8b9691551c4d0e3688cc8"
+    },
+    "assets/images/leaf.png": {
+      "file": "1b25cd5a2806e5626791.webp",
+      "bytes": 5062,
+      "sha256": "1b25cd5a2806e5626791042bca65c57b1a820ca2d61102fcda652ef28b002ca9"
+    },
+    "assets/images/lightning.png": {
+      "file": "b3a0f1743825a9e0477d.webp",
+      "bytes": 1364,
+      "sha256": "b3a0f1743825a9e0477d757bb00995e4903306b088e1621103ae8588cd579447"
+    },
+    "assets/images/listen_your_body.png": {
+      "file": "71a5d924f77e505199ec.webp",
+      "bytes": 105124,
+      "sha256": "71a5d924f77e505199ec0d40334a4e27ef3a586def4a02120d4a95b25ae2c8e3"
+    },
+    "assets/images/log_hunger.png": {
+      "file": "b83a5eeffc4d73587a14.webp",
+      "bytes": 135900,
+      "sha256": "b83a5eeffc4d73587a1472c7cbfdd65ce1da10cc18661abd197c7c72cd78e6e3"
+    },
+    "assets/images/low_carbv2.png": {
+      "file": "c81ab98c6665dbb36651.webp",
+      "bytes": 898,
+      "sha256": "c81ab98c6665dbb36651b9021f616458faa472cd9a1b154d3c7ef3e57dcd3e69"
+    },
+    "assets/images/low_energiy.png": {
+      "file": "e0c4b6ea7d3eff2e3cc9.webp",
+      "bytes": 6170,
+      "sha256": "e0c4b6ea7d3eff2e3cc9fd18060889bf66a3313b3eea9037da860955ae410467"
+    },
+    "assets/images/man.png": {
+      "file": "351c5724b91eeee92a7b.webp",
+      "bytes": 41680,
+      "sha256": "351c5724b91eeee92a7b63742ee9af8fcedbd0045c1b2635a895b5610e982052"
+    },
+    "assets/images/mascot-chat.png": {
+      "file": "0130ac17c211156b55d8.webp",
+      "bytes": 49968,
+      "sha256": "0130ac17c211156b55d8987f94f1f7c01766a8ba0cd5b9f3552ec8f411a5e7c7"
+    },
+    "assets/images/mascot-omh.png": {
+      "file": "b1f3cd4561b4acaaf9ae.webp",
+      "bytes": 98674,
+      "sha256": "b1f3cd4561b4acaaf9ae2e77d0129bda326109f889432f8742991b6b2da99575"
+    },
+    "assets/images/mascot_breath.png": {
+      "file": "4a0edfb1f04f707a2cbb.webp",
+      "bytes": 156004,
+      "sha256": "4a0edfb1f04f707a2cbbddf3efc85b6d45bd96168b335510c4f024a037484601"
+    },
+    "assets/images/mascot_chat_pp.png": {
+      "file": "cfc57f784e7fab61677e.webp",
+      "bytes": 51022,
+      "sha256": "cfc57f784e7fab61677ebdf94db8ced1edf37ddb6815a0ee09af3af4e4b2135b"
+    },
+    "assets/images/mascot_clock.png": {
+      "file": "5188abe2ec2c13dfee64.webp",
+      "bytes": 34926,
+      "sha256": "5188abe2ec2c13dfee64909d4244f0c824626488dee0186271c4b1c10269d85d"
+    },
+    "assets/images/mascot_diver.png": {
+      "file": "f9a49bdb73c9a146d866.webp",
+      "bytes": 89396,
+      "sha256": "f9a49bdb73c9a146d8667efa902314481a94d97df4bf5b74b7d7a0b162549185"
+    },
+    "assets/images/mascot_hi_water.png": {
+      "file": "72e30cf6aad42ddc79bf.webp",
+      "bytes": 73004,
+      "sha256": "72e30cf6aad42ddc79bf278f5d2f8de1a0bd14996863eccb76d2d9da51150b47"
+    },
+    "assets/images/mascot_hi_without.png": {
+      "file": "79b6beec82fa96df7c67.webp",
+      "bytes": 93040,
+      "sha256": "79b6beec82fa96df7c670c5d6cc0afebe7b917940d86e0efae035527c26de130"
+    },
+    "assets/images/mascot_learn_detail.png": {
+      "file": "c3dd262533c0e24e3957.webp",
+      "bytes": 112360,
+      "sha256": "c3dd262533c0e24e39574985829a5bb94e7d272ff6992d73839ae57f02338902"
+    },
+    "assets/images/mascot_metabolic.png": {
+      "file": "79b6beec82fa96df7c67.webp",
+      "bytes": 93040,
+      "sha256": "79b6beec82fa96df7c670c5d6cc0afebe7b917940d86e0efae035527c26de130"
+    },
+    "assets/images/mascot_quick_walkt.png": {
+      "file": "d38fc490c5eacd8e82c6.webp",
+      "bytes": 129094,
+      "sha256": "d38fc490c5eacd8e82c6f7e6df07e85176febf60f6bebfb5b26f448dad1c238c"
+    },
+    "assets/images/mascot_search.png": {
+      "bundled": "assets/images/bundled/mascot_search.webp"
+    },
+    "assets/images/mascot_tip.png": {
+      "file": "060e53e28df2e3b5034d.webp",
+      "bytes": 90426,
+      "sha256": "060e53e28df2e3b5034df980570ef794d2edc56a75270d6839d9a82f599d6ac1"
+    },
+    "assets/images/mascot_water.png": {
+      "file": "e262adaaac967b850127.webp",
+      "bytes": 159766,
+      "sha256": "e262adaaac967b850127ec609a90c776b8c168a0cd3f31bcaad117174dea4caf"
+    },
+    "assets/images/mascot_widget.png": {
+      "file": "2c33110fec3234ba6ee2.webp",
+      "bytes": 106372,
+      "sha256": "2c33110fec3234ba6ee22d446c8ee64eba6a1fd3cf40db7ba1b3a1aeecdf3891"
+    },
+    "assets/images/meal_record_emoji.png": {
+      "file": "99a1a6549936b11ff5d9.webp",
+      "bytes": 654,
+      "sha256": "99a1a6549936b11ff5d907ae981665ad092a712857c69bf14c2cd3489e05e48a"
+    },
+    "assets/images/meat.png": {
+      "file": "69f26cbc1961d2f68208.webp",
+      "bytes": 14332,
+      "sha256": "69f26cbc1961d2f6820883fa6548c563a20964a77ba9a59daa25b2b179a27e29"
+    },
+    "assets/images/mediterrian.png": {
+      "file": "38923ac92eb1ffc5e2fd.webp",
+      "bytes": 20748,
+      "sha256": "38923ac92eb1ffc5e2fdb5c475c8a9f1b7211b4caad70042b9a3ca2036968f97"
+    },
+    "assets/images/meh_colored.png": {
+      "file": "71134f3a6eb840b36b3c.webp",
+      "bytes": 30750,
+      "sha256": "71134f3a6eb840b36b3cac0536d69cf03c2739e4b62d0b73a6c7602d7ed9a911"
+    },
+    "assets/images/mehv2.png": {
+      "file": "a16b2580a16c68079854.webp",
+      "bytes": 2192,
+      "sha256": "a16b2580a16c6807985486886955bd51dea9f2b72d06d3716e2ec987e03930c0"
+    },
+    "assets/images/mehv3.png": {
+      "file": "542c533d8476aa1e393f.webp",
+      "bytes": 2058,
+      "sha256": "542c533d8476aa1e393ffc759abc1a2a25ba99d7d8df540d30b92bb0458d76e9"
+    },
+    "assets/images/metabolic.png": {
+      "file": "ae75c8e39118b8a0d996.webp",
+      "bytes": 91188,
+      "sha256": "ae75c8e39118b8a0d99639ee5d5b9ead3d506e3050a31036787a88ae3914f010"
+    },
+    "assets/images/mixedv2.png": {
+      "file": "c97c61fce9e453751698.webp",
+      "bytes": 7764,
+      "sha256": "c97c61fce9e453751698ab0c70e5dd5850a90b928ac6097d23c6b6cab56d2392"
+    },
+    "assets/images/mochi-world-5.png": {
+      "file": "51fcc6f32bc3a16edf0d.webp",
+      "bytes": 103032,
+      "sha256": "51fcc6f32bc3a16edf0dcb1604100ead7fd163ced9491f2fed373f175daadb98"
+    },
+    "assets/images/mochi-world-6.png": {
+      "file": "037476ad4adc6c83ca16.webp",
+      "bytes": 108188,
+      "sha256": "037476ad4adc6c83ca160a1a6c7cd34f0a8782d619fb9124f0483801af7bfa54"
+    },
+    "assets/images/mochi-world-7.png": {
+      "file": "55f7a5de38e9867b96bd.webp",
+      "bytes": 124186,
+      "sha256": "55f7a5de38e9867b96bd1bafa409b940689c957ea56972ed9621c6323fc28104"
+    },
+    "assets/images/mochi-worlds.png": {
+      "file": "40b694e65db025687082.webp",
+      "bytes": 98752,
+      "sha256": "40b694e65db02568708281198838b4046f4edc8f70f9cc421bb91d9a84d8bf37"
+    },
+    "assets/images/mochi_worl_v2.png": {
+      "file": "701328c90afc17296426.webp",
+      "bytes": 88988,
+      "sha256": "701328c90afc17296426b5e0db8277de7f536f236f963bd26887ba39b3245f72"
+    },
+    "assets/images/mood.png": {
+      "file": "ab59c4f1050ffd2a0f8c.webp",
+      "bytes": 3618,
+      "sha256": "ab59c4f1050ffd2a0f8ce37d1f99de876f75ab19950274222a413468193df7c9"
+    },
+    "assets/images/motivation.png": {
+      "file": "67ec96192e23c4285d23.webp",
+      "bytes": 11702,
+      "sha256": "67ec96192e23c4285d23f4739feb5991853b3018873e94899f9856c53fe562bc"
+    },
+    "assets/images/mushroom.png": {
+      "file": "da5e80ab8c0ea81e45a1.webp",
+      "bytes": 13054,
+      "sha256": "da5e80ab8c0ea81e45a1346a12801a85742c8146b9e1c341755c9980bac9a69f"
+    },
+    "assets/images/nausea.png": {
+      "file": "7ada0fc15fab01adc6a3.webp",
+      "bytes": 88564,
+      "sha256": "7ada0fc15fab01adc6a304a86e4011421d25881f8d4456c1b32bf41f8c541fb0"
+    },
+    "assets/images/next_fast.png": {
+      "file": "41fccae46a69ef6fc1e3.webp",
+      "bytes": 7096,
+      "sha256": "41fccae46a69ef6fc1e36f0124e8f375d22a94fb2efdc5287fe06ed64ed61aeb"
+    },
+    "assets/images/non-binary.png": {
+      "file": "6ab567aae7b8bec43e42.webp",
+      "bytes": 36466,
+      "sha256": "6ab567aae7b8bec43e42da66eb0ed9dd55fe7d30ed673bb7985c11ec1bad64f1"
+    },
+    "assets/images/noodles.png": {
+      "file": "8b9de7b3406c4c775560.webp",
+      "bytes": 19544,
+      "sha256": "8b9de7b3406c4c775560ed64d1a9cdb9cb9aa7798896e8a03674747cca385049"
+    },
+    "assets/images/noone.png": {
+      "file": "cee5d4994461330d4493.webp",
+      "bytes": 3914,
+      "sha256": "cee5d4994461330d4493afcdc2e8bacc34c18053fa8bef7f7aba5f543664ab2f"
+    },
+    "assets/images/not_surev2.png": {
+      "file": "8fa21e761dcf305b2422.webp",
+      "bytes": 4386,
+      "sha256": "8fa21e761dcf305b2422b135a732d3679dfe9987cd549253fae633ef3b27c91f"
+    },
+    "assets/images/nothing_physical.png": {
+      "file": "2b2519817bfa8da6c95d.webp",
+      "bytes": 3196,
+      "sha256": "2b2519817bfa8da6c95d78f6600306fd749db8ee0e887a3de18302a7e8181112"
+    },
+    "assets/images/notificatio.png": {
+      "file": "68fbd81b74b38c131f87.webp",
+      "bytes": 8012,
+      "sha256": "68fbd81b74b38c131f87805ef577a1897ba63182b7595d757dd03040b8477a9d"
+    },
+    "assets/images/notification_empty_bell.png": {
+      "file": "7e91dbc6c2212cfe38ef.webp",
+      "bytes": 66714,
+      "sha256": "7e91dbc6c2212cfe38ef42db1df5f0b2f0a210a6b9a51f55eae2e41d2ebd71d8"
+    },
+    "assets/images/nuts.png": {
+      "file": "31bb2c3ab8c1fb30eb1a.webp",
+      "bytes": 16616,
+      "sha256": "31bb2c3ab8c1fb30eb1ac3c4cdbe881abbcc80bea7e67bdc61c23a3b30143a49"
+    },
+    "assets/images/olive.png": {
+      "file": "68d072fb9d2b96bfb4e1.webp",
+      "bytes": 66826,
+      "sha256": "68d072fb9d2b96bfb4e1b9360bd10091565d66508b4be367bed1c4f4db256b7f"
+    },
+    "assets/images/olives.png": {
+      "file": "1da56b60e094b17d63ab.webp",
+      "bytes": 14444,
+      "sha256": "1da56b60e094b17d63abd67357909ada7a84cb5d81a54222bfc9b8a74eff8c95"
+    },
+    "assets/images/onion.png": {
+      "file": "efdd3f92c081ec3843f5.webp",
+      "bytes": 13704,
+      "sha256": "efdd3f92c081ec3843f583dd76f8be7332e4156ead69a103b8ae286266bfbfed"
+    },
+    "assets/images/orange_bell.png": {
+      "file": "bbdca76b05f4708f01ea.webp",
+      "bytes": 726,
+      "sha256": "bbdca76b05f4708f01eacaa4cbebc2752ac138196d6c6a3b1f164d4014b6a65b"
+    },
+    "assets/images/orange_bellv2.png": {
+      "file": "c72b02c109cd06ac361a.webp",
+      "bytes": 5464,
+      "sha256": "c72b02c109cd06ac361a1eb0000fceb208f54148de7452865bfeaa5163711a3f"
+    },
+    "assets/images/pasta.png": {
+      "file": "d019b991411d0e42d5b3.webp",
+      "bytes": 16746,
+      "sha256": "d019b991411d0e42d5b332962f49d0f88f9a789816906cdf2a17596ea8c352f8"
+    },
+    "assets/images/pescatarian.png": {
+      "file": "ee44826de6b4420e6fac.webp",
+      "bytes": 27910,
+      "sha256": "ee44826de6b4420e6facbb883b51fb7db70d28c2dbf0004ba111329e241738c6"
+    },
+    "assets/images/physical_hunger.png": {
+      "file": "76522cfcdb7515294433.webp",
+      "bytes": 220856,
+      "sha256": "76522cfcdb7515294433365a6a1a8818224e62b9a7e186afa1c3e972d08f9eef"
+    },
+    "assets/images/plans.png": {
+      "file": "94c621564eb3441f3872.webp",
+      "bytes": 52834,
+      "sha256": "94c621564eb3441f387251b6321f96dcbf8dae86da81db6bb57b84fa1ce8e41f"
+    },
+    "assets/images/plant.png": {
+      "file": "20bf6f6bd3e02c15a93b.webp",
+      "bytes": 23836,
+      "sha256": "20bf6f6bd3e02c15a93b0ac02f292154cf1aa87f7615b84c4302a5df131c8614"
+    },
+    "assets/images/pleteu.png": {
+      "file": "d699236ffbeb0eb50488.webp",
+      "bytes": 9330,
+      "sha256": "d699236ffbeb0eb50488997a8c6bbc1c594b2f7137b9aef0c48251bce0bce084"
+    },
+    "assets/images/prefer-not.png": {
+      "file": "d524c02b23f8b34321a0.webp",
+      "bytes": 38238,
+      "sha256": "d524c02b23f8b34321a071542edf63e9f67e7b4792e2a4e9c812f455803550c0"
+    },
+    "assets/images/pro_king.png": {
+      "file": "0c0b7acde1f46f946fd4.webp",
+      "bytes": 64480,
+      "sha256": "0c0b7acde1f46f946fd438f82aa8f8b96efe5d4be33bf96606b7b9de9ec42993"
+    },
+    "assets/images/pro_reading.png": {
+      "file": "dcd892caa111f4f35dd4.webp",
+      "bytes": 43654,
+      "sha256": "dcd892caa111f4f35dd4b128b9f7cdbd10d4626dba6da999d9306ca9d272d57b"
+    },
+    "assets/images/profile.png": {
+      "file": "058b1e35b49646540232.webp",
+      "bytes": 29116,
+      "sha256": "058b1e35b49646540232bff57d9153179e6a546a31117250fcc2a8a5fd074631"
+    },
+    "assets/images/progress_head.png": {
+      "file": "73e8c0eb674c6aa17fbc.webp",
+      "bytes": 39458,
+      "sha256": "73e8c0eb674c6aa17fbc98f04c78fc24614273570f5f00d7773feb5e82e25ecf"
+    },
+    "assets/images/protein.png": {
+      "file": "50da7971f81c49df8329.webp",
+      "bytes": 78932,
+      "sha256": "50da7971f81c49df83293553fce9287ee8eca18461766cf4f719af8f6e157f20"
+    },
+    "assets/images/purple_star.png": {
+      "file": "7636c28d1773c446b60f.webp",
+      "bytes": 69166,
+      "sha256": "7636c28d1773c446b60fb3d5d2144232f23a33a171ff0b70ef7bdf589f8a25fd"
+    },
+    "assets/images/quick_walk.png": {
+      "file": "20f761cc7bbd3eefc008.webp",
+      "bytes": 7120,
+      "sha256": "20f761cc7bbd3eefc008fdeb122d97dc1f23386b27a9e1696c32a23f4c2dcc84"
+    },
+    "assets/images/red_warning.png": {
+      "file": "f0e81edcbed41a632326.webp",
+      "bytes": 5382,
+      "sha256": "f0e81edcbed41a63232642520d036ffbdb07ab5f61656db1a08610ed9163610e"
+    },
+    "assets/images/restrictive.png": {
+      "file": "a287c26271ea884e1604.webp",
+      "bytes": 21364,
+      "sha256": "a287c26271ea884e160491bceda890a9b7ef4b533bd823470193af400f80b839"
+    },
+    "assets/images/rice.png": {
+      "file": "e7edf0fd19f1bfa4fe30.webp",
+      "bytes": 10120,
+      "sha256": "e7edf0fd19f1bfa4fe301ebb32b941c057ceea311ee91d9a693141e8db40ed8f"
+    },
+    "assets/images/riiight.png": {
+      "file": "0457af1c354240927694.webp",
+      "bytes": 120,
+      "sha256": "0457af1c354240927694db19886dec8fea08f569efb7f437c594b2742924ed84"
+    },
+    "assets/images/salata.png": {
+      "file": "54fc5c294398d1b61c3f.webp",
+      "bytes": 17298,
+      "sha256": "54fc5c294398d1b61c3f73d4078a2555e4817de0113d0ece13a3b95103ed4e29"
+    },
+    "assets/images/sand_clock.png": {
+      "file": "e4e4902b6350a7498640.webp",
+      "bytes": 5740,
+      "sha256": "e4e4902b6350a749864002c2b7d77d115c50d9972da5560bd3b61a51a71fb033"
+    },
+    "assets/images/scramlbed_eggs.png": {
+      "file": "865b1ca3b9f7af85dd87.webp",
+      "bytes": 6268,
+      "sha256": "865b1ca3b9f7af85dd87051b2f6f275f7aaf3eef1fca7b9fcdaa36f18e213cf7"
+    },
+    "assets/images/searchpng.png": {
+      "file": "bd8314ddabedfc8349b1.webp",
+      "bytes": 688,
+      "sha256": "bd8314ddabedfc8349b100191ce07b9290faecc59b6ca7227faf41159c5ca95f"
+    },
+    "assets/images/second_question.png": {
+      "file": "cabf86f2d49ea6439757.webp",
+      "bytes": 113268,
+      "sha256": "cabf86f2d49ea6439757dd3089846ad14a15cbf79fd0406196914c1314f61495"
+    },
+    "assets/images/see_star.png": {
+      "file": "877625284a341db79698.webp",
+      "bytes": 46152,
+      "sha256": "877625284a341db7969886eab56a3398c30f32935e3bcac462fdcfde9dbd82ab"
+    },
+    "assets/images/seefood.png": {
+      "file": "10ef5cb4b6d6c73e5a19.webp",
+      "bytes": 17662,
+      "sha256": "10ef5cb4b6d6c73e5a19c01b78fe4b8c32cc796ef6dc45b028a44c3371ef05f4"
+    },
+    "assets/images/small_steps.png": {
+      "file": "a9483c2c9ee002a7ae9b.webp",
+      "bytes": 95716,
+      "sha256": "a9483c2c9ee002a7ae9b1b16949adc6917c3dd4dc095d8a584581a0d6232ea6e"
+    },
+    "assets/images/solar_pen-bold (1).png": {
+      "file": "dd658ae7cdaf3e942ebd.webp",
+      "bytes": 386,
+      "sha256": "dd658ae7cdaf3e942ebd647351f91a3e4b506b97b1045a6735e117a9c59abe63"
+    },
+    "assets/images/solar_pen-bold.png": {
+      "file": "d48b373da70c1492ce7e.webp",
+      "bytes": 368,
+      "sha256": "d48b373da70c1492ce7e5ffecf5bf606cd4c1d7e04ed4a4ec5f54945cfe620b0"
+    },
+    "assets/images/solar_verified-check-bold.png": {
+      "file": "91b104fd9260f951c385.webp",
+      "bytes": 222,
+      "sha256": "91b104fd9260f951c3858bda8274af251da48dfe234c358173e21ada8c097ef3"
+    },
+    "assets/images/spicy.png": {
+      "file": "3360ed157961cd7f6755.webp",
+      "bytes": 9634,
+      "sha256": "3360ed157961cd7f6755f5c84e0a09e4a27553de313908d144f7346959fbfca5"
+    },
+    "assets/images/star.png": {
+      "file": "6ff438dbdd5b3a85225e.webp",
+      "bytes": 57446,
+      "sha256": "6ff438dbdd5b3a85225e8793d78803cdf3836b6149e46bfc111d5d77727cb1b3"
+    },
+    "assets/images/start.png": {
+      "file": "d2092d450ed24010806f.webp",
+      "bytes": 5094,
+      "sha256": "d2092d450ed24010806f9c911955a0624182f8e5e07b1a90e87e2497bee7ac59"
+    },
+    "assets/images/steps.png": {
+      "file": "5b57f6afef0dbe996a97.webp",
+      "bytes": 85236,
+      "sha256": "5b57f6afef0dbe996a977a7d07b0e66258caafb3e452aef470ee3ac390b62e6d"
+    },
+    "assets/images/stomach.png": {
+      "file": "fd253420492d34fcf968.webp",
+      "bytes": 9718,
+      "sha256": "fd253420492d34fcf968c40ff1305a49c0db41fcc7a3435e72e41861887867ef"
+    },
+    "assets/images/stonks.png": {
+      "file": "b850a0a616b8c895e0ba.webp",
+      "bytes": 4756,
+      "sha256": "b850a0a616b8c895e0bac7f604e7a99a856fbfd7a1b6627c98f6f27bee454070"
+    },
+    "assets/images/streak.png": {
+      "file": "b2369955f767460b6b48.webp",
+      "bytes": 40622,
+      "sha256": "b2369955f767460b6b48f401b0abc8c8ae3e88d023437404367e9fa27bf2cae0"
+    },
+    "assets/images/streak_flame.png": {
+      "file": "3b2b60f63907083310e6.webp",
+      "bytes": 51040,
+      "sha256": "3b2b60f63907083310e6b58efe5504e1f5279f75fab42583f6f4da8d61bd9356"
+    },
+    "assets/images/stressed.png": {
+      "file": "1415dad72502873a4e9f.webp",
+      "bytes": 6232,
+      "sha256": "1415dad72502873a4e9f8db968e0c813e783e5a1aaa1598d3315af7b45cb1c50"
+    },
+    "assets/images/summit.png": {
+      "file": "c55b9337ec9bf66b0e62.webp",
+      "bytes": 5682,
+      "sha256": "c55b9337ec9bf66b0e6248d52cfd2a51c53a71ea05419a237d2c22080098f2f1"
+    },
+    "assets/images/super.png": {
+      "file": "9e4e8477099a78c103fa.webp",
+      "bytes": 25952,
+      "sha256": "9e4e8477099a78c103fa00fec59691e4aab317233aa5314c1430dcdf880d8752"
+    },
+    "assets/images/super_colored.png": {
+      "file": "86d5947836eaf9bc741e.webp",
+      "bytes": 3918,
+      "sha256": "86d5947836eaf9bc741e3cd8b889739129cf43d81213e40482a718b7af199b8f"
+    },
+    "assets/images/sweethies.png": {
+      "file": "116f665352745432c7b0.webp",
+      "bytes": 16136,
+      "sha256": "116f665352745432c7b0435013a346b85a84ac9d5fc74bdb1167087b0222a44d"
+    },
+    "assets/images/take_photo.png": {
+      "file": "83b7f07157b54a6ee267.webp",
+      "bytes": 3138,
+      "sha256": "83b7f07157b54a6ee267bced145e356143502121871a060cecbed20f347468a8"
+    },
+    "assets/images/third_s-question.png": {
+      "file": "f146fafaf8b72b63d000.webp",
+      "bytes": 135140,
+      "sha256": "f146fafaf8b72b63d000b71ab9c7585ae58ec91f66717020177bbb2effc48430"
+    },
+    "assets/images/time-cook.png": {
+      "file": "68939aa11498a82e850b.webp",
+      "bytes": 13276,
+      "sha256": "68939aa11498a82e850b21616427442239d6b0504b37e150ff561e55cefe9515"
+    },
+    "assets/images/tirtil.png": {
+      "file": "c24654d06d968111734f.webp",
+      "bytes": 34390,
+      "sha256": "c24654d06d968111734f0f47044e9b3e63b6cf085c0ad1010b6b264e7e59bd06"
+    },
+    "assets/images/tonguev2.png": {
+      "file": "7b009f74deed72358195.webp",
+      "bytes": 4544,
+      "sha256": "7b009f74deed72358195c761b3880a0cf8bfe35e1851ed2697015f439aa40106"
+    },
+    "assets/images/toospicy.png": {
+      "file": "0d0b25693b266a11d917.webp",
+      "bytes": 13680,
+      "sha256": "0d0b25693b266a11d917041fec2b29f8a3d4e9b4327b8d021f532f11542feaf2"
+    },
+    "assets/images/tough.png": {
+      "file": "6a9e4f10fe900057056d.webp",
+      "bytes": 2492,
+      "sha256": "6a9e4f10fe900057056d34146856e9ac0183293dd6ce18bdbc6b93cf3c293bbb"
+    },
+    "assets/images/tough_colored.png": {
+      "file": "5f508fdc309988327235.webp",
+      "bytes": 41938,
+      "sha256": "5f508fdc309988327235229b25487e77caf80b9ca6dc5e17b0957b4e01b2db92"
+    },
+    "assets/images/tree.png": {
+      "file": "8e9a713289541eaecbea.webp",
+      "bytes": 71600,
+      "sha256": "8e9a713289541eaecbeac14b69f43f27e325fcb519df865e588df20555c55d21"
+    },
+    "assets/images/tree3.png": {
+      "file": "9832d2967cdbf56b027d.webp",
+      "bytes": 18614,
+      "sha256": "9832d2967cdbf56b027df76f4dd5f8b34ff8c055d002f369c7b00fcc414e5757"
+    },
+    "assets/images/trip.png": {
+      "file": "90d98f666c8284446600.webp",
+      "bytes": 25176,
+      "sha256": "90d98f666c8284446600f00648cd4f7f64eb2cab2ac79a3202c1aa2003275418"
+    },
+    "assets/images/unhappyv2.png": {
+      "file": "13e730623afd6cd29251.webp",
+      "bytes": 4640,
+      "sha256": "13e730623afd6cd29251ea9e00dc713ee92672dec6e85d3a1f4f0d76b85e2421"
+    },
+    "assets/images/vector_18_bmi.png": {
+      "file": "8ae8afcf589d7cf2ffc8.webp",
+      "bytes": 962,
+      "sha256": "8ae8afcf589d7cf2ffc83e37ef9d14a24017af5a4ceae9181f1a9fe4580974cd"
+    },
+    "assets/images/vegetarian.png": {
+      "file": "84772fd1dd70c8ae642d.webp",
+      "bytes": 32720,
+      "sha256": "84772fd1dd70c8ae642d8709424ba6871df0606fed48f656cc223e592f8229ef"
+    },
+    "assets/images/wake.png": {
+      "file": "5e1444ab3e9b397d1d9c.webp",
+      "bytes": 133782,
+      "sha256": "5e1444ab3e9b397d1d9c9d64a558db9798956ef3111b74aa36fb74877db1ea3d"
+    },
+    "assets/images/water.png": {
+      "file": "ace6de1343f568f98932.webp",
+      "bytes": 32668,
+      "sha256": "ace6de1343f568f989324eda2d6b90cb12f96f6e826e1cf7d7c71fff83b7921c"
+    },
+    "assets/images/water_bottle.png": {
+      "file": "36964f9a854fb1cdb4ea.webp",
+      "bytes": 742,
+      "sha256": "36964f9a854fb1cdb4ea98f344d3fa89bd89b883067041ef4ecd5e013b57f183"
+    },
+    "assets/images/water_bottle_300.png": {
+      "file": "a1301d30df1c22784fe7.webp",
+      "bytes": 930,
+      "sha256": "a1301d30df1c22784fe7315b3ad71ea27ade0e4edac50636a6449b22ec17cde4"
+    },
+    "assets/images/water_bottle_500.png": {
+      "file": "e16b6f980c3e7b0483a2.webp",
+      "bytes": 922,
+      "sha256": "e16b6f980c3e7b0483a280938e75fe0cf2e93fb73f2e3668da34e2287aa1b87e"
+    },
+    "assets/images/water_glass_100.png": {
+      "file": "3553ba2cc175ed7c6fb8.webp",
+      "bytes": 842,
+      "sha256": "3553ba2cc175ed7c6fb8a970222d40faf5620f56eb0e401c65af9af5d51d1a6d"
+    },
+    "assets/images/water_glass_200.png": {
+      "file": "dccd9ea461dca29b25fd.webp",
+      "bytes": 764,
+      "sha256": "dccd9ea461dca29b25fdbed463cc960d7d2c70bdd3a0a722b63c979c82fe8ff4"
+    },
+    "assets/images/water_glass_50.png": {
+      "file": "b87c0ff25910cb932b92.webp",
+      "bytes": 878,
+      "sha256": "b87c0ff25910cb932b923358d91087b459fa61aa4b639b078dc10e291e7d833c"
+    },
+    "assets/images/water_size_plus.png": {
+      "file": "a49fbf531d44992d994c.webp",
+      "bytes": 902,
+      "sha256": "a49fbf531d44992d994c83851aaf9490bce1b9fe3222a424979324225e0347b6"
+    },
+    "assets/images/weakness.png": {
+      "file": "15a1697cfdb14c559a54.webp",
+      "bytes": 70052,
+      "sha256": "15a1697cfdb14c559a549ecec2b80685888808188c63199d0edd8221912ff152"
+    },
+    "assets/images/weigher.png": {
+      "file": "327c97d2f1aa22f7dee0.webp",
+      "bytes": 42812,
+      "sha256": "327c97d2f1aa22f7dee08c4e7755df0a73e5f3fad1d4776ff6ee0466e5a600b0"
+    },
+    "assets/images/weigher_2.png": {
+      "file": "bc9c2fb1926e1719fb93.webp",
+      "bytes": 59698,
+      "sha256": "bc9c2fb1926e1719fb93fc7060ce6e0f7e2bbc4611f0c163e9e9770f4088f0a6"
+    },
+    "assets/images/widget-1.png": {
+      "file": "17bd0686b5d2b8d14431.webp",
+      "bytes": 92050,
+      "sha256": "17bd0686b5d2b8d144314d94a79d5952db6b00cb3fa34c9c6df417f750af31b7"
+    },
+    "assets/images/widget-2.png": {
+      "file": "3e9c97078168effccf79.webp",
+      "bytes": 126702,
+      "sha256": "3e9c97078168effccf794ab8bc7e2947c54ee91abf6acaa290b3e674b3fdf19a"
+    },
+    "assets/images/woman.png": {
+      "file": "2efe810051bbc80e5e60.webp",
+      "bytes": 52272,
+      "sha256": "2efe810051bbc80e5e60c3ba56b55b340dd0d03bc04275e3f5aca9a61e5b2000"
+    },
+    "assets/images/yellow_lightning.png": {
+      "file": "2a5337ec577a8d1bf5b2.webp",
+      "bytes": 64940,
+      "sha256": "2a5337ec577a8d1bf5b27f7a99ba25f5e96645dd5915f52cd61eb1e72cc9d0bc"
+    },
+    "assets/images/yogurt.png": {
+      "file": "7496a532d3dba7d3b19b.webp",
+      "bytes": 5848,
+      "sha256": "7496a532d3dba7d3b19b5afb856a0ca6cd38b53eafe179d968bcbba227d393bd"
+    },
+    "assets/images/zzz.png": {
+      "file": "8eaa265293a969304f8b.webp",
+      "bytes": 80252,
+      "sha256": "8eaa265293a969304f8ba6b30d27001540eacfa9573e560b874f5e008a31c5ad"
+    }
+  }
+}

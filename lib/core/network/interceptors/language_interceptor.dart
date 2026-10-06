@@ -7,10 +7,7 @@ final class LanguageInterceptor extends Interceptor {
   LanguageInterceptor();
 
   @override
-  void onRequest(
-    RequestOptions options,
-    RequestInterceptorHandler handler,
-  ) {
+  void onRequest(RequestOptions options, RequestInterceptorHandler handler) {
     options.headers['Accept-Language'] =
         PlatformDispatcher.instance.locale.languageCode;
     handler.next(options);

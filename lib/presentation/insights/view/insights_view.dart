@@ -2,8 +2,10 @@ import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:easy_localization/easy_localization.dart';
+import 'package:fastingapp/core/remote_images/app_image.dart';
 import 'package:fastingapp/core/router/route_paths.dart';
 import 'package:fastingapp/core/theme/app_text_styles.dart';
+import 'package:fastingapp/generated/app_images.g.dart';
 import 'package:fastingapp/generated/assets.gen.dart';
 import 'package:fastingapp/generated/colors.gen.dart';
 import 'package:fastingapp/presentation/insights/insight_topic.dart';
@@ -134,7 +136,7 @@ final class _InsightsHeader extends StatelessWidget {
           right: -10,
           top: 5,
           child: IgnorePointer(
-            child: Assets.images.insightsss.image(
+            child: AppImages.insightsss.image(
               width: 180,
               height: 180,
               fit: BoxFit.contain,
@@ -213,7 +215,7 @@ final class _SearchField extends StatelessWidget {
         padding: const EdgeInsets.all(10),
         child: Row(
           children: [
-            Assets.images.searchpng.image(width: 20, height: 20),
+            AppImages.searchpng.image(width: 20, height: 20),
             const SizedBox(width: 10),
             Expanded(
               child: TextField(
@@ -258,12 +260,12 @@ final class _Topic {
   final String bodyKey;
   final _TopicBackground background;
 
-  AssetGenImage get asset => switch (image) {
-    _TopicImage.tree => Assets.images.tree,
-    _TopicImage.flame => Assets.images.flameCalories,
-    _TopicImage.window => Assets.images.eatWindow,
-    _TopicImage.heart => Assets.images.blueHearth,
-    _TopicImage.star => Assets.images.purpleStar,
+  AppImageAsset get asset => switch (image) {
+    _TopicImage.tree => AppImages.tree,
+    _TopicImage.flame => AppImages.flameCalories,
+    _TopicImage.window => AppImages.eatWindow,
+    _TopicImage.heart => AppImages.blueHearth,
+    _TopicImage.star => AppImages.purpleStar,
   };
 
   Color get color => switch (background) {
@@ -395,7 +397,7 @@ final class _StepsBanner extends StatelessWidget {
               ),
             ),
 
-            Assets.images.smallSteps.image(height: 73, fit: BoxFit.contain),
+            AppImages.smallSteps.image(height: 73, fit: BoxFit.contain),
           ],
         ),
       ),

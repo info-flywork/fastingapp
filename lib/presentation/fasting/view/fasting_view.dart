@@ -4,6 +4,7 @@ import 'dart:math' as math;
 import 'package:easy_localization/easy_localization.dart';
 import 'package:fastingapp/core/dialogs/app_dialogs.dart';
 import 'package:fastingapp/core/home_widgets/fasting_widget_sync.dart';
+import 'package:fastingapp/core/remote_images/app_image.dart';
 import 'package:fastingapp/core/router/route_paths.dart';
 import 'package:fastingapp/core/theme/app_text_styles.dart';
 import 'package:fastingapp/core/utils/extensions/future_extensions.dart';
@@ -12,6 +13,7 @@ import 'package:fastingapp/core/widgets/app_button_decoration.dart';
 import 'package:fastingapp/core/widgets/bottom_navigation_bar/'
     'app_bottom_nav.dart';
 import 'package:fastingapp/core/widgets/horseshoe_arc.dart';
+import 'package:fastingapp/generated/app_images.g.dart';
 import 'package:fastingapp/generated/assets.gen.dart';
 import 'package:fastingapp/generated/colors.gen.dart';
 import 'package:fastingapp/presentation/fasting/view/fasting_end_signal.dart';
@@ -399,7 +401,7 @@ final class _ActionRow extends StatelessWidget {
             onTap: () => context.pushNamed(RoutePaths.water.name),
             child: Transform.scale(
               scale: 1.45,
-              child: Assets.images.water.image(
+              child: AppImages.water.image(
                 width: 32,
                 height: 32,
                 fit: BoxFit.contain,
@@ -496,7 +498,7 @@ final class _ModeToggle extends StatelessWidget {
                     onTap: onBodyTap,
                     child: Transform.scale(
                       scale: 1.25,
-                      child: Assets.images.human.image(
+                      child: AppImages.human.image(
                         width: 28,
                         height: 28,
                         fit: BoxFit.contain,
@@ -506,7 +508,7 @@ final class _ModeToggle extends StatelessWidget {
                   const SizedBox(width: _gap),
                   _ModeSegment(
                     onTap: onMealTap,
-                    child: Assets.images.forkClosest.image(
+                    child: AppImages.forkClosest.image(
                       width: 28,
                       height: 28,
                       fit: BoxFit.contain,
@@ -597,7 +599,7 @@ final class _MealStage extends StatelessWidget {
         ),
         const SizedBox(height: 12),
         _StageCard(
-          image: Assets.images.breakYourFast,
+          image: AppImages.breakYourFast,
           titleKey: 'fasting_page.break_title',
           bodyKey: 'fasting_page.break_body',
           onTap: () => context.pushNamed(RoutePaths.eatingWindow.name),
@@ -642,7 +644,7 @@ final class _BodyStage extends StatelessWidget {
     return Column(
       children: [
         _StageCard(
-          image: Assets.images.a1Light,
+          image: AppImages.a1Light,
           titleKey: 'fasting_page.body_title',
           bodyKey: 'fasting_page.body_body',
           onTap: () => context.pushNamed(RoutePaths.bodyStatus.name),
@@ -674,7 +676,7 @@ final class _StageCard extends StatelessWidget {
     this.onTap,
   });
 
-  final AssetGenImage image;
+  final AppImageAsset image;
   final String titleKey;
   final String bodyKey;
   final VoidCallback? onTap;
@@ -788,36 +790,36 @@ final class _FastingArc extends StatelessWidget {
                         if (bodyMode) ...[
                           _ArcMarker(
                             center: breakFast,
-                            image: Assets.images.a1Light,
+                            image: AppImages.a1Light,
                           ),
                           _ArcMarker(
                             center: _pointOnArc(arcSize, 0.44),
-                            image: Assets.images.a3,
+                            image: AppImages.a3,
                             dimmed: true,
                           ),
                           _ArcMarker(
                             center: _pointOnArc(arcSize, 0.66),
-                            image: Assets.images.a4,
+                            image: AppImages.a4,
                             dimmed: true,
                           ),
                           _ArcMarker(
                             center: _pointOnArc(arcSize, 0.92),
-                            image: Assets.images.a6,
+                            image: AppImages.a6,
                             dimmed: true,
                           ),
                         ] else ...[
                           _ArcMarker(
                             center: breakFast,
-                            image: Assets.images.breakYourFast,
+                            image: AppImages.breakYourFast,
                           ),
                           _ArcMarker(
                             center: nourish,
-                            image: Assets.images.darkNorusih,
+                            image: AppImages.darkNorusih,
                             scale: 1.35,
                           ),
                           _ArcMarker(
                             center: nextFast,
-                            image: Assets.images.darkFast,
+                            image: AppImages.darkFast,
                             scale: 1.25,
                             onTap: onHourglassTap,
                           ),
@@ -909,7 +911,7 @@ final class _PenIcon extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Assets.images.solarPenBold1.image(
+    return AppImages.solarPenBold1.image(
       width: 18,
       height: 18,
       fit: BoxFit.contain,
@@ -927,7 +929,7 @@ final class _ArcMarker extends StatelessWidget {
   });
 
   final Offset center;
-  final AssetGenImage image;
+  final AppImageAsset image;
   final double scale;
   final bool dimmed;
   final VoidCallback? onTap;

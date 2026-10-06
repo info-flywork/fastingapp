@@ -993,5 +993,11 @@
       "card3_body": "Ein unterbrochenes Fasten setzt dich nicht zurück. Iss, ruh dich aus und öffne das nächste Fenster ohne Rede.",
       "tip": "Halt das Ziel schlicht und freundlich. Du baust einen Rhythmus, du gewinnst kein Rennen."
     }
+  },
+  "no_internet": {
+    "title": "Keine Internetverbindung",
+    "subtitle": "Mochi sucht nach einer Verbindung. Prüfe dein WLAN oder deine mobilen Daten und versuche es erneut.",
+    "retry": "Erneut versuchen",
+    "checking": "Wird geprüft…"
   }
 }

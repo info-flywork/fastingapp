@@ -1,3 +1,4 @@
+import 'package:fastingapp/core/remote_images/app_image.dart';
 import 'package:fastingapp/core/theme/app_text_styles.dart';
 import 'package:fastingapp/generated/colors.gen.dart';
 import 'package:flutter/material.dart';
@@ -49,7 +50,7 @@ final class OnboardingGridOptionCard extends StatelessWidget {
                 child: ClipRect(
                   child: Transform.scale(
                     scale: 1.2,
-                    child: Image.asset(
+                    child: appImage(
                       imagePath,
                       width: 48,
                       height: 48,

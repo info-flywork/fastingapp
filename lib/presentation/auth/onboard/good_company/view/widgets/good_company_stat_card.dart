@@ -62,7 +62,7 @@ final class GoodCompanyStatCard extends StatelessWidget {
               right: 0,
               child: Transform.rotate(
                 angle: iconTiltRadians,
-                child: Image.asset(
+                child: appImage(
                   iconPath,
                   width: 56,
                   height: 56,

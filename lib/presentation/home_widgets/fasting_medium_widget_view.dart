@@ -1,4 +1,4 @@
-import 'package:fastingapp/generated/assets.gen.dart';
+import 'package:fastingapp/generated/app_images.g.dart';
 import 'package:fastingapp/generated/colors.gen.dart';
 import 'package:fastingapp/generated/fonts.gen.dart';
 import 'package:flutter/material.dart';
@@ -41,7 +41,7 @@ final class FastingMediumWidgetView extends StatelessWidget {
               Positioned(
                 right: -4,
                 bottom: -48,
-                child: Assets.images.widget2.image(
+                child: AppImages.widget2.image(
                   height: 240,
                   fit: BoxFit.contain,
                 ),

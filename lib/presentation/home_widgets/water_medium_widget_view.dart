@@ -1,6 +1,7 @@
 import 'dart:math' as math;
 
-import 'package:fastingapp/generated/assets.gen.dart';
+import 'package:fastingapp/core/remote_images/app_image.dart';
+import 'package:fastingapp/generated/app_images.g.dart';
 import 'package:fastingapp/generated/colors.gen.dart';
 import 'package:fastingapp/generated/fonts.gen.dart';
 import 'package:flutter/material.dart';
@@ -189,7 +190,7 @@ final class _SipCard extends StatelessWidget {
         padding: const EdgeInsets.fromLTRB(8, 12, 8, 12),
         child: Column(
           children: [
-            Image.asset(Assets.images.droplet.path, width: 32, height: 32),
+            appImage(AppImages.droplet.path, width: 32, height: 32),
             const SizedBox(height: 6),
             Text('$ml$unitLabel', style: _sipAmount),
             const SizedBox(height: 4),

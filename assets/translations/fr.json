@@ -993,5 +993,11 @@
       "card3_body": "Un jeûne rompu ne vous réinitialise pas. Mangez, reposez-vous et démarrez la fenêtre suivante sans parler.",
       "tip": "Gardez l’objectif ennuyeux et gentil. Vous construisez un rythme, vous ne gagnez pas une course."
     }
+  },
+  "no_internet": {
+    "title": "Pas de connexion Internet",
+    "subtitle": "Mochi cherche une connexion. Vérifie ton Wi‑Fi ou tes données mobiles, puis réessaie.",
+    "retry": "Réessayer",
+    "checking": "Vérification…"
   }
 }

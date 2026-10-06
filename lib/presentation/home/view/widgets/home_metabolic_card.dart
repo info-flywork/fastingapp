@@ -17,7 +17,7 @@ final class HomeMetabolicCard extends StatelessWidget {
         children: [
           Row(
             children: [
-              Assets.images.metabolic.image(
+              AppImages.metabolic.image(
                 width: 28,
                 height: 28,
                 fit: BoxFit.contain,
@@ -118,7 +118,7 @@ final class _MascotStage extends StatelessWidget {
             child: SizedBox(
               width: _mascotSize,
               height: _mascotSize,
-              child: Assets.images.mascotMetabolic.image(
+              child: AppImages.mascotMetabolic.image(
                 width: _mascotSize,
                 height: _mascotSize,
                 fit: BoxFit.contain,

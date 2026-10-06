@@ -119,7 +119,7 @@ final class _StreakPill extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Assets.images.streakFlame.image(
+          AppImages.streakFlame.image(
             width: 28,
             height: 28,
             fit: BoxFit.contain,

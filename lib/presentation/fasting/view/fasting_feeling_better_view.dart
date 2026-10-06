@@ -1,5 +1,6 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:fastingapp/core/dialogs/app_dialogs.dart';
+import 'package:fastingapp/core/remote_images/app_image.dart';
 import 'package:fastingapp/core/router/route_paths.dart';
 import 'package:fastingapp/core/theme/app_text_styles.dart';
 import 'package:fastingapp/core/widgets/app_button.dart';
@@ -41,7 +42,7 @@ final class FastingFeelingBetterView extends StatelessWidget {
             Center(
               child: Transform.scale(
                 scale: 1.2,
-                child: Image.asset(
+                child: appImage(
                   Assets.gifs.mascotHearts.path,
                   width: 180,
                   height: 180,

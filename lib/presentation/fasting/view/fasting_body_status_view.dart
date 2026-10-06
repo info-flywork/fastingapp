@@ -1,7 +1,9 @@
 import 'dart:math' as math;
 
 import 'package:easy_localization/easy_localization.dart';
+import 'package:fastingapp/core/remote_images/app_image.dart';
 import 'package:fastingapp/core/theme/app_text_styles.dart';
+import 'package:fastingapp/generated/app_images.g.dart';
 import 'package:fastingapp/generated/assets.gen.dart';
 import 'package:fastingapp/generated/colors.gen.dart';
 import 'package:flutter/material.dart';
@@ -76,8 +78,8 @@ final class _Stage {
     required this.bodyKey,
   });
 
-  final AssetGenImage reached;
-  final AssetGenImage idle;
+  final AppImageAsset reached;
+  final AppImageAsset idle;
   final String rangeKey;
   final String titleKey;
   final String bodyKey;
@@ -85,65 +87,65 @@ final class _Stage {
 
 /// Renkli `*_light` geçilen aşama, gri düz dosya henüz gelmeyen.
 final _stages = <_Stage>[
-  _Stage(
-    reached: Assets.images.a1Light,
-    idle: Assets.images.a1,
+  const _Stage(
+    reached: AppImages.a1Light,
+    idle: AppImages.a1,
     rangeKey: 'body_status.range_1',
     titleKey: 'body_status.title_1',
     bodyKey: 'body_status.body_1',
   ),
-  _Stage(
-    reached: Assets.images.a2Light,
-    idle: Assets.images.a2,
+  const _Stage(
+    reached: AppImages.a2Light,
+    idle: AppImages.a2,
     rangeKey: 'body_status.range_2',
     titleKey: 'body_status.title_2',
     bodyKey: 'body_status.body_2',
   ),
-  _Stage(
-    reached: Assets.images.a3Light,
-    idle: Assets.images.a3,
+  const _Stage(
+    reached: AppImages.a3Light,
+    idle: AppImages.a3,
     rangeKey: 'body_status.range_3',
     titleKey: 'body_status.title_3',
     bodyKey: 'body_status.body_3',
   ),
-  _Stage(
-    reached: Assets.images.a4Light,
-    idle: Assets.images.a4,
+  const _Stage(
+    reached: AppImages.a4Light,
+    idle: AppImages.a4,
     rangeKey: 'body_status.range_4',
     titleKey: 'body_status.title_4',
     bodyKey: 'body_status.body_4',
   ),
-  _Stage(
-    reached: Assets.images.a5Light,
-    idle: Assets.images.a5,
+  const _Stage(
+    reached: AppImages.a5Light,
+    idle: AppImages.a5,
     rangeKey: 'body_status.range_5',
     titleKey: 'body_status.title_5',
     bodyKey: 'body_status.body_5',
   ),
-  _Stage(
-    reached: Assets.images.a6Light,
-    idle: Assets.images.a6,
+  const _Stage(
+    reached: AppImages.a6Light,
+    idle: AppImages.a6,
     rangeKey: 'body_status.range_6',
     titleKey: 'body_status.title_6',
     bodyKey: 'body_status.body_6',
   ),
-  _Stage(
-    reached: Assets.images.a7Light,
-    idle: Assets.images.a7,
+  const _Stage(
+    reached: AppImages.a7Light,
+    idle: AppImages.a7,
     rangeKey: 'body_status.range_7',
     titleKey: 'body_status.title_7',
     bodyKey: 'body_status.body_7',
   ),
-  _Stage(
-    reached: Assets.images.a8Light,
-    idle: Assets.images.a8,
+  const _Stage(
+    reached: AppImages.a8Light,
+    idle: AppImages.a8,
     rangeKey: 'body_status.range_8',
     titleKey: 'body_status.title_8',
     bodyKey: 'body_status.body_8',
   ),
-  _Stage(
-    reached: Assets.images.a9Light,
-    idle: Assets.images.a9,
+  const _Stage(
+    reached: AppImages.a9Light,
+    idle: AppImages.a9,
     rangeKey: 'body_status.range_9',
     titleKey: 'body_status.title_9',
     bodyKey: 'body_status.body_9',

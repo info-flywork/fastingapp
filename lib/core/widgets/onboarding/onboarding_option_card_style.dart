@@ -24,8 +24,9 @@ final class OnboardingOptionCardStyle {
       borderWidth: 2,
       unselectedBorderColor: ColorName.colorBlack.withValues(alpha: 0.05),
       selectedBorderColor: ColorName.colorOptionSelected,
-      selectedBackgroundColor:
-          ColorName.colorOptionSelected.withValues(alpha: 0.08),
+      selectedBackgroundColor: ColorName.colorOptionSelected.withValues(
+        alpha: 0.08,
+      ),
       iconSize: 54,
       radioSize: 24,
     );

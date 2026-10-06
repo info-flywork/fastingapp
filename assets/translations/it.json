@@ -989,6 +989,12 @@
         "card3_body": "Un digiuno interrotto non cancella i progressi. Mangia, riposa e riprendi la prossima finestra senza rimproverarti.",
         "tip": "Mantieni l’obiettivo semplice e gentile. Stai costruendo un ritmo, non vincendo una gara."
       }
+    },
+    "no_internet": {
+        "title": "Nessuna connessione a Internet",
+        "subtitle": "Mochi sta cercando una connessione. Controlla il Wi‑Fi o i dati mobili e riprova.",
+        "retry": "Riprova",
+        "checking": "Verifica in corso…"
     }
   }
   

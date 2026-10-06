@@ -6,6 +6,7 @@ import 'package:fastingapp/core/theme/app_text_styles.dart';
 import 'package:fastingapp/core/widgets/app_button.dart';
 import 'package:fastingapp/core/widgets/app_button_decoration.dart';
 import 'package:fastingapp/core/widgets/horseshoe_arc.dart';
+import 'package:fastingapp/generated/app_images.g.dart';
 import 'package:fastingapp/generated/assets.gen.dart';
 import 'package:fastingapp/generated/colors.gen.dart';
 import 'package:fastingapp/presentation/plans/plan_detail_args.dart';
@@ -342,10 +343,7 @@ final class _PlanTimeRow extends StatelessWidget {
                       ColorName.colorPlanPen,
                       BlendMode.srcIn,
                     ),
-                    child: Assets.images.solarPenBold.image(
-                      width: 16,
-                      height: 16,
-                    ),
+                    child: AppImages.solarPenBold.image(width: 16, height: 16),
                   ),
                 ],
               ),

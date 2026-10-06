@@ -2,8 +2,9 @@ import 'dart:math' as math;
 import 'dart:ui' as ui;
 
 import 'package:easy_localization/easy_localization.dart';
+import 'package:fastingapp/core/remote_images/app_image.dart';
 import 'package:fastingapp/core/theme/app_text_styles.dart';
-import 'package:fastingapp/generated/assets.gen.dart';
+import 'package:fastingapp/generated/app_images.g.dart';
 import 'package:fastingapp/generated/colors.gen.dart';
 import 'package:flutter/material.dart';
 
@@ -61,7 +62,7 @@ final class _Header extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        Assets.images.fastForecast.image(
+        AppImages.fastForecast.image(
           width: 28,
           height: 28,
           fit: BoxFit.contain,
@@ -184,9 +185,7 @@ final class _ForecastSummary extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final icon = day == _ForecastDay.easy
-        ? Assets.images.huh
-        : Assets.images.noone;
+    final icon = day == _ForecastDay.easy ? AppImages.huh : AppImages.noone;
     final dayLabel = switch (day) {
       _ForecastDay.easy => 'fasting_page.forecast_easy'.tr(),
       _ForecastDay.moderate => 'fasting_page.forecast_moderate'.tr(),
@@ -240,7 +239,7 @@ final class _MetricsRow extends StatelessWidget {
       children: [
         Expanded(
           child: _MetricCell(
-            icon: Assets.images.stonks,
+            icon: AppImages.stonks,
             value: '14:00',
             label: 'fasting_page.forecast_hunger_pack'.tr(),
           ),
@@ -248,7 +247,7 @@ final class _MetricsRow extends StatelessWidget {
         const SizedBox(width: 8),
         Expanded(
           child: _MetricCell(
-            icon: Assets.images.redWarning,
+            icon: AppImages.redWarning,
             value: '13:30 - 14:30',
             label: 'fasting_page.forecast_risk_zone'.tr(),
           ),
@@ -256,7 +255,7 @@ final class _MetricsRow extends StatelessWidget {
         const SizedBox(width: 8),
         Expanded(
           child: _MetricCell(
-            icon: Assets.images.sandClock,
+            icon: AppImages.sandClock,
             value: '16h:00',
             label: 'fasting_page.forecast_recommended'.tr(),
           ),
@@ -273,7 +272,7 @@ final class _MetricCell extends StatelessWidget {
     required this.label,
   });
 
-  final AssetGenImage icon;
+  final AppImageAsset icon;
   final String value;
   final String label;
 

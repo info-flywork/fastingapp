@@ -18,7 +18,7 @@ final class HomeChallengeCard extends StatelessWidget {
         children: [
           Row(
             children: [
-              Assets.images.challenge.image(width: 28, height: 28),
+              AppImages.challenge.image(width: 28, height: 28),
               const SizedBox(width: 6),
               Text(
                 'home.active_challenge'.tr(),
@@ -31,7 +31,7 @@ final class HomeChallengeCard extends StatelessWidget {
           const SizedBox(height: 12),
           Row(
             children: [
-              Assets.images.fastingChallenge.image(
+              AppImages.fastingChallenge.image(
                 width: 80,
                 height: 80,
                 fit: BoxFit.contain,
@@ -82,9 +82,9 @@ final class _ParticipantsCluster extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final avatars = [
-      Assets.images.fastingChallengeUser1,
-      Assets.images.fastingChallengeUser2,
-      Assets.images.fastingChallengeUser3,
+      AppImages.fastingChallengeUser1,
+      AppImages.fastingChallengeUser2,
+      AppImages.fastingChallengeUser3,
     ];
     const step = _avatarSize - _avatarOverlap;
     final lastAvatarLeft = (avatars.length - 1) * step;

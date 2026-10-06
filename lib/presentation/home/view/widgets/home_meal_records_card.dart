@@ -23,7 +23,7 @@ final class HomeMealRecordsCard extends StatelessWidget {
           children: [
             Row(
               children: [
-                Assets.images.orangeBell.image(
+                AppImages.orangeBell.image(
                   width: 28,
                   height: 28,
                   fit: BoxFit.contain,
@@ -140,7 +140,7 @@ final class _MealEntryCard extends StatelessWidget {
               borderRadius: BorderRadius.circular(12),
             ),
             alignment: Alignment.center,
-            child: Assets.images.orangeBell.image(
+            child: AppImages.orangeBell.image(
               width: 32,
               height: 32,
               fit: BoxFit.contain,
@@ -160,7 +160,7 @@ final class _MealEntryCard extends StatelessWidget {
           const SizedBox(width: 8),
           Padding(
             padding: const EdgeInsets.only(top: 24),
-            child: Assets.images.mealRecordEmoji.image(
+            child: AppImages.mealRecordEmoji.image(
               width: 36,
               height: 36,
               fit: BoxFit.contain,

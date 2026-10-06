@@ -2,11 +2,13 @@ import 'dart:math' as math;
 
 import 'package:easy_localization/easy_localization.dart';
 import 'package:fastingapp/core/dialogs/app_dialogs.dart';
+import 'package:fastingapp/core/remote_images/app_image.dart';
 import 'package:fastingapp/core/theme/app_text_styles.dart';
 import 'package:fastingapp/core/widgets/app_button.dart';
 import 'package:fastingapp/core/widgets/app_button_decoration.dart';
 import 'package:fastingapp/core/widgets/onboarding/onboarding_option_card.dart';
 import 'package:fastingapp/core/widgets/onboarding/onboarding_option_card_style.dart';
+import 'package:fastingapp/generated/app_images.g.dart';
 import 'package:fastingapp/generated/assets.gen.dart';
 import 'package:fastingapp/generated/colors.gen.dart';
 import 'package:fastingapp/generated/fonts.gen.dart';
@@ -193,7 +195,7 @@ final class _MealTimeCard extends StatelessWidget {
               children: [
                 Text(label, style: AppTextStyles.mealDetailTimeValue),
                 const SizedBox(width: 6),
-                Assets.images.solarPenBold1.image(
+                AppImages.solarPenBold1.image(
                   width: 18,
                   height: 18,
                   fit: BoxFit.contain,
@@ -226,7 +228,7 @@ final class _MealOrSnackCard extends StatelessWidget {
               Expanded(
                 child: _KindTile(
                   label: 'meal_detail.kind_meal'.tr(),
-                  image: Assets.images.orangeBellv2,
+                  image: AppImages.orangeBellv2,
                   selected: selected == MealKind.meal,
                   onTap: () => onSelected(MealKind.meal),
                 ),
@@ -235,7 +237,7 @@ final class _MealOrSnackCard extends StatelessWidget {
               Expanded(
                 child: _KindTile(
                   label: 'meal_detail.kind_snack'.tr(),
-                  image: Assets.images.apple,
+                  image: AppImages.apple,
                   selected: selected == MealKind.snack,
                   onTap: () => onSelected(MealKind.snack),
                 ),
@@ -257,7 +259,7 @@ final class _KindTile extends StatelessWidget {
   });
 
   final String label;
-  final AssetGenImage image;
+  final AppImageAsset image;
   final bool selected;
   final VoidCallback onTap;
 
@@ -316,38 +318,38 @@ final class _DietTypeCard extends StatelessWidget {
           MealDietChoice diet,
           String titleKey,
           String? subtitleKey,
-          AssetGenImage image,
+          AppImageAsset image,
         })
       >[
         (
           diet: MealDietChoice.ketogenic,
           titleKey: 'meal_detail.diet_keto_title',
           subtitleKey: 'meal_detail.diet_keto_subtitle',
-          image: Assets.images.avacado,
+          image: AppImages.avacado,
         ),
         (
           diet: MealDietChoice.lowCarb,
           titleKey: 'meal_detail.diet_low_carb_title',
           subtitleKey: 'meal_detail.diet_low_carb_subtitle',
-          image: Assets.images.lowCarbv2,
+          image: AppImages.lowCarbv2,
         ),
         (
           diet: MealDietChoice.mixed,
           titleKey: 'meal_detail.diet_mixed_title',
           subtitleKey: 'meal_detail.diet_mixed_subtitle',
-          image: Assets.images.mixedv2,
+          image: AppImages.mixedv2,
         ),
         (
           diet: MealDietChoice.highCarb,
           titleKey: 'meal_detail.diet_high_carb_title',
           subtitleKey: 'meal_detail.diet_high_carb_subtitle',
-          image: Assets.images.highCarbv2,
+          image: AppImages.highCarbv2,
         ),
         (
           diet: MealDietChoice.notSure,
           titleKey: 'meal_detail.diet_not_sure_title',
           subtitleKey: null,
-          image: Assets.images.notSurev2,
+          image: AppImages.notSurev2,
         ),
       ];
 
@@ -417,7 +419,7 @@ final class _FeelingCard extends StatelessWidget {
               Expanded(
                 child: _FeelingTile(
                   label: 'meal_detail.feeling_meh'.tr(),
-                  image: Assets.images.mehv2,
+                  image: AppImages.mehv2,
                   selected: selected == MealFeeling.meh,
                   onTap: () => onSelected(MealFeeling.meh),
                 ),
@@ -425,7 +427,7 @@ final class _FeelingCard extends StatelessWidget {
               Expanded(
                 child: _FeelingTile(
                   label: 'meal_detail.feeling_good'.tr(),
-                  image: Assets.images.goodv2,
+                  image: AppImages.goodv2,
                   selected: selected == MealFeeling.good,
                   onTap: () => onSelected(MealFeeling.good),
                 ),
@@ -433,7 +435,7 @@ final class _FeelingCard extends StatelessWidget {
               Expanded(
                 child: _FeelingTile(
                   label: 'meal_detail.feeling_super'.tr(),
-                  image: Assets.images.mealRecordEmoji,
+                  image: AppImages.mealRecordEmoji,
                   selected: selected == MealFeeling.superFeeling,
                   onTap: () => onSelected(MealFeeling.superFeeling),
                 ),
@@ -455,7 +457,7 @@ final class _FeelingTile extends StatelessWidget {
   });
 
   final String label;
-  final AssetGenImage image;
+  final AppImageAsset image;
   final bool selected;
   final VoidCallback onTap;
 

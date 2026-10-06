@@ -1,6 +1,6 @@
 import 'dart:math' as math;
 
-import 'package:fastingapp/generated/assets.gen.dart';
+import 'package:fastingapp/generated/app_images.g.dart';
 import 'package:fastingapp/generated/colors.gen.dart';
 import 'package:fastingapp/generated/fonts.gen.dart';
 import 'package:flutter/material.dart';
@@ -64,10 +64,7 @@ final class FastingHomeWidgetView extends StatelessWidget {
               Positioned(
                 right: -8,
                 bottom: -72,
-                child: Assets.images.widget1.image(
-                  width: 220,
-                  fit: BoxFit.contain,
-                ),
+                child: AppImages.widget1.image(width: 220, fit: BoxFit.contain),
               ),
             ],
           ),

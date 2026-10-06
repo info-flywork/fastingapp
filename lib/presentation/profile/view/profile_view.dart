@@ -6,6 +6,7 @@ import 'package:fastingapp/core/dialogs/app_dialogs.dart';
 import 'package:fastingapp/core/router/route_paths.dart';
 import 'package:fastingapp/core/theme/app_text_styles.dart';
 import 'package:fastingapp/core/widgets/bottom_navigation_bar/app_bottom_nav.dart';
+import 'package:fastingapp/generated/app_images.g.dart';
 import 'package:fastingapp/generated/assets.gen.dart';
 import 'package:fastingapp/generated/colors.gen.dart';
 import 'package:fastingapp/presentation/auth/bloc/auth_bloc.dart';

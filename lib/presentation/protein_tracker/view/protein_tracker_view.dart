@@ -1,11 +1,13 @@
 import 'dart:math' as math;
 
 import 'package:easy_localization/easy_localization.dart';
+import 'package:fastingapp/core/remote_images/app_image.dart';
 import 'package:fastingapp/core/router/route_paths.dart';
 import 'package:fastingapp/core/theme/app_text_styles.dart';
 import 'package:fastingapp/core/widgets/app_button.dart';
 import 'package:fastingapp/core/widgets/app_button_decoration.dart';
 import 'package:fastingapp/core/widgets/horseshoe_arc.dart';
+import 'package:fastingapp/generated/app_images.g.dart';
 import 'package:fastingapp/generated/assets.gen.dart';
 import 'package:fastingapp/generated/colors.gen.dart';
 import 'package:flutter/material.dart';
@@ -234,10 +236,10 @@ final class _Meal {
   final String proteinKey;
   final String kcalKey;
 
-  AssetGenImage get asset => switch (image) {
-    _MealImage.eggs => Assets.images.scramlbedEggs,
-    _MealImage.salad => Assets.images.grilledSalad,
-    _MealImage.yogurt => Assets.images.yogurt,
+  AppImageAsset get asset => switch (image) {
+    _MealImage.eggs => AppImages.scramlbedEggs,
+    _MealImage.salad => AppImages.grilledSalad,
+    _MealImage.yogurt => AppImages.yogurt,
   };
 }
 

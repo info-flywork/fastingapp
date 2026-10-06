@@ -1,8 +1,9 @@
 import 'package:easy_localization/easy_localization.dart';
+import 'package:fastingapp/core/remote_images/app_image.dart';
 import 'package:fastingapp/core/theme/app_text_styles.dart';
 import 'package:fastingapp/core/widgets/app_button.dart';
 import 'package:fastingapp/core/widgets/app_button_decoration.dart';
-import 'package:fastingapp/generated/assets.gen.dart';
+import 'package:fastingapp/generated/app_images.g.dart';
 import 'package:fastingapp/generated/colors.gen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -12,10 +13,7 @@ enum WaterVolumeUnit { ml, oz }
 /// Su miktarı dialog sonucu — her zaman ml.
 @immutable
 final class WaterValueEditResult {
-  const WaterValueEditResult({
-    required this.valueMl,
-    required this.unit,
-  });
+  const WaterValueEditResult({required this.valueMl, required this.unit});
 
   final int valueMl;
   final WaterVolumeUnit unit;
@@ -44,7 +42,7 @@ final class WaterValueEditDialog extends StatefulWidget {
   final String subtitleKey;
   final int initialValueMl;
   final WaterVolumeUnit initialUnit;
-  final AssetGenImage headerImage;
+  final AppImageAsset headerImage;
 
   static const double _mlPerOz = 29.5735295625;
 
@@ -134,9 +132,7 @@ class _WaterValueEditDialogState extends State<WaterValueEditDialog>
   void _onSave() {
     final ml = _valueInMl();
     if (ml == null) return;
-    Navigator.of(context).pop(
-      WaterValueEditResult(valueMl: ml, unit: _unit),
-    );
+    Navigator.of(context).pop(WaterValueEditResult(valueMl: ml, unit: _unit));
   }
 
   @override
@@ -182,10 +178,7 @@ class _WaterValueEditDialogState extends State<WaterValueEditDialog>
 
 /// Birim seçimi — Weight dialog düzeni (toggle + kaydet).
 final class WaterUnitEditDialog extends StatefulWidget {
-  const WaterUnitEditDialog({
-    required this.initialUnit,
-    super.key,
-  });
+  const WaterUnitEditDialog({required this.initialUnit, super.key});
 
   final WaterVolumeUnit initialUnit;
 
@@ -203,7 +196,7 @@ class _WaterUnitEditDialogState extends State<WaterUnitEditDialog> {
   @override
   Widget build(BuildContext context) {
     return _WaterDialogShell(
-      headerImage: Assets.images.waterBottle,
+      headerImage: AppImages.waterBottle,
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -237,12 +230,9 @@ class _WaterUnitEditDialogState extends State<WaterUnitEditDialog> {
 }
 
 final class _WaterDialogShell extends StatelessWidget {
-  const _WaterDialogShell({
-    required this.headerImage,
-    required this.child,
-  });
+  const _WaterDialogShell({required this.headerImage, required this.child});
 
-  final AssetGenImage headerImage;
+  final AppImageAsset headerImage;
   final Widget child;
 
   @override

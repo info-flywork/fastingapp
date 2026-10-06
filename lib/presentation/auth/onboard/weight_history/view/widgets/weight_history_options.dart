@@ -9,12 +9,14 @@ final class WeightHistoryOptions extends StatelessWidget {
   });
 
   final List<
-      ({
-        OnboardingWeightHistory history,
-        String titleKey,
-        String subtitleKey,
-        String iconPath,
-      })> items;
+    ({
+      OnboardingWeightHistory history,
+      String titleKey,
+      String subtitleKey,
+      String iconPath,
+    })
+  >
+  items;
   final OnboardingWeightHistory? selected;
   final ValueChanged<OnboardingWeightHistory> onSelected;
 
@@ -30,10 +32,7 @@ final class WeightHistoryOptions extends StatelessWidget {
             subtitle: items[i].subtitleKey.tr(),
             isSelected: selected == items[i].history,
             onTap: () => onSelected(items[i].history),
-            icon: Image.asset(
-              items[i].iconPath,
-              fit: BoxFit.contain,
-            ),
+            icon: appImage(items[i].iconPath, fit: BoxFit.contain),
           ),
         ],
       ],

@@ -1,7 +1,7 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:fastingapp/core/theme/app_text_styles.dart';
 import 'package:fastingapp/core/widgets/app_button.dart';
-import 'package:fastingapp/generated/assets.gen.dart';
+import 'package:fastingapp/generated/app_images.g.dart';
 import 'package:fastingapp/generated/colors.gen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -169,7 +169,7 @@ class _WeightEditDialogState extends State<WeightEditDialog>
                 border: Border.all(color: ColorName.colorWhite, width: 3),
               ),
               clipBehavior: Clip.antiAlias,
-              child: Assets.images.weigher2.image(
+              child: AppImages.weigher2.image(
                 fit: BoxFit.cover,
                 width: 72,
                 height: 72,

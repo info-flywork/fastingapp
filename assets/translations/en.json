@@ -993,5 +993,11 @@
       "card3_body": "One broken fast does not reset you. Eat, rest, and start the next window without a speech.",
       "tip": "Keep the goal boring and kind. You are building a rhythm, not winning a race."
     }
+  },
+  "no_internet": {
+    "title": "No internet connection",
+    "subtitle": "Mochi is looking for a connection. Check your Wi‑Fi or mobile data and try again.",
+    "retry": "Try again",
+    "checking": "Checking…"
   }
 }

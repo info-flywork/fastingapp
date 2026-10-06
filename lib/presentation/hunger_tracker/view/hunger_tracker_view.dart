@@ -1,10 +1,12 @@
 import 'dart:math' as math;
 
 import 'package:easy_localization/easy_localization.dart';
+import 'package:fastingapp/core/remote_images/app_image.dart';
 import 'package:fastingapp/core/router/route_paths.dart';
 import 'package:fastingapp/core/theme/app_text_styles.dart';
 import 'package:fastingapp/core/widgets/app_button.dart';
 import 'package:fastingapp/core/widgets/app_button_decoration.dart';
+import 'package:fastingapp/generated/app_images.g.dart';
 import 'package:fastingapp/generated/assets.gen.dart';
 import 'package:fastingapp/generated/colors.gen.dart';
 import 'package:fastingapp/presentation/hunger_tracker/hunger_symptom.dart';
@@ -79,7 +81,7 @@ class _HungerTrackerViewState extends State<HungerTrackerView>
                           ),
                           const SizedBox(width: 8),
                           IgnorePointer(
-                            child: Assets.images.listenYourBody.image(
+                            child: AppImages.listenYourBody.image(
                               width: 148,
                               height: 148,
                               fit: BoxFit.contain,
@@ -105,7 +107,7 @@ class _HungerTrackerViewState extends State<HungerTrackerView>
                               Expanded(
                                 child: _ActionCard(
                                   background: ColorName.colorMealCream,
-                                  icon: Assets.images.stomach,
+                                  icon: AppImages.stomach,
                                   iconSize: 70,
                                   titleKey: 'hunger_tracker_page.hungry_now',
                                   subtitleKey:
@@ -117,7 +119,7 @@ class _HungerTrackerViewState extends State<HungerTrackerView>
                               Expanded(
                                 child: _ActionCard(
                                   background: ColorName.colorHungerHistoryBg,
-                                  icon: Assets.images.analytics,
+                                  icon: AppImages.analytics,
                                   titleKey: 'hunger_tracker_page.history',
                                   subtitleKey:
                                       'hunger_tracker_page.history_sub',
@@ -226,7 +228,7 @@ final class _ActionCard extends StatelessWidget {
   });
 
   final Color background;
-  final AssetGenImage icon;
+  final AppImageAsset icon;
   final double iconSize;
   final String titleKey;
   final String subtitleKey;
@@ -289,36 +291,36 @@ final class _SymptomsGrid extends StatelessWidget {
   final Set<HungerSymptom> selected;
   final ValueChanged<HungerSymptom> onToggle;
 
-  static final _items = <(HungerSymptom, String, AssetGenImage)>[
+  static final _items = <(HungerSymptom, String, AppImageAsset)>[
     (
       HungerSymptom.sleeplessness,
       'hunger_tracker_page.symptom_sleeplessness',
-      Assets.images.zzz,
+      AppImages.zzz,
     ),
     (
       HungerSymptom.headache,
       'hunger_tracker_page.symptom_headache',
-      Assets.images.yellowLightning,
+      AppImages.yellowLightning,
     ),
     (
       HungerSymptom.dizziness,
       'hunger_tracker_page.symptom_dizziness',
-      Assets.images.dizzinies,
+      AppImages.dizzinies,
     ),
     (
       HungerSymptom.nausea,
       'hunger_tracker_page.symptom_nausea',
-      Assets.images.nausea,
+      AppImages.nausea,
     ),
     (
       HungerSymptom.fatigue,
       'hunger_tracker_page.symptom_fatigue',
-      Assets.images.fatigue,
+      AppImages.fatigue,
     ),
     (
       HungerSymptom.weakness,
       'hunger_tracker_page.symptom_weakness',
-      Assets.images.weakness,
+      AppImages.weakness,
     ),
   ];
 
@@ -357,7 +359,7 @@ final class _SymptomChip extends StatelessWidget {
   });
 
   final String labelKey;
-  final AssetGenImage icon;
+  final AppImageAsset icon;
   final bool selected;
   final VoidCallback onTap;
 

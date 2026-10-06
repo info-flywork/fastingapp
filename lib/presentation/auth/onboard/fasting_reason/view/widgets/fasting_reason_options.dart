@@ -9,11 +9,9 @@ final class FastingReasonOptions extends StatelessWidget {
   });
 
   final List<
-      ({
-        OnboardingFastingReason reason,
-        String titleKey,
-        String iconPath,
-      })> items;
+    ({OnboardingFastingReason reason, String titleKey, String iconPath})
+  >
+  items;
   final OnboardingFastingReason? selected;
   final ValueChanged<OnboardingFastingReason> onSelected;
 
@@ -28,10 +26,7 @@ final class FastingReasonOptions extends StatelessWidget {
             title: items[i].titleKey.tr(),
             isSelected: selected == items[i].reason,
             onTap: () => onSelected(items[i].reason),
-            icon: Image.asset(
-              items[i].iconPath,
-              fit: BoxFit.contain,
-            ),
+            icon: appImage(items[i].iconPath, fit: BoxFit.contain),
           ),
         ],
       ],

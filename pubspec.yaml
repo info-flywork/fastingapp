@@ -38,6 +38,13 @@ dependencies:
   # Assets / codegen output usage
   flutter_svg: ^2.0.16
 
+  # Uzak görseller (CDN + cihaz önbelleği)
+  crypto: ^3.0.6
+  path_provider: ^2.1.5
+
+  # Ağ durumu (internet yok sayfası)
+  connectivity_plus: ^7.0.0
+
   # Storage
   flutter_secure_storage: ^9.2.4
   shared_preferences: ^2.3.5
@@ -67,8 +74,11 @@ flutter:
   uses-material-design: true
 
   assets:
-    - assets/images/
+    # assets/images PNG'leri uygulamaya gömülmez: asset_sources/images → CDN
+    # (tool/remote_images.dart). Burada yalnızca gömülü olanlar var.
+    - assets/images/bundled/
     - assets/images/mochi/
+    - assets/remote_images/
     - assets/icons/
     - assets/flags/
     - assets/gifs/
@@ -130,7 +140,7 @@ flutter_gen:
 flutter_launcher_icons:
   android: true
   ios: true
-  image_path: "assets/images/App Icon.png"
+  image_path: "asset_sources/images/App Icon.png"
   adaptive_icon_background: "#A8D5BA"
-  adaptive_icon_foreground: "assets/images/App Icon.png"
+  adaptive_icon_foreground: "asset_sources/images/App Icon.png"
   remove_alpha_ios: true

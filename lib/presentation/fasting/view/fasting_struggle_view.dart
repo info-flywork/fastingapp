@@ -1,6 +1,8 @@
 import 'package:easy_localization/easy_localization.dart';
+import 'package:fastingapp/core/remote_images/app_image.dart';
 import 'package:fastingapp/core/router/route_paths.dart';
 import 'package:fastingapp/core/theme/app_text_styles.dart';
+import 'package:fastingapp/generated/app_images.g.dart';
 import 'package:fastingapp/generated/assets.gen.dart';
 import 'package:fastingapp/generated/colors.gen.dart';
 import 'package:fastingapp/presentation/fasting/view/fasting_struggle_advice_view.dart';
@@ -67,7 +69,7 @@ class _FastingStruggleViewState extends State<FastingStruggleView> {
             Center(
               child: Transform.scale(
                 scale: 1.2,
-                child: Image.asset(
+                child: appImage(
                   Assets.gifs.mascotWav.path,
                   width: 180,
                   height: 180,
@@ -129,12 +131,12 @@ final class _StruggleOption {
   final String bodyKey;
   final FastingStruggleReason reason;
 
-  AssetGenImage get asset => switch (image) {
-    _StruggleImage.hungry => Assets.images.hungry,
-    _StruggleImage.craving => Assets.images.cravling,
-    _StruggleImage.energy => Assets.images.lowEnergiy,
-    _StruggleImage.stressed => Assets.images.stressed,
-    _StruggleImage.bored => Assets.images.bored,
+  AppImageAsset get asset => switch (image) {
+    _StruggleImage.hungry => AppImages.hungry,
+    _StruggleImage.craving => AppImages.cravling,
+    _StruggleImage.energy => AppImages.lowEnergiy,
+    _StruggleImage.stressed => AppImages.stressed,
+    _StruggleImage.bored => AppImages.bored,
   };
 }
 

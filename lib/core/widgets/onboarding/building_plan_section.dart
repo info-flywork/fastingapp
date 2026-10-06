@@ -1,6 +1,7 @@
+import 'package:fastingapp/core/remote_images/app_image.dart';
 import 'package:fastingapp/core/theme/app_text_styles.dart';
 import 'package:fastingapp/core/widgets/onboarding/building_plan_progress_bar.dart';
-import 'package:fastingapp/generated/assets.gen.dart';
+import 'package:fastingapp/generated/app_images.g.dart';
 import 'package:fastingapp/generated/colors.gen.dart';
 import 'package:flutter/material.dart';
 
@@ -36,17 +37,14 @@ final class BuildingPlanSection extends StatelessWidget {
               child: Text(title, style: AppTextStyles.buildingPlanSectionTitle),
             ),
             if (isComplete)
-              Image.asset(
-                Assets.images.greenTick.path,
+              appImage(
+                AppImages.greenTick.path,
                 width: 28,
                 height: 28,
                 fit: BoxFit.contain,
               )
             else
-              Text(
-                '$percent%',
-                style: AppTextStyles.buildingPlanSectionTitle,
-              ),
+              Text('$percent%', style: AppTextStyles.buildingPlanSectionTitle),
           ],
         ),
         AnimatedSize(
@@ -73,10 +71,7 @@ final class BuildingPlanSection extends StatelessWidget {
         ),
         if (showProgressBar) ...[
           const SizedBox(height: 12),
-          BuildingPlanProgressBar(
-            progress: progress,
-            showHead: !isComplete,
-          ),
+          BuildingPlanProgressBar(progress: progress, showHead: !isComplete),
         ],
       ],
     );
@@ -84,11 +79,7 @@ final class BuildingPlanSection extends StatelessWidget {
 }
 
 final class _AnimatedChip extends StatefulWidget {
-  const _AnimatedChip({
-    required this.label,
-    required this.delay,
-    super.key,
-  });
+  const _AnimatedChip({required this.label, required this.delay, super.key});
 
   final String label;
   final Duration delay;

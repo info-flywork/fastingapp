@@ -1,10 +1,12 @@
 import 'dart:math' as math;
 
 import 'package:easy_localization/easy_localization.dart';
+import 'package:fastingapp/core/remote_images/app_image.dart';
 import 'package:fastingapp/core/router/route_paths.dart';
 import 'package:fastingapp/core/theme/app_text_styles.dart';
 import 'package:fastingapp/core/widgets/app_button.dart';
 import 'package:fastingapp/core/widgets/app_button_decoration.dart';
+import 'package:fastingapp/generated/app_images.g.dart';
 import 'package:fastingapp/generated/assets.gen.dart';
 import 'package:fastingapp/generated/colors.gen.dart';
 import 'package:fastingapp/presentation/hunger_tracker/hunger_symptom.dart';
@@ -89,7 +91,7 @@ class _HungerSecondQuestionViewState extends State<HungerSecondQuestionView>
                       right: -28,
                       top: -8,
                       child: IgnorePointer(
-                        child: Assets.images.secondQuestion.image(
+                        child: AppImages.secondQuestion.image(
                           width: 245,
                           height: 245,
                           fit: BoxFit.contain,
@@ -101,7 +103,7 @@ class _HungerSecondQuestionViewState extends State<HungerSecondQuestionView>
                       child: Column(
                         children: [
                           _AnswerCard(
-                            icon: Assets.images.greenTick3d,
+                            icon: AppImages.greenTick3d,
                             labelKey:
                                 'hunger_second_question_page.opt_gradually',
                             selected: selected == HungerSecondAnswer.gradually,
@@ -110,7 +112,7 @@ class _HungerSecondQuestionViewState extends State<HungerSecondQuestionView>
                           ),
                           const SizedBox(height: 12),
                           _AnswerCard(
-                            icon: Assets.images.yellowLightning,
+                            icon: AppImages.yellowLightning,
                             labelKey:
                                 'hunger_second_question_page.opt_suddenly',
                             selected: selected == HungerSecondAnswer.suddenly,
@@ -119,7 +121,7 @@ class _HungerSecondQuestionViewState extends State<HungerSecondQuestionView>
                           ),
                           const SizedBox(height: 12),
                           _AnswerCard(
-                            icon: Assets.images.mood,
+                            icon: AppImages.mood,
                             labelKey:
                                 'hunger_second_question_page.opt_not_sure',
                             selected: selected == HungerSecondAnswer.notSure,
@@ -185,7 +187,7 @@ final class _AnswerCard extends StatelessWidget {
     required this.onTap,
   });
 
-  final AssetGenImage icon;
+  final AppImageAsset icon;
   final String labelKey;
   final bool selected;
   final VoidCallback onTap;

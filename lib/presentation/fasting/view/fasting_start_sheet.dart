@@ -2,7 +2,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:fastingapp/core/theme/app_text_styles.dart';
 import 'package:fastingapp/core/widgets/app_button.dart';
 import 'package:fastingapp/core/widgets/app_button_decoration.dart';
-import 'package:fastingapp/generated/assets.gen.dart';
+import 'package:fastingapp/generated/app_images.g.dart';
 import 'package:fastingapp/generated/colors.gen.dart';
 import 'package:flutter/material.dart';
 
@@ -204,7 +204,7 @@ final class _Clock extends StatelessWidget {
     return ClipOval(
       child: ColoredBox(
         color: ColorName.colorWhite,
-        child: Assets.images.greenClock.image(
+        child: AppImages.greenClock.image(
           width: 80,
           height: 80,
           fit: BoxFit.cover,

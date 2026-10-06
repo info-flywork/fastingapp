@@ -1,6 +1,7 @@
 import 'package:easy_localization/easy_localization.dart';
+import 'package:fastingapp/core/remote_images/app_image.dart';
 import 'package:fastingapp/core/theme/app_text_styles.dart';
-import 'package:fastingapp/generated/assets.gen.dart';
+import 'package:fastingapp/generated/app_images.g.dart';
 import 'package:fastingapp/generated/colors.gen.dart';
 import 'package:flutter/material.dart';
 
@@ -61,7 +62,7 @@ final class AppBottomNav extends StatelessWidget {
                 Expanded(
                   child: _NavTile(
                     labelKey: 'home.nav_home',
-                    icon: Assets.images.home,
+                    icon: AppImages.home,
                     selected: currentIndex == 0,
                     onTap: () => onTap(0),
                   ),
@@ -69,7 +70,7 @@ final class AppBottomNav extends StatelessWidget {
                 Expanded(
                   child: _NavTile(
                     labelKey: 'home.nav_fasting',
-                    icon: Assets.images.fasting,
+                    icon: AppImages.fasting,
                     selected: currentIndex == 1,
                     onTap: () => onTap(1),
                   ),
@@ -83,7 +84,7 @@ final class AppBottomNav extends StatelessWidget {
                 Expanded(
                   child: _NavTile(
                     labelKey: 'home.nav_plans',
-                    icon: Assets.images.plans,
+                    icon: AppImages.plans,
                     selected: currentIndex == 3,
                     onTap: () => onTap(3),
                   ),
@@ -91,7 +92,7 @@ final class AppBottomNav extends StatelessWidget {
                 Expanded(
                   child: _NavTile(
                     labelKey: 'home.nav_profile',
-                    icon: Assets.images.profile,
+                    icon: AppImages.profile,
                     selected: currentIndex == 4,
                     onTap: () => onTap(4),
                   ),
@@ -127,7 +128,7 @@ final class _MochiTile extends StatelessWidget {
               child: SizedBox(
                 width: AppBottomNav._mochiSize,
                 height: AppBottomNav._mochiSize,
-                child: Assets.images.mochiWorlV2.image(fit: BoxFit.contain),
+                child: AppImages.mochiWorlV2.image(fit: BoxFit.contain),
               ),
             ),
             Opacity(
@@ -156,7 +157,7 @@ final class _NavTile extends StatelessWidget {
   });
 
   final String labelKey;
-  final AssetGenImage icon;
+  final AppImageAsset icon;
   final bool selected;
   final VoidCallback onTap;
 

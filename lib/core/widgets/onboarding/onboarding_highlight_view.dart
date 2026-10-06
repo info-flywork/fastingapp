@@ -1,3 +1,4 @@
+import 'package:fastingapp/core/remote_images/app_image.dart';
 import 'package:fastingapp/core/theme/app_text_styles.dart';
 import 'package:fastingapp/core/widgets/app_button.dart';
 import 'package:fastingapp/core/widgets/app_button_decoration.dart';
@@ -48,7 +49,7 @@ final class OnboardingHighlightView extends StatelessWidget {
             child: Column(
               children: [
                 const Spacer(),
-                Image.asset(
+                appImage(
                   mediaPath,
                   width: mediaSize,
                   height: mediaSize,

@@ -1,6 +1,6 @@
 import 'dart:ui';
 
-import 'package:fastingapp/generated/assets.gen.dart';
+import 'package:fastingapp/generated/app_images.g.dart';
 import 'package:fastingapp/generated/colors.gen.dart';
 import 'package:fastingapp/generated/fonts.gen.dart';
 import 'package:flutter/material.dart';
@@ -87,9 +87,7 @@ final class FastingPlanWidgetView extends StatelessWidget {
                           color: ColorName.colorCtaGradientBottom,
                           borderRadius: BorderRadius.all(Radius.circular(999)),
                         ),
-                        child: Center(
-                          child: Text(ctaLabel, style: _cta),
-                        ),
+                        child: Center(child: Text(ctaLabel, style: _cta)),
                       ),
                     ),
                   ],
@@ -98,7 +96,7 @@ final class FastingPlanWidgetView extends StatelessWidget {
               Positioned(
                 right: 12,
                 bottom: 78,
-                child: Assets.images.mascotWidget.image(
+                child: AppImages.mascotWidget.image(
                   height: 230,
                   fit: BoxFit.contain,
                   gaplessPlayback: true,

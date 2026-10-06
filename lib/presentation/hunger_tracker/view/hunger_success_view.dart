@@ -5,6 +5,7 @@ import 'package:fastingapp/core/router/route_paths.dart';
 import 'package:fastingapp/core/theme/app_text_styles.dart';
 import 'package:fastingapp/core/widgets/app_button.dart';
 import 'package:fastingapp/core/widgets/app_button_decoration.dart';
+import 'package:fastingapp/generated/app_images.g.dart';
 import 'package:fastingapp/generated/assets.gen.dart';
 import 'package:fastingapp/generated/colors.gen.dart';
 import 'package:flutter/material.dart';
@@ -49,7 +50,7 @@ class _HungerSuccessViewState extends State<HungerSuccessView>
                 padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
                 child: Column(
                   children: [
-                    Assets.images.greatJob.image(
+                    AppImages.greatJob.image(
                       width: 280,
                       height: 280,
                       fit: BoxFit.contain,
@@ -143,7 +144,7 @@ final class _InsightsCard extends StatelessWidget {
         ),
         child: Row(
           children: [
-            Assets.images.insightss.image(
+            AppImages.insightss.image(
               width: 50,
               height: 50,
               fit: BoxFit.contain,

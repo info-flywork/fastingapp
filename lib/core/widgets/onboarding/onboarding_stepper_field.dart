@@ -81,10 +81,7 @@ final class OnboardingStepperField extends StatelessWidget {
 }
 
 final class _RoundIconButton extends StatefulWidget {
-  const _RoundIconButton({
-    required this.assetPath,
-    required this.onPressed,
-  });
+  const _RoundIconButton({required this.assetPath, required this.onPressed});
 
   final String assetPath;
   final VoidCallback onPressed;

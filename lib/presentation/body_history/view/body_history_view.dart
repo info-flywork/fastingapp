@@ -4,6 +4,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:fastingapp/core/dialogs/app_dialogs.dart';
 import 'package:fastingapp/core/theme/app_text_styles.dart';
 import 'package:fastingapp/core/widgets/weight_progress_bar.dart';
+import 'package:fastingapp/generated/app_images.g.dart';
 import 'package:fastingapp/generated/assets.gen.dart';
 import 'package:fastingapp/generated/colors.gen.dart';
 import 'package:flutter/material.dart';
@@ -205,7 +206,7 @@ final class _LatestRecordCard extends StatelessWidget {
               ),
               Transform.rotate(
                 angle: math.pi / 6,
-                child: Assets.images.weigher2.image(
+                child: AppImages.weigher2.image(
                   width: 105,
                   height: 105,
                   fit: BoxFit.contain,
@@ -490,7 +491,7 @@ final class _BmiCard extends StatelessWidget {
                         Positioned(
                           left: (markerX - 8).clamp(0.0, barW - 16),
                           top: 0,
-                          child: Assets.images.vector18Bmi.image(
+                          child: AppImages.vector18Bmi.image(
                             width: 16,
                             height: 10,
                             fit: BoxFit.contain,

@@ -3,6 +3,7 @@ import 'dart:math' as math;
 
 import 'package:easy_localization/easy_localization.dart';
 import 'package:fastingapp/core/theme/app_text_styles.dart';
+import 'package:fastingapp/generated/app_images.g.dart';
 import 'package:fastingapp/generated/assets.gen.dart';
 import 'package:fastingapp/generated/colors.gen.dart';
 import 'package:flutter/material.dart';
@@ -217,7 +218,7 @@ final class _StepsRing extends StatelessWidget {
                 ),
                 const SizedBox(height: 2),
               ] else ...[
-                Assets.images.steps.image(
+                AppImages.steps.image(
                   width: 36,
                   height: 36,
                   fit: BoxFit.contain,
@@ -313,7 +314,7 @@ final class _StepsGoalRow extends StatelessWidget {
           ),
           const SizedBox(width: 8),
           if (goalReached)
-            Assets.images.solarVerifiedCheckBold.image(width: 22, height: 22)
+            AppImages.solarVerifiedCheckBold.image(width: 22, height: 22)
           else
             Icon(
               Icons.flag_rounded,
@@ -598,7 +599,7 @@ final class _StepsControls extends StatelessWidget {
           width: _StepsActionCircle.minusSize,
           height: _StepsActionCircle.minusSize,
           child: Center(
-            child: Assets.images.steps.image(
+            child: AppImages.steps.image(
               width: 36,
               height: 36,
               fit: BoxFit.contain,

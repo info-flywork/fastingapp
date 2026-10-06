@@ -1,0 +1,13 @@
+{
+  "sourceDir": "asset_sources/images",
+  "logicalPrefix": "assets/images/",
+  "bundled": ["App Icon.png", "mascot_search.png"],
+  "bundledOutputDir": "assets/images/bundled",
+  "manifest": "assets/remote_images/manifest.json",
+  "generatedDart": "lib/generated/app_images.g.dart",
+  "quality": 88,
+  "cdnBaseUrl": "https://mochifast.b-cdn.net/app-images/",
+  "storageHost": "storage.bunnycdn.com",
+  "storageZone": "mochifast",
+  "remoteDir": "app-images"
+}

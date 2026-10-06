@@ -1,10 +1,12 @@
 import 'dart:math' as math;
 
 import 'package:easy_localization/easy_localization.dart';
+import 'package:fastingapp/core/remote_images/app_image.dart';
 import 'package:fastingapp/core/router/route_paths.dart';
 import 'package:fastingapp/core/theme/app_text_styles.dart';
 import 'package:fastingapp/core/widgets/app_button.dart';
 import 'package:fastingapp/core/widgets/app_button_decoration.dart';
+import 'package:fastingapp/generated/app_images.g.dart';
 import 'package:fastingapp/generated/assets.gen.dart';
 import 'package:fastingapp/generated/colors.gen.dart';
 import 'package:fastingapp/presentation/hunger_tracker/hunger_result_type.dart';
@@ -95,7 +97,7 @@ class _HungerLogViewState extends State<HungerLogView> with HungerLogViewMixin {
                             child: IgnorePointer(
                               child: Transform.scale(
                                 scale: 1.15,
-                                child: Assets.images.logHunger.image(
+                                child: AppImages.logHunger.image(
                                   width: 180,
                                   height: 180,
                                   fit: BoxFit.contain,
@@ -108,7 +110,7 @@ class _HungerLogViewState extends State<HungerLogView> with HungerLogViewMixin {
                     ),
                     const SizedBox(height: 8),
                     _InfoCard(
-                      icon: Assets.images.leaf,
+                      icon: AppImages.leaf,
                       labelKey: 'hunger_log_page.hunger_type',
                       value:
                           (_isPhysical
@@ -118,7 +120,7 @@ class _HungerLogViewState extends State<HungerLogView> with HungerLogViewMixin {
                     ),
                     const SizedBox(height: 12),
                     _InfoCard(
-                      icon: Assets.images.blueClock,
+                      icon: AppImages.blueClock,
                       labelKey: 'hunger_log_page.time',
                       value: formattedTime,
                     ),
@@ -204,7 +206,7 @@ final class _InfoCard extends StatelessWidget {
     required this.value,
   });
 
-  final AssetGenImage icon;
+  final AppImageAsset icon;
   final String labelKey;
   final String value;
 
@@ -255,7 +257,7 @@ final class _NotesCard extends StatelessWidget {
         children: [
           Row(
             children: [
-              Assets.images.blueBook.image(
+              AppImages.blueBook.image(
                 width: 48,
                 height: 48,
                 fit: BoxFit.contain,

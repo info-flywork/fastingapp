@@ -15,7 +15,7 @@ final class NotificationsEmptyState extends StatelessWidget {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Assets.images.notificationEmptyBell.image(
+                AppImages.notificationEmptyBell.image(
                   width: 180,
                   height: 180,
                   fit: BoxFit.contain,

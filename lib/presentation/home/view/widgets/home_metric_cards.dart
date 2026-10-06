@@ -19,7 +19,7 @@ final class HomeMetricCards extends StatelessWidget {
         children: [
           Expanded(
             child: _MetricCard(
-              icon: Assets.images.water,
+              icon: AppImages.water,
               labelKey: 'home.water',
               value: 600,
               goal: 2500,
@@ -35,7 +35,7 @@ final class HomeMetricCards extends StatelessWidget {
           const SizedBox(width: 12),
           Expanded(
             child: _MetricCard(
-              icon: Assets.images.steps,
+              icon: AppImages.steps,
               labelKey: 'home.steps',
               value: 1000,
               goal: 8000,
@@ -68,7 +68,7 @@ final class _MetricCard extends StatelessWidget {
     this.onTap,
   });
 
-  final AssetGenImage icon;
+  final AppImageAsset icon;
   final String labelKey;
   final int value;
   final int goal;

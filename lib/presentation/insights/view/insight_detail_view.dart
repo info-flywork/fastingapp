@@ -2,7 +2,7 @@ import 'dart:math' as math;
 
 import 'package:easy_localization/easy_localization.dart';
 import 'package:fastingapp/core/theme/app_text_styles.dart';
-import 'package:fastingapp/generated/assets.gen.dart';
+import 'package:fastingapp/generated/app_images.g.dart';
 import 'package:fastingapp/generated/colors.gen.dart';
 import 'package:fastingapp/presentation/insights/insight_topic.dart';
 import 'package:flutter/material.dart';
@@ -61,9 +61,9 @@ final class _DetailHeader extends StatelessWidget {
         final width = constraints.maxWidth;
         const overhang = 16.0;
         const handFraction = 0.08;
-        final mascotWidth = ((width + overhang - (_titleMinWidth + 6)) /
-                (1 - handFraction))
-            .clamp(120.0, _mascotMaxWidth);
+        final mascotWidth =
+            ((width + overhang - (_titleMinWidth + 6)) / (1 - handFraction))
+                .clamp(120.0, _mascotMaxWidth);
         final side = math.max(0.0, mascotWidth - overhang);
         final titleRight = math.max(0.0, width - _titleMinWidth);
 
@@ -74,7 +74,7 @@ final class _DetailHeader extends StatelessWidget {
               top: 0,
               right: -overhang,
               child: IgnorePointer(
-                child: Assets.images.mascotLearnDetail.image(
+                child: AppImages.mascotLearnDetail.image(
                   width: mascotWidth,
                   height: mascotWidth * _mascotHeightRatio,
                   fit: BoxFit.contain,
@@ -249,7 +249,7 @@ final class _TipCard extends StatelessWidget {
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Assets.images.mascotTip.image(
+            AppImages.mascotTip.image(
               width: 48,
               height: 48,
               fit: BoxFit.contain,

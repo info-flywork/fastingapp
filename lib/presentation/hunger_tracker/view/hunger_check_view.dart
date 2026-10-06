@@ -1,8 +1,10 @@
 import 'dart:math' as math;
 
 import 'package:easy_localization/easy_localization.dart';
+import 'package:fastingapp/core/remote_images/app_image.dart';
 import 'package:fastingapp/core/router/route_paths.dart';
 import 'package:fastingapp/core/theme/app_text_styles.dart';
+import 'package:fastingapp/generated/app_images.g.dart';
 import 'package:fastingapp/generated/assets.gen.dart';
 import 'package:fastingapp/generated/colors.gen.dart';
 import 'package:fastingapp/presentation/hunger_tracker/hunger_symptom.dart';
@@ -84,7 +86,7 @@ class _HungerCheckViewState extends State<HungerCheckView>
                           right: -28,
                           top: -12,
                           child: IgnorePointer(
-                            child: Assets.images.mascotSearch.image(
+                            child: AppImages.mascotSearch.image(
                               width: 250,
                               height: 250,
                               fit: BoxFit.contain,
@@ -98,7 +100,7 @@ class _HungerCheckViewState extends State<HungerCheckView>
                             crossAxisAlignment: CrossAxisAlignment.stretch,
                             children: [
                               _CheckOptionCard(
-                                icon: Assets.images.yellowLightning,
+                                icon: AppImages.yellowLightning,
                                 titleKey: 'hunger_check_page.quick_title',
                                 metaKey: 'hunger_check_page.quick_meta',
                                 subtitleKey: 'hunger_check_page.quick_sub',
@@ -106,7 +108,7 @@ class _HungerCheckViewState extends State<HungerCheckView>
                               ),
                               const SizedBox(height: 12),
                               _CheckOptionCard(
-                                icon: Assets.images.fullCheck,
+                                icon: AppImages.fullCheck,
                                 titleKey: 'hunger_check_page.full_title',
                                 metaKey: 'hunger_check_page.full_meta',
                                 subtitleKey: 'hunger_check_page.full_sub',
@@ -171,7 +173,7 @@ final class _CheckOptionCard extends StatelessWidget {
     required this.onTap,
   });
 
-  final AssetGenImage icon;
+  final AppImageAsset icon;
   final String titleKey;
   final String metaKey;
   final String subtitleKey;
@@ -211,7 +213,7 @@ final class _CheckOptionCard extends StatelessWidget {
               ),
             ),
             const SizedBox(width: 10),
-            Assets.images.riiight.image(width: 10, height: 18),
+            AppImages.riiight.image(width: 10, height: 18),
           ],
         ),
       ),
@@ -232,7 +234,7 @@ final class _TipBanner extends StatelessWidget {
       ),
       child: Row(
         children: [
-          Assets.images.tree.image(width: 48, height: 48, fit: BoxFit.contain),
+          AppImages.tree.image(width: 48, height: 48, fit: BoxFit.contain),
           const SizedBox(width: 20),
           Expanded(
             child: Text(

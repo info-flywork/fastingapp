@@ -196,10 +196,6 @@ class $AssetsIconsGen {
   SvgGenImage get solarArrowLeftDownLinear =>
       const SvgGenImage('assets/icons/solar_arrow-left-down-linear.svg');
 
-  /// File path: assets/icons/solar_arrow-left-linear.svg
-  SvgGenImage get solarArrowLeftLinear =>
-      const SvgGenImage('assets/icons/solar_arrow-left-linear.svg');
-
   /// File path: assets/icons/solar_arrow-left-linear (1).png
   AssetGenImage get solarArrowLeftLinear1 =>
       const AssetGenImage('assets/icons/solar_arrow-left-linear (1).png');
@@ -207,6 +203,10 @@ class $AssetsIconsGen {
   /// File path: assets/icons/solar_arrow-left-linear (2).svg
   SvgGenImage get solarArrowLeftLinear2 =>
       const SvgGenImage('assets/icons/solar_arrow-left-linear (2).svg');
+
+  /// File path: assets/icons/solar_arrow-left-linear.svg
+  SvgGenImage get solarArrowLeftLinear =>
+      const SvgGenImage('assets/icons/solar_arrow-left-linear.svg');
 
   /// File path: assets/icons/solar_bell-bing-line-duotone.svg
   SvgGenImage get solarBellBingLineDuotone =>
@@ -361,9 +361,9 @@ class $AssetsIconsGen {
     solarAltArrowUpLineDuotone,
     solarAltArrowUpLineDuotoneRight,
     solarArrowLeftDownLinear,
-    solarArrowLeftLinear,
     solarArrowLeftLinear1,
     solarArrowLeftLinear2,
+    solarArrowLeftLinear,
     solarBellBingLineDuotone,
     solarBellLineDuotone,
     solarCalendarDateLineDuotone,
@@ -403,1200 +403,21 @@ class $AssetsIconsGen {
 class $AssetsImagesGen {
   const $AssetsImagesGen();
 
-  /// File path: assets/images/1-or-2.png
-  AssetGenImage get a1Or2 => const AssetGenImage('assets/images/1-or-2.png');
+  /// Directory path: assets/images/bundled
+  $AssetsImagesBundledGen get bundled => const $AssetsImagesBundledGen();
 
-  /// File path: assets/images/1.png
-  AssetGenImage get a1 => const AssetGenImage('assets/images/1.png');
+  /// Directory path: assets/images/mochi
+  $AssetsImagesMochiGen get mochi => const $AssetsImagesMochiGen();
+}
 
-  /// File path: assets/images/100ml.png
-  AssetGenImage get a100ml => const AssetGenImage('assets/images/100ml.png');
+class $AssetsRemoteImagesGen {
+  const $AssetsRemoteImagesGen();
 
-  /// File path: assets/images/1_light.png
-  AssetGenImage get a1Light => const AssetGenImage('assets/images/1_light.png');
-
-  /// File path: assets/images/2.png
-  AssetGenImage get a2 => const AssetGenImage('assets/images/2.png');
-
-  /// File path: assets/images/200ml.png
-  AssetGenImage get a200ml => const AssetGenImage('assets/images/200ml.png');
-
-  /// File path: assets/images/2_light.png
-  AssetGenImage get a2Light => const AssetGenImage('assets/images/2_light.png');
-
-  /// File path: assets/images/3.png
-  AssetGenImage get a3 => const AssetGenImage('assets/images/3.png');
-
-  /// File path: assets/images/3_light.png
-  AssetGenImage get a3Light => const AssetGenImage('assets/images/3_light.png');
-
-  /// File path: assets/images/4.png
-  AssetGenImage get a4 => const AssetGenImage('assets/images/4.png');
-
-  /// File path: assets/images/4_light.png
-  AssetGenImage get a4Light => const AssetGenImage('assets/images/4_light.png');
-
-  /// File path: assets/images/5.png
-  AssetGenImage get a5 => const AssetGenImage('assets/images/5.png');
-
-  /// File path: assets/images/500ml.png
-  AssetGenImage get a500ml => const AssetGenImage('assets/images/500ml.png');
-
-  /// File path: assets/images/50ml.png
-  AssetGenImage get a50ml => const AssetGenImage('assets/images/50ml.png');
-
-  /// File path: assets/images/5_light.png
-  AssetGenImage get a5Light => const AssetGenImage('assets/images/5_light.png');
-
-  /// File path: assets/images/6.png
-  AssetGenImage get a6 => const AssetGenImage('assets/images/6.png');
-
-  /// File path: assets/images/6_light.png
-  AssetGenImage get a6Light => const AssetGenImage('assets/images/6_light.png');
-
-  /// File path: assets/images/7.png
-  AssetGenImage get a7 => const AssetGenImage('assets/images/7.png');
-
-  /// File path: assets/images/7_light.png
-  AssetGenImage get a7Light => const AssetGenImage('assets/images/7_light.png');
-
-  /// File path: assets/images/8.png
-  AssetGenImage get a8 => const AssetGenImage('assets/images/8.png');
-
-  /// File path: assets/images/8_light.png
-  AssetGenImage get a8Light => const AssetGenImage('assets/images/8_light.png');
-
-  /// File path: assets/images/9.png
-  AssetGenImage get a9 => const AssetGenImage('assets/images/9.png');
-
-  /// File path: assets/images/9_light.png
-  AssetGenImage get a9Light => const AssetGenImage('assets/images/9_light.png');
-
-  /// File path: assets/images/App Icon.png
-  AssetGenImage get appIcon =>
-      const AssetGenImage('assets/images/App Icon.png');
-
-  /// File path: assets/images/_debug_bar.png
-  AssetGenImage get aDebugBar =>
-      const AssetGenImage('assets/images/_debug_bar.png');
-
-  /// File path: assets/images/ai_chat.png
-  AssetGenImage get aiChat => const AssetGenImage('assets/images/ai_chat.png');
-
-  /// File path: assets/images/almost_any.png
-  AssetGenImage get almostAny =>
-      const AssetGenImage('assets/images/almost_any.png');
-
-  /// File path: assets/images/analytics.png
-  AssetGenImage get analytics =>
-      const AssetGenImage('assets/images/analytics.png');
-
-  /// File path: assets/images/apple.png
-  AssetGenImage get apple => const AssetGenImage('assets/images/apple.png');
-
-  /// File path: assets/images/avacado.png
-  AssetGenImage get avacado => const AssetGenImage('assets/images/avacado.png');
-
-  /// File path: assets/images/beans.png
-  AssetGenImage get beans => const AssetGenImage('assets/images/beans.png');
-
-  /// File path: assets/images/bedtime.png
-  AssetGenImage get bedtime => const AssetGenImage('assets/images/bedtime.png');
-
-  /// File path: assets/images/blob.png
-  AssetGenImage get blob => const AssetGenImage('assets/images/blob.png');
-
-  /// File path: assets/images/blood.png
-  AssetGenImage get blood => const AssetGenImage('assets/images/blood.png');
-
-  /// File path: assets/images/blue_book.png
-  AssetGenImage get blueBook =>
-      const AssetGenImage('assets/images/blue_book.png');
-
-  /// File path: assets/images/blue_clock.png
-  AssetGenImage get blueClock =>
-      const AssetGenImage('assets/images/blue_clock.png');
-
-  /// File path: assets/images/blue_hearth.png
-  AssetGenImage get blueHearth =>
-      const AssetGenImage('assets/images/blue_hearth.png');
-
-  /// File path: assets/images/bored.png
-  AssetGenImage get bored => const AssetGenImage('assets/images/bored.png');
-
-  /// File path: assets/images/bowel.png
-  AssetGenImage get bowel => const AssetGenImage('assets/images/bowel.png');
-
-  /// File path: assets/images/brain.png
-  AssetGenImage get brain => const AssetGenImage('assets/images/brain.png');
-
-  /// File path: assets/images/break_your_fast.png
-  AssetGenImage get breakYourFast =>
-      const AssetGenImage('assets/images/break_your_fast.png');
-
-  /// File path: assets/images/breathe.png
-  AssetGenImage get breathe => const AssetGenImage('assets/images/breathe.png');
-
-  /// File path: assets/images/brocc.png
-  AssetGenImage get brocc => const AssetGenImage('assets/images/brocc.png');
-
-  /// File path: assets/images/broccv2.png
-  AssetGenImage get broccv2 => const AssetGenImage('assets/images/broccv2.png');
-
-  /// File path: assets/images/brocolies.png
-  AssetGenImage get brocolies =>
-      const AssetGenImage('assets/images/brocolies.png');
-
-  /// File path: assets/images/building.png
-  AssetGenImage get building =>
-      const AssetGenImage('assets/images/building.png');
-
-  /// File path: assets/images/burger.png
-  AssetGenImage get burger => const AssetGenImage('assets/images/burger.png');
-
-  /// File path: assets/images/burgerv2.png
-  AssetGenImage get burgerv2 =>
-      const AssetGenImage('assets/images/burgerv2.png');
-
-  /// File path: assets/images/busy.png
-  AssetGenImage get busy => const AssetGenImage('assets/images/busy.png');
-
-  /// File path: assets/images/calories_tracker.png
-  AssetGenImage get caloriesTracker =>
-      const AssetGenImage('assets/images/calories_tracker.png');
-
-  /// File path: assets/images/carbs.png
-  AssetGenImage get carbs => const AssetGenImage('assets/images/carbs.png');
-
-  /// File path: assets/images/challenge.png
-  AssetGenImage get challenge =>
-      const AssetGenImage('assets/images/challenge.png');
-
-  /// File path: assets/images/cheese.png
-  AssetGenImage get cheese => const AssetGenImage('assets/images/cheese.png');
-
-  /// File path: assets/images/chicken.png
-  AssetGenImage get chicken => const AssetGenImage('assets/images/chicken.png');
-
-  /// File path: assets/images/clock.png
-  AssetGenImage get clock => const AssetGenImage('assets/images/clock.png');
-
-  /// File path: assets/images/confidence.png
-  AssetGenImage get confidence =>
-      const AssetGenImage('assets/images/confidence.png');
-
-  /// File path: assets/images/confusing.png
-  AssetGenImage get confusing =>
-      const AssetGenImage('assets/images/confusing.png');
-
-  /// File path: assets/images/cravling.png
-  AssetGenImage get cravling =>
-      const AssetGenImage('assets/images/cravling.png');
-
-  /// File path: assets/images/dairy.png
-  AssetGenImage get dairy => const AssetGenImage('assets/images/dairy.png');
-
-  /// File path: assets/images/dark_fast.png
-  AssetGenImage get darkFast =>
-      const AssetGenImage('assets/images/dark_fast.png');
-
-  /// File path: assets/images/dark_next_fasting.png
-  AssetGenImage get darkNextFasting =>
-      const AssetGenImage('assets/images/dark_next_fasting.png');
-
-  /// File path: assets/images/dark_noruish.png
-  AssetGenImage get darkNoruish =>
-      const AssetGenImage('assets/images/dark_noruish.png');
-
-  /// File path: assets/images/dark_norusih.png
-  AssetGenImage get darkNorusih =>
-      const AssetGenImage('assets/images/dark_norusih.png');
-
-  /// File path: assets/images/date.png
-  AssetGenImage get date => const AssetGenImage('assets/images/date.png');
-
-  /// File path: assets/images/dizzinies.png
-  AssetGenImage get dizzinies =>
-      const AssetGenImage('assets/images/dizzinies.png');
-
-  /// File path: assets/images/donut.png
-  AssetGenImage get donut => const AssetGenImage('assets/images/donut.png');
-
-  /// File path: assets/images/droplet.png
-  AssetGenImage get droplet =>
-      const AssetGenImage('assets/images/droplet.png');
-
-  /// File path: assets/images/dumble.png
-  AssetGenImage get dumble => const AssetGenImage('assets/images/dumble.png');
-
-  /// File path: assets/images/eat_window.png
-  AssetGenImage get eatWindow =>
-      const AssetGenImage('assets/images/eat_window.png');
-
-  /// File path: assets/images/eggplant.png
-  AssetGenImage get eggplant =>
-      const AssetGenImage('assets/images/eggplant.png');
-
-  /// File path: assets/images/eggs.png
-  AssetGenImage get eggs => const AssetGenImage('assets/images/eggs.png');
-
-  /// File path: assets/images/emotional_hunger.png
-  AssetGenImage get emotionalHunger =>
-      const AssetGenImage('assets/images/emotional_hunger.png');
-
-  /// File path: assets/images/end.png
-  AssetGenImage get end => const AssetGenImage('assets/images/end.png');
-
-  /// File path: assets/images/end_fast.png
-  AssetGenImage get endFast =>
-      const AssetGenImage('assets/images/end_fast.png');
-
-  /// File path: assets/images/everything.png
-  AssetGenImage get everything =>
-      const AssetGenImage('assets/images/everything.png');
-
-  /// File path: assets/images/fasting.png
-  AssetGenImage get fasting => const AssetGenImage('assets/images/fasting.png');
-
-  /// File path: assets/images/fasting_challenge.png
-  AssetGenImage get fastingChallenge =>
-      const AssetGenImage('assets/images/fasting_challenge.png');
-
-  /// File path: assets/images/fasting_challenge_user_1.png
-  AssetGenImage get fastingChallengeUser1 =>
-      const AssetGenImage('assets/images/fasting_challenge_user_1.png');
-
-  /// File path: assets/images/fasting_challenge_user_2.png
-  AssetGenImage get fastingChallengeUser2 =>
-      const AssetGenImage('assets/images/fasting_challenge_user_2.png');
-
-  /// File path: assets/images/fasting_challenge_user_3.png
-  AssetGenImage get fastingChallengeUser3 =>
-      const AssetGenImage('assets/images/fasting_challenge_user_3.png');
-
-  /// File path: assets/images/fast_forecast.png
-  AssetGenImage get fastForecast =>
-      const AssetGenImage('assets/images/fast_forecast.png');
-
-  /// File path: assets/images/fatigue.png
-  AssetGenImage get fatigue => const AssetGenImage('assets/images/fatigue.png');
-
-  /// File path: assets/images/first_question.png
-  AssetGenImage get firstQuestion =>
-      const AssetGenImage('assets/images/first_question.png');
-
-  /// File path: assets/images/first_time.png
-  AssetGenImage get firstTime =>
-      const AssetGenImage('assets/images/first_time.png');
-
-  /// File path: assets/images/fish.png
-  AssetGenImage get fish => const AssetGenImage('assets/images/fish.png');
-
-  /// File path: assets/images/flame_calories.png
-  AssetGenImage get flameCalories =>
-      const AssetGenImage('assets/images/flame_calories.png');
-
-  /// File path: assets/images/fork.png
-  AssetGenImage get fork => const AssetGenImage('assets/images/fork.png');
-
-  /// File path: assets/images/fork_closest.png
-  AssetGenImage get forkClosest =>
-      const AssetGenImage('assets/images/fork_closest.png');
-
-  /// File path: assets/images/forest.png
-  AssetGenImage get forest => const AssetGenImage('assets/images/forest.png');
-
-  /// File path: assets/images/fourth_question.png
-  AssetGenImage get fourthQuestion =>
-      const AssetGenImage('assets/images/fourth_question.png');
-
-  /// File path: assets/images/garden.png
-  AssetGenImage get garden => const AssetGenImage('assets/images/garden.png');
-
-  /// File path: assets/images/fried_potato.png
-  AssetGenImage get friedPotato =>
-      const AssetGenImage('assets/images/fried_potato.png');
-
-  /// File path: assets/images/fruit.png
-  AssetGenImage get fruit => const AssetGenImage('assets/images/fruit.png');
-
-  /// File path: assets/images/full_check.png
-  AssetGenImage get fullCheck =>
-      const AssetGenImage('assets/images/full_check.png');
-
-  /// File path: assets/images/goal.png
-  AssetGenImage get goal => const AssetGenImage('assets/images/goal.png');
-
-  /// File path: assets/images/good.png
-  AssetGenImage get good => const AssetGenImage('assets/images/good.png');
-
-  /// File path: assets/images/good_colored.png
-  AssetGenImage get goodColored =>
-      const AssetGenImage('assets/images/good_colored.png');
-
-  /// File path: assets/images/goodv2.png
-  AssetGenImage get goodv2 => const AssetGenImage('assets/images/goodv2.png');
-
-  /// File path: assets/images/goodv3.png
-  AssetGenImage get goodv3 => const AssetGenImage('assets/images/goodv3.png');
-
-  /// File path: assets/images/great_job.png
-  AssetGenImage get greatJob =>
-      const AssetGenImage('assets/images/great_job.png');
-
-  /// File path: assets/images/green_apple.png
-  AssetGenImage get greenApple =>
-      const AssetGenImage('assets/images/green_apple.png');
-
-  /// File path: assets/images/green_book.png
-  AssetGenImage get greenBook =>
-      const AssetGenImage('assets/images/green_book.png');
-
-  /// File path: assets/images/green_clock.png
-  AssetGenImage get greenClock =>
-      const AssetGenImage('assets/images/green_clock.png');
-
-  /// File path: assets/images/green_tick.png
-  AssetGenImage get greenTick =>
-      const AssetGenImage('assets/images/green_tick.png');
-
-  /// File path: assets/images/green_tick3d.png
-  AssetGenImage get greenTick3d =>
-      const AssetGenImage('assets/images/green_tick3d.png');
-
-  /// File path: assets/images/green_tick_filled.png
-  AssetGenImage get greenTickFilled =>
-      const AssetGenImage('assets/images/green_tick_filled.png');
-
-  /// File path: assets/images/grilled_salad.png
-  AssetGenImage get grilledSalad =>
-      const AssetGenImage('assets/images/grilled_salad.png');
-
-  /// File path: assets/images/header_back.png
-  AssetGenImage get headerBack =>
-      const AssetGenImage('assets/images/header_back.png');
-
-  /// File path: assets/images/healty.png
-  AssetGenImage get healty => const AssetGenImage('assets/images/healty.png');
-
-  /// File path: assets/images/hearttt.png
-  AssetGenImage get hearttt => const AssetGenImage('assets/images/hearttt.png');
-
-  /// File path: assets/images/high_carb.png
-  AssetGenImage get highCarb =>
-      const AssetGenImage('assets/images/high_carb.png');
-
-  /// File path: assets/images/high_carbv2.png
-  AssetGenImage get highCarbv2 =>
-      const AssetGenImage('assets/images/high_carbv2.png');
-
-  /// File path: assets/images/home.png
-  AssetGenImage get home => const AssetGenImage('assets/images/home.png');
-
-  /// File path: assets/images/hours.png
-  AssetGenImage get hours => const AssetGenImage('assets/images/hours.png');
-
-  /// File path: assets/images/huh.png
-  AssetGenImage get huh => const AssetGenImage('assets/images/huh.png');
-
-  /// File path: assets/images/human.png
-  AssetGenImage get human => const AssetGenImage('assets/images/human.png');
-
-  /// File path: assets/images/hungry.png
-  AssetGenImage get hungry => const AssetGenImage('assets/images/hungry.png');
-
-  /// File path: assets/images/hunger-tracker.png
-  AssetGenImage get hungerTracker =>
-      const AssetGenImage('assets/images/hunger-tracker.png');
-
-  /// File path: assets/images/hunger_log.png
-  AssetGenImage get hungerLog =>
-      const AssetGenImage('assets/images/hunger_log.png');
-
-  /// File path: assets/images/insights.png
-  AssetGenImage get insights =>
-      const AssetGenImage('assets/images/insights.png');
-
-  /// File path: assets/images/insightss.png
-  AssetGenImage get insightss =>
-      const AssetGenImage('assets/images/insightss.png');
-
-  /// File path: assets/images/insightsss.png
-  AssetGenImage get insightsss =>
-      const AssetGenImage('assets/images/insightsss.png');
-
-  /// File path: assets/images/keep_noruish.png
-  AssetGenImage get keepNoruish =>
-      const AssetGenImage('assets/images/keep_noruish.png');
-
-  /// File path: assets/images/king_sl.png
-  AssetGenImage get kingSl => const AssetGenImage('assets/images/king_sl.png');
-
-  /// File path: assets/images/law-carb.png
-  AssetGenImage get lawCarb =>
-      const AssetGenImage('assets/images/law-carb.png');
-
-  /// File path: assets/images/leaf.png
-  AssetGenImage get leaf => const AssetGenImage('assets/images/leaf.png');
-
-  /// File path: assets/images/lake.png
-  AssetGenImage get lake => const AssetGenImage('assets/images/lake.png');
-
-  /// File path: assets/images/lightning.png
-  AssetGenImage get lightning =>
-      const AssetGenImage('assets/images/lightning.png');
-
-  /// File path: assets/images/listen_your_body.png
-  AssetGenImage get listenYourBody =>
-      const AssetGenImage('assets/images/listen_your_body.png');
-
-  /// File path: assets/images/log_hunger.png
-  AssetGenImage get logHunger =>
-      const AssetGenImage('assets/images/log_hunger.png');
-
-  /// File path: assets/images/loginv2.png
-  AssetGenImage get loginv2 => const AssetGenImage('assets/images/loginv2.png');
-
-  /// File path: assets/images/low_energiy.png
-  AssetGenImage get lowEnergiy =>
-      const AssetGenImage('assets/images/low_energiy.png');
-
-  /// File path: assets/images/low_Carb.png
-  AssetGenImage get lowCarb =>
-      const AssetGenImage('assets/images/low_Carb.png');
-
-  /// File path: assets/images/low_carbv2.png
-  AssetGenImage get lowCarbv2 =>
-      const AssetGenImage('assets/images/low_carbv2.png');
-
-  /// File path: assets/images/man.png
-  AssetGenImage get man => const AssetGenImage('assets/images/man.png');
-
-  /// File path: assets/images/mascot_breath.png
-  AssetGenImage get mascotBreath =>
-      const AssetGenImage('assets/images/mascot_breath.png');
-
-  /// File path: assets/images/mascot-chat.png
-  AssetGenImage get mascotChat =>
-      const AssetGenImage('assets/images/mascot-chat.png');
-
-  /// File path: assets/images/mascot_chat_pp.png
-  AssetGenImage get mascotChatPp =>
-      const AssetGenImage('assets/images/mascot_chat_pp.png');
-
-  /// File path: assets/images/mascot_clock.png
-  AssetGenImage get mascotClock =>
-      const AssetGenImage('assets/images/mascot_clock.png');
-
-  /// File path: assets/images/mascot_diver.png
-  AssetGenImage get mascotDiver =>
-      const AssetGenImage('assets/images/mascot_diver.png');
-
-  /// File path: assets/images/mascot_hi.png
-  AssetGenImage get mascotHi =>
-      const AssetGenImage('assets/images/mascot_hi.png');
-
-  /// File path: assets/images/mascot_hi_water.png
-  AssetGenImage get mascotHiWater =>
-      const AssetGenImage('assets/images/mascot_hi_water.png');
-
-  /// File path: assets/images/mascot_hi_without.png
-  AssetGenImage get mascotHiWithout =>
-      const AssetGenImage('assets/images/mascot_hi_without.png');
-
-  /// File path: assets/images/mascot_learn_detail.png
-  AssetGenImage get mascotLearnDetail =>
-      const AssetGenImage('assets/images/mascot_learn_detail.png');
-
-  /// File path: assets/images/mascot_metabolic.png
-  AssetGenImage get mascotMetabolic =>
-      const AssetGenImage('assets/images/mascot_metabolic.png');
-
-  /// File path: assets/images/mascot-omh.png
-  AssetGenImage get mascotOmh =>
-      const AssetGenImage('assets/images/mascot-omh.png');
-
-  /// File path: assets/images/mascot_quick_walkt.png
-  AssetGenImage get mascotQuickWalkt =>
-      const AssetGenImage('assets/images/mascot_quick_walkt.png');
-
-  /// File path: assets/images/mascot_search.png
-  AssetGenImage get mascotSearch =>
-      const AssetGenImage('assets/images/mascot_search.png');
-
-  /// File path: assets/images/mascot_tip.png
-  AssetGenImage get mascotTip =>
-      const AssetGenImage('assets/images/mascot_tip.png');
-
-  /// File path: assets/images/mascot_water.png
-  AssetGenImage get mascotWater =>
-      const AssetGenImage('assets/images/mascot_water.png');
-
-  /// File path: assets/images/mascot_widget.png
-  AssetGenImage get mascotWidget =>
-      const AssetGenImage('assets/images/mascot_widget.png');
-
-  /// File path: assets/images/meal_record_emoji.png
-  AssetGenImage get mealRecordEmoji =>
-      const AssetGenImage('assets/images/meal_record_emoji.png');
-
-  /// File path: assets/images/meat.png
-  AssetGenImage get meat => const AssetGenImage('assets/images/meat.png');
-
-  /// File path: assets/images/mediterrian.png
-  AssetGenImage get mediterrian =>
-      const AssetGenImage('assets/images/mediterrian.png');
-
-  /// File path: assets/images/meh.png
-  AssetGenImage get meh => const AssetGenImage('assets/images/meh.png');
-
-  /// File path: assets/images/meh_colored.png
-  AssetGenImage get mehColored =>
-      const AssetGenImage('assets/images/meh_colored.png');
-
-  /// File path: assets/images/mehv2.png
-  AssetGenImage get mehv2 => const AssetGenImage('assets/images/mehv2.png');
-
-  /// File path: assets/images/mehv3.png
-  AssetGenImage get mehv3 => const AssetGenImage('assets/images/mehv3.png');
-
-  /// File path: assets/images/metabolic.png
-  AssetGenImage get metabolic =>
-      const AssetGenImage('assets/images/metabolic.png');
-
-  /// File path: assets/images/mixed.png
-  AssetGenImage get mixed => const AssetGenImage('assets/images/mixed.png');
-
-  /// File path: assets/images/mixedv2.png
-  AssetGenImage get mixedv2 => const AssetGenImage('assets/images/mixedv2.png');
-
-  /// File path: assets/images/mochi_worl_v2.png
-  AssetGenImage get mochiWorlV2 =>
-      const AssetGenImage('assets/images/mochi_worl_v2.png');
-
-  /// File path: assets/images/mochi-worlds.png
-  AssetGenImage get mochiWorlds =>
-      const AssetGenImage('assets/images/mochi-worlds.png');
-
-  /// File path: assets/images/mood.png
-  AssetGenImage get mood => const AssetGenImage('assets/images/mood.png');
-
-  /// File path: assets/images/motivation.png
-  AssetGenImage get motivation =>
-      const AssetGenImage('assets/images/motivation.png');
-
-  /// File path: assets/images/mushroom.png
-  AssetGenImage get mushroom =>
-      const AssetGenImage('assets/images/mushroom.png');
-
-  /// File path: assets/images/nausea.png
-  AssetGenImage get nausea => const AssetGenImage('assets/images/nausea.png');
-
-  /// File path: assets/images/next_fast.png
-  AssetGenImage get nextFast =>
-      const AssetGenImage('assets/images/next_fast.png');
-
-  /// File path: assets/images/non-binary.png
-  AssetGenImage get nonBinary =>
-      const AssetGenImage('assets/images/non-binary.png');
-
-  /// File path: assets/images/noodles.png
-  AssetGenImage get noodles => const AssetGenImage('assets/images/noodles.png');
-
-  /// File path: assets/images/noone.png
-  AssetGenImage get noone => const AssetGenImage('assets/images/noone.png');
-
-  /// File path: assets/images/not_sure.png
-  AssetGenImage get notSure =>
-      const AssetGenImage('assets/images/not_sure.png');
-
-  /// File path: assets/images/not_surev2.png
-  AssetGenImage get notSurev2 =>
-      const AssetGenImage('assets/images/not_surev2.png');
-
-  /// File path: assets/images/nothing_physical.png
-  AssetGenImage get nothingPhysical =>
-      const AssetGenImage('assets/images/nothing_physical.png');
-
-  /// File path: assets/images/notificatio.png
-  AssetGenImage get notificatio =>
-      const AssetGenImage('assets/images/notificatio.png');
-
-  /// File path: assets/images/notification_empty_bell.png
-  AssetGenImage get notificationEmptyBell =>
-      const AssetGenImage('assets/images/notification_empty_bell.png');
-
-  /// File path: assets/images/nuts.png
-  AssetGenImage get nuts => const AssetGenImage('assets/images/nuts.png');
-
-  /// File path: assets/images/olive.png
-  AssetGenImage get olive => const AssetGenImage('assets/images/olive.png');
-
-  /// File path: assets/images/olives.png
-  AssetGenImage get olives => const AssetGenImage('assets/images/olives.png');
-
-  /// File path: assets/images/onion.png
-  AssetGenImage get onion => const AssetGenImage('assets/images/onion.png');
-
-  /// File path: assets/images/orange_bell.png
-  AssetGenImage get orangeBell =>
-      const AssetGenImage('assets/images/orange_bell.png');
-
-  /// File path: assets/images/orange_bellv2.png
-  AssetGenImage get orangeBellv2 =>
-      const AssetGenImage('assets/images/orange_bellv2.png');
-
-  /// File path: assets/images/pasta.png
-  AssetGenImage get pasta => const AssetGenImage('assets/images/pasta.png');
-
-  /// File path: assets/images/pescatarian.png
-  AssetGenImage get pescatarian =>
-      const AssetGenImage('assets/images/pescatarian.png');
-
-  /// File path: assets/images/physical_hunger.png
-  AssetGenImage get physicalHunger =>
-      const AssetGenImage('assets/images/physical_hunger.png');
-
-  /// File path: assets/images/plans.png
-  AssetGenImage get plans => const AssetGenImage('assets/images/plans.png');
-
-  /// File path: assets/images/plant.png
-  AssetGenImage get plant => const AssetGenImage('assets/images/plant.png');
-
-  /// File path: assets/images/pleteu.png
-  AssetGenImage get pleteu => const AssetGenImage('assets/images/pleteu.png');
-
-  /// File path: assets/images/prefer-not.png
-  AssetGenImage get preferNot =>
-      const AssetGenImage('assets/images/prefer-not.png');
-
-  /// File path: assets/images/pro_king.png
-  AssetGenImage get proKing =>
-      const AssetGenImage('assets/images/pro_king.png');
-
-  /// File path: assets/images/pro_reading.png
-  AssetGenImage get proReading =>
-      const AssetGenImage('assets/images/pro_reading.png');
-
-  /// File path: assets/images/profile.png
-  AssetGenImage get profile => const AssetGenImage('assets/images/profile.png');
-
-  /// File path: assets/images/progress_head.png
-  AssetGenImage get progressHead =>
-      const AssetGenImage('assets/images/progress_head.png');
-
-  /// File path: assets/images/protein.png
-  AssetGenImage get protein => const AssetGenImage('assets/images/protein.png');
-
-  /// File path: assets/images/purple_star.png
-  AssetGenImage get purpleStar =>
-      const AssetGenImage('assets/images/purple_star.png');
-
-  /// File path: assets/images/quick_walk.png
-  AssetGenImage get quickWalk =>
-      const AssetGenImage('assets/images/quick_walk.png');
-
-  /// File path: assets/images/restrictive.png
-  AssetGenImage get restrictive =>
-      const AssetGenImage('assets/images/restrictive.png');
-
-  /// File path: assets/images/red_warning.png
-  AssetGenImage get redWarning =>
-      const AssetGenImage('assets/images/red_warning.png');
-
-  /// File path: assets/images/rice.png
-  AssetGenImage get rice => const AssetGenImage('assets/images/rice.png');
-
-  /// File path: assets/images/riiight.png
-  AssetGenImage get riiight => const AssetGenImage('assets/images/riiight.png');
-
-  /// File path: assets/images/salata.png
-  AssetGenImage get salata => const AssetGenImage('assets/images/salata.png');
-
-  /// File path: assets/images/sand_clock.png
-  AssetGenImage get sandClock =>
-      const AssetGenImage('assets/images/sand_clock.png');
-
-  /// File path: assets/images/scramlbed_eggs.png
-  AssetGenImage get scramlbedEggs =>
-      const AssetGenImage('assets/images/scramlbed_eggs.png');
-
-  /// File path: assets/images/searchpng.png
-  AssetGenImage get searchpng =>
-      const AssetGenImage('assets/images/searchpng.png');
-
-  /// File path: assets/images/second_question.png
-  AssetGenImage get secondQuestion =>
-      const AssetGenImage('assets/images/second_question.png');
-
-  /// File path: assets/images/see_star.png
-  AssetGenImage get seeStar =>
-      const AssetGenImage('assets/images/see_star.png');
-
-  /// File path: assets/images/seefood.png
-  AssetGenImage get seefood => const AssetGenImage('assets/images/seefood.png');
-
-  /// File path: assets/images/small_steps.png
-  AssetGenImage get smallSteps =>
-      const AssetGenImage('assets/images/small_steps.png');
-
-  /// File path: assets/images/solar_pen-bold (1).png
-  AssetGenImage get solarPenBold1 =>
-      const AssetGenImage('assets/images/solar_pen-bold (1).png');
-
-  /// File path: assets/images/solar_pen-bold.png
-  AssetGenImage get solarPenBold =>
-      const AssetGenImage('assets/images/solar_pen-bold.png');
-
-  /// File path: assets/images/solar_verified-check-bold.png
-  AssetGenImage get solarVerifiedCheckBold =>
-      const AssetGenImage('assets/images/solar_verified-check-bold.png');
-
-  /// File path: assets/images/spicy.png
-  AssetGenImage get spicy => const AssetGenImage('assets/images/spicy.png');
-
-  /// File path: assets/images/star.png
-  AssetGenImage get star => const AssetGenImage('assets/images/star.png');
-
-  /// File path: assets/images/start.png
-  AssetGenImage get start => const AssetGenImage('assets/images/start.png');
-
-  /// File path: assets/images/steps.png
-  AssetGenImage get steps => const AssetGenImage('assets/images/steps.png');
-
-  /// File path: assets/images/stomach.png
-  AssetGenImage get stomach => const AssetGenImage('assets/images/stomach.png');
-
-  /// File path: assets/images/stonks.png
-  AssetGenImage get stonks => const AssetGenImage('assets/images/stonks.png');
-
-  /// File path: assets/images/summit.png
-  AssetGenImage get summit => const AssetGenImage('assets/images/summit.png');
-
-  /// File path: assets/images/stressed.png
-  AssetGenImage get stressed =>
-      const AssetGenImage('assets/images/stressed.png');
-
-  /// File path: assets/images/streak.png
-  AssetGenImage get streak => const AssetGenImage('assets/images/streak.png');
-
-  /// File path: assets/images/streak_flame.png
-  AssetGenImage get streakFlame =>
-      const AssetGenImage('assets/images/streak_flame.png');
-
-  /// File path: assets/images/super.png
-  AssetGenImage get superFace => const AssetGenImage('assets/images/super.png');
-
-  /// File path: assets/images/super_colored.png
-  AssetGenImage get superColored =>
-      const AssetGenImage('assets/images/super_colored.png');
-
-  /// File path: assets/images/sweethies.png
-  AssetGenImage get sweethies =>
-      const AssetGenImage('assets/images/sweethies.png');
-
-  /// File path: assets/images/take_photo.png
-  AssetGenImage get takePhoto =>
-      const AssetGenImage('assets/images/take_photo.png');
-
-  /// File path: assets/images/third_s-question.png
-  AssetGenImage get thirdSQuestion =>
-      const AssetGenImage('assets/images/third_s-question.png');
-
-  /// File path: assets/images/time-cook.png
-  AssetGenImage get timeCook =>
-      const AssetGenImage('assets/images/time-cook.png');
-
-  /// File path: assets/images/tirtil.png
-  AssetGenImage get tirtil => const AssetGenImage('assets/images/tirtil.png');
-
-  /// File path: assets/images/tongue.png
-  AssetGenImage get tongue => const AssetGenImage('assets/images/tongue.png');
-
-  /// File path: assets/images/tonguev2.png
-  AssetGenImage get tonguev2 =>
-      const AssetGenImage('assets/images/tonguev2.png');
-
-  /// File path: assets/images/toospicy.png
-  AssetGenImage get toospicy =>
-      const AssetGenImage('assets/images/toospicy.png');
-
-  /// File path: assets/images/tough.png
-  AssetGenImage get tough => const AssetGenImage('assets/images/tough.png');
-
-  /// File path: assets/images/tough_colored.png
-  AssetGenImage get toughColored =>
-      const AssetGenImage('assets/images/tough_colored.png');
-
-  /// File path: assets/images/tree.png
-  AssetGenImage get tree => const AssetGenImage('assets/images/tree.png');
-
-  /// File path: assets/images/tree2.png
-  AssetGenImage get tree2 => const AssetGenImage('assets/images/tree2.png');
-
-  /// File path: assets/images/tree3.png
-  AssetGenImage get tree3 => const AssetGenImage('assets/images/tree3.png');
-
-  /// File path: assets/images/trip.png
-  AssetGenImage get trip => const AssetGenImage('assets/images/trip.png');
-
-  /// File path: assets/images/unhappy.png
-  AssetGenImage get unhappy => const AssetGenImage('assets/images/unhappy.png');
-
-  /// File path: assets/images/unhappyv2.png
-  AssetGenImage get unhappyv2 =>
-      const AssetGenImage('assets/images/unhappyv2.png');
-
-  /// File path: assets/images/vector_18_bmi.png
-  AssetGenImage get vector18Bmi =>
-      const AssetGenImage('assets/images/vector_18_bmi.png');
-
-  /// File path: assets/images/vegetarian.png
-  AssetGenImage get vegetarian =>
-      const AssetGenImage('assets/images/vegetarian.png');
-
-  /// File path: assets/images/wake.png
-  AssetGenImage get wake => const AssetGenImage('assets/images/wake.png');
-
-  /// File path: assets/images/water.png
-  AssetGenImage get water => const AssetGenImage('assets/images/water.png');
-
-  /// File path: assets/images/water_bottle.png
-  AssetGenImage get waterBottle =>
-      const AssetGenImage('assets/images/water_bottle.png');
-
-  /// File path: assets/images/water_bottle_300.png
-  AssetGenImage get waterBottle300 =>
-      const AssetGenImage('assets/images/water_bottle_300.png');
-
-  /// File path: assets/images/water_bottle_500.png
-  AssetGenImage get waterBottle500 =>
-      const AssetGenImage('assets/images/water_bottle_500.png');
-
-  /// File path: assets/images/water_glass_100.png
-  AssetGenImage get waterGlass100 =>
-      const AssetGenImage('assets/images/water_glass_100.png');
-
-  /// File path: assets/images/water_glass_200.png
-  AssetGenImage get waterGlass200 =>
-      const AssetGenImage('assets/images/water_glass_200.png');
-
-  /// File path: assets/images/water_glass_50.png
-  AssetGenImage get waterGlass50 =>
-      const AssetGenImage('assets/images/water_glass_50.png');
-
-  /// File path: assets/images/water_progress_highlight.png
-  AssetGenImage get waterProgressHighlight =>
-      const AssetGenImage('assets/images/water_progress_highlight.png');
-
-  /// File path: assets/images/water_progress_wave.png
-  AssetGenImage get waterProgressWave =>
-      const AssetGenImage('assets/images/water_progress_wave.png');
-
-  /// File path: assets/images/water_size_plus.png
-  AssetGenImage get waterSizePlus =>
-      const AssetGenImage('assets/images/water_size_plus.png');
-
-  /// File path: assets/images/weakness.png
-  AssetGenImage get weakness =>
-      const AssetGenImage('assets/images/weakness.png');
-
-  /// File path: assets/images/weigher.png
-  AssetGenImage get weigher => const AssetGenImage('assets/images/weigher.png');
-
-  /// File path: assets/images/weigher_2.png
-  AssetGenImage get weigher2 =>
-      const AssetGenImage('assets/images/weigher_2.png');
-
-  /// File path: assets/images/widget-1.png
-  AssetGenImage get widget1 =>
-      const AssetGenImage('assets/images/widget-1.png');
-
-  /// File path: assets/images/widget-2.png
-  AssetGenImage get widget2 =>
-      const AssetGenImage('assets/images/widget-2.png');
-
-  /// File path: assets/images/woman.png
-  AssetGenImage get woman => const AssetGenImage('assets/images/woman.png');
-
-  /// File path: assets/images/world.png
-  AssetGenImage get world => const AssetGenImage('assets/images/world.png');
-
-  /// File path: assets/images/yellow_lightning.png
-  AssetGenImage get yellowLightning =>
-      const AssetGenImage('assets/images/yellow_lightning.png');
-
-  /// File path: assets/images/yogurt.png
-  AssetGenImage get yogurt => const AssetGenImage('assets/images/yogurt.png');
-
-  /// File path: assets/images/zzz.png
-  AssetGenImage get zzz => const AssetGenImage('assets/images/zzz.png');
+  /// File path: assets/remote_images/manifest.json
+  String get manifest => 'assets/remote_images/manifest.json';
 
   /// List of all assets
-  List<AssetGenImage> get values => [
-    a1Or2,
-    a1,
-    a100ml,
-    a1Light,
-    a2,
-    a200ml,
-    a2Light,
-    a3,
-    a3Light,
-    a4,
-    a4Light,
-    a5,
-    a500ml,
-    a50ml,
-    a5Light,
-    a6,
-    a6Light,
-    a7,
-    a7Light,
-    a8,
-    a8Light,
-    a9,
-    a9Light,
-    appIcon,
-    aDebugBar,
-    aiChat,
-    almostAny,
-    analytics,
-    apple,
-    avacado,
-    beans,
-    bedtime,
-    blob,
-    blood,
-    blueBook,
-    blueClock,
-    blueHearth,
-    bored,
-    bowel,
-    brain,
-    breakYourFast,
-    breathe,
-    brocc,
-    broccv2,
-    brocolies,
-    building,
-    burger,
-    burgerv2,
-    busy,
-    caloriesTracker,
-    carbs,
-    challenge,
-    cheese,
-    chicken,
-    clock,
-    confidence,
-    confusing,
-    cravling,
-    dairy,
-    darkFast,
-    darkNextFasting,
-    darkNoruish,
-    darkNorusih,
-    date,
-    dizzinies,
-    donut,
-    droplet,
-    dumble,
-    eatWindow,
-    eggplant,
-    eggs,
-    emotionalHunger,
-    end,
-    endFast,
-    everything,
-    fasting,
-    fastingChallenge,
-    fastingChallengeUser1,
-    fastingChallengeUser2,
-    fastingChallengeUser3,
-    fastForecast,
-    fatigue,
-    firstQuestion,
-    firstTime,
-    fish,
-    flameCalories,
-    fork,
-    forkClosest,
-    forest,
-    fourthQuestion,
-    garden,
-    friedPotato,
-    fruit,
-    fullCheck,
-    goal,
-    good,
-    goodColored,
-    goodv2,
-    goodv3,
-    greatJob,
-    greenApple,
-    greenBook,
-    greenClock,
-    greenTick,
-    greenTick3d,
-    greenTickFilled,
-    grilledSalad,
-    headerBack,
-    healty,
-    hearttt,
-    highCarb,
-    highCarbv2,
-    home,
-    hours,
-    huh,
-    human,
-    hungry,
-    hungerTracker,
-    hungerLog,
-    insights,
-    insightss,
-    insightsss,
-    keepNoruish,
-    kingSl,
-    lawCarb,
-    leaf,
-    lake,
-    lightning,
-    listenYourBody,
-    logHunger,
-    loginv2,
-    lowCarb,
-    lowCarbv2,
-    lowEnergiy,
-    man,
-    mascotBreath,
-    mascotChat,
-    mascotChatPp,
-    mascotClock,
-    mascotDiver,
-    mascotHi,
-    mascotHiWater,
-    mascotHiWithout,
-    mascotLearnDetail,
-    mascotMetabolic,
-    mascotOmh,
-    mascotQuickWalkt,
-    mascotSearch,
-    mascotTip,
-    mascotWater,
-    mascotWidget,
-    mealRecordEmoji,
-    meat,
-    mediterrian,
-    meh,
-    mehColored,
-    mehv2,
-    mehv3,
-    metabolic,
-    mixed,
-    mixedv2,
-    mochiWorlV2,
-    mochiWorlds,
-    mood,
-    motivation,
-    mushroom,
-    nausea,
-    nextFast,
-    nonBinary,
-    noodles,
-    noone,
-    notSure,
-    notSurev2,
-    nothingPhysical,
-    notificatio,
-    notificationEmptyBell,
-    nuts,
-    olive,
-    olives,
-    onion,
-    orangeBell,
-    orangeBellv2,
-    pasta,
-    pescatarian,
-    physicalHunger,
-    plans,
-    plant,
-    pleteu,
-    preferNot,
-    proKing,
-    proReading,
-    profile,
-    progressHead,
-    protein,
-    purpleStar,
-    quickWalk,
-    restrictive,
-    redWarning,
-    rice,
-    riiight,
-    salata,
-    sandClock,
-    scramlbedEggs,
-    searchpng,
-    secondQuestion,
-    seeStar,
-    seefood,
-    smallSteps,
-    solarPenBold1,
-    solarPenBold,
-    solarVerifiedCheckBold,
-    spicy,
-    star,
-    start,
-    steps,
-    stomach,
-    stonks,
-    summit,
-    stressed,
-    streak,
-    streakFlame,
-    superFace,
-    superColored,
-    sweethies,
-    takePhoto,
-    thirdSQuestion,
-    timeCook,
-    tirtil,
-    tongue,
-    tonguev2,
-    toospicy,
-    tough,
-    toughColored,
-    tree,
-    tree2,
-    tree3,
-    trip,
-    unhappy,
-    unhappyv2,
-    vector18Bmi,
-    vegetarian,
-    wake,
-    water,
-    waterBottle,
-    waterBottle300,
-    waterBottle500,
-    waterGlass100,
-    waterGlass200,
-    waterGlass50,
-    waterProgressHighlight,
-    waterProgressWave,
-    waterSizePlus,
-    weakness,
-    weigher,
-    weigher2,
-    widget1,
-    widget2,
-    woman,
-    world,
-    yellowLightning,
-    yogurt,
-    zzz,
-  ];
+  List<String> get values => [manifest];
 }
 
 class $AssetsTranslationsGen {
@@ -1608,11 +429,172 @@ class $AssetsTranslationsGen {
   /// File path: assets/translations/en.json
   String get en => 'assets/translations/en.json';
 
+  /// File path: assets/translations/es.json
+  String get es => 'assets/translations/es.json';
+
+  /// File path: assets/translations/fr.json
+  String get fr => 'assets/translations/fr.json';
+
+  /// File path: assets/translations/it.json
+  String get it => 'assets/translations/it.json';
+
+  /// File path: assets/translations/ru.json
+  String get ru => 'assets/translations/ru.json';
+
   /// File path: assets/translations/tr.json
   String get tr => 'assets/translations/tr.json';
 
   /// List of all assets
-  List<String> get values => [de, en, tr];
+  List<String> get values => [de, en, es, fr, it, ru, tr];
+}
+
+class $AssetsImagesBundledGen {
+  const $AssetsImagesBundledGen();
+
+  /// File path: assets/images/bundled/app_icon.webp
+  AssetGenImage get appIcon =>
+      const AssetGenImage('assets/images/bundled/app_icon.webp');
+
+  /// List of all assets
+  List<AssetGenImage> get values => [appIcon];
+}
+
+class $AssetsImagesMochiGen {
+  const $AssetsImagesMochiGen();
+
+  /// File path: assets/images/mochi/bench.webp
+  AssetGenImage get bench =>
+      const AssetGenImage('assets/images/mochi/bench.webp');
+
+  /// File path: assets/images/mochi/cracked_patch.webp
+  AssetGenImage get crackedPatch =>
+      const AssetGenImage('assets/images/mochi/cracked_patch.webp');
+
+  /// File path: assets/images/mochi/fence.webp
+  AssetGenImage get fence =>
+      const AssetGenImage('assets/images/mochi/fence.webp');
+
+  /// File path: assets/images/mochi/flower_clay.webp
+  AssetGenImage get flowerClay =>
+      const AssetGenImage('assets/images/mochi/flower_clay.webp');
+
+  /// File path: assets/images/mochi/flower_cream.webp
+  AssetGenImage get flowerCream =>
+      const AssetGenImage('assets/images/mochi/flower_cream.webp');
+
+  /// File path: assets/images/mochi/flower_orange.webp
+  AssetGenImage get flowerOrange =>
+      const AssetGenImage('assets/images/mochi/flower_orange.webp');
+
+  /// File path: assets/images/mochi/flower_peach.webp
+  AssetGenImage get flowerPeach =>
+      const AssetGenImage('assets/images/mochi/flower_peach.webp');
+
+  /// File path: assets/images/mochi/flower_wilted.webp
+  AssetGenImage get flowerWilted =>
+      const AssetGenImage('assets/images/mochi/flower_wilted.webp');
+
+  /// File path: assets/images/mochi/flower_yellow.webp
+  AssetGenImage get flowerYellow =>
+      const AssetGenImage('assets/images/mochi/flower_yellow.webp');
+
+  /// File path: assets/images/mochi/flowers.webp
+  AssetGenImage get flowers =>
+      const AssetGenImage('assets/images/mochi/flowers.webp');
+
+  /// File path: assets/images/mochi/fruit_tree.webp
+  AssetGenImage get fruitTree =>
+      const AssetGenImage('assets/images/mochi/fruit_tree.webp');
+
+  /// File path: assets/images/mochi/lantern.webp
+  AssetGenImage get lantern =>
+      const AssetGenImage('assets/images/mochi/lantern.webp');
+
+  /// File path: assets/images/mochi/lily.webp
+  AssetGenImage get lily =>
+      const AssetGenImage('assets/images/mochi/lily.webp');
+
+  /// File path: assets/images/mochi/mountain.webp
+  AssetGenImage get mountain =>
+      const AssetGenImage('assets/images/mochi/mountain.webp');
+
+  /// File path: assets/images/mochi/pond_dried.webp
+  AssetGenImage get pondDried =>
+      const AssetGenImage('assets/images/mochi/pond_dried.webp');
+
+  /// File path: assets/images/mochi/pond_drying.webp
+  AssetGenImage get pondDrying =>
+      const AssetGenImage('assets/images/mochi/pond_drying.webp');
+
+  /// File path: assets/images/mochi/pond_lily.webp
+  AssetGenImage get pondLily =>
+      const AssetGenImage('assets/images/mochi/pond_lily.webp');
+
+  /// File path: assets/images/mochi/sapling_wilting.webp
+  AssetGenImage get saplingWilting =>
+      const AssetGenImage('assets/images/mochi/sapling_wilting.webp');
+
+  /// File path: assets/images/mochi/shrub_dry.webp
+  AssetGenImage get shrubDry =>
+      const AssetGenImage('assets/images/mochi/shrub_dry.webp');
+
+  /// File path: assets/images/mochi/tree.webp
+  AssetGenImage get tree =>
+      const AssetGenImage('assets/images/mochi/tree.webp');
+
+  /// File path: assets/images/mochi/tree_bare.webp
+  AssetGenImage get treeBare =>
+      const AssetGenImage('assets/images/mochi/tree_bare.webp');
+
+  /// File path: assets/images/mochi/tree_fairy.webp
+  AssetGenImage get treeFairy =>
+      const AssetGenImage('assets/images/mochi/tree_fairy.webp');
+
+  /// File path: assets/images/mochi/tree_pale.webp
+  AssetGenImage get treePale =>
+      const AssetGenImage('assets/images/mochi/tree_pale.webp');
+
+  /// File path: assets/images/mochi/tree_round.webp
+  AssetGenImage get treeRound =>
+      const AssetGenImage('assets/images/mochi/tree_round.webp');
+
+  /// File path: assets/images/mochi/tree_soft.webp
+  AssetGenImage get treeSoft =>
+      const AssetGenImage('assets/images/mochi/tree_soft.webp');
+
+  /// File path: assets/images/mochi/waterfall.webp
+  AssetGenImage get waterfall =>
+      const AssetGenImage('assets/images/mochi/waterfall.webp');
+
+  /// List of all assets
+  List<AssetGenImage> get values => [
+    bench,
+    crackedPatch,
+    fence,
+    flowerClay,
+    flowerCream,
+    flowerOrange,
+    flowerPeach,
+    flowerWilted,
+    flowerYellow,
+    flowers,
+    fruitTree,
+    lantern,
+    lily,
+    mountain,
+    pondDried,
+    pondDrying,
+    pondLily,
+    saplingWilting,
+    shrubDry,
+    tree,
+    treeBare,
+    treeFairy,
+    treePale,
+    treeRound,
+    treeSoft,
+    waterfall,
+  ];
 }
 
 abstract final class Assets {
@@ -1621,6 +603,7 @@ abstract final class Assets {
   static const $AssetsGifsGen gifs = $AssetsGifsGen();
   static const $AssetsIconsGen icons = $AssetsIconsGen();
   static const $AssetsImagesGen images = $AssetsImagesGen();
+  static const $AssetsRemoteImagesGen remoteImages = $AssetsRemoteImagesGen();
   static const $AssetsTranslationsGen translations = $AssetsTranslationsGen();
 }
 

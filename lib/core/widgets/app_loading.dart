@@ -21,10 +21,7 @@ final class LoadingDialog extends StatelessWidget {
         width: 56,
         height: 56,
         child: Card(
-          child: Padding(
-            padding: EdgeInsets.all(12),
-            child: AppLoading(),
-          ),
+          child: Padding(padding: EdgeInsets.all(12), child: AppLoading()),
         ),
       ),
     );

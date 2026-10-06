@@ -54,9 +54,8 @@ final class PhotoSourceBottomSheet extends StatelessWidget {
                     _PhotoSourceRow(
                       icon: Icons.photo_camera_outlined,
                       title: 'profile.photo_camera'.tr(),
-                      onTap: () => Navigator.of(context).pop(
-                        ImageSource.camera,
-                      ),
+                      onTap: () =>
+                          Navigator.of(context).pop(ImageSource.camera),
                     ),
                     Divider(
                       height: 2,

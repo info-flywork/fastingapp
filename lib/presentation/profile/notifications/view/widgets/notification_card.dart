@@ -36,10 +36,7 @@ class _NotificationCardState extends State<NotificationCard>
       vsync: this,
       duration: const Duration(milliseconds: 280),
     );
-    final curved = CurvedAnimation(
-      parent: _remove,
-      curve: Curves.easeInCubic,
-    );
+    final curved = CurvedAnimation(parent: _remove, curve: Curves.easeInCubic);
     _removeSize = Tween<double>(begin: 1, end: 0).animate(curved);
     _removeOpacity = Tween<double>(begin: 1, end: 0).animate(curved);
     _removeOffset = Tween<Offset>(
@@ -123,8 +120,7 @@ class _NotificationCardState extends State<NotificationCard>
                       child: InkWell(
                         onTap: _onDelete,
                         child: Center(
-                          child:
-                              Assets.icons.solarTrashBinTrashBoldDuotone.svg(
+                          child: Assets.icons.solarTrashBinTrashBoldDuotone.svg(
                             width: 24,
                             height: 24,
                           ),
@@ -209,8 +205,8 @@ final class _NotificationIcon extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final asset = kind == NotificationKind.weight
-        ? Assets.images.weigher
-        : Assets.images.notificatio;
+        ? AppImages.weigher
+        : AppImages.notificatio;
 
     return Container(
       width: 56,

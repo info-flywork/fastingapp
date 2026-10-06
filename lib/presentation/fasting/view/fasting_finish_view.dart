@@ -2,12 +2,14 @@ import 'dart:math' as math;
 
 import 'package:easy_localization/easy_localization.dart';
 import 'package:fastingapp/core/dialogs/app_dialogs.dart';
+import 'package:fastingapp/core/remote_images/app_image.dart';
 import 'package:fastingapp/core/router/route_paths.dart';
 import 'package:fastingapp/core/theme/app_text_styles.dart';
 import 'package:fastingapp/core/widgets/app_button.dart';
 import 'package:fastingapp/core/widgets/app_button_decoration.dart';
 import 'package:fastingapp/core/widgets/flip_clock_unit.dart';
 import 'package:fastingapp/core/widgets/weight_progress_bar.dart';
+import 'package:fastingapp/generated/app_images.g.dart';
 import 'package:fastingapp/generated/assets.gen.dart';
 import 'package:fastingapp/generated/colors.gen.dart';
 import 'package:fastingapp/presentation/fasting/view/fasting_first_time_view.dart';
@@ -251,7 +253,7 @@ final class _FinishHeader extends StatelessWidget {
         clipBehavior: Clip.none,
         children: [
           Positioned.fill(
-            child: Assets.images.headerBack.image(
+            child: AppImages.headerBack.image(
               fit: BoxFit.fitWidth,
               alignment: Alignment.topCenter,
             ),
@@ -262,7 +264,7 @@ final class _FinishHeader extends StatelessWidget {
             top: topInset,
             child: Transform.scale(
               scale: 1.1,
-              child: Assets.images.caloriesTracker.image(
+              child: AppImages.caloriesTracker.image(
                 width: _mascotSize,
                 height: _mascotSize,
                 fit: BoxFit.contain,
@@ -353,7 +355,7 @@ final class _FastingTimesCard extends StatelessWidget {
                       ColorName.colorWhite,
                       BlendMode.srcATop,
                     ),
-                    child: Assets.images.forkClosest.image(
+                    child: AppImages.forkClosest.image(
                       width: 22,
                       height: 22,
                       fit: BoxFit.contain,
@@ -489,7 +491,7 @@ final class _TimeRow extends StatelessWidget {
           behavior: HitTestBehavior.opaque,
           child: Padding(
             padding: const EdgeInsets.all(4),
-            child: Assets.images.solarPenBold1.image(
+            child: AppImages.solarPenBold1.image(
               width: 18,
               height: 18,
               fit: BoxFit.contain,
@@ -743,7 +745,7 @@ final class _CurrentWeightCard extends StatelessWidget {
           children: [
             Row(
               children: [
-                Assets.images.weigher2.image(
+                AppImages.weigher2.image(
                   width: 28,
                   height: 28,
                   fit: BoxFit.contain,
@@ -861,7 +863,7 @@ final class _FeelingCard extends StatelessWidget {
           children: [
             Row(
               children: [
-                Assets.images.goodColored.image(
+                AppImages.goodColored.image(
                   width: 28,
                   height: 28,
                   fit: BoxFit.contain,
@@ -906,26 +908,26 @@ final class _FeelingOption extends StatelessWidget {
   final bool selected;
   final VoidCallback onTap;
 
-  (AssetGenImage idle, AssetGenImage active, String labelKey) get _data =>
+  (AppImageAsset idle, AppImageAsset active, String labelKey) get _data =>
       switch (mood) {
         _FinishFeeling.tough => (
-          Assets.images.tough,
-          Assets.images.toughColored,
+          AppImages.tough,
+          AppImages.toughColored,
           'fasting_page.finish_tough',
         ),
         _FinishFeeling.meh => (
-          Assets.images.mehv3,
-          Assets.images.mehColored,
+          AppImages.mehv3,
+          AppImages.mehColored,
           'fasting_page.finish_meh',
         ),
         _FinishFeeling.good => (
-          Assets.images.goodv3,
-          Assets.images.goodColored,
+          AppImages.goodv3,
+          AppImages.goodColored,
           'fasting_page.finish_good',
         ),
         _FinishFeeling.superMood => (
-          Assets.images.superFace,
-          Assets.images.superColored,
+          AppImages.superImage,
+          AppImages.superColored,
           'fasting_page.finish_super',
         ),
       };
@@ -975,7 +977,7 @@ final class _NotesCard extends StatelessWidget {
           children: [
             Row(
               children: [
-                Assets.images.greenBook.image(
+                AppImages.greenBook.image(
                   width: 28,
                   height: 28,
                   fit: BoxFit.contain,

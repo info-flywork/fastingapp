@@ -1,6 +1,8 @@
 import 'package:easy_localization/easy_localization.dart';
+import 'package:fastingapp/core/remote_images/app_image.dart';
 import 'package:fastingapp/core/router/route_paths.dart';
 import 'package:fastingapp/core/theme/app_text_styles.dart';
+import 'package:fastingapp/generated/app_images.g.dart';
 import 'package:fastingapp/generated/assets.gen.dart';
 import 'package:fastingapp/generated/colors.gen.dart';
 import 'package:flutter/material.dart';
@@ -80,7 +82,7 @@ class _FastingStruggleAdviceViewState extends State<FastingStruggleAdviceView> {
             Center(
               child: Transform.scale(
                 scale: 1.2,
-                child: Image.asset(
+                child: appImage(
                   Assets.gifs.mascotHearts.path,
                   width: 180,
                   height: 180,
@@ -154,10 +156,10 @@ final class _Tip {
   final String titleKey;
   final String bodyKey;
 
-  AssetGenImage get asset => switch (image) {
-    _TipImage.hydration => Assets.images.blob,
-    _TipImage.walk => Assets.images.quickWalk,
-    _TipImage.breathe => Assets.images.breathe,
+  AppImageAsset get asset => switch (image) {
+    _TipImage.hydration => AppImages.blob,
+    _TipImage.walk => AppImages.quickWalk,
+    _TipImage.breathe => AppImages.breathe,
   };
 }
 

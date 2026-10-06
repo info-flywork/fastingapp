@@ -58,7 +58,7 @@ class _HomeFastingCardState extends State<HomeFastingCard> {
                 child: ClipRect(
                   child: Transform.scale(
                     scale: 1.75,
-                    child: Assets.images.fork.image(
+                    child: AppImages.fork.image(
                       width: 32,
                       height: 32,
                       fit: BoxFit.contain,
@@ -85,7 +85,7 @@ class _HomeFastingCardState extends State<HomeFastingCard> {
                       child: ClipOval(
                         child: Transform.scale(
                           scale: 1.85,
-                          child: Assets.images.blood.image(
+                          child: AppImages.blood.image(
                             width: 28,
                             height: 28,
                             fit: BoxFit.contain,
@@ -113,7 +113,7 @@ class _HomeFastingCardState extends State<HomeFastingCard> {
                 child: ClipRect(
                   child: Transform.scale(
                     scale: 1.21,
-                    child: Assets.images.mascotClock.image(
+                    child: AppImages.mascotClock.image(
                       width: 96,
                       height: 96,
                       fit: BoxFit.contain,

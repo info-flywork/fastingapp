@@ -1,4 +1,4 @@
-import 'package:fastingapp/generated/assets.gen.dart';
+import 'package:fastingapp/generated/app_images.g.dart';
 import 'package:fastingapp/generated/colors.gen.dart';
 import 'package:fastingapp/generated/fonts.gen.dart';
 import 'package:flutter/material.dart';
@@ -66,7 +66,7 @@ final class FastingWeekWidgetView extends StatelessWidget {
               Positioned(
                 right: 8,
                 bottom: -18,
-                child: Assets.images.widget1.image(
+                child: AppImages.widget1.image(
                   height: 150,
                   fit: BoxFit.contain,
                 ),
@@ -80,10 +80,7 @@ final class FastingWeekWidgetView extends StatelessWidget {
 }
 
 final class _WeekChart extends StatelessWidget {
-  const _WeekChart({
-    required this.weekdayLabels,
-    required this.dayProgress,
-  });
+  const _WeekChart({required this.weekdayLabels, required this.dayProgress});
 
   final List<String> weekdayLabels;
   final List<double> dayProgress;
@@ -181,11 +178,9 @@ final class _CheerChip extends StatelessWidget {
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Assets.images.tree.image(height: 44, fit: BoxFit.contain),
+              AppImages.tree.image(height: 44, fit: BoxFit.contain),
               const SizedBox(width: 10),
-              Flexible(
-                child: Text(label, style: _cheer),
-              ),
+              Flexible(child: Text(label, style: _cheer)),
             ],
           ),
         ),

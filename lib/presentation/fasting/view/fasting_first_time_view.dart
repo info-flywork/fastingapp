@@ -6,6 +6,7 @@ import 'package:fastingapp/core/utils/extensions/future_extensions.dart';
 import 'package:fastingapp/core/widgets/app_button.dart';
 import 'package:fastingapp/core/widgets/app_button_decoration.dart';
 import 'package:fastingapp/core/widgets/flip_clock_unit.dart';
+import 'package:fastingapp/generated/app_images.g.dart';
 import 'package:fastingapp/generated/assets.gen.dart';
 import 'package:fastingapp/generated/colors.gen.dart';
 import 'package:flutter/material.dart';
@@ -102,7 +103,7 @@ final class FastingFirstTimeView extends StatelessWidget {
                       ],
                     ),
                     const SizedBox(height: 24),
-                    Assets.images.firstTime.image(
+                    AppImages.firstTime.image(
                       width: 280,
                       height: 280,
                       fit: BoxFit.contain,
@@ -124,12 +125,7 @@ final class FastingFirstTimeView extends StatelessWidget {
               ),
             ),
             Padding(
-              padding: EdgeInsets.fromLTRB(
-                16,
-                8,
-                16,
-                math.max(bottom, 24),
-              ),
+              padding: EdgeInsets.fromLTRB(16, 8, 16, math.max(bottom, 24)),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [

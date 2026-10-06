@@ -4,6 +4,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:fastingapp/core/theme/app_text_styles.dart';
 import 'package:fastingapp/core/widgets/app_button.dart';
 import 'package:fastingapp/core/widgets/app_button_decoration.dart';
+import 'package:fastingapp/generated/app_images.g.dart';
 import 'package:fastingapp/generated/assets.gen.dart';
 import 'package:fastingapp/generated/colors.gen.dart';
 import 'package:fastingapp/presentation/fasting/view/fasting_feeling_better_view.dart';
@@ -82,7 +83,7 @@ class _FastingQuickWalkViewState extends State<FastingQuickWalkView>
             Center(
               child: Transform.scale(
                 scale: 1.1,
-                child: Assets.images.mascotQuickWalkt.image(
+                child: AppImages.mascotQuickWalkt.image(
                   width: 200,
                   height: 200,
                   fit: BoxFit.contain,
@@ -183,7 +184,7 @@ final class _WalkCard extends StatelessWidget {
         padding: const EdgeInsets.all(12),
         child: Column(
           children: [
-            Assets.images.quickWalk.image(
+            AppImages.quickWalk.image(
               width: 48,
               height: 48,
               fit: BoxFit.contain,

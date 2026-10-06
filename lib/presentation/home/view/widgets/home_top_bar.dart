@@ -77,7 +77,7 @@ final class _PremiumPill extends StatelessWidget {
           Positioned(
             top: -24,
             right: -6,
-            child: Assets.images.proKing.image(
+            child: AppImages.proKing.image(
               width: 41,
               height: 41,
               fit: BoxFit.contain,
@@ -113,7 +113,7 @@ final class _StreakPill extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Assets.images.streakFlame.image(
+          AppImages.streakFlame.image(
             width: 28,
             height: 28,
             fit: BoxFit.contain,

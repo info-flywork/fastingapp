@@ -53,14 +53,14 @@ final class ProfilePremiumCard extends StatelessWidget {
               ),
             ),
           ),
-          
+
           Positioned(
             right: -55,
             bottom: -15,
             width: 248,
             height: _cardHeight + 100,
             child: IgnorePointer(
-              child: Assets.images.proReading.image(
+              child: AppImages.proReading.image(
                 fit: BoxFit.contain,
                 alignment: Alignment.bottomCenter,
               ),

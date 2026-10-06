@@ -8,11 +8,7 @@ final class SplashLogo extends StatelessWidget {
   Widget build(BuildContext context) {
     return ClipRRect(
       borderRadius: BorderRadius.circular(16),
-      child: Assets.images.appIcon.image(
-        width: 96,
-        height: 96,
-        fit: BoxFit.cover,
-      ),
+      child: AppImages.appIcon.image(width: 96, height: 96, fit: BoxFit.cover),
     );
   }
 }

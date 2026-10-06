@@ -1,9 +1,10 @@
 import 'package:easy_localization/easy_localization.dart';
+import 'package:fastingapp/core/remote_images/app_image.dart';
 import 'package:fastingapp/core/router/route_paths.dart';
 import 'package:fastingapp/core/theme/app_text_styles.dart';
 import 'package:fastingapp/core/widgets/app_button.dart';
 import 'package:fastingapp/core/widgets/onboarding/building_plan_section.dart';
-import 'package:fastingapp/generated/assets.gen.dart';
+import 'package:fastingapp/generated/app_images.g.dart';
 import 'package:fastingapp/generated/colors.gen.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -90,10 +91,7 @@ class _BuildingPlanViewState extends State<BuildingPlanView>
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    Image.asset(
-                      Assets.images.building.path,
-                      fit: BoxFit.contain,
-                    ),
+                    appImage(AppImages.building.path, fit: BoxFit.contain),
                     Text(
                       'onboarding.building_plan_title'.tr(),
                       textAlign: TextAlign.center,

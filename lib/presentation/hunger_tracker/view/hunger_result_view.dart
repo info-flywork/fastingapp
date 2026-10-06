@@ -5,6 +5,7 @@ import 'package:fastingapp/core/router/route_paths.dart';
 import 'package:fastingapp/core/theme/app_text_styles.dart';
 import 'package:fastingapp/core/widgets/app_button.dart';
 import 'package:fastingapp/core/widgets/app_button_decoration.dart';
+import 'package:fastingapp/generated/app_images.g.dart';
 import 'package:fastingapp/generated/assets.gen.dart';
 import 'package:fastingapp/generated/colors.gen.dart';
 import 'package:fastingapp/presentation/hunger_tracker/hunger_result_type.dart';
@@ -58,8 +59,8 @@ class _HungerResultViewState extends State<HungerResultView>
                 child: Column(
                   children: [
                     (_isPhysical
-                            ? Assets.images.physicalHunger
-                            : Assets.images.emotionalHunger)
+                            ? AppImages.physicalHunger
+                            : AppImages.emotionalHunger)
                         .image(width: 220, height: 235, fit: BoxFit.contain),
 
                     _Badge(
@@ -297,7 +298,7 @@ final class _RecommendationsCard extends StatelessWidget {
             Positioned(
               right: 0,
               top: 0,
-              child: Assets.images.tree3.image(
+              child: AppImages.tree3.image(
                 width: 119,
                 height: 119,
                 fit: BoxFit.contain,
@@ -320,7 +321,7 @@ final class _RecRow extends StatelessWidget {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Assets.images.greenTickFilled.image(
+        AppImages.greenTickFilled.image(
           width: 24,
           height: 24,
           fit: BoxFit.contain,

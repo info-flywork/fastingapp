@@ -5,6 +5,7 @@ import 'package:fastingapp/core/router/route_paths.dart';
 import 'package:fastingapp/core/theme/app_text_styles.dart';
 import 'package:fastingapp/core/widgets/app_button.dart';
 import 'package:fastingapp/core/widgets/app_button_decoration.dart';
+import 'package:fastingapp/generated/app_images.g.dart';
 import 'package:fastingapp/generated/assets.gen.dart';
 import 'package:fastingapp/generated/colors.gen.dart';
 import 'package:fastingapp/presentation/hunger_tracker/hunger_symptom.dart';
@@ -85,7 +86,7 @@ class _HungerFirstQuestionViewState extends State<HungerFirstQuestionView>
                       right: -28,
                       top: -8,
                       child: IgnorePointer(
-                        child: Assets.images.firstQuestion.image(
+                        child: AppImages.firstQuestion.image(
                           width: 245,
                           height: 245,
                           fit: BoxFit.contain,
@@ -193,7 +194,7 @@ final class _AnswerCard extends StatelessWidget {
         child: Row(
           children: [
             if (selected)
-              Assets.images.greenTickFilled.image(
+              AppImages.greenTickFilled.image(
                 width: 24,
                 height: 24,
                 fit: BoxFit.contain,

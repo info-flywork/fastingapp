@@ -14,10 +14,7 @@ extension FutureLoadingExtension<T> on Future<T> {
       AppDialogs.instance.showNormalDialog<void>(
         context: context,
         barrierDismissible: false,
-        child: const PopScope(
-          canPop: false,
-          child: LoadingDialog(),
-        ),
+        child: const PopScope(canPop: false, child: LoadingDialog()),
       ),
     );
 

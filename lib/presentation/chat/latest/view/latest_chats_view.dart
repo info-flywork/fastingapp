@@ -3,6 +3,7 @@ import 'package:fastingapp/core/di/injection.dart';
 import 'package:fastingapp/core/theme/app_text_styles.dart';
 import 'package:fastingapp/core/widgets/app_button.dart';
 import 'package:fastingapp/core/widgets/app_button_decoration.dart';
+import 'package:fastingapp/generated/app_images.g.dart';
 import 'package:fastingapp/generated/assets.gen.dart';
 import 'package:fastingapp/generated/colors.gen.dart';
 import 'package:fastingapp/presentation/chat/bloc/chat_session_cubit.dart';
@@ -90,10 +91,7 @@ final class _LatestChatsEmptyState extends StatelessWidget {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Assets.images.mascotChat.image(
-                  height: 180,
-                  fit: BoxFit.contain,
-                ),
+                AppImages.mascotChat.image(height: 180, fit: BoxFit.contain),
                 const SizedBox(height: 28),
                 Text(
                   'chat.empty_title'.tr(),
@@ -152,7 +150,7 @@ final class _LatestChatsHeader extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 ClipOval(
-                  child: Assets.images.mascotChatPp.image(
+                  child: AppImages.mascotChatPp.image(
                     width: 40,
                     height: 40,
                     fit: BoxFit.cover,

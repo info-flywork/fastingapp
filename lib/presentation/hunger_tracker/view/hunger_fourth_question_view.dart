@@ -1,10 +1,12 @@
 import 'dart:math' as math;
 
 import 'package:easy_localization/easy_localization.dart';
+import 'package:fastingapp/core/remote_images/app_image.dart';
 import 'package:fastingapp/core/router/route_paths.dart';
 import 'package:fastingapp/core/theme/app_text_styles.dart';
 import 'package:fastingapp/core/widgets/app_button.dart';
 import 'package:fastingapp/core/widgets/app_button_decoration.dart';
+import 'package:fastingapp/generated/app_images.g.dart';
 import 'package:fastingapp/generated/assets.gen.dart';
 import 'package:fastingapp/generated/colors.gen.dart';
 import 'package:fastingapp/presentation/hunger_tracker/hunger_result_type.dart';
@@ -95,7 +97,7 @@ class _HungerFourthQuestionViewState extends State<HungerFourthQuestionView>
                       right: -28,
                       top: -8,
                       child: IgnorePointer(
-                        child: Assets.images.fourthQuestion.image(
+                        child: AppImages.fourthQuestion.image(
                           width: 245,
                           height: 245,
                           fit: BoxFit.contain,
@@ -107,7 +109,7 @@ class _HungerFourthQuestionViewState extends State<HungerFourthQuestionView>
                       child: Column(
                         children: [
                           _AnswerCard(
-                            icon: Assets.images.almostAny,
+                            icon: AppImages.almostAny,
                             labelKey:
                                 'hunger_fourth_question_page.opt_almost_any',
                             selected:
@@ -117,7 +119,7 @@ class _HungerFourthQuestionViewState extends State<HungerFourthQuestionView>
                           ),
                           const SizedBox(height: 12),
                           _AnswerCard(
-                            icon: Assets.images.donut,
+                            icon: AppImages.donut,
                             labelKey: 'hunger_fourth_question_page.opt_sweet',
                             selected:
                                 selected == HungerFourthAnswer.somethingSweet,
@@ -126,7 +128,7 @@ class _HungerFourthQuestionViewState extends State<HungerFourthQuestionView>
                           ),
                           const SizedBox(height: 12),
                           _AnswerCard(
-                            icon: Assets.images.friedPotato,
+                            icon: AppImages.friedPotato,
                             labelKey:
                                 'hunger_fourth_question_page.opt_fast_food',
                             selected: selected == HungerFourthAnswer.fastFood,
@@ -135,7 +137,7 @@ class _HungerFourthQuestionViewState extends State<HungerFourthQuestionView>
                           ),
                           const SizedBox(height: 12),
                           _AnswerCard(
-                            icon: Assets.images.mood,
+                            icon: AppImages.mood,
                             labelKey:
                                 'hunger_fourth_question_page.opt_not_sure',
                             selected: selected == HungerFourthAnswer.notSure,
@@ -201,7 +203,7 @@ final class _AnswerCard extends StatelessWidget {
     required this.onTap,
   });
 
-  final AssetGenImage icon;
+  final AppImageAsset icon;
   final String labelKey;
   final bool selected;
   final VoidCallback onTap;

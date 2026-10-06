@@ -34,8 +34,7 @@ class _OnboardingTimePickerState extends State<OnboardingTimePicker> {
 
   int _loopCenter(int itemCount) => itemCount * (_loopPasses ~/ 2);
 
-  int _toLoopIndex(int value, int itemCount) =>
-      _loopCenter(itemCount) + value;
+  int _toLoopIndex(int value, int itemCount) => _loopCenter(itemCount) + value;
 
   @override
   void initState() {

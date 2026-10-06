@@ -52,7 +52,7 @@ final class GoodCompanyReviewCard extends StatelessWidget {
                           child: Transform.scale(
                             scale: 1.85,
                             alignment: const Alignment(0.5, -0.4),
-                            child: Image.asset(avatarPath, fit: BoxFit.cover),
+                            child: appImage(avatarPath, fit: BoxFit.cover),
                           ),
                         ),
                       ),

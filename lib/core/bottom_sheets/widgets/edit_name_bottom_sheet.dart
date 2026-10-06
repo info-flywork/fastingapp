@@ -128,9 +128,7 @@ class _EditNameBottomSheetState extends State<EditNameBottomSheet> {
                         child: Text(
                           'profile.photo_cancel'.tr(),
                           style: AppTextStyles.profileLogout.copyWith(
-                            color: ColorName.colorTitle.withValues(
-                              alpha: 0.65,
-                            ),
+                            color: ColorName.colorTitle.withValues(alpha: 0.65),
                           ),
                         ),
                       ),

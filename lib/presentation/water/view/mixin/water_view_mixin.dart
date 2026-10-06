@@ -265,7 +265,7 @@ mixin WaterViewMixin on State<WaterView>, TickerProvider {
       subtitleKey: 'water_reminder.goal_dialog_subtitle',
       initialValueMl: dailyGoalMl,
       initialUnit: WaterVolumeUnit.ml,
-      headerImage: Assets.images.waterBottle,
+      headerImage: AppImages.waterBottle,
     );
     if (result == null || !mounted) return;
     setState(() => dailyGoalMl = result.valueMl);

@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:math' as math;
 import 'dart:ui' as ui;
 
+import 'package:fastingapp/core/remote_images/app_image.dart';
 import 'package:fastingapp/presentation/mochi_world/model/mochi_world_layout.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -273,7 +274,7 @@ final class _Sprite extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    Widget image = Image.asset(
+    var image = appImage(
       kind.asset,
       width: width,
       height: height,

@@ -1,10 +1,11 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:fastingapp/core/dialogs/app_dialogs.dart';
 import 'package:fastingapp/core/dialogs/widgets/water_edit_dialog.dart';
+import 'package:fastingapp/core/remote_images/app_image.dart';
 import 'package:fastingapp/core/theme/app_text_styles.dart';
 import 'package:fastingapp/core/widgets/app_button.dart';
 import 'package:fastingapp/core/widgets/app_button_decoration.dart';
-import 'package:fastingapp/generated/assets.gen.dart';
+import 'package:fastingapp/generated/app_images.g.dart';
 import 'package:fastingapp/generated/colors.gen.dart';
 import 'package:fastingapp/presentation/profile/view/widgets/edit_profile_app_bar.dart';
 import 'package:fastingapp/presentation/water/reminder/water_reminder_result.dart';
@@ -49,8 +50,7 @@ class _WaterReminderViewState extends State<WaterReminderView> {
 
   List<int> get _allSizes => [..._presetSizes, ..._customSizes];
 
-  String get _unitLabel =>
-      _unit == WaterVolumeUnit.ml ? 'ml' : 'oz';
+  String get _unitLabel => _unit == WaterVolumeUnit.ml ? 'ml' : 'oz';
 
   Future<void> _editDailyGoal() async {
     final result = await AppDialogs.instance.showEditWaterValue(
@@ -59,7 +59,7 @@ class _WaterReminderViewState extends State<WaterReminderView> {
       subtitleKey: 'water_reminder.goal_dialog_subtitle',
       initialValueMl: _dailyGoalMl,
       initialUnit: _unit,
-      headerImage: Assets.images.waterBottle,
+      headerImage: AppImages.waterBottle,
     );
     if (result == null || !mounted) return;
     setState(() {
@@ -84,7 +84,7 @@ class _WaterReminderViewState extends State<WaterReminderView> {
       subtitleKey: 'water_reminder.custom_size_dialog_subtitle',
       initialValueMl: _glassSizeMl,
       initialUnit: _unit,
-      headerImage: Assets.images.waterSizePlus,
+      headerImage: AppImages.waterSizePlus,
     );
     if (result == null || !mounted) return;
     setState(() {
@@ -107,7 +107,7 @@ class _WaterReminderViewState extends State<WaterReminderView> {
     );
   }
 
-  AssetGenImage _iconForSize(int ml) => WaterGlassIcons.forMl(ml);
+  AppImageAsset _iconForSize(int ml) => WaterGlassIcons.forMl(ml);
 
   @override
   Widget build(BuildContext context) {
@@ -241,7 +241,7 @@ final class _SettingsCard extends StatelessWidget {
   final String unitLabel;
   final int glassSizeMl;
   final List<int> sizes;
-  final AssetGenImage? Function(int ml) iconForSize;
+  final AppImageAsset? Function(int ml) iconForSize;
   final VoidCallback onEditGoal;
   final VoidCallback onEditUnit;
   final ValueChanged<int> onSelectSize;
@@ -313,7 +313,7 @@ final class _SettingRow extends StatelessWidget {
           behavior: HitTestBehavior.opaque,
           child: Padding(
             padding: const EdgeInsets.all(4),
-            child: Assets.images.solarPenBold.image(width: 16, height: 16),
+            child: AppImages.solarPenBold.image(width: 16, height: 16),
           ),
         ),
       ],
@@ -332,7 +332,7 @@ final class _GlassSizeGrid extends StatelessWidget {
 
   final List<int> sizes;
   final int selectedMl;
-  final AssetGenImage? Function(int ml) iconForSize;
+  final AppImageAsset? Function(int ml) iconForSize;
   final ValueChanged<int> onSelect;
   final VoidCallback onAddCustom;
 
@@ -349,7 +349,7 @@ final class _GlassSizeGrid extends StatelessWidget {
       _GlassSizeTile(
         label: null,
         selected: false,
-        icon: Assets.images.waterSizePlus,
+        icon: AppImages.waterSizePlus,
         onTap: onAddCustom,
       ),
     ];
@@ -381,7 +381,7 @@ final class _GlassSizeTile extends StatelessWidget {
 
   final String? label;
   final bool selected;
-  final AssetGenImage? icon;
+  final AppImageAsset? icon;
   final VoidCallback onTap;
 
   @override
@@ -433,7 +433,7 @@ final class _GlassSizeTile extends StatelessWidget {
 final class _GlassSizeIcon extends StatelessWidget {
   const _GlassSizeIcon({required this.image, required this.vibrant});
 
-  final AssetGenImage image;
+  final AppImageAsset image;
   final bool vibrant;
 
   static const _mutedFilter = ColorFilter.matrix(<double>[

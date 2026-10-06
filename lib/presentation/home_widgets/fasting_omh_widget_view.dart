@@ -1,6 +1,6 @@
 import 'dart:ui';
 
-import 'package:fastingapp/generated/assets.gen.dart';
+import 'package:fastingapp/generated/app_images.g.dart';
 import 'package:fastingapp/generated/colors.gen.dart';
 import 'package:fastingapp/generated/fonts.gen.dart';
 import 'package:flutter/material.dart';
@@ -83,7 +83,7 @@ final class FastingOmhWidgetView extends StatelessWidget {
               Positioned(
                 right: 8,
                 bottom: 0,
-                child: Assets.images.mascotOmh.image(
+                child: AppImages.mascotOmh.image(
                   height: 260,
                   fit: BoxFit.contain,
                   gaplessPlayback: true,

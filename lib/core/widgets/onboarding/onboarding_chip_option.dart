@@ -1,3 +1,4 @@
+import 'package:fastingapp/core/remote_images/app_image.dart';
 import 'package:fastingapp/core/theme/app_text_styles.dart';
 import 'package:fastingapp/generated/colors.gen.dart';
 import 'package:flutter/material.dart';
@@ -48,7 +49,7 @@ final class OnboardingChipOption extends StatelessWidget {
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Image.asset(
+              appImage(
                 imagePath,
                 width: iconSize,
                 height: iconSize,

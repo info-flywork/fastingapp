@@ -993,5 +993,11 @@
       "card3_body": "Bozulan bir oruç seni sıfırlamaz. Ye, dinlen ve sonraki pencereyi nutuk çekmeden aç.",
       "tip": "Hedefi sade ve nazik tut. Bir yarış kazanmıyorsun, bir ritim kuruyorsun."
     }
+  },
+  "no_internet": {
+    "title": "İnternet bağlantısı yok",
+    "subtitle": "Mochi bağlantıyı arıyor. Wi‑Fi'ni ya da mobil verini kontrol edip tekrar dene.",
+    "retry": "Tekrar dene",
+    "checking": "Kontrol ediliyor…"
   }
 }

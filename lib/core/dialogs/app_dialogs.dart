@@ -5,7 +5,7 @@ import 'package:fastingapp/core/dialogs/widgets/meal_date_picker_dialog.dart';
 import 'package:fastingapp/core/dialogs/widgets/sign_out_dialog.dart';
 import 'package:fastingapp/core/dialogs/widgets/water_edit_dialog.dart';
 import 'package:fastingapp/core/dialogs/widgets/weight_edit_dialog.dart';
-import 'package:fastingapp/generated/assets.gen.dart';
+import 'package:fastingapp/core/remote_images/app_image.dart';
 import 'package:flutter/material.dart';
 
 /// Tüm dialog'ların tek giriş noktası (singleton). Feature katmanında
@@ -55,7 +55,7 @@ final class AppDialogs extends DialogHandler {
     required String subtitleKey,
     required int initialValueMl,
     required WaterVolumeUnit initialUnit,
-    required AssetGenImage headerImage,
+    required AppImageAsset headerImage,
   }) {
     return showNormalDialog<WaterValueEditResult>(
       context: context,

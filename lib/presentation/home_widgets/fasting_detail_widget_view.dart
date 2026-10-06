@@ -1,6 +1,7 @@
 import 'dart:math' as math;
 
-import 'package:fastingapp/generated/assets.gen.dart';
+import 'package:fastingapp/core/remote_images/app_image.dart';
+import 'package:fastingapp/generated/app_images.g.dart';
 import 'package:fastingapp/generated/colors.gen.dart';
 import 'package:fastingapp/generated/fonts.gen.dart';
 import 'package:flutter/material.dart';
@@ -68,7 +69,7 @@ final class FastingDetailWidgetView extends StatelessWidget {
               Positioned(
                 right: -4,
                 bottom: -36,
-                child: Assets.images.widget1.image(
+                child: AppImages.widget1.image(
                   height: 190,
                   fit: BoxFit.contain,
                 ),
@@ -149,7 +150,7 @@ final class _Body extends StatelessWidget {
                 children: [
                   Expanded(
                     child: _Stat(
-                      icon: Assets.images.start,
+                      icon: AppImages.start,
                       caption: startCaption,
                       value: startValue,
                       showDivider: true,
@@ -157,7 +158,7 @@ final class _Body extends StatelessWidget {
                   ),
                   Expanded(
                     child: _Stat(
-                      icon: Assets.images.end,
+                      icon: AppImages.end,
                       caption: endCaption,
                       value: endValue,
                       showDivider: true,
@@ -165,7 +166,7 @@ final class _Body extends StatelessWidget {
                   ),
                   Expanded(
                     child: _Stat(
-                      icon: Assets.images.hours,
+                      icon: AppImages.hours,
                       caption: goalCaption,
                       value: goalValue,
                     ),
@@ -202,7 +203,7 @@ final class _Stat extends StatelessWidget {
     this.showDivider = false,
   });
 
-  final AssetGenImage icon;
+  final AppImageAsset icon;
   final String caption;
   final String value;
   final bool showDivider;

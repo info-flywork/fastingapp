@@ -9,7 +9,7 @@ final class ObstaclesOptions extends StatelessWidget {
   });
 
   final List<({OnboardingObstacle obstacle, String titleKey, String iconPath})>
-      items;
+  items;
   final OnboardingObstacle? selected;
   final ValueChanged<OnboardingObstacle> onSelected;
 
@@ -24,10 +24,7 @@ final class ObstaclesOptions extends StatelessWidget {
             title: items[i].titleKey.tr(),
             isSelected: selected == items[i].obstacle,
             onTap: () => onSelected(items[i].obstacle),
-            icon: Image.asset(
-              items[i].iconPath,
-              fit: BoxFit.contain,
-            ),
+            icon: appImage(items[i].iconPath, fit: BoxFit.contain),
           ),
         ],
       ],

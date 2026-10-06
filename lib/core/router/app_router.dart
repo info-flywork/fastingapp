@@ -83,6 +83,7 @@ import 'package:fastingapp/presentation/insights/view/insight_detail_view.dart';
 import 'package:fastingapp/presentation/insights/view/insights_view.dart';
 import 'package:fastingapp/presentation/meal_records/view/meal_detail_view.dart';
 import 'package:fastingapp/presentation/meal_records/view/meal_records_view.dart';
+import 'package:fastingapp/presentation/mochi_world/view/mochi_world_view.dart';
 import 'package:fastingapp/presentation/plans/plan_detail_args.dart';
 import 'package:fastingapp/presentation/plans/plans_catalog.dart';
 import 'package:fastingapp/presentation/plans/view/plan_detail_view.dart';
@@ -97,7 +98,6 @@ import 'package:fastingapp/presentation/profile/edit_profile/view/edit_profile_v
 import 'package:fastingapp/presentation/profile/edit_profile/view/edit_skipped_foods_view.dart';
 import 'package:fastingapp/presentation/profile/faq/view/faq_view.dart';
 import 'package:fastingapp/presentation/profile/languages/view/languages_view.dart';
-import 'package:fastingapp/presentation/mochi_world/view/mochi_world_view.dart';
 import 'package:fastingapp/presentation/profile/notifications/view/notifications_view.dart';
 import 'package:fastingapp/presentation/profile/view/profile_view.dart';
 import 'package:fastingapp/presentation/protein_tracker/view/protein_tracker_view.dart';
@@ -503,11 +503,7 @@ final GoRouter appRouter = GoRouter(
         final args = extra is FastingFirstTimeArgs
             ? extra
             : const FastingFirstTimeArgs(
-                elapsed: Duration(
-                  hours: 12,
-                  minutes: 12,
-                  seconds: 39,
-                ),
+                elapsed: Duration(hours: 12, minutes: 12, seconds: 39),
               );
         return FastingFirstTimeView(args: args);
       },

@@ -3,7 +3,7 @@ import 'dart:ui';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:fastingapp/core/router/route_paths.dart';
 import 'package:fastingapp/core/theme/app_text_styles.dart';
-import 'package:fastingapp/generated/assets.gen.dart';
+import 'package:fastingapp/generated/app_images.g.dart';
 import 'package:fastingapp/generated/colors.gen.dart';
 import 'package:fastingapp/presentation/plans/plan_detail_args.dart';
 import 'package:fastingapp/presentation/plans/plans_catalog.dart';
@@ -384,14 +384,14 @@ final class _IntensityBolts extends StatelessWidget {
         return Padding(
           padding: EdgeInsets.only(left: index == 0 ? 0 : 3),
           child: isOn
-              ? Assets.images.lightning.image(
+              ? AppImages.lightning.image(
                   width: _kBoltSize,
                   height: _kBoltSize,
                   fit: BoxFit.contain,
                 )
               : Opacity(
                   opacity: 0.18,
-                  child: Assets.images.lightning.image(
+                  child: AppImages.lightning.image(
                     width: _kBoltSize,
                     height: _kBoltSize,
                     fit: BoxFit.contain,
@@ -433,7 +433,7 @@ final class _PremiumLockBadge extends StatelessWidget {
           ),
         ],
       ),
-      child: Assets.images.kingSl.image(fit: BoxFit.contain),
+      child: AppImages.kingSl.image(fit: BoxFit.contain),
     );
   }
 }

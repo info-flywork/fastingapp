@@ -1,5 +1,6 @@
+import 'package:fastingapp/core/remote_images/app_image.dart';
+import 'package:fastingapp/generated/app_images.g.dart';
 import 'package:flutter/foundation.dart';
-import 'package:fastingapp/generated/assets.gen.dart';
 
 /// Insights listesindeki konu. Detay metni bu kimliğe göre değişir.
 enum InsightTopic {
@@ -72,11 +73,11 @@ final class InsightDetailCard {
   String bodyKey(InsightTopic topic) =>
       'insights_detail.${topic.name}.card${index}_body';
 
-  AssetGenImage get asset => switch (icon) {
-    InsightDetailIcon.tree => Assets.images.tree,
-    InsightDetailIcon.flame => Assets.images.flameCalories,
-    InsightDetailIcon.window => Assets.images.eatWindow,
-    InsightDetailIcon.heart => Assets.images.blueHearth,
-    InsightDetailIcon.star => Assets.images.purpleStar,
+  AppImageAsset get asset => switch (icon) {
+    InsightDetailIcon.tree => AppImages.tree,
+    InsightDetailIcon.flame => AppImages.flameCalories,
+    InsightDetailIcon.window => AppImages.eatWindow,
+    InsightDetailIcon.heart => AppImages.blueHearth,
+    InsightDetailIcon.star => AppImages.purpleStar,
   };
 }

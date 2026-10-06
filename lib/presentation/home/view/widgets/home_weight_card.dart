@@ -33,7 +33,7 @@ final class HomeWeightCard extends StatelessWidget {
           children: [
             Row(
               children: [
-                Assets.images.weigher2.image(
+                AppImages.weigher2.image(
                   width: 28,
                   height: 28,
                   fit: BoxFit.contain,

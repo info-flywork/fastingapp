@@ -8,7 +8,7 @@ import 'package:fastingapp/core/widgets/app_button_decoration.dart';
 import 'package:fastingapp/core/widgets/arc_progress_gauge.dart';
 import 'package:fastingapp/core/widgets/onboarding/onboarding_stepper_field.dart';
 import 'package:fastingapp/core/widgets/weight_progress_bar.dart';
-import 'package:fastingapp/generated/assets.gen.dart';
+import 'package:fastingapp/generated/app_images.g.dart';
 import 'package:fastingapp/generated/colors.gen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -161,7 +161,7 @@ final class _CaloriesHeader extends StatelessWidget {
         clipBehavior: Clip.none,
         children: [
           Positioned.fill(
-            child: Assets.images.headerBack.image(
+            child: AppImages.headerBack.image(
               fit: BoxFit.fitWidth,
               alignment: Alignment.topCenter,
             ),
@@ -171,7 +171,7 @@ final class _CaloriesHeader extends StatelessWidget {
             top: topInset,
             child: Transform.scale(
               scale: 1.1,
-              child: Assets.images.caloriesTracker.image(
+              child: AppImages.caloriesTracker.image(
                 width: _mascotSize,
                 height: _mascotSize,
                 fit: BoxFit.contain,
@@ -229,7 +229,7 @@ final class _CalorieTrackingCard extends StatelessWidget {
         children: [
           Row(
             children: [
-              Assets.images.flameCalories.image(
+              AppImages.flameCalories.image(
                 width: 28,
                 height: 28,
                 fit: BoxFit.contain,

@@ -6,6 +6,7 @@ import 'package:fastingapp/core/router/route_paths.dart';
 import 'package:fastingapp/core/theme/app_text_styles.dart';
 import 'package:fastingapp/core/widgets/app_button.dart';
 import 'package:fastingapp/core/widgets/app_button_decoration.dart';
+import 'package:fastingapp/generated/app_images.g.dart';
 import 'package:fastingapp/generated/assets.gen.dart';
 import 'package:fastingapp/generated/colors.gen.dart';
 import 'package:flutter/material.dart';
@@ -166,7 +167,7 @@ final class _MealRecordsEmptyState extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Assets.images.confusing.image(
+          AppImages.confusing.image(
             width: 120,
             height: 120,
             fit: BoxFit.contain,
@@ -285,7 +286,7 @@ final class _MealEntryCard extends StatelessWidget {
                 borderRadius: BorderRadius.circular(12),
               ),
               alignment: Alignment.center,
-              child: Assets.images.orangeBell.image(
+              child: AppImages.orangeBell.image(
                 width: 32,
                 height: 32,
                 fit: BoxFit.contain,
@@ -305,7 +306,7 @@ final class _MealEntryCard extends StatelessWidget {
             const SizedBox(width: 8),
             Padding(
               padding: const EdgeInsets.only(top: 24),
-              child: Assets.images.mealRecordEmoji.image(
+              child: AppImages.mealRecordEmoji.image(
                 width: 36,
                 height: 36,
                 fit: BoxFit.contain,
