@@ -2,7 +2,7 @@
 ///
 /// İskelet: bildirim SDK entegrasyonu (FCM/OneSignal vb.) proje ihtiyacına
 /// göre doldurulur.
-class NotificationManager {
+final class NotificationManager {
   NotificationManager();
 
   Future<void> init() async {

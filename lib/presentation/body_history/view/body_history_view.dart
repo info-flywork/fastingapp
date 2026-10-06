@@ -773,6 +773,7 @@ final class _RangeSegment extends StatelessWidget {
   }
 }
 
+@immutable
 final class _ChartPoint {
   const _ChartPoint({required this.label, required this.kg});
 

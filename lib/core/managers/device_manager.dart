@@ -2,7 +2,7 @@
 ///
 /// İskelet: gerçek cihaz ID kaynağı (device_info_plus vb.) proje ihtiyacına
 /// göre eklenir.
-class DeviceManager {
+final class DeviceManager {
   DeviceManager();
 
   Future<String> getDeviceId() async {

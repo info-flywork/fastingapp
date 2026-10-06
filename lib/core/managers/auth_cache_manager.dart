@@ -6,7 +6,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 /// JWT token'ları ve kullanıcıyı [FlutterSecureStorage]'a yazar/okur.
 /// (Doküman 8)
-class AuthCacheManager {
+final class AuthCacheManager {
   const AuthCacheManager(this._storage);
 
   final FlutterSecureStorage _storage;

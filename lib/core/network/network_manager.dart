@@ -6,7 +6,7 @@ import 'package:fastingapp/core/utils/enum/request_type.dart';
 
 /// Generic HTTP katmanı. Dio isteğini atar, [BaseResponse] ile parse eder ve
 /// `data` alanını döndürür. (Doküman 10)
-class NetworkManager {
+final class NetworkManager {
   const NetworkManager(this._dio);
 
   final Dio _dio;

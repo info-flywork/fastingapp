@@ -218,6 +218,7 @@ final class _ArcCaption extends StatelessWidget {
 
 enum _MealImage { eggs, salad, yogurt }
 
+@immutable
 final class _Meal {
   const _Meal({
     required this.image,

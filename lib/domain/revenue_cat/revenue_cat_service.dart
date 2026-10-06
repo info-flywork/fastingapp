@@ -3,7 +3,7 @@
 ///
 /// İskelet: SDK konfigürasyonu ve satın alma akışı proje ihtiyacına göre
 /// doldurulur.
-class RevenueCatService {
+final class RevenueCatService {
   RevenueCatService();
 
   Future<void> init() async {

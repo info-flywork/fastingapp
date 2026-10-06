@@ -61,5 +61,12 @@ mixin ProfileViewMixin on State<ProfileView> {
 
   void onShareApp() {}
 
-  void onLogOut() {}
+  Future<void> onLogOut() async {
+    final confirmed = await AppDialogs.instance.showSignOut(context);
+    if (confirmed != true || !mounted) return;
+
+    getIt<AuthBloc>().add(const AuthLoggedOut());
+    if (!mounted) return;
+    context.go(RoutePaths.welcome.path);
+  }
 }

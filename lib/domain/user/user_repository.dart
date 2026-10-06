@@ -3,7 +3,7 @@ import 'package:fastingapp/core/utils/enum/request_type.dart';
 import 'package:fastingapp/data/model/user/user.dart';
 
 /// Profil güncelleme, premium sync, hesap silme. (Doküman 7)
-class UserRepository {
+final class UserRepository {
   const UserRepository(this._networkManager);
 
   final NetworkManager _networkManager;

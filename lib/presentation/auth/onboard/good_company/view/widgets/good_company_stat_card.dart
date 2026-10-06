@@ -51,7 +51,6 @@ final class GoodCompanyStatCard extends StatelessWidget {
                   const SizedBox(height: 10),
                   Text(
                     label,
-                    maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                     style: AppTextStyles.goodCompanyStatLabel,
                   ),

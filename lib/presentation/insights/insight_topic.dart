@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:fastingapp/generated/assets.gen.dart';
 
 /// Insights listesindeki konu. Detay metni bu kimliğe göre değişir.
@@ -58,6 +59,7 @@ enum InsightTopic {
 
 enum InsightDetailIcon { tree, flame, window, heart, star }
 
+@immutable
 final class InsightDetailCard {
   const InsightDetailCard({required this.icon, required this.index});
 

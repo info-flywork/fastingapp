@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 ///
 /// Yeni varyantlar için named constructor / factory eklenir; widget tarafında
 /// hex veya BoxDecoration hardcoded tutulmaz.
+@immutable
 final class AppButtonDecoration {
   const AppButtonDecoration({
     required this.gradient,

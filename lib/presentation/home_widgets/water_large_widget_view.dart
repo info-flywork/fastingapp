@@ -101,7 +101,7 @@ final class WaterLargeWidgetView extends StatelessWidget {
   }
 }
 
-class _IntakeCard extends StatelessWidget {
+final class _IntakeCard extends StatelessWidget {
   const _IntakeCard({
     required this.currentMl,
     required this.goalMl,
@@ -193,7 +193,7 @@ class _IntakeCard extends StatelessWidget {
   }
 }
 
-class _WeekChart extends StatelessWidget {
+final class _WeekChart extends StatelessWidget {
   const _WeekChart({
     required this.weekdayLabels,
     required this.weekProgress,
@@ -244,7 +244,7 @@ class _WeekChart extends StatelessWidget {
   }
 }
 
-class _WeekBar extends StatelessWidget {
+final class _WeekBar extends StatelessWidget {
   const _WeekBar({required this.progress, required this.isToday});
 
   final double progress;
@@ -275,7 +275,7 @@ class _WeekBar extends StatelessWidget {
   }
 }
 
-class _Footer extends StatelessWidget {
+final class _Footer extends StatelessWidget {
   const _Footer({
     required this.reminderLabel,
     required this.addWaterLabel,
@@ -331,7 +331,7 @@ class _Footer extends StatelessWidget {
   }
 }
 
-class _BellPainter extends CustomPainter {
+final class _BellPainter extends CustomPainter {
   const _BellPainter(this.picture);
 
   final ui.Picture? picture;
@@ -352,7 +352,7 @@ class _BellPainter extends CustomPainter {
       oldDelegate.picture != picture;
 }
 
-class _WaterRingPainter extends CustomPainter {
+final class _WaterRingPainter extends CustomPainter {
   const _WaterRingPainter({required this.progress});
 
   final double progress;

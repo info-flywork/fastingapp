@@ -10,6 +10,7 @@ import 'package:go_router/go_router.dart';
 enum FastingStruggleReason { hungry, craving, energy, stressed, bored }
 
 /// Mochi öneri sayfasına giden seçim.
+@immutable
 final class FastingStruggleAdviceArgs {
   const FastingStruggleAdviceArgs({
     required this.bodyKey,
@@ -141,6 +142,7 @@ class _FastingStruggleAdviceViewState extends State<FastingStruggleAdviceView> {
 
 enum _TipImage { hydration, walk, breathe }
 
+@immutable
 final class _Tip {
   const _Tip({
     required this.image,

@@ -54,7 +54,7 @@ final class FastingMediumWidgetView extends StatelessWidget {
   }
 }
 
-class _Copy extends StatelessWidget {
+final class _Copy extends StatelessWidget {
   const _Copy({
     required this.headline,
     required this.timeLabel,
@@ -89,7 +89,7 @@ class _Copy extends StatelessWidget {
   }
 }
 
-class _Logo extends StatelessWidget {
+final class _Logo extends StatelessWidget {
   const _Logo();
 
   @override

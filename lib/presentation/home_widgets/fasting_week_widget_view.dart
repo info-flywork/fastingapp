@@ -79,7 +79,7 @@ final class FastingWeekWidgetView extends StatelessWidget {
   }
 }
 
-class _WeekChart extends StatelessWidget {
+final class _WeekChart extends StatelessWidget {
   const _WeekChart({
     required this.weekdayLabels,
     required this.dayProgress,
@@ -125,7 +125,7 @@ class _WeekChart extends StatelessWidget {
   }
 }
 
-class _DayBar extends StatelessWidget {
+final class _DayBar extends StatelessWidget {
   const _DayBar({required this.progress});
 
   final double progress;
@@ -162,7 +162,7 @@ class _DayBar extends StatelessWidget {
   }
 }
 
-class _CheerChip extends StatelessWidget {
+final class _CheerChip extends StatelessWidget {
   const _CheerChip({required this.label});
 
   final String label;

@@ -97,7 +97,7 @@ final class FastingOmhWidgetView extends StatelessWidget {
   }
 }
 
-class _Logo extends StatelessWidget {
+final class _Logo extends StatelessWidget {
   const _Logo();
 
   @override

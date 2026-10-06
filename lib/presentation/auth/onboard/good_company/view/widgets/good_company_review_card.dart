@@ -50,8 +50,8 @@ final class GoodCompanyReviewCard extends StatelessWidget {
                         child: Transform.translate(
                           offset: const Offset(20, 6),
                           child: Transform.scale(
-                            scale: 1.9,
-                            alignment: const Alignment(0.35, -0.2),
+                            scale: 1.85,
+                            alignment: const Alignment(0.5, -0.4),
                             child: Image.asset(avatarPath, fit: BoxFit.cover),
                           ),
                         ),
@@ -65,10 +65,10 @@ final class GoodCompanyReviewCard extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(name, style: AppTextStyles.goodCompanyReviewer),
-                      const SizedBox(height: 4),
+                      const SizedBox(height: 2),
                       const _StarRow(
                         size: 20,
-                        gap: 2,
+                        gap: 0,
                         alignment: MainAxisAlignment.start,
                       ),
                     ],

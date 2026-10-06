@@ -1,6 +1,8 @@
+import 'package:flutter/foundation.dart';
 import 'package:fastingapp/presentation/plans/plans_catalog.dart';
 
 /// Plan detay sayfası nav argümanları.
+@immutable
 final class PlanDetailArgs {
   const PlanDetailArgs({
     required this.plan,

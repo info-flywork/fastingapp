@@ -10,6 +10,7 @@ import 'package:flutter/services.dart';
 enum WaterVolumeUnit { ml, oz }
 
 /// Su miktarı dialog sonucu — her zaman ml.
+@immutable
 final class WaterValueEditResult {
   const WaterValueEditResult({
     required this.valueMl,
@@ -21,6 +22,7 @@ final class WaterValueEditResult {
 }
 
 /// Su birimi dialog sonucu.
+@immutable
 final class WaterUnitEditResult {
   const WaterUnitEditResult({required this.unit});
 

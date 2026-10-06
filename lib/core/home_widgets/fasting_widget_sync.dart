@@ -64,7 +64,7 @@ abstract final class FastingWidgetSync {
     _headlineEating = headlineEating ?? _headlineEating;
     _planLabel = planLabel ?? _planLabel;
     try {
-      await HomeWidget.setAppGroupId('group.com.flywork.fastingapp');
+      await HomeWidget.setAppGroupId('group.com.flywork.mochifast');
       await HomeWidget.saveWidgetData<int>(activeKey, isFasting ? 1 : 0);
       await HomeWidget.saveWidgetData<int>(
         startKey,
@@ -135,7 +135,7 @@ abstract final class FastingWidgetSync {
     final left = _leftLabel;
     if (fasting == null || eating == null || left == null) return;
     try {
-      await HomeWidget.setAppGroupId('group.com.flywork.fastingapp');
+      await HomeWidget.setAppGroupId('group.com.flywork.mochifast');
       final active = await _readInt(activeKey);
       final startMs = await _readInt(startKey);
       final endMs = await _readInt(endKey);

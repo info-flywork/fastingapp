@@ -1,7 +1,7 @@
 import 'package:fastingapp/core/network/network_manager.dart';
 
 /// Bildirim CRUD işlemleri. (Doküman 7)
-class NotificationsRepository {
+final class NotificationsRepository {
   const NotificationsRepository(this._networkManager);
 
   // İskelet: bildirim metodları proje API'sine göre eklenir.

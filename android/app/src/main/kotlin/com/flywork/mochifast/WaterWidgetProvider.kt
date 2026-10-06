@@ -1,4 +1,4 @@
-package com.flywork.fastingapp
+package com.flywork.mochifast
 
 import android.app.PendingIntent
 import android.appwidget.AppWidgetManager

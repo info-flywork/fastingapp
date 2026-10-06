@@ -17,13 +17,11 @@ final class AppDialogs extends DialogHandler {
 
   static AppDialogs get instance => _instance;
 
-  Future<void> showSignOut(
-    BuildContext context, {
-    required VoidCallback onConfirm,
-  }) {
-    return showNormalDialog<void>(
+  /// Çıkış onayı. `true` → onaylandı.
+  Future<bool?> showSignOut(BuildContext context) {
+    return showNormalDialog<bool>(
       context: context,
-      child: SignOutDialog(onConfirm: onConfirm),
+      child: const SignOutDialog(),
     );
   }
 

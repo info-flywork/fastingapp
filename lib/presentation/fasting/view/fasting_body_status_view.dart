@@ -66,6 +66,7 @@ class _FastingBodyStatusViewState extends State<FastingBodyStatusView> {
   }
 }
 
+@immutable
 final class _Stage {
   const _Stage({
     required this.reached,

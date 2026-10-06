@@ -1,3 +1,5 @@
+import 'package:flutter/foundation.dart';
+
 /// Açlık takibi / hızlı kontrol ortak belirti seçimleri.
 enum HungerSymptom {
   sleeplessness,
@@ -30,6 +32,7 @@ extension HungerSymptomBodyNoticeX on HungerSymptom {
 }
 
 /// Hızlı kontrol akışında ekranlar arası taşınan seçimler.
+@immutable
 final class HungerFlowArgs {
   const HungerFlowArgs({this.symptoms = const {}});
 

@@ -22,7 +22,7 @@ final class MyApp extends StatelessWidget {
         // Diğer global BLoC'lar buraya eklenir.
       ],
       child: MaterialApp.router(
-        title: 'Fasting App',
+        title: 'Mochi Fast',
         debugShowCheckedModeBanner: false,
         theme: AppTheme.lightTheme,
         routerConfig: appRouter,

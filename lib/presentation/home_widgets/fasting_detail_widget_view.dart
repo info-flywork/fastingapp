@@ -81,7 +81,7 @@ final class FastingDetailWidgetView extends StatelessWidget {
   }
 }
 
-class _Body extends StatelessWidget {
+final class _Body extends StatelessWidget {
   const _Body({
     required this.timeLabel,
     required this.leftLabel,
@@ -194,7 +194,7 @@ class _Body extends StatelessWidget {
   }
 }
 
-class _Stat extends StatelessWidget {
+final class _Stat extends StatelessWidget {
   const _Stat({
     required this.icon,
     required this.caption,
@@ -235,7 +235,7 @@ class _Stat extends StatelessWidget {
   }
 }
 
-class _Logo extends StatelessWidget {
+final class _Logo extends StatelessWidget {
   const _Logo();
 
   @override
@@ -258,7 +258,7 @@ class _Logo extends StatelessWidget {
   }
 }
 
-class _RingPainter extends CustomPainter {
+final class _RingPainter extends CustomPainter {
   const _RingPainter({required this.progress});
 
   final double progress;

@@ -1,4 +1,7 @@
+import 'package:flutter/foundation.dart';
+
 /// Water Reminder kaydet sonucu — [WaterView]'a geri döner.
+@immutable
 final class WaterReminderResult {
   const WaterReminderResult({
     required this.dailyGoalMl,
@@ -14,6 +17,7 @@ final class WaterReminderResult {
 }
 
 /// Water Reminder açılış argümanları.
+@immutable
 final class WaterReminderArgs {
   const WaterReminderArgs({
     required this.dailyGoalMl,

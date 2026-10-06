@@ -8,6 +8,7 @@ import 'package:fastingapp/generated/colors.gen.dart';
 import 'package:flutter/material.dart';
 
 /// Oruç / yemek penceresi saat seçimi sonucu.
+@immutable
 final class FastingTimeResult {
   const FastingTimeResult({
     required this.startHour,

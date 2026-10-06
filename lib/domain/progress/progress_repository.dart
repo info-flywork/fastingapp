@@ -4,7 +4,7 @@ import 'package:fastingapp/data/model/user/user_progress.dart';
 import 'package:fastingapp/domain/progress/progress_exception.dart';
 
 /// Kullanıcı ilerleme verisi. (Doküman 7 / 16)
-class ProgressRepository {
+final class ProgressRepository {
   const ProgressRepository(this._networkManager);
 
   final NetworkManager _networkManager;

@@ -77,7 +77,7 @@ final class FastingHomeWidgetView extends StatelessWidget {
   }
 }
 
-class _Logo extends StatelessWidget {
+final class _Logo extends StatelessWidget {
   const _Logo();
 
   @override
@@ -100,7 +100,7 @@ class _Logo extends StatelessWidget {
   }
 }
 
-class _FastingRingPainter extends CustomPainter {
+final class _FastingRingPainter extends CustomPainter {
   const _FastingRingPainter({required this.progress});
 
   final double progress;

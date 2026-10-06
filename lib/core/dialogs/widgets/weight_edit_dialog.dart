@@ -9,6 +9,7 @@ import 'package:flutter/services.dart';
 enum WeightUnit { lb, kg }
 
 /// Kilo düzenleme dialog sonucu — her zaman kg cinsinden.
+@immutable
 final class WeightEditResult {
   const WeightEditResult({required this.weightKg});
 

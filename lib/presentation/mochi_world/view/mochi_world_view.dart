@@ -487,6 +487,7 @@ class _ExploreHintState extends State<_ExploreHint>
 
 enum _ZoneId { forest, lake, summit, garden }
 
+@immutable
 final class _Zone {
   const _Zone({
     required this.id,

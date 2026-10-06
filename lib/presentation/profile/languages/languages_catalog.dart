@@ -2,6 +2,7 @@ import 'package:fastingapp/generated/assets.gen.dart';
 import 'package:flutter/material.dart';
 
 /// Dil seçenek kataloğu.
+@immutable
 final class AppLanguageOption {
   const AppLanguageOption({
     required this.code,

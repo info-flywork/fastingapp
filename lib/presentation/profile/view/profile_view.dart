@@ -1,11 +1,15 @@
 import 'dart:io';
 
 import 'package:easy_localization/easy_localization.dart';
+import 'package:fastingapp/core/di/injection.dart';
+import 'package:fastingapp/core/dialogs/app_dialogs.dart';
 import 'package:fastingapp/core/router/route_paths.dart';
 import 'package:fastingapp/core/theme/app_text_styles.dart';
 import 'package:fastingapp/core/widgets/bottom_navigation_bar/app_bottom_nav.dart';
 import 'package:fastingapp/generated/assets.gen.dart';
 import 'package:fastingapp/generated/colors.gen.dart';
+import 'package:fastingapp/presentation/auth/bloc/auth_bloc.dart';
+import 'package:fastingapp/presentation/auth/bloc/auth_event.dart';
 import 'package:fastingapp/presentation/chat/view/widgets/ai_chat_header_icon.dart';
 import 'package:fastingapp/presentation/profile/view/widgets/profile_menu_card.dart';
 import 'package:fastingapp/presentation/profile/view/widgets/profile_section.dart';

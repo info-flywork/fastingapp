@@ -1,7 +1,7 @@
 import SwiftUI
 import WidgetKit
 
-private let widgetGroupId = "group.com.flywork.fastingapp"
+private let widgetGroupId = "group.com.flywork.mochifast"
 
 struct WaterEntry: TimelineEntry {
   let date: Date

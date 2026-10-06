@@ -14,6 +14,7 @@ part 'widgets/notifications_empty_state.dart';
 
 enum NotificationKind { weight, meal }
 
+@immutable
 final class AppNotificationItem {
   const AppNotificationItem({
     required this.id,

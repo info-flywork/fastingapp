@@ -68,7 +68,7 @@ final class WaterMediumWidgetView extends StatelessWidget {
   }
 }
 
-class _GoalColumn extends StatelessWidget {
+final class _GoalColumn extends StatelessWidget {
   const _GoalColumn({
     required this.currentMl,
     required this.goalMl,
@@ -114,7 +114,7 @@ class _GoalColumn extends StatelessWidget {
   }
 }
 
-class _TimelineColumn extends StatelessWidget {
+final class _TimelineColumn extends StatelessWidget {
   const _TimelineColumn({
     required this.timelineLabel,
     required this.addLabel,
@@ -167,7 +167,7 @@ class _TimelineColumn extends StatelessWidget {
   }
 }
 
-class _SipCard extends StatelessWidget {
+final class _SipCard extends StatelessWidget {
   const _SipCard({
     required this.ml,
     required this.timeLabel,

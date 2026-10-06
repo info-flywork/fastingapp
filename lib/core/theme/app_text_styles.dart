@@ -390,7 +390,7 @@ abstract final class AppTextStyles {
   /// Good company stat value — 26 / Heavy
   static TextStyle get goodCompanyStatValue => const TextStyle(
     fontFamily: FontFamily.sFProDisplay,
-    fontWeight: FontWeight.w800,
+    fontWeight: FontWeight.w900,
     fontSize: 26,
     height: 36 / 26,
     letterSpacing: 26 * -0.015,
@@ -400,8 +400,8 @@ abstract final class AppTextStyles {
   static TextStyle get goodCompanyStatLabel => TextStyle(
     fontFamily: FontFamily.sFProDisplay,
     fontWeight: FontWeight.w500,
-    fontSize: 15,
-    height: 24 / 15,
+    fontSize: 14,
+    height: 24 / 14,
     letterSpacing: 15 * -0.015,
     color: ColorName.colorSubtitle.withValues(alpha: 0.6),
   );

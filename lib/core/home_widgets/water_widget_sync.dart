@@ -14,6 +14,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:home_widget/home_widget.dart';
 
 /// Ana ekran widget'ına yazılan tek bir su kaydı.
+@immutable
 final class WaterWidgetSip {
   const WaterWidgetSip({required this.ml, required this.at});
 
@@ -23,7 +24,7 @@ final class WaterWidgetSip {
 
 /// Su miktarını ana ekran widget'larına yazar.
 abstract final class WaterWidgetSync {
-  static const groupId = 'group.com.flywork.fastingapp';
+  static const groupId = 'group.com.flywork.mochifast';
   static const imageKey = 'water_widget_image';
   static const mediumImageKey = 'water_widget_medium_image';
   static const largeImageKey = 'water_widget_large_image';
@@ -307,7 +308,7 @@ abstract final class WaterWidgetSync {
 }
 
 /// Widget dokunuşunda su sayfasını açar.
-class WaterWidgetTapHandler extends StatefulWidget {
+final class WaterWidgetTapHandler extends StatefulWidget {
   const WaterWidgetTapHandler({required this.child, super.key});
 
   final Widget child;
@@ -363,7 +364,7 @@ class _WaterWidgetTapHandlerState extends State<WaterWidgetTapHandler> {
 }
 
 /// Çeviriler yüklendikten sonra su widget görsellerini basar.
-class WaterWidgetLocaleSync extends StatefulWidget {
+final class WaterWidgetLocaleSync extends StatefulWidget {
   const WaterWidgetLocaleSync({required this.child, super.key});
 
   final Widget child;

@@ -1,3 +1,4 @@
+import 'package:fastingapp/generated/assets.gen.dart';
 import 'package:fastingapp/presentation/auth/splash/bloc/splash_bloc.dart';
 import 'package:fastingapp/presentation/auth/splash/bloc/splash_state.dart';
 import 'package:flutter/material.dart';
@@ -19,6 +20,7 @@ class _SplashViewState extends State<SplashView> with SplashViewMixin {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       body: BlocListener<SplashBloc, SplashState>(
         listener: onStateChanged,
         child: const Center(child: SplashLogo()),

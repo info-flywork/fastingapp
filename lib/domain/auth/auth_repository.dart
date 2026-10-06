@@ -8,7 +8,7 @@ import 'package:fastingapp/data/model/auth/auth_response.dart';
 import 'package:fastingapp/domain/auth/auth_exception.dart';
 
 /// Login, register, guest, refresh token ve profil işleri. (Doküman 7)
-class AuthRepository {
+final class AuthRepository {
   const AuthRepository(
     this._networkManager,
     this._authCacheManager,

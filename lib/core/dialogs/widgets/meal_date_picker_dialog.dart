@@ -9,6 +9,7 @@ import 'package:fastingapp/generated/fonts.gen.dart';
 import 'package:flutter/material.dart';
 
 /// Meal Records tarih seçici sonucu (opsiyonel saat dahil).
+@immutable
 final class MealDatePickerResult {
   const MealDatePickerResult({required this.date});
 

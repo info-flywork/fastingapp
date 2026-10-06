@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 /// Boy / yaş düzenleme sonucu.
+@immutable
 final class HeightEditResult {
   const HeightEditResult({required this.heightCm, required this.age});
 

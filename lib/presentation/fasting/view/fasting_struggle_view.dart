@@ -115,6 +115,7 @@ class _FastingStruggleViewState extends State<FastingStruggleView> {
 
 enum _StruggleImage { hungry, craving, energy, stressed, bored }
 
+@immutable
 final class _StruggleOption {
   const _StruggleOption({
     required this.image,

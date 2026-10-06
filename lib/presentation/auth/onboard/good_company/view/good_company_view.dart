@@ -47,7 +47,7 @@ class _GoodCompanyViewState extends State<GoodCompanyView>
                   builder: (context, constraints) {
                     return SingleChildScrollView(
                       physics: const ClampingScrollPhysics(),
-                      padding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
+                      padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
                       child: ConstrainedBox(
                         constraints: BoxConstraints(
                           minHeight: constraints.maxHeight - 32,

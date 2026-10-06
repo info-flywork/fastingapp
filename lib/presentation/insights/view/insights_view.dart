@@ -241,6 +241,7 @@ enum _TopicImage { tree, flame, window, heart, star }
 
 enum _TopicBackground { basics, during, eating, health, tips }
 
+@immutable
 final class _Topic {
   const _Topic({
     required this.kind,

@@ -1,4 +1,4 @@
-package com.flywork.fastingapp
+package com.flywork.mochifast
 
 import android.appwidget.AppWidgetManager
 import android.content.Context
@@ -6,7 +6,7 @@ import android.content.SharedPreferences
 import android.widget.RemoteViews
 import es.antonborri.home_widget.HomeWidgetProvider
 
-class FastingWidgetOmhProvider : HomeWidgetProvider() {
+class FastingWidgetWeekProvider : HomeWidgetProvider() {
     override fun onUpdate(
         context: Context,
         appWidgetManager: AppWidgetManager,
@@ -17,10 +17,10 @@ class FastingWidgetOmhProvider : HomeWidgetProvider() {
             val views = RemoteViews(context.packageName, R.layout.water_widget).apply {
                 setOnClickPendingIntent(
                     R.id.water_widget_root,
-                    widgetLaunchIntent(context, "fastingapp://fasting?homeWidget", 18),
+                    widgetLaunchIntent(context, "fastingapp://fasting?homeWidget", 19),
                 )
-                val imagePath = widgetData.getString("fasting_widget_omh_image", null)
-                val bitmap = imagePath?.let { decodeWidgetBitmap(it, 1200) }
+                val imagePath = widgetData.getString("fasting_widget_week_image", null)
+                val bitmap = imagePath?.let { decodeWidgetBitmap(it, 1400) }
                 if (bitmap != null) {
                     setImageViewBitmap(R.id.water_widget_image, bitmap)
                 }

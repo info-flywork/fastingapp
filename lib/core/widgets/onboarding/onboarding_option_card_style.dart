@@ -2,6 +2,7 @@ import 'package:fastingapp/generated/colors.gen.dart';
 import 'package:flutter/material.dart';
 
 /// Onboarding seçenek kartı (seçili / seçili değil) dekorasyonu.
+@immutable
 final class OnboardingOptionCardStyle {
   const OnboardingOptionCardStyle({
     required this.borderRadius,

@@ -15,6 +15,6 @@ mixin GoodCompanyViewMixin on State<GoodCompanyView> {
       const AuthLoggedIn(AuthResponse(token: token, user: user)),
     );
     if (!mounted) return;
-    context.go(RoutePaths.home.path);
+    context.go(RoutePaths.login.path);
   }
 }

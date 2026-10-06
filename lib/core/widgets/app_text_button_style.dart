@@ -3,6 +3,7 @@ import 'package:fastingapp/generated/fonts.gen.dart';
 import 'package:flutter/material.dart';
 
 /// Metin butonu tipografisi / padding. Yeni varyantlar factory ile eklenir.
+@immutable
 final class AppTextButtonStyle {
   const AppTextButtonStyle({
     required this.labelColor,
