@@ -10,6 +10,17 @@
 
 İstemcideki `NotificationManager.syncTags` (OneSignal tarzı etiketler) **gerekmez**. Hedefleme sunucu tarafında yapılır.
 
+## 1b. Uygulama (F9)
+
+- **Günlük planlayıcı (F11):** "yerel saat 0 mı" yerine her saat dilimi için her yerel günü bir kez işler (`zone_day_runs`): gece yarısının yaşanmadığı DST günlerinde (Santiago, Asunción, Havana…) ve worker'ın kapalı olduğu saatlerde de gün kaçmaz. Seri gün dönümü (`dayRollover`) aynı mekanizmayı kullanır.
+- **Kod:** `src/modules/notifications/` (`notify.js` planlama/iptal, `notifications.rules.js`, `notifications.service.js` gönderim + inbox, `planner.js` günlük hatırlatıcılar), `src/infra/fcm.js`, `src/jobs/notifications.jobs.js`. Şablonlar `seeds/notifications.json` (20 tür, 7 dil) → `notification_templates` (+ `quiet_hours: defer|silent|send`, `max_delay_min`).
+- **Tek yol:** anlık olaylar da `scheduled_notifications`'tan geçer (`fire_at = şimdi`); inbox kaydı gönderim işinde yazılır (push yeniden denenirse kutuda kopya olmaz).
+- **Ayar:** `FCM_SERVICE_ACCOUNT_JSON` (ham ya da base64). Yoksa push atlanır (`push_not_configured`), inbox çalışır. Worker kuyruğu `notifications`: dağıtıcı 30 sn, planlayıcı saatlik (yerel 00:xx dilimleri), bakım günlük.
+- **Gönderim anında geçerlilik:** oruç bildirimleri oruç hâlâ aktifse; su hatırlatması hedef tutmadıysa ve son 60 dk'da su yoksa; seri dürtmesi seri ≥ 2 ve bugün oruç yoksa; tartı hatırlatması 7 gündür kayıt yoksa; oruç başlatma / yeme penceresi bitiyor aktif oruç yoksa.
+- **Ayar anahtarları:** `user_settings.notif_world` eklendi (dünya kategorisi). `system` kategorisi her zaman açık; `marketing` push'u ayrı rıza akışı gelene kadar gönderilmez.
+- **Atlama sebepleri** `scheduled_notifications.last_error`'da: `category_off`, `push_disabled`, `quiet_hours`, `quiet_hours_deferred`, `new_user_quiet_period`, `daily_limit`, `category_limit`, `no_device`, `invalid_tokens`, `fast_not_active`, `water_recent`…
+- **Bağlı olaylar:** oruç (başlat/düzenle/bitir/iptal/sil/otomatik kapanış), yeme penceresi, kilo (`weight_update`), seri kilometre taşı (yalnızca BUGÜN ulaşılan) ve kaybı, dünya seviye atlama ve kötüleşen sağlık, challenge yarı yol ve tamamlanma, premium kaybı. `subscription_expiring` ve dışa aktarma/hesap silme şablonları hazır; tetikleyicileri F10'da.
+
 ## 2. Bildirim tipleri
 
 | Tip | Kanal | Kategori (ayar anahtarı) | Tetikleyici | Derin link |
@@ -33,7 +44,7 @@
 | `challenge_completed` | push + inbox | challenge | Tamamlandı | `fastingapp://home` |
 | `subscription_expiring` | inbox | system | Deneme bitimine 2 gün kala (RevenueCat olayı) | – |
 | `data_export_ready` | push + inbox | system | Dışa aktarma hazır | `fastingapp://profile` |
-| `account_deletion_scheduled` | inbox | system | Hesap silme talebi | `fastingapp://profile` |
+| ~~`account_deletion_scheduled`~~ | — | — | Kaldırıldı (F11): silme talebinde oturumlar ve push token'lar hemen kapandığı için gönderilemiyordu; bilgi uygulamadaki onay diyaloğunda ve `DELETE /user/me` yanıtında (`scheduledFor`) | — |
 
 **Gizlilik:**
 - Push metinleri **sağlık değeri içermez**. Bunun yerine "Yeni kilo kaydın eklendi 🎉" gibi ifadeler kullanılır. Değerler yalnızca uygulama içi kutuda görünür.

@@ -34,5 +34,10 @@ final class AuthCacheManager {
     return User.fromJson(jsonDecode(raw) as Map<String, dynamic>);
   }
 
-  Future<void> clearAll() => _storage.deleteAll();
+  /// Yalnızca oturum anahtarları; kurulum kimliği (DeviceManager) kalır.
+  Future<void> clearAll() async {
+    await _storage.delete(key: _accessTokenKey);
+    await _storage.delete(key: _refreshTokenKey);
+    await _storage.delete(key: _userKey);
+  }
 }

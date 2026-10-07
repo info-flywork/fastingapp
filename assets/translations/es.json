@@ -22,7 +22,11 @@
     "entry_title": "Hola, soy Mochi.\nayunemos juntos.",
     "entry_subtitle": "Cuéntame un poco sobre ti y crearé un plan de ayuno que realmente se adapte a tu vida.",
     "get_started": "Empezar",
-    "already_have_account": "ya tengo una cuenta"
+    "already_have_account": "ya tengo una cuenta",
+    "restore_account_title": "¿Restaurar tu cuenta?",
+    "restore_account_body": "Tu cuenta se eliminará el {date}. ¿Quieres restaurarla y conservar todo tu progreso?",
+    "restore_account_confirm": "Restaurar",
+    "restore_account_cancel": "Ahora no"
   },
   "onboarding": {
     "plan_ready_before": "Tu plan es",
@@ -729,7 +733,13 @@
     "weight_title": "Peso",
     "weight_today": "Hoy",
     "unit_lb": "libra",
-    "unit_kg": "kg"
+    "unit_kg": "kg",
+    "delete_account": "Eliminar cuenta",
+    "delete_account_title": "¿Eliminar tu cuenta?",
+    "delete_account_body": "Tu cuenta se cerrará ahora y todos tus datos se eliminarán de forma permanente en 7 días. Si vuelves a iniciar sesión en esos 7 días, podrás restaurarla. Las suscripciones deben cancelarse por separado en App Store o Google Play.",
+    "delete_account_confirm": "Eliminar",
+    "delete_account_cancel": "Conservar",
+    "delete_account_subscription_note": "Tu cuenta se eliminará. No olvides cancelar tu suscripción en App Store o Google Play."
   },
   "notifications": {
     "title": "Notificaciones",

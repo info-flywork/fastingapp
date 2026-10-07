@@ -4,10 +4,10 @@
 
 | Özellik | Ekran | Çağrı tipi | Model (varsayılan) |
 |---|---|---|---|
-| **Coach Mochi sohbeti** | `/chat`, son sohbetler, açlık sonucu → "Talk to Mochi" | Streaming (SSE'ye aktarılır) | `claude-opus-5-5`, `effort: low` |
+| **Coach Mochi sohbeti** | `/chat`, son sohbetler, açlık sonucu → "Talk to Mochi" | Streaming (SSE'ye aktarılır) | **OpenAI** (`OPENAI_CHAT_MODEL`; ürün kararı, F6) |
 | **Fotoğraftan besin analizi** | Kalori kamerası → sonuç | Tek çağrı, yapılandırılmış çıktı (JSON Schema), görüntü girdisi | `claude-opus-5-5`, `effort: medium` |
 | **Günün planı ipucu** ("Mochi's Plan for Today") — faz 7 | Oruç sekmesi kartı | Gece toplu üretim (Message Batches API, %50 indirimli) | `claude-opus-5-5`, `effort: low` |
-| Sohbet özeti (uzun konuşmalar) | – | Tek çağrı | `claude-opus-5-5`, `effort: low` |
+| Sohbet özeti (uzun konuşmalar) | – | Tek çağrı | OpenAI (sohbetle aynı model) |
 
 **Model yapılandırması:**
 - Modeller ortam değişkeninden okunur: `AI_CHAT_MODEL`, `AI_VISION_MODEL`.
@@ -25,6 +25,8 @@
 - **Sunucu tarafı yedek model (fallback):** `fallbacks: "default"` + beta header `server-side-fallback-2026-07-01` ile açık tutulur. Güvenlik sınıflandırıcısı bir isteği reddederse Anthropic uygun modele yönlendirir. Tasarımda bu **varsayılan olarak açıktır**; istenirse kapatılabilir.
 
 ## 2. Coach Mochi sohbeti
+
+> **Sağlayıcı (F6 kararı): OpenAI.** Sohbet `openai` Node SDK'sı ile Chat Completions akışı kullanır (`src/infra/openai.js`); fotoğraf analizi Claude'da kalır. Ayarlar: `OPENAI_API_KEY`, `OPENAI_CHAT_MODEL` (zorunlu, varsayılan yok), `OPENAI_REASONING_EFFORT` (yalnızca reasoning modellerde), `AI_CHAT_MAX_OUTPUT_TOKENS=1200`, `AI_CHAT_FIRST_TOKEN_MS=15000`, `AI_CHAT_TOTAL_MS=90000`. Aşağıdaki §2.2 iskeleti Claude için yazılmıştı; uygulanan akış aynıdır, çağrı `client.chat.completions.create({model, messages, stream: true, stream_options: {include_usage: true}, max_completion_tokens}, {signal})` ile yapılır. Rıza, kota, bütçe ve maliyet kaydı fotoğraf analiziyle ortak (`ai.gate`); OpenAI kullanımı ortak biçime çevrilir (`prompt_tokens − cached_tokens` = önbelleksiz girdi). Model fiyatı `app_config.ai.pricing`'e eklenmeli (yoksa maliyet 0 sayılır, log uyarısı).
 
 ### 2.1 Akış
 
@@ -87,7 +89,7 @@ entry_point: hunger_result(physical)
 
 **Bağlam kuralları:**
 - **Veri minimizasyonu:** E-posta, gerçek soyad ve cihaz bilgisi **gönderilmez**. Yalnızca takma ad ve gerekli sağlık bağlamı gider.
-- **Prompt cache uyumu:**
+- **Prompt cache uyumu** (OpenAI'de önbellek otomatiktir, ≥ 1024 token'lık sabit önek; `usage.prompt_tokens_details.cached_tokens` → `chat_messages.cache_read_tokens`):
   - Önek her istekte aynı kalmalıdır: `system` (persona) + eski mesajlar.
   - API'ye giden kullanıcı içeriği (bağlam + metin) aynen saklanır (`chat_messages.context_enc`). Sonraki turlarda geçmiş **byte'ı byte'ına aynı** yeniden kurulur ve cache isabeti korunur.
   - Değişken değerler (saat, geçen süre) yalnızca **son** kullanıcı mesajının bağlamında bulunur.
@@ -112,6 +114,17 @@ entry_point: hunger_result(physical)
 - Geçmişten son **30 mesaj** gönderilir.
 - Konuşma 40 mesajı aşınca arka planda bir **özet** üretilir (`rolling_summary_enc`, şifreli). Bu özet sistem promptundan sonra, sabit bir blok olarak eklenir. Özet her 20 mesajda bir güncellenir.
 - Yanıt sayfalaması istemcide yapılır (`GET messages?cursor`).
+
+### 2.5b Uygulama notları (F6 2. hafta)
+
+- Persona: `prompts/coach_mochi.v1.md` (sürümlü, Prettier dışında). Sistem mesajı 1: persona; sistem mesajı 2 (varsa): özet; sonra geçmiş (son 30, özetin kapsamadıkları), en sonda bağlam + yeni metin.
+- Bağlam: `src/modules/chat/chat.context.js#formatContext` — sabit sıralı satırlar; `<`, `>` ve satır sonları değerlerden temizlenir (blok kullanıcı kaynaklı metinle bozulamaz). Yaşı 18'in altındaysa `under_18` bayrağı eklenir.
+- Kilit: process içi `Set` (konuşma başına tek yanıt).
+- Zaman aşımı: ilk parça 15 sn, toplam 90 sn (aşılırsa iptal + `failed` + kota iadesi). İstemci ayrılırsa (`res 'close'`) `AbortController` ile çağrı iptal edilir: `interrupted`, hak düşer.
+- Ret: `delta.refusal` ya da `finish_reason: "content_filter"` → `refused` + yerelleştirilmiş metin (7 dil).
+- Özet: konuşma 40 mesajı aşınca ve sonra her 20 mesajda `chatSummary` işi (`ai` kuyruğu, eşik başına tek iş); ≤ 3000 karakter, şifreli.
+- Acil durum: `chat.safety.js` (7 dil, aksan/harf duyarsız regex listesi). Model de persona kuralıyla aynı durumda orucu bitirmesini söyler; sınıflandırıcı modelden bağımsız güvenlik ağıdır.
+- Red-team: `redteam/chat-cases.json` (14 vaka: enjeksiyon, yeme bozukluğu, 18 yaş altı, ilaç dozu, 72 sa oruç, acil belirti, hamilelik, kapsam dışı) → `npm run redteam:chat` gerçek modele gönderir, `redteam/results/*.md`'ye yanıt + beklenen davranış yazar; **elle** işaretlenir.
 
 ### 2.6 Başlık üretimi
 
@@ -138,6 +151,16 @@ Worker (photo-analysis.job.js):
   4. sonuç doğrulama (§3.3) → status=succeeded | not_food
   5. Hata: 429/5xx/timeout → iş kuyruğu yeniden dener (maxAttempts: 3, üstel geri çekilme: 2 sn, 4 sn); kalıcı hata → failed
 ```
+
+### 3.1b Uygulama notları (F6 1. hafta)
+
+- İstek: `client.beta.messages.create` · `output_config: { effort: 'medium', format: { type: 'json_schema', schema } }` · `fallbacks: 'default'` + beta `server-side-fallback-2026-07-01` (`AI_SERVER_FALLBACK=false` ile kapatılır) · görsel `lg` varyantı (≤ 1600 px WebP, base64) · `max_tokens: 8000` (düşünme token'ları dahil).
+- Prompt: `prompts/meal_analysis.v1.md` (sürümlü; Prettier dışında, birebir sabit). Dil talimatı kullanıcı içeriğinde: `Language: Turkish.`
+- Şemada sayı/uzunluk sınırı yok (yapılandırılmış çıktı desteklemiyor); sınırlar `normalizeAnalysis`'te uygulanır.
+- `stop_reason` içerikten önce okunur: `refusal` → `REFUSED`, `max_tokens` → `TRUNCATED`; JSON çözülemezse `INVALID_OUTPUT`.
+- Yeniden deneme: kuyruk işi `maxAttempts: 3`; geçici hata (429/5xx/bağlantı/zaman aşımı/devre açık) son deneme değilse iş yeniden denenir; son denemede `AI_UNAVAILABLE`. 15 dk'dan uzun açık kalan analiz `TIMEOUT` ile kapatılır.
+- Devre kesici: art arda 5 geçici hata → 30 sn boyunca çağrı yapılmadan 503.
+- Değerlendirme: `npm run eval:meals -- --dir eval/meals` (üretimdeki istek + doğrulamanın aynısı; rapor `eval/meals/results/`). Veri seti `eval/` altında, git dışında.
 
 ### 3.2 Yapılandırılmış çıktı şeması
 
@@ -193,11 +216,13 @@ Kota değerleri `app_config` tablosundan okunur; deploy gerekmeden ayarlanabilir
 
 **Uygulama:**
 - **Sayaç:** Kullanıcının **yerel gününe** göre MySQL'de tutulur (`ai_quota_daily`, [03 §3.8](03-veri-modeli.md#38-yapay-zekâ--sohbet-0008_aisql)). Artırma atomiktir: `INSERT … ON DUPLICATE KEY UPDATE count = count + 1`, ardından yeni değer okunup limitle karşılaştırılır. Eski satırlar periyodik temizlik işiyle silinir. DB erişilemezse istek zaten başarısız olur (doğal olarak fail-closed).
-- **İade:** İstek başarısız olursa (5xx/timeout) kota geri verilir (`count = count - 1`).
+- **İade:** İstek başarısız olursa (5xx/timeout/ret/geçersiz çıktı) kota geri verilir (`count = count - 1`), kotanın düşüldüğü güne. Aynı fotoğrafın tekrar gönderilmesi hak düşürmez.
 - **Kota dolunca:** 429 `QUOTA_EXCEEDED` döner, `details: {limit, resetAt, upgradeAvailable}` ile. İstemci paywall gösterir.
 - **Global maliyet sigortası:**
   - Günlük toplam AI maliyeti `app_config.ai.daily_budget_usd` değerini aşarsa ücretsiz kullanıcılar için AI özellikleri geçici olarak kapanır (503 `UNAVAILABLE`) ve alarm gider.
   - Maliyet şu şekilde hesaplanır: `usage` token sayıları × `app_config.ai.pricing` tablosu. Fiyatlar kodda değil config'de tutulur, çünkü değişebilir.
+  - Varsayılan: `ai.daily_budget_usd = 50`; `ai.pricing` yalnızca `claude-opus-5-5` (USD/MTok: girdi 4, çıktı 20, cache okuma 0.2, cache yazma 5). Yedek modelin fiyatı eklenmezse maliyeti 0 sayılır: yedek model kullanımı izlenip fiyatı eklenmeli.
+  - Toplam 60 sn önbelleklenir (her istekte tüm kullanıcılar toplanmaz).
 
 ## 5. Güvenlik korkulukları
 

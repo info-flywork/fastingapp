@@ -1,6 +1,7 @@
 import 'package:fastingapp/core/di/injection.dart';
 import 'package:fastingapp/core/router/go_router_refresh_stream.dart';
 import 'package:fastingapp/core/router/route_paths.dart';
+import 'package:fastingapp/data/model/onboarding/onboarding_result.dart';
 import 'package:fastingapp/core/widgets/bottom_navigation_bar/main_wrapper.dart';
 import 'package:fastingapp/presentation/auth/bloc/auth_bloc.dart';
 import 'package:fastingapp/presentation/auth/bloc/auth_state.dart';
@@ -113,12 +114,41 @@ import 'package:go_router/go_router.dart';
 /// Root navigator anahtarı (dialog/overlay için köke erişim).
 final rootNavigatorKey = GlobalKey<NavigatorState>();
 
-/// Korumalı (auth gerektiren) rotalar.
-/// Not: Shell (home + tablar) şu an UI geliştirme için açık;
-/// giriş akışı hazır olunca tekrar korumaya alınır.
-const _protectedPaths = <String>{};
+/// Oturumsuz açılabilen rotalar: açılış, giriş ve onboarding akışı.
+/// Diğer her şey (home, sekmeler, takipçiler, profil) oturum ister.
+final _publicPaths = <String>{
+  for (final route in [
+    RoutePaths.splash,
+    RoutePaths.entry,
+    RoutePaths.login,
+    RoutePaths.welcome,
+    RoutePaths.onboarding,
+    RoutePaths.goalHighlight,
+    RoutePaths.aboutYou,
+    RoutePaths.privacyHighlight,
+    RoutePaths.startingPoint,
+    RoutePaths.doableHighlight,
+    RoutePaths.diet,
+    RoutePaths.foodLoves,
+    RoutePaths.foodSkips,
+    RoutePaths.notedHighlight,
+    RoutePaths.weightHistory,
+    RoutePaths.obstacles,
+    RoutePaths.obstacleHighlight,
+    RoutePaths.fastingReason,
+    RoutePaths.reasonHighlight,
+    RoutePaths.fastingPlan,
+    RoutePaths.planHighlight,
+    RoutePaths.mealWindow,
+    RoutePaths.buildingPlan,
+    RoutePaths.weightProjection,
+    RoutePaths.goodCompany,
+    RoutePaths.languageLevel,
+  ])
+    route.path,
+};
 
-bool _isProtectedRoute(String location) => _protectedPaths.contains(location);
+bool _isProtectedRoute(String location) => !_publicPaths.contains(location);
 
 /// GoRouter yapılandırması. Auth guard [AuthBloc] state'ine göre çalışır.
 /// (Doküman 11)
@@ -331,7 +361,17 @@ final GoRouter appRouter = GoRouter(
     GoRoute(
       path: RoutePaths.weightProjection.path,
       name: RoutePaths.weightProjection.name,
-      builder: (context, state) => const WeightProjectionView(),
+      builder: (context, state) {
+        // Sunucu projeksiyonu (BuildingPlan gönderiminden); yoksa varsayılanlar.
+        final p = state.extra is WeightProjection
+            ? state.extra! as WeightProjection
+            : const WeightProjection();
+        return WeightProjectionView(
+          currentWeightKg: p.currentWeightKg ?? 74,
+          goalWeightKg: p.goalWeightKg ?? 68,
+          weeklyLossKg: p.weeklyLossKg ?? 0.4,
+        );
+      },
     ),
     GoRoute(
       path: RoutePaths.goodCompany.path,

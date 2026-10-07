@@ -167,7 +167,7 @@ Mobil ekip, her fazın "İstemci işleri" bölümünü aynı sprintte yürütür
 
 ### Görevler
 - [ ] Migration'lar: katalog `0005_catalog_plans.sql` (planlar, gruplar, etiketler, app_config), içerik (sıradaki numara).
-- [ ] `scripts/extract-translations.js`: Flutter `assets/translations/*.json` dosyalarından şu bölümleri çeker ve seed JSON'larını üretir:
+- [ ] `scripts/extract-translations.js` (`npm run seed:extract`): Flutter `assets/translations/*.json` dosyalarından şu bölümleri çeker ve `seeds/content.json` + `seeds/content_labels.json` üretir (görsel/renk/eşleşme yapısı uygulamanın ekran kodundan alınmıştır):
   - `plans.*`, `onboarding.plan_*`
   - `body_status.*`, `eating_window.*`
   - `fasting_struggle.*`
@@ -178,9 +178,9 @@ Mobil ekip, her fazın "İstemci işleri" bölümünü aynı sprintte yürütür
   - Kategori, yoğunluk, premium, güvenlik onayı, izin verilen zamanlama tercihleri.
   - Doküman İngilizce; diğer 6 dil için çeviri gerekecek ([14 #14](14-acik-kararlar.md)).
 - [ ] `scripts/seed.js`: idempotent seed (upsert by code).
-- [ ] `GET /v1/catalog/plans`, `/plans/:code`, `/stages`, `/struggle`, `/onboarding-options`, `/faq`.
+- [ ] `GET /v1/catalog/plans`, `/plans/:code`, `/stages`, `/struggle`, `/onboarding-options`, `/faq`, `/chat-suggestions`.
 - [ ] `GET /v1/app/config` + `app_config` seed (min sürüm, özellikler, limitler, pazarlama sayıları, yasal metin sürümleri).
-- [ ] `GET /v1/insights/categories`, `/articles` (FULLTEXT ngram araması), `/articles/:slug`.
+- [ ] `GET /v1/insights/categories`, `/articles` (kelime başı arama, imleçli sayfalama; MariaDB'de ngram yok), `/articles/:slug`.
 - [ ] Cache katmanları: `cat:v{n}:*` anahtarları + `cat:version` artırma yardımcısı.
 - [ ] HTTP cache: `ETag` + `Cache-Control` + `Vary: Accept-Language`, 304 testleri.
 - [ ] Minimum sürüm ara katmanı: `X-App-Version < min` → 426 `APP_UPDATE_REQUIRED`.
@@ -204,44 +204,45 @@ Mobil ekip, her fazın "İstemci işleri" bölümünü aynı sprintte yürütür
 ### Görevler
 
 **Hafta 1 — Plan & seans:**
-- [ ] Migration'lar: `0003` (user_plans, plan_day_checkins), `0004_fasting.sql`, `0007_aggregates.sql` (daily_summaries, user_stats, xp_events).
-- [ ] `plans.rules.js`:
+- [x] Migration `0007_plans_fasting.sql`: `user_plans`, `plan_day_checkins`, `fasting_sessions` (tek aktif için üretilmiş sütun + unique), `struggle_events`, `idempotency_keys`. Toplam tablolar (`daily_summaries`, `xp_events`) hafta 2'de.
+- [x] `plans.rules.js`:
   - zamanlama tercihi → yeme penceresi
   - haftalık program doğrulama (5:2 ardışık değil vb.)
   - custom aralıklar
   - premium ve sağlık kontrolleri
-- [ ] `GET/PUT /v1/plans/current`, `PUT /v1/plans/days/:date`, `GET /v1/plans/history`. Onboarding'in `planCode`'u aktif plana bağlanır.
-- [ ] `fasting.rules.js`:
+- [x] `GET/PUT /v1/plans/current`, `PUT /v1/plans/days/:date`, `GET /v1/plans/history`. Onboarding'in `planCode`'u aktif plana bağlanır.
+- [x] `fasting.rules.js`:
   - durum makinesi
   - zaman aralığı kontrolleri
   - vücut evresi hesabı
   - yeme penceresi evresi
-- [ ] `POST /v1/fasts` (idempotent, tek aktif, çakışma kontrolü `SELECT … FOR UPDATE`).
-- [ ] `GET /v1/fasts/active` (canlı `elapsed`, `progress`, `stage`, `serverTime`; negatif cache).
-- [ ] `PATCH /v1/fasts/:id`, `POST /:id/finish`, `POST /:id/cancel`, `POST /v1/fasts/manual`, `DELETE /:id`.
-- [ ] `Idempotency-Key` eklentisi (MySQL `idempotency_keys` tablosu + migration, gövde hash'i kontrolü, süresi dolanları silen periyodik iş).
+- [x] `POST /v1/fasts` (idempotent, tek aktif, çakışma kontrolü `SELECT … FOR UPDATE`).
+- [x] `GET /v1/fasts/active` (canlı `elapsed`, `progress`, `stage`, `serverTime`). Negatif cache bilinçli olarak eklenmedi: sorgu tek indeksli satır, cache invalidation riski kazançtan büyük; F3 hafta 2'de yük ölçülünce yeniden değerlendirilir.
+- [x] `PATCH /v1/fasts/:id`, `POST /:id/finish`, `POST /:id/cancel`, `POST /v1/fasts/manual`, `DELETE /:id`.
+- [x] `Idempotency-Key` eklentisi (MySQL `idempotency_keys` tablosu + migration, gövde hash'i kontrolü, süresi dolanları silen periyodik iş).
 
 **Hafta 2 — Türetilmiş veriler:**
-- [ ] `stats.rules.js`: seri (nötr ve zorunlu gün, %80 tolerans), sayaçlar, XP ve seviye.
-- [ ] `stats.service`:
-  - artımlı `daily_summaries` güncellemesi
-  - `recompute(userId, fromDate)`
-  - kullanıcı kilidi
-- [ ] Domain olay altyapısı (`events.js`). `fast.finished` → özet, seri, XP, cache invalidation.
-- [ ] `POST /finish` yanıtı: `isFirstFast`, `streak`, `xpGained`, `levelUp`.
-- [ ] `GET /v1/fasts`, `/fasts/:id`, `/fasts/week`, `/fasts/stats`.
-- [ ] `GET /v1/user/summary` (ana sayfa birleşik yanıtı; F4'te takipçi alanları eklenir).
-- [ ] `GET /v1/user/progress` gerçek veriyle. `GET /v1/user/stats`.
-- [ ] İşler:
-  - `daily-rollup` (03:30 UTC doğrulama)
-  - `day-rollover` (saatlik; yerel 00:05 dilimi; seri kontrolü)
-  - `fast-autoclose` (72 sa)
-- [ ] `POST /v1/fasts/:id/struggles` (+ `/v1/struggles`).
-- [ ] Birim testleri:
-  - seri senaryoları: günlük plan, 5:2, nötr gün, bugün sürüyor
-  - saat dilimi değişimi
-  - gece yarısını geçen oruç
-  - yaz saati (DST) geçişi
+- [x] Migration `0008_aggregates.sql`: `daily_summaries`, `xp_events` (`ref_key` birincil anahtarda; NULL'lı UNIQUE yerine).
+- [x] `stats.rules.js`: seri (nötr ve zorunlu gün, %80 tolerans, check-in), kilometre taşları, sayaçlar, XP ve seviye.
+- [x] `stats.service`:
+  - `recompute(userId, fromDate)`: günlük özetler, seri, taş XP'si, sayaçlar, seviye
+  - yazmalarla aynı transaction, kullanıcı satırı kilidi
+  - okuma uçlarında bayat seri tazeleme (`fresh`)
+- [ ] ~~Domain olay altyapısı (`events.js`)~~ → ertelendi. Yeniden hesaplama yazmayla aynı transaction'da doğrudan çağrılıyor (tutarlı, basit). Olay yayını, F4/F7/F9'da birden çok dinleyici (dünya, challenge, bildirim) gelince eklenir. Cache invalidation da o zaman bağlanır (`/user/summary` şimdilik cache'siz).
+- [x] `POST /finish` yanıtı: `isFirstFast`, `streak`, `xpGained`, `levelUp`.
+- [x] `/fasts/week`, `/fasts/stats` (`GET /v1/fasts` ve `/fasts/:id` hafta 1'de bitti).
+- [x] `GET /v1/user/summary` (ana sayfa birleşik yanıtı; F4'te takipçi alanları eklenir).
+- [x] `GET /v1/user/progress` gerçek veriyle. `GET /v1/user/stats`.
+- [x] İşler (`stats` kuyruğu, worker'da tek eşzamanlılık):
+  - `daily-rollup` (24 saatte bir; son 26 sa değişenler)
+  - `day-rollover` (saatlik; yerel gece yarısı geçen dilimler)
+  - `fast-autoclose` (15 dk'da bir; 72 sa)
+- [x] `npm run stats:recompute [-- <userId>]` (elle tam yeniden hesaplama).
+- [x] `POST /v1/fasts/:id/struggles` (+ `/v1/struggles`) — hafta 1'de yapıldı.
+- [x] Birim testleri:
+  - seri senaryoları: günlük plan, 5:2, nötr gün, bugün sürüyor, kilometre taşları
+  - gece yarısını geçen oruç (İstanbul 20:00 → 12:00, hafta 1 entegrasyon)
+- [ ] Saat dilimi değişimi ve yaz saati (DST) geçişi senaryoları: seans `tz`'si saklanıyor, ama özel testleri yazılmadı. F11 sertleştirmede.
 
 ### Kabul kriterleri
 - Aynı anda iki oruç başlatılamaz (eşzamanlı 10 istek testi → tek başarı).
@@ -266,39 +267,41 @@ Mobil ekip, her fazın "İstemci işleri" bölümünü aynı sprintte yürütür
 ### Görevler
 
 **Hafta 1:**
-- [ ] Migration `0006_trackers.sql`.
-- [ ] **Kilo:**
+- [x] Migration `0009_trackers.sql` (`water_entries`, `step_daily`, `sleep_entries` + `external_id`; `weight_entries` 0003'te).
+- [x] **Kilo:**
   - CRUD
-  - `/weights/chart` (gün/hafta/ay kovaları, dinamik Y ekseni, yerelleştirilmiş etiketler)
+  - `/weights/chart` (gün/hafta/ay kovaları, dinamik Y ekseni — hedefi de kapsar, yerelleştirilmiş etiketler)
   - `/weights/summary` (BMI kategorisi ve bandı, ilerleme)
   - `PATCH /weights/goal`
   - bitiş ekranından kilo kaydı (`source = fasting_finish`)
-- [ ] **Su:**
+- [x] **Su:**
   - `/water/day`, `POST /water`, `DELETE /water/:id`, `/water/week`
   - hedef günü sayacı
   - `HIGH_WATER_INTAKE` uyarısı
-- [ ] **Adım:**
+- [x] **Adım:**
   - `PUT /steps/:date`, `POST /steps/sync` (toplu, kaynak önceliği)
-  - `GET /steps` (türetilmiş km/kcal/dk)
-- [ ] **Uyku:**
+  - `GET /steps` (türetilmiş km/kcal/dk; day/week/month)
+- [x] **Uyku:**
   - CRUD
-  - `/sleep/sync`
+  - `/sleep/sync` (`externalId` ile idempotent)
   - `/sleep/summary` (son gece, hedef, hafta)
+- [x] Takipçi yazmaları günlük özete ve XP'ye bağlandı (`stats.applyDay`; su hedefi 5, kilo 3 XP). `/user/summary` → `today.water/steps/sleep` gerçek veri. Gece doğrulaması son 3 günün takipçi sütunlarını yeniden yazar.
 
 **Hafta 2:**
-- [ ] **Öğünler:**
-  - CRUD (manuel). Aktif oruç varsa `suggestEndFast` önerisi.
-  - `GET /meals?date` (zaman çizelgesi)
-- [ ] **Beslenme:**
-  - `nutrition.rules.js`: BMR, TDEE, kcal hedefi, makrolar, taban değerler, sağlık bayrakları
+- [x] Migration `0010_meals_hunger.sql` (`meals`, `hunger_checkins`).
+- [x] **Öğünler:**
+  - CRUD (manuel, `quickKcal`). Aktif oruç varsa `suggestEndFast` önerisi.
+  - `GET /meals?date` (zaman çizelgesi) ve sayfalı geçmiş.
+- [x] **Beslenme:**
+  - `nutrition.rules.js`: BMR, TDEE (bugünün adım kalorisi dahil), kcal hedefi, makrolar, taban değerler, sağlık bayrakları, yakılan kalori
   - `/nutrition/day`, `/nutrition/week`
-  - `/user/goals` içinde `computed` alanı
-- [ ] **Açlık:**
-  - `hunger.rules.js` (skor tablosu v1, güvenlik bayrağı)
-  - `/hunger-checkins/evaluate`, CRUD, `/summary`
-- [ ] Tüm takipçiler `daily_summaries`'e bağlanır (artımlı + recompute). `GET /user/summary` `today` alanı tamamlanır.
-- [ ] Bildirim kutusu için `weight_update` olayı. Gerçek bildirim F9'da; şimdilik yalnızca olay yayınlanır.
-- [ ] Çevrimdışı ve idempotent yazma: tüm POST'larda istemci `id` desteği ve testi.
+  - `/user/goals` içinde `computed` alanı adım kalorisiyle
+- [x] **Açlık:**
+  - `hunger.rules.js` (skor tablosu v1, bağlam puanı, güvenlik bayrağı)
+  - `/hunger-checkins/evaluate`, CRUD, `/summary`. Öneri metinleri katalogda (7 dil; `safety_end_fast` elle yazıldı)
+- [x] Tüm takipçiler `daily_summaries`'e bağlandı (artımlı `applyDay` + gece/elle recompute). `GET /user/summary` `today` alanı tamam (`nutrition`, `lastMeal`, `hunger`).
+- [ ] Bildirim kutusu için `weight_update` olayı → F9'a ertelendi (olay altyapısı henüz yok; bkz. F3 hafta 2 notu).
+- [x] Çevrimdışı ve idempotent yazma: oruç, kilo, su, uyku, öğün, açlık POST'larında istemci `id` desteği (aynı id → 200, başkasının id'si → 409).
 
 ### Kabul kriterleri
 - **Su:** 23:50'de içilen su o güne, 00:10'da içilen ertesi güne yazılır. Gece yarısı sıfırlama hatası çözülmüştür.
@@ -320,30 +323,25 @@ Mobil ekip, her fazın "İstemci işleri" bölümünü aynı sprintte yürütür
 **Hedef:** Güvenli fotoğraf yükleme hattı. Avatar ve öğün fotoğrafı çalışır.
 
 ### Görevler
-- [ ] Migration `0011_media.sql`.
-- [ ] Bunny hesabı kurulumu:
-  - `mochifast-private` ve `mochifast-public` storage zone'ları (DE + replikasyon)
-  - pull zone'lar, Token Authentication, alan adları ve TLS
-  - edge kuralları
-- [ ] `infra/bunny.js`: `put`, `delete`, `list(prefix)`, `purge`, `signPrivateUrl` (zaman kovalı). Test için yerel diske yazan sahte implementasyon.
-- [ ] `media.service`:
-  - multipart limitleri
-  - magic byte kontrolü
+- [x] Migration `0011_media.sql` (+ `users.avatar_media_id`, `meals.photo_media_id` FK'leri).
+- [ ] Bunny hesabı kurulumu (**kullanıcı işi**, panelden):
+  - `mochifast-private` storage zone (DE + AB içi replikasyon) ve pull zone'u; **Token Authentication açık**
+  - anahtarlar `.env`/`.env.production`'a: `BUNNY_PRIVATE_*`, `BUNNY_TOKEN_AUTH_KEY`, `MEDIA_DRIVER=bunny`
+  - alan adları ve TLS (`media.mochifast.app`), edge kuralları
+  - public zone (`mochifast`, mevcut) uygulama görselleri için kalır
+- [x] `infra/bunny.js`: `put` (checksum + 3 deneme), `delete`, `list(prefix)`, `purge`, `signPrivateUrl` (saat kovalı), `verifyPrivateToken`. Yerel diske yazan sürücü (`MEDIA_DRIVER=local`) + `/media-files/*` ucu.
+- [x] `media.pipeline` / `media.service`:
+  - multipart limitleri (1 dosya, 10 MB → 413)
+  - magic byte kontrolü (jpeg/png/webp; HEIC/SVG/PDF → 415)
   - `sharp` hattı: rotate, varyantlar, WebP, metadata temizliği, piksel limiti
-  - SHA-256 ile yinelenen yükleme tespiti
+  - SHA-256 ile yinelenen yükleme tespiti (24 sa)
   - blurhash
-- [ ] `PUT/DELETE /v1/user/me/avatar` (senkron).
-- [ ] `POST /v1/media` (`purpose = mealPhoto`) ve öğüne fotoğraf bağlama (`meals.photo_media_id`).
-- [ ] Tüm yanıtlarda imzalı URL gömme yardımcısı (`media.presenter`).
-- [ ] Temizlik işleri:
-  - takılı `processing` kayıtları
-  - öğüne bağlanmamış fotoğraflar (24 sa)
-  - yumuşak silinmiş öğünlerin medyası (30 gün)
-- [ ] Testler:
-  - EXIF/GPS temizliği
-  - dekompresyon bombası
-  - HEIC/SVG/PDF reddi
-  - imzalı URL formatı (Bunny'nin örnek değerleriyle doğrulama)
+- [x] `PUT/DELETE /v1/user/me/avatar` (senkron; eski avatar hemen silinir). `GET /user/me` → imzalı `avatarUrl`.
+- [x] `POST /v1/media` (`purpose = mealPhoto`), `GET/DELETE /v1/media/:id`, öğüne fotoğraf bağlama (`photoMediaId`).
+- [x] Yanıtlara imzalı URL gömme (`media.present`, listelerde toplu `presentMany`).
+- [x] Temizlik işleri (`media` kuyruğu): takılı `processing` (1 sa), öğüne bağlanmamış fotoğraflar (24 sa), silinmiş öğünlerin medyası (30 gün).
+- [x] Testler: EXIF/GPS temizliği, yön, dekompresyon bombası, HEIC/SVG/PDF reddi, imzalı URL formatı (token değeri `openssl` ile bağımsız hesaplanan değerle), token'sız/bozuk/süresi geçmiş → 403, 10 MB → 413.
+- [ ] İmzalı URL'nin **gerçek Bunny edge'inde** doğrulanması: private zone kurulunca staging'de (token'sız 403, imzalı 200).
 
 ### Kabul kriterleri
 - iPhone'dan GPS'li bir fotoğraf yüklenip Bunny'den indirildiğinde **hiç EXIF içermez**.
@@ -365,52 +363,36 @@ Mobil ekip, her fazın "İstemci işleri" bölümünü aynı sprintte yürütür
 ### Görevler
 
 **Hafta 1 — Fotoğraf analizi:**
-- [ ] Migration `0008_ai.sql` (analiz, sohbet, kullanım tabloları).
-- [ ] `infra/anthropic.js`:
-  - istemci
+- [x] Migration `0012_ai.sql` (`food_photo_analyses`, `ai_quota_daily`, `ai_usage_daily`; sohbet tabloları 2. haftada).
+- [x] `infra/anthropic.js`:
+  - istemci (`@anthropic-ai/sdk`, `maxRetries: 2`)
   - timeout'lar
-  - devre kesici
-  - fiyat tablosu `app_config`'den
-  - `fallbacks: "default"` (beta header)
-- [ ] `prompts/meal_analysis.v1.md` + Zod şeması + yerelleştirme talimatı.
-- [ ] `POST /v1/meals/photo-analyses` (202) + `GET /:id`. `photo-analysis` worker işi: retry, refusal, doğrulama ([09 §3.3](09-yapay-zeka.md#33-sunucu-tarafı-doğrulama-modele-körü-körüne-güvenme)).
-- [ ] Kota servisi:
-  - MySQL `ai_quota_daily` (atomik `INSERT … ON DUPLICATE KEY UPDATE`, eski satırları silen periyodik iş)
-  - yerel gün
+  - devre kesici (5 geçici hata → 30 sn)
+  - fiyat tablosu `app_config.ai.pricing`'ten
+  - `fallbacks: "default"` (beta `server-side-fallback-2026-07-01`, kapatılabilir)
+- [x] `prompts/meal_analysis.v1.md` + JSON şeması (`output_config.format`) + dil talimatı. Zod yerine saf JSON Schema + `normalizeAnalysis` (proje saf JS).
+- [x] `POST /v1/meals/photo-analyses` (202) + `GET /:id`. `photoAnalysis` worker işi (`ai` kuyruğu): retry, refusal, doğrulama. Öğün kaydı `analysisId` ile.
+- [x] Kota servisi (`ai.gate`):
+  - MySQL `ai_quota_daily` (atomik artırma, eski satırları silen periyodik iş)
+  - yerel gün, `resetAt`
   - başarısız istekte iade
-  - global maliyet sigortası
+  - global maliyet sigortası (`ai.daily_budget_usd`)
   - `GET /v1/chat/quota`
-- [ ] **Eval seti:** 100 öğün + 20 yemek dışı fotoğraf. `scripts/eval-meal-analysis.js` (MAPE, MAE, `isFood` doğruluğu, maliyet raporu).
-- [ ] AI rıza kontrolü: `ai_processing` yoksa 403 `CONSENT_REQUIRED`.
+- [ ] **Eval seti:** `scripts/eval-meal-analysis.js` hazır (MAPE, MAE, `isFood` doğruluğu, p50/p95, maliyet). **Veri seti (100 öğün + 20 yemek dışı fotoğraf, bilinen kalori) ve `ANTHROPIC_API_KEY` bekleniyor.**
+- [x] AI rıza kontrolü: `ai_processing` yoksa 403 `CONSENT_REQUIRED`.
 
-**Hafta 2 — Coach Mochi:**
-- [ ] `prompts/coach_mochi.v1.md`: persona, kapsam, sağlık korkulukları, biçim kuralları.
-- [ ] Bağlam derleyici (`chat.context.js`): profil, plan, aktif oruç, bugün, son açlık sonucu, güvenlik bayrakları, giriş noktası.
-- [ ] Sohbet uçları:
-  - konuşma CRUD
-  - mesaj listeleme (cursor)
-  - pin/sil
-  - geri bildirim
-  - öneriler
-- [ ] `POST …/messages` SSE:
-  - kilit
-  - kota
-  - akış
-  - bağlantı kopunca iptal (AbortController)
-  - `interrupted` durumu
-  - heartbeat
-  - JSON yedek yolu
-- [ ] Prompt cache: sabit sistem öneki + bağlamın birebir saklanması. `cache_read_input_tokens` metriği.
-- [ ] Uzun sohbet özeti işi (40+ mesaj).
-- [ ] Acil durum sinyali sınıflandırıcısı (anahtar kelime listesi, 7 dil) → `safety: "urgent"` meta verisi.
-- [ ] Red-team test seti:
-  - prompt enjeksiyonu
-  - yeme bozukluğu senaryoları
-  - 18 yaş altı
-  - tıbbi doz soruları
-  - 72 sa oruç isteği
-  
-  Beklenen davranışlar elle gözden geçirilir ve sonuçlar kaydedilir.
+**Hafta 2 — Coach Mochi** (sağlayıcı: **OpenAI**, kullanıcı kararı):
+- [x] Migration `0013_chat.sql` (`chat_conversations`, `chat_messages`).
+- [x] `infra/openai.js`: Chat Completions akışı, tipli hata sınıflandırması, ortak devre kesici (`infra/breaker.js`), kullanım dönüşümü.
+- [x] `prompts/coach_mochi.v1.md`: persona, kapsam, sağlık korkulukları, biçim kuralları, bağlamın veri olduğu.
+- [x] Bağlam derleyici (`chat.context.js`): profil, plan, aktif oruç / yeme penceresi, seri, bugün, son açlık sonucu, güvenlik bayrakları, giriş noktası.
+- [x] Sohbet uçları: konuşma CRUD, mesaj listeleme (cursor), pin/sil, geri bildirim, öneriler.
+- [x] `POST …/messages` SSE: kilit, kota, akış, bağlantı kopunca iptal (AbortController), `interrupted`, heartbeat, JSON yedek yolu, tekrar gönderim.
+- [x] Prompt cache: sabit persona öneki + bağlamın birebir saklanması (test: önceki tur byte'ı byte'ına aynı). `cache_read_tokens` kaydı.
+- [x] Uzun sohbet özeti işi (40+ mesaj, her 20 mesajda).
+- [x] Acil durum sinyali sınıflandırıcısı (7 dil) → `safety: "urgent"`.
+- [ ] Red-team: set (`redteam/chat-cases.json`, 14 vaka) ve betik hazır; **`OPENAI_API_KEY` + model gelince çalıştırılıp elle gözden geçirilecek**.
+- [x] Nginx: SSE yolunda `proxy_buffering off` + 120 sn; yükleme yollarında 11 MB (`deploy/nginx/mochifast-api.conf`).
 
 ### Kabul kriterleri
 - Eval: kcal MAPE ≤ %25, `isFood` ≥ %98, p95 uçtan uca < 12 sn.
@@ -430,23 +412,23 @@ Mobil ekip, her fazın "İstemci işleri" bölümünü aynı sprintte yürütür
 **Hedef:** Mochi World, XP/seviye ve challenge'ların gerçek veriyle çalışması.
 
 ### Görevler
-- [ ] `world_zone_thresholds` seed ([05 §7](05-is-kurallari.md#7-mochi-world)).
-- [ ] `world.rules.js`: bölge seviyesi, `nextThreshold`, `ratioToNext`, `sceneLevel`, `worldProgress`, sağlık hesabı.
-- [ ] `user_stats` alanlarının olaylarla beslenmesi:
-  - `water_goal_days`, `meals_logged`, `best_weight_lost_kg`
-  - `world_health` (gün dönümü işi + `fast.finished`)
-- [ ] `GET /v1/world` (cache'li).
-- [ ] Seviye atlama ve sağlık değişimi olayları (bildirimler F9'da bağlanır).
-- [ ] **Challenge'lar:**
+- [x] Migration `0014_gamification.sql` + `world_zone_thresholds` ve challenge kataloğu seed'i (`seeds/gamification.json`; 4 challenge, 7 dil).
+- [x] `world.rules.js`: bölge seviyesi, `nextThreshold`, `ratioToNext`, `sceneLevel`, `worldProgress`, sağlık hesabı.
+- [x] `user_stats` alanlarının beslenmesi:
+  - `water_goal_days`, `meals_logged` (F4), `best_weight_lost_kg` (ham veriden)
+  - `world_health` (her yeniden hesaplamada; gün dönümünde okuma/iş ile)
+- [x] `GET /v1/world` (cache'siz; hafif sorgular).
+- [x] Seviye atlama ve sağlık değişimi: bitirme yanıtında `world.levelUps`/`health` (bildirimler F9'da bağlanır).
+- [x] **Challenge'lar:**
   - katalog seed
   - `GET /challenges`, `/featured`, `join`, `leave`
-  - olaylarla ilerleme güncellemesi
-  - tamamlanma + XP
+  - her ilgili yazmada pencere içinde yeniden sayım
+  - tamamlanma + XP (bir kez)
   - süresi dolanlar için saatlik iş
-  - gerçek katılımcı sayısı ve izinli avatarlar
-- [ ] Seri kilometre taşı XP'leri.
-- [ ] (Opsiyonel) **Fast Forecast v0** (kural tabanlı): son 14 günün struggle olayları ve açlık check-in saatlerinden açlık zirvesi ve risk aralığı. Veri yetersizse `null` döner.
-- [ ] (Opsiyonel) **Günlük ipucu:** Batches API ile gece üretim → `GET /fasts/daily-tip` (premium).
+  - gerçek katılımcı sayısı; avatarlar izin ayarı gelene kadar boş
+- [x] Seri kilometre taşı XP'leri (F3'te yapıldı).
+- [ ] (Opsiyonel) Fast Forecast v0 — yapılmadı.
+- [ ] (Opsiyonel) Günlük ipucu — yapılmadı.
 
 ### Kabul kriterleri
 - Mock senaryosu (3 oruç, 2 su günü, 0 kg, 3 öğün) verildiğinde dünya istemcinin beklediği seviyeleri üretir.
@@ -462,22 +444,24 @@ Mobil ekip, her fazın "İstemci işleri" bölümünü aynı sprintte yürütür
 ## F8 — Abonelik (1 hafta)
 
 ### Görevler
-- [ ] Migration `0010_subscriptions.sql`.
-- [ ] RevenueCat projesi:
+- [x] Migration `0015_subscriptions.sql` (`subscriptions`, `revenuecat_events`, `notifications` inbox).
+- [ ] RevenueCat projesi (**kullanıcı işi**, `TODO.md`):
   - entitlement `premium`
-  - ürünler ve offering
+  - ürünler ve offering + Paywall (RevenueCat Paywalls)
   - webhook URL'si + auth değeri
   - sandbox ve production ayrımı
-- [ ] `POST /v1/webhooks/revenuecat`: auth, idempotency, kuyruk.
-- [ ] `revenuecat-event` işi: REST teyidi, durum eşlemesi, TRANSFER, cache invalidation, audit.
-- [ ] `GET /v1/subscription`, `POST /v1/subscription/sync`.
-- [ ] `requirePremium` ve entitlement cache'i. Bağlanacak yerler:
-  - premium planlar (402)
-  - AI kotaları (premium limitleri)
-  - premium içerik
+- [x] `POST /v1/webhooks/revenuecat`: auth (sabit zamanlı), idempotency (`event_id`), kuyruk.
+- [x] `revenuecatEvent` işi: REST teyidi, durum eşlemesi, TRANSFER, audit. (API önbelleği worker'dan silinemez: 30 sn TTL + istemci sync.)
+- [x] `GET /v1/subscription`, `POST /v1/subscription/sync`.
+- [x] Entitlement (tek kaynak, 30 sn önbellek). Bağlanan yerler:
+  - premium planlar (402) ve bekleyen onboarding planının otomatik etkinleşmesi
+  - AI kotaları (premium limitleri) ve bütçe sigortası muafiyeti
+  - premium içerik (katalog/insights kilitleri)
   - challenge'lar
-- [ ] Premium kaybı akışı: planın düşürülmesi, bildirim olayı.
-- [ ] Admin promosyon premium işlemi (API; panel F10'da).
+  - `/user/me` ve giriş yanıtlarında `isPremium`
+- [x] Premium kaybı akışı: ertesi yerel gün plan 16:8'e düşer, inbox kaydı (`premium_expired`).
+- [x] Promosyon premium: servis + `npm run premium:grant` (panel F10'da).
+- [x] Paywall: istemcide RevenueCat Paywalls (sunucu kodu yok).
 
 ### Kabul kriterleri
 - Sandbox satın alma yapılınca `/user/me.isPremium = true` en geç 5 sn içinde (sync ile anında) görünür.
@@ -494,29 +478,15 @@ Mobil ekip, her fazın "İstemci işleri" bölümünü aynı sprintte yürütür
 ## F9 — Bildirimler (1.5 hafta) → **M3**
 
 ### Görevler
-- [ ] Migration `0009_notifications.sql`. Şablon seed'i (7 dil; yeni metinler çevrilecek).
-- [ ] Firebase projeleri (staging ve prod). `infra/fcm.js` (`sendEach`, geçersiz token temizliği).
-- [ ] `notifications.service`:
-  - `schedule`, `cancel`, `createInbox`
-  - şablon render (yer tutucular, `Intl`)
-- [ ] `notification-dispatch` işi: 30 sn, `SKIP LOCKED`, 500'lük partiler.
-- [ ] `push-send` işi:
-  - ayar, rıza ve sessiz saat kontrolü
-  - frekans sınırı
-  - inbox ve push
-  - retry
-- [ ] Olay bağlamaları:
-  - oruç: hedef, yarı yol, evre, overdue
-  - yeme penceresi
-  - kilo
-  - seri: dürtme, kilometre taşı, kayıp
-  - dünya
-  - challenge
-  - abonelik
-  - dışa aktarma
-- [ ] Günlük planlama işleri: su slotları, kilo hatırlatması, seri dürtmesi (yerel saat dilimine göre).
-- [ ] Inbox uçları: liste, okunmamış sayısı, okundu, tümü okundu, sil.
-- [ ] (Opsiyonel) widget yenilemesi için sessiz push.
+- [x] Migration `0016_notifications.sql`. Şablon seed'i (`seeds/notifications.json`, 20 tür, 7 dil; metinlerin çoğu yeni → gözden geçirilecek).
+- [ ] Firebase projeleri (staging ve prod) + servis hesabı (**kullanıcı işi**, `TODO.md`). `infra/fcm.js` (`sendEach`, geçersiz token temizliği) hazır.
+- [x] Bildirim servisi: `schedule`, `cancel` (`notify.js`), inbox, şablon render (yer tutucular, `Intl`; bölge/challenge/plan adları dile göre).
+- [x] `notificationDispatch` işi: 30 sn, `SKIP LOCKED`, 500'lük partiler.
+- [x] `pushSend` işi: ayar, sessiz saat (ertele/sessiz/gönder), yeni kullanıcı sessiz dönemi, frekans sınırı (6/gün, kategori 3), gönderim anında geçerlilik, inbox ve push, retry.
+- [x] Olay bağlamaları: oruç (hedef, yarı yol, evre, overdue), yeme penceresi, kilo, seri (dürtme, kilometre taşı, kayıp), dünya, challenge, abonelik. Dışa aktarma → F10.
+- [x] Günlük planlama işi: su slotları, tartı hatırlatması, seri dürtmesi, oruç başlatma (yerel saat dilimine göre).
+- [x] Inbox uçları: liste, okunmamış sayısı, okundu, tümü okundu, sil.
+- [ ] (Opsiyonel) widget yenilemesi için sessiz push — yapılmadı.
 
 ### Kabul kriterleri
 - 16 sa oruç başlatılınca hedefe ulaşma push'u ±60 sn içinde gelir. Oruç erken bitirilirse gelmez.
@@ -535,30 +505,29 @@ Mobil ekip, her fazın "İstemci işleri" bölümünü aynı sprintte yürütür
 ## F10 — Yönetim paneli API'si, hesap/veri hakları, analitik (1.5 hafta)
 
 ### Görevler
-- [ ] Migration `0012_compliance_admin.sql`.
+- [x] Migration `0017_compliance.sql` (silme ve dışa aktarma talepleri), `0018_admin.sql` (yöneticiler, katalog dokümanları, günlük etkinlik).
 - [ ] **Hesap silme:**
-  - `DELETE /v1/user/me`, `POST /v1/user/me/restore`
-  - `account-delete` işi: Apple revoke, Bunny önek silme ve purge, RevenueCat silme, cascade, audit anonimleştirme
-  - Play Store için web silme sayfası (basit form → aynı akış, e-posta/giriş doğrulaması ile)
-- [ ] **Veri dışa aktarma:** `POST /v1/user/me/export` → zip (JSON + CSV + fotoğraflar) → private zone → bildirim.
-- [ ] **Rıza yönetimi:**
-  - yasal metin sürümü değişince yeniden onay (`app/config.legal`)
-  - rıza geri çekme davranışları
-- [ ] **Saklama (retention) işleri:**
-  - inaktif misafir
-  - yumuşak silinenler
-  - eski bildirimler
-  - `push_deliveries`
-  - audit
-- [ ] **Admin API:**
+  - [x] `DELETE /v1/user/me`; geri alma giriş akışında (`409 ACCOUNT_PENDING_DELETION` → `restoreAccount: true`)
+  - [x] `account-delete` işi: Firebase kullanıcı silme, Bunny önek silme ve purge, RevenueCat silme, cascade, audit anonimleştirme. Apple revoke istemcide (06 §8.3)
+  - [x] Play Store için web silme sayfası: `/account/delete` (bilgi sayfası + destek e-postası; destek panelden talep oluşturur)
+- [x] **Veri dışa aktarma:** `POST /v1/user/me/export` → zip (JSON + CSV + fotoğraflar) → private zone → bildirim.
+- [x] **Rıza yönetimi:**
+  - yasal metin sürümü değişince yeniden onay (`requiredConsents`)
+  - rıza geri çekme davranışları (sağlık → kayıt 403, pazarlama → bildirim kapalı)
+- [x] **Saklama (retention) işleri:**
+  - inaktif misafir (90 gün), birleştirmede kapanan misafir (30 gün)
+  - yumuşak silinenler (30 gün), okunmuş bildirimler (90 gün)
+  - `push_deliveries` (F9), audit (13 ay), kapanmış oturumlar (30 gün)
+  - [ ] inaktif kayıtlı hesap (24 ay + uyarı) — e-posta kanalı gelince
+- [x] **Admin API:**
   - kimlik doğrulama: argon2id, TOTP, kilitleme
   - RBAC, IP allowlist
-  - içerik CRUD + çeviriler: planlar, evreler, struggle, insights, FAQ, öneriler, challenge'lar, şablonlar
-  - `app_config` düzenleme + `cat:version` artırma
+  - içerik + çeviriler: bölüm dokümanları (planlar, evreler, struggle, insights, FAQ, öneriler, challenge'lar, şablonlar), sürüm geçmişi ve geri alma
+  - `app_config` düzenleme + `catalog.version` artırma
   - medya yükleme (public)
   - kullanıcı arama (maskeli) ve destek işlemleri
   - raporlar: DAU/MAU, kayıt hunisi, oruç tamamlama, AI maliyeti, premium dönüşümü
-- [ ] **Ürün analitiği (opsiyonel):** Sunucu tarafı olaylar (anonim ID ile) PostHog/Amplitude'a gönderilir. Rıza kontrolü yapılır.
+- [ ] **Ürün analitiği (opsiyonel):** Sunucu tarafı olaylar (anonim ID ile) PostHog/Amplitude'a gönderilir. Rıza kontrolü yapılır. — yapılmadı (raporlar şimdilik DB'den)
 - [ ] Admin arayüzü: Ayrı bir proje (React/Next veya Refine/AdminJS). Bu yol haritasının kapsamı **yalnızca API**'dir.
 
 ### Kabul kriterleri
@@ -575,41 +544,34 @@ Mobil ekip, her fazın "İstemci işleri" bölümünü aynı sprintte yürütür
 
 ### Görevler
 - [ ] **Güvenlik:**
-  - OWASP ASVS L2 kontrol listesi
-  - harici pentest (API + mobil)
-  - bulguların kapatılması
+  - [x] OWASP ASVS L2 öz-denetimi (kod okuması): kritik/yüksek yok; düzeltilenler: kullanıcı bazlı rate limit (önceden hep IP'ydi) + IPv6 /64, misafir oluşturma sınırının `/auth/register` ile aşılması, yönetici token iptali + zorunlu şifre değişimi + kilitte hesap sızıntısı, üretimde boş allowlist'te admin kapalı, e-posta araması POST, oturum mutlak ömrü, HSTS (nginx), sohbet/analiz dakika limitleri
+  - [ ] harici pentest (API + mobil)
+  - [ ] bulguların kapatılması
 - [ ] **Yük testi (k6):**
-  - sabah zirvesi senaryosu, 500 rps
-  - hedefler: [07 §8.1](07-cache-performans.md#81-performans-hedefleri-slo)
-  - darboğaz analizi: havuz, indeks, cache isabet oranı
+  - [x] sabah zirvesi senaryosu + eşikler (`loadtest/`)
+  - [ ] staging'de 500 rps çalıştırma ve darboğaz analizi
 - [ ] **Gözlemlenebilirlik:**
-  - OpenTelemetry tracing
-  - dashboard'lar: HTTP, DB, cache (hit/miss/evict), kuyruk (`jobs` durum sayıları), AI, push
-  - alarmlar ve nöbet (on-call) runbook'ları
+  - [x] worker metrikleri (iş sonuç/süre, kuyruk birikimi, AI maliyeti, push, geciken bildirim), alarm kuralları (`deploy/monitoring/alerts.yml`), runbook'lar (`docs/runbooks.md`)
+  - [ ] Prometheus/Grafana kurulumu, uptime izleme; tracing Sentry ile (`SENTRY_TRACES_SAMPLE_RATE`), OpenTelemetry yok
 - [ ] **Yedekleme:**
-  - PITR doğrulaması
-  - **geri yükleme tatbikatı** (staging'e üretim yedeği, maskeli)
-- [ ] **Read replica:** Raporlama ve gece işleri için.
+  - [x] saatlik şifreli yedek + tatbikat betikleri (`scripts/backup-db.sh`, `scripts/restore-drill.sh`); cPanel'de PITR yok → RPO ≤ 1 sa
+  - [ ] cron kurulumu ve ilk **geri yükleme tatbikatı**
+- [ ] **Read replica:** cPanel'de yok; raporlar şimdilik primary'de (küçük, indeksli sorgular).
 - [ ] **WAF/CDN önü:** Bunny Shield veya Cloudflare.
 - [ ] **Uyumluluk:**
   - KVKK: aydınlatma metni, açık rıza metinleri, VERBİS, yurt dışı aktarım sözleşmeleri
-  - DPA'lar: Bunny, Anthropic, Google, RevenueCat, Sentry
-  - App Store: Privacy Nutrition Label, hesap silme
-  - Play Store: Data Safety, silme URL'si
-- [ ] **Runbook'lar:**
-  - olay müdahalesi
-  - anahtar rotasyonu (JWT, alan şifreleme, Bunny, Anthropic)
-  - kötü deploy geri alma
-  - DB migration geri dönüşü
-  - AI maliyet patlaması
-- [ ] **Eski yolların takvimi:** prefix'siz yollar ve `PATCH /user/onboarding` için kaldırma takvimi + minimum sürüm.
+  - DPA'lar: Bunny, Anthropic, OpenAI, Google, RevenueCat, Sentry
+  - [x] App Store gizlilik etiketi ve Play Veri güvenliği cevapları: [15](15-magaza-gizlilik.md)
+- [x] **Runbook'lar:** olay müdahalesi, anahtar rotasyonu, kötü deploy geri alma, migration geri dönüşü, AI maliyet patlaması (+ AI acil kapatma: `app_config.features`)
+- [x] **DST/saat dilimi:** testler + gün atlayan planlayıcı/gün dönümü düzeltmesi (`zone_day_runs`)
+- [x] **Eski yollar:** uygulama mağazada olmadığı için önek'siz yollar lansmandan önce kaldırıldı.
 - [ ] **Üretim kurulumu:** üretim ortamı, gizli bilgiler, alan adları, ilk seed, smoke testleri.
 - [ ] **Lansman:** Kademeli açılış (önce TestFlight / iç test, sonra %10 → %100). İlk 72 saat yoğun izleme.
 
 ### Kabul kriterleri
 - Pentest'te kritik veya yüksek seviye bulgu kalmamıştır.
 - Yük testinde SLO'lar sağlanır. 5xx oranı < %0.1.
-- Geri yükleme tatbikatı belgelenmiştir (RTO < 2 sa, RPO < 5 dk).
+- Geri yükleme tatbikatı belgelenmiştir (RTO < 2 sa; RPO cPanel'de ≤ 1 sa, < 5 dk için PITR'li yönetilen DB gerekir).
 - **M4:** Mağaza yayını.
 
 ---

@@ -11,6 +11,7 @@ mixin FastingPlanViewMixin on State<FastingPlanView> {
 
   void onContinue() {
     final plan = context.read<FastingPlanBloc>().state.selected;
+    getIt<OnboardingDraft>().plan = plan;
     if (plan == null) return;
     context.push(RoutePaths.planHighlight.path, extra: plan);
   }

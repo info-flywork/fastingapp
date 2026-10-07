@@ -37,6 +37,19 @@ Storage Zone: mochifast-public    (Primary: DE, replikasyon: 2+ bölge)
 | İzin verilen uzantılar | `webp`, `zip` | `webp`, `png`, `svg` |
 | Edge Rule | `Content-Disposition` (zip için `attachment`) | `Cache-Control: public, max-age=31536000, immutable` |
 
+### 2.1 Uygulama durumu ve ayarlar (F5)
+
+| Değişken | Zone | Not |
+|---|---|---|
+| `BUNNY_STORAGE_ZONE`, `BUNNY_STORAGE_PASSWORD`, `BUNNY_STORAGE_HOST`, `BUNNY_PULL_ZONE_HOST` | public | Mevcut `mochifast` zone'u (`mochifast.b-cdn.net`, uygulama görselleri). Token **kapalı** |
+| `BUNNY_PRIVATE_STORAGE_ZONE`, `BUNNY_PRIVATE_STORAGE_PASSWORD`, `BUNNY_PRIVATE_STORAGE_HOST`, `BUNNY_PRIVATE_PULL_ZONE_HOST` | private | **Henüz kurulmadı.** Ayrı storage zone + pull zone, Token Authentication açık |
+| `BUNNY_TOKEN_AUTH_KEY` | private | Private pull zone'un "Url Token Authentication Key" değeri |
+| `BUNNY_API_KEY` | – | Purge |
+| `MEDIA_DRIVER` | – | `local` (geliştirme/test: `var/media`, imzalı URL'ler API'nin `/media-files/*` ucuna) \| `bunny` (üretimde zorunlu) |
+| `MEDIA_PATH_SECRET` | – | `ownerKey` HMAC sırrı; üretimde ≥ 32 karakter zorunlu |
+
+**Güvenlik kilidi:** `MEDIA_DRIVER=bunny` iken private pull host ya da storage zone public olanla aynıysa API **başlamaz**. Böylece kullanıcı fotoğrafları yanlışlıkla token'sız CDN'e yazılamaz.
+
 ## 3. Depolama yolu düzeni (PII içermez)
 
 ```
@@ -81,9 +94,12 @@ POST multipart ──────────────► 1. Auth + rate limi
                                9. Yanıt: {id, url(imzalı), thumbUrl(imzalı), blurhash, expiresAt}
 ```
 
+**F5 uygulaması:** `src/modules/media/media.pipeline.js` (`file-type` + `sharp` + `blurhash`), `src/infra/bunny.js` (Storage API, imza, yerel sürücü). Dekompresyon bombası hem başlıktaki boyuttan (`w × h > 40M` → 413) hem sharp'ın `limitInputPixels` korumasından yakalanır. Varyant adı uzun kenar pikselidir: `…/{mediaId}_{512|1024|…}.webp`.
+
 **Senkron mu, asenkron mu?**
 - **Avatar:** Senkron. Küçük dosya, p95 < 1.5 sn.
-- **Öğün fotoğrafı + analiz:** API yalnızca 2–4. adımları yapıp ham görseli **worker'a** devreder.
+- **Öğün fotoğrafı (F5, AI'sız):** `POST /v1/media` senkron işler ve 201 döner (avatar gibi).
+- **Öğün fotoğrafı + analiz (F6):** API yalnızca 2–4. adımları yapıp ham görseli **worker'a** devreder.
   - Pratik yol: `lg` varyantını üretip Bunny'ye yükler, ardından AI analiz işini kuyruğa atar ([09](09-yapay-zeka.md)).
   - Böylece istek hızlıca 202 döner.
 - **Hata durumu:** Bunny PUT 3 kez üstel geri çekilme (exponential backoff) ile denenir. Hepsi başarısız olursa `media.status = 'failed'` olur ve kullanıcıya 503 döner.

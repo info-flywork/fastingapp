@@ -22,7 +22,11 @@
     "entry_title": "Hi, ich bin Mochi.\nLass uns gemeinsam fasten.",
     "entry_subtitle": "Erzähl mir ein wenig von dir und ich erstelle einen Fastenplan, der wirklich zu deinem Leben passt.",
     "get_started": "Loslegen",
-    "already_have_account": "Ich habe bereits ein Konto"
+    "already_have_account": "Ich habe bereits ein Konto",
+    "restore_account_title": "Konto wiederherstellen?",
+    "restore_account_body": "Dein Konto wird am {date} gelöscht. Möchtest du es wiederherstellen und deinen Fortschritt behalten?",
+    "restore_account_confirm": "Wiederherstellen",
+    "restore_account_cancel": "Nicht jetzt"
   },
   "onboarding": {
     "plan_ready_before": "Dein Plan ist zu ",
@@ -729,7 +733,13 @@
     "weight_title": "Gewicht",
     "weight_today": "Heute",
     "unit_lb": "lb",
-    "unit_kg": "kg"
+    "unit_kg": "kg",
+    "delete_account": "Konto löschen",
+    "delete_account_title": "Konto löschen?",
+    "delete_account_body": "Dein Konto wird sofort geschlossen und alle Daten werden nach 7 Tagen endgültig gelöscht. Wenn du dich innerhalb von 7 Tagen wieder anmeldest, kannst du es wiederherstellen. Abos musst du separat im App Store oder bei Google Play kündigen.",
+    "delete_account_confirm": "Löschen",
+    "delete_account_cancel": "Behalten",
+    "delete_account_subscription_note": "Dein Konto wird gelöscht. Vergiss nicht, dein Abo im App Store oder bei Google Play zu kündigen."
   },
   "notifications": {
     "title": "Benachrichtigungen",

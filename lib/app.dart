@@ -2,6 +2,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:fastingapp/core/connectivity/offline_gate.dart';
 import 'package:fastingapp/core/di/injection.dart';
 import 'package:fastingapp/core/home_widgets/water_widget_sync.dart';
+import 'package:fastingapp/core/managers/localization_manager.dart';
 import 'package:fastingapp/core/router/app_router.dart';
 import 'package:fastingapp/core/theme/app_theme.dart';
 import 'package:fastingapp/presentation/auth/bloc/auth_bloc.dart';
@@ -15,6 +16,7 @@ final class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    LocalizationManager.current = context.locale;
     return MultiBlocProvider(
       providers: [
         BlocProvider<AuthBloc>.value(

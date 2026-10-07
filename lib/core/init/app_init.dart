@@ -4,6 +4,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:fastingapp/core/connectivity/connectivity_service.dart';
 import 'package:fastingapp/core/managers/shared_pref_manager.dart';
 import 'package:fastingapp/core/remote_images/remote_image_store.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/widgets.dart';
 
 /// Uygulama başlangıç sırası: binding, prefs, localization, servis init.
@@ -13,6 +14,9 @@ final class AppInit {
 
   Future<void> initialize() async {
     WidgetsFlutterBinding.ensureInitialized();
+    // Yapılandırma native dosyalardan: GoogleService-Info.plist /
+    // google-services.json.
+    await Firebase.initializeApp();
     await EasyLocalization.ensureInitialized();
     await SharedPrefManager.instance.init();
     // Uzak görseller: manifest şimdi (küçük, gömülü); eksik dosyalar ilk kare

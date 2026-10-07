@@ -56,6 +56,13 @@ dependencies:
   camera: ^0.12.1
   share_plus: ^12.0.2
   home_widget: ^0.10.0
+  firebase_core: ^4.15.0
+  firebase_auth: ^6.7.0
+  google_sign_in: ^7.2.0
+  sign_in_with_apple: ^8.2.0
+  flutter_timezone: ^5.1.1
+  package_info_plus: ^9.0.1
+  uuid: ^4.6.0
 
 dev_dependencies:
   flutter_test:

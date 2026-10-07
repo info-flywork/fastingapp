@@ -131,11 +131,15 @@ Aktif cihaz oturumlarını listeler ve uzaktan çıkış yapmayı sağlar (profi
 
 ### `PUT /v1/user/me/avatar` 🔐
 
-- `multipart/form-data`, alan `file`, en fazla 10 MB.
-- Kabul edilen türler: jpeg/png/webp/heic*.
-- Yanıt: `{ "avatarUrl": "…" }`. Senkron çalışır (küçük görsel). Ayrıntı: [08](08-medya-bunny.md).
+- `multipart/form-data`, alan `file`, en fazla 10 MB (aşınca 413).
+- Kabul edilen türler (içerikten, magic byte ile): jpeg/png/webp. HEIC/SVG/PDF → 415 (HEIC'te `details.hint: "convert_to_jpeg"`; istemci JPEG'e çevirir).
+- Yanıt: `{ "avatar": <medya> }` (aşağıdaki medya biçimi; `md` 512, `thumb` 128). Senkron çalışır. Eski avatar hemen silinir. Ayrıntı: [08](08-medya-bunny.md).
+- `GET /v1/user/me` → `avatarUrl` (imzalı, `md`).
+- Kullanıcı başına saatte 30 yükleme.
 
 ### `DELETE /v1/user/me/avatar` 🔐
+
+Avatarı kaldırır, dosyaları siler.
 
 ### `POST /v1/user/onboarding` 🔐
 
@@ -217,51 +221,65 @@ Edit Profile ekranının tüm alanları:
 
 ### `GET /v1/user/summary` 🔐 — **Ana sayfa tek çağrı**
 
-Ana sayfayı, profil başlığını, oruç sekmesi başlığını ve widget'ları besleyen birleşik yanıt (cache: 15 sn, [07](07-cache-performans.md)).
+Ana sayfayı, profil başlığını, oruç sekmesi başlığını ve widget'ları besleyen birleşik yanıt. Şimdilik cache'lenmez: oruç, plan, profil ve hedef yazmalarının hepsi özeti değiştirir; 15 sn cache ([07](07-cache-performans.md)) bu invalidation'lar F4'te takipçilerle birlikte bağlanınca eklenir.
 
 ```jsonc
 { "user": { "id", "name", "avatarUrl", "isPremium", "isGuest" },
-  "progress": { "level": 4, "xp": 380, "nextLevelXp": 450,
-                "streakDays": 5, "bestStreak": 12, "completedFasts": 23 },
-  "activeFast": { /* GET /v1/fasts/active ile aynı, yoksa null */ },
+  "progress": { /* GET /v1/user/progress ile aynı */ },
+  "activeFast": { /* GET /v1/fasts/active → fast, yoksa null */ },
+  "eatingWindow": { /* GET /v1/fasts/active → eatingWindow */ },
   "plan": { "planCode": "16_8", "displayName": "16:8", "fastMinutes": 960,
-            "eatWindow": {"start":"12:00","end":"20:00"} },
-  "week": [ { "date": "2026-10-05", "fastedMinutes": 970, "goalMinutes": 960, "progress": 1.0 }, … 7 gün ],
+            "eatWindow": {"start":"12:00","end":"20:00"} },     // yoksa null
+  "pendingPlanCode": null,
+  "week": [ /* GET /v1/fasts/week → days (7 gün) */ ],
   "today": {
+    "date": "2026-10-07",                                       // kullanıcının yerel günü
     "water": { "ml": 600, "goalMl": 2500 },
     "steps": { "count": 1000, "goal": 8000 },
+    "sleep": { "minutes": 450, "goalMin": 450 },
     "nutrition": { "kcal": 1240, "kcalGoal": 1850 },
     "lastMeal": { "id", "eatenAt", "kind": "meal", "dietType": "ketogenic", "feeling": "good" } | null,
     "hunger": { "physical": 2, "emotional": 1 } },
   "weight": { "currentKg": 102.5, "startKg": 112.2, "goalKg": 75.2, "progress": 0.26 },
   "featuredChallenge": { /* §12 */ } | null,
-  "unreadNotifications": 2 }
+  "unreadNotifications": 2,
+  "serverTime": "…" }
 ```
+
+`featuredChallenge` öne çıkan challenge (katılımımla), `unreadNotifications` F9'a kadar 0 döner; diğer alanların hepsi gerçek veridir. `today.nutrition.kcalGoal`, `eating_disorder_history` bayrağında null. `lastMeal`: `{id, eatenAt, kind, dietType, feeling, title, kcal}`.
 
 ### `GET /v1/user/progress` 🔐 (mevcut yol korunur)
 
-`{ "level", "streakDays", "completedFasts" }` döner. Ek alanlar eklenebilir; mevcut alanlar değişmez.
+`{ level, xp, levelXp, nextLevelXp, streakDays, bestStreak, completedFasts, totalFasts, totalFastedMinutes, longestFastMinutes }` döner. `level`, `streakDays`, `completedFasts` eski istemcinin alanlarıdır, değişmez; diğerleri eklenmiştir.
+
+Seri, kullanıcının yerel gününe göre hesaplanır. Son hesap dünden kaldıysa (gün döndüyse) okuma sırasında yenilenir; gün dönümü işi kaçsa da seri doğru görünür.
 
 ### `GET /v1/user/stats?range=week|month|year|all` 🔐
 
-Döner:
-- toplam oruç sayısı
-- tamamlanma oranı
-- toplam, en uzun ve ortalama oruç süresi
-- en iyi seri
-- kilo değişimi
-- su hedefi tutturulan günler
-- öğün sayısı
+Varsayılan `range=all`. Aralık bugünle biter (week = son 7 gün, month = 30, year = 365).
+
+```jsonc
+{ "range": "all", "from": null, "to": "2026-10-07",
+  "fasts": 23, "completedFasts": 20, "completionRate": 0.87,
+  "totalFastedMinutes": 21000, "longestFastMinutes": 1260, "avgFastMinutes": 913,
+  "currentStreak": 5, "bestStreak": 12,          // seri aralıktan bağımsız
+  "weightChangeKg": -2.4,                        // aralıktaki ilk ve son ölçüm; < 2 ölçümde null
+  "waterGoalDays": 0, "mealsLogged": 0 }         // F4'te dolar
+```
 
 ### Hesap & veri
 
 | Uç | Açıklama |
 |---|---|
 | `POST /v1/user/consents` 🔐 | `{type, version, granted}`. Yalnızca ekleme yapılır (append-only). Yanıt ve `GET /v1/user/consents`: her tür için son durum `{items:[{type, version, granted, at}]}` |
-| `DELETE /v1/user/me` 🔐 | Hesap silme talebi. Gövde: `{reason?}`. Yanıt 202 `{scheduledFor}`. Oturumlar hemen iptal edilir, hesap `pending_deletion` olur. Süre dolunca silme işi çalışır ([06 §8](06-guvenlik.md#8-kvkk--gdpr)) |
-| `POST /v1/user/me/restore` 🔐 | Silme süresi içinde yeniden giriş yapıldıysa talebi iptal eder |
-| `POST /v1/user/me/export` 🔐 | 202. Hazır olunca bildirim ve imzalı zip linki gelir (günde 1) |
-| `GET /v1/user/me/export/:id` 🔐 | Dışa aktarma durumu ve link |
+| `DELETE /v1/user/me` 🔐 | Hesap silme talebi. Gövde: `{reason?}`. Yanıt 202 `{scheduledFor, hasActiveSubscription}`. Oturumlar hemen iptal edilir, push token'lar silinir, planlı bildirimler iptal edilir, hesap `pending_deletion` olur. 7 gün sonra silme işi çalışır ([06 §8.3](06-guvenlik.md#83-hesap-silme-akışı)). Tekrar çağrı aynı talebi döner. `hasActiveSubscription: true` ise istemci "aboneliğini mağazadan iptal et" uyarısı gösterir |
+| Geri alma | Süre içinde Apple/Google (ya da aynı cihazla misafir) girişi `409 ACCOUNT_PENDING_DELETION` döner: `details: {scheduledFor, options:["restore"]}`. İstemci sorar; aynı istek `"restoreAccount": true` ile tekrarlanınca talep iptal edilir ve giriş yapılır (`/auth/register` ve `/auth/guest`). Ayrı bir `/user/me/restore` ucu yoktur: silme talebindeki hesabın geçerli oturumu olmaz |
+| `POST /v1/user/me/export` 🔐 | 202 `{export}`. Günde 1: son 24 saatte talep varsa o döner. Hazır olunca `data_export_ready` bildirimi (`params.exportId`) |
+| `GET /v1/user/me/export/:id` 🔐 | `{export: {id, status: queued\|processing\|ready\|expired\|failed, requestedAt, completedAt, expiresAt, bytes, url, urlExpiresAt}}`. `url` yalnızca `ready` iken; 1 saatlik imzalı link, her çağrıda yenisi. Dosya 7 gün sonra silinir |
+
+- **Zip içeriği:** `data/*.json` (her domain), `csv/*.csv` (oruç, kilo, su, adım, uyku, öğün, açlık, günlük özet, zorlanma), `photos/meals|avatar/*.webp`, `README.txt`, `manifest.json`. Şifreli notlar ve sohbet metni çözülmüş olarak verilir; token, push token ve IP verilmez.
+- **Yasal metin güncellemesi:** `GET /v1/user/me` → `requiredConsents: ["terms","privacy"]` (onboarding tamamlanmış ve son onaylanan sürüm `app_config.legal.*Version`'dan farklıysa). İstemci yeniden onay ekranı gösterir → `POST /v1/user/consents {type, version, granted:true}`.
+- **Rıza geri çekme:** `healthData: false` → sağlık kaydı yazan uçlar (kilo, su, adım, uyku, öğün, açlık; POST/PATCH/PUT) `403 CONSENT_REQUIRED {consent:"healthData"}`; silme serbest. `marketingPush: false` → `notifications.marketing` kapanır. `aiProcessing: false` → AI uçları 403.
 
 ---
 
@@ -294,10 +312,14 @@ Token zorunlu değildir; varsa premium kilit durumu kişiselleştirilir ve `Cach
 |---|---|
 | `GET /v1/catalog/plans` 🔓 | `{ groups: [{ category, title, plans: [{code, category, scheduleType, displayName, cardLabel, shortDescription, fastHours, eatHours, reducedDaysPerWeek, reducedDayKcal, intensity, isPremium, isLocked, isFeatured, requiresSafetyAck, minAge, allowedTimings, defaultTiming, defaultEatStart}] }], timings: [{code, title}] }`. Grup sırası: beginner, popular, intermediate, advanced, weekly, flexible; bir plan birden çok grupta olabilir |
 | `GET /v1/catalog/plans/:code` 🔓 | Özet alanları + `longDescription`, `safetyNote`, `exampleWindow {start,end}`, `weeklyTemplate` (haftalık/özel planlarda 7 gün: `{dow, type: normal\|reduced\|fast, kcal?, fastMinutes?}`). Bilinmeyen kod 404 |
-| `GET /v1/catalog/stages?type=body\|eating_window` 🔓 | `[{position, startHour, endHour, rangeLabel, title, body, imageKey}]` |
-| `GET /v1/catalog/struggle` 🔓 | `{ reasons:[{code,title,body,imageKey,tips:[…]}], tips:[{code,title,body,imageKey,activity:{…},done:{title,body}}] }` |
-| `GET /v1/catalog/onboarding-options` 🔓 | Hedefler, diyetler, yiyecekler, engeller, sebepler (gün sayılarıyla) ve onboarding'de gösterilecek plan alt kümesi. Uygulamadaki sabit listelerin uzaktan güncellenebilmesi için |
-| `GET /v1/catalog/faq` 🔓 | `[{code, question, answer}]` |
+| `GET /v1/catalog/stages?type=body\|eating_window` 🔓 | `{ type, items: [{position, startHour, endHour, rangeLabel, title, body, imageKey, images:{idle, reached}}] }`. Görseller mantıksal yoldur (`assets/images/…png`), istemci `appImage()` ile yükler |
+| `GET /v1/catalog/struggle` 🔓 | `{ intro:{title,body}, reasons:[{code,title,body,image,tips:[tipCode…]}], tips:[{code,title,body,image,activity:{type:sips\|timer\|breathing,…}, session:{title,body}, done:{title,body,button}}] }` |
+| `GET /v1/catalog/onboarding-options` 🔓 | `{ goals, genders, diets, foodLoves, foodSkips, weightHistories, obstacles, fastingReasons:[…, days], plans:[plan özeti + title, subtitle, badge, badgeColor] }`. Seçenek: `{code (API enum), title, subtitle?, badge?, image?}`. Uygulamadaki sabit listelerin uzaktan güncellenebilmesi için |
+| `GET /v1/catalog/faq` 🔓 | `{ items: [{code, question, answer}] }` |
+| `GET /v1/catalog/chat-suggestions` 🔓 | `{ items: [{code, text}] }` (sohbet ekranındaki hazır öneriler) |
+| `GET /v1/insights/categories` 🔓 | `{ items: [{slug, title, description, icon, iconImage, bgColor, isPremium, isLocked, articleCount}] }` |
+| `GET /v1/insights/articles?category=&q=&limit=&cursor=` 🔓 | Sayfalı `{ items: [{slug, category, kicker, title, subtitle, readMinutes, isPremium, isLocked}], pageInfo }`. `q`: her kelime bir kelimenin başında geçmeli (başlık + bölümler), dil ve büyük/küçük harf duyarsız |
+| `GET /v1/insights/articles/:slug` 🔓 | Makale + `quote, quoteAuthor, tip, sections:[{position, icon, iconImage, title, body}]`. Kilitli makale 402 `PREMIUM_REQUIRED`, bilinmeyen 404 |
 | `GET /v1/app/config` 🔓 | `{ platform, minAppVersion, latestAppVersion, updateRequired, updateAvailable, features:{chat,photoAnalysis,challenges,forecast}, limits:{freeChatDaily,freePhotoDaily,premiumChatDaily,premiumPhotoDaily}, marketing:{activeUsers:"2M+", rating:4.8, avgStreakDays:12, trustedBy:"200K+"}, legal:{termsUrl, privacyUrl, termsVersion, privacyVersion}, support:{email}, catalogVersion }`. Platform `?platform=` ya da `X-Platform`; sürümü eski istemci de erişir |
 
 ---
@@ -307,11 +329,15 @@ Token zorunlu değildir; varsa premium kilit durumu kişiselleştirilir ve `Cach
 ### `GET /v1/plans/current` 🔐
 
 ```jsonc
-{ "id": "…", "planCode": "16_8", "displayName": "16:8", "timing": "skipBreakfast",
-  "fastMinutes": 960, "eatWindow": { "start": "12:00", "end": "20:00" },
-  "weeklySchedule": [ { "dow": 1, "type": "fast", "fastMinutes": 960, "eatStart": "12:00" }, … ],
-  "startedOn": "2026-10-01", "isPremium": false }
+{ "plan": {
+    "id": "…", "planCode": "16_8", "displayName": "16:8", "timing": "skipBreakfast",
+    "fastMinutes": 960, "eatWindow": { "start": "12:00", "end": "20:00" },
+    "weeklySchedule": null,          // haftalık planlarda [ { "dow": 1, "type": "reduced", "kcal": 500 }, … ]
+    "startedOn": "2026-10-01", "isPremium": false },
+  "pendingPlanCode": null }          // onboarding'de 💎 plan seçildiyse plan=null, kod burada bekler (F8'de etkinleşir)
 ```
+
+`PUT` aynı şekli döner. Onboarding'de seçilen ücretsiz plan, öğün penceresine göre `timing: "custom"` ile otomatik etkinleşir.
 
 ### `PUT /v1/plans/current` 🔐
 
@@ -324,7 +350,8 @@ Token zorunlu değildir; varsa premium kilit durumu kişiselleştirilir ve `Cach
 ```
 
 **Hata durumları:**
-- 💎 premium plan seçildiyse ve kullanıcı premium değilse: 402.
+- 💎 premium plan seçildiyse ve kullanıcı premium değilse: 402 `PREMIUM_REQUIRED` (`details.planCode`).
+- Plan zamanlaması/penceresi plan kuralına uymuyorsa (ör. 16:8'de 10 sa pencere): 400 `VALIDATION_ERROR`.
 - `requiresSafetyAck` olan planda onay yoksa: 422 `SAFETY_ACK_REQUIRED`.
 - Sağlık bayrağı çakışırsa: 422 `UNSAFE_REQUEST`.
 
@@ -334,10 +361,12 @@ Token zorunlu değildir; varsa premium kilit durumu kişiselleştirilir ve `Cach
 
 ### `PUT /v1/plans/days/:date` 🔐
 
-Haftalık planlarda (5:2, 6:1, ADF) azaltılmış günü işaretler: `{status:"done"|"skipped"}`.
+Haftalık planlarda (5:2, 6:1, ADF, seçili günler) planlı günü işaretler: `{status:"done"|"skipped"}`. Yalnızca son 7 gün; planlı gün değilse 409 `CONFLICT` (`details.reason: "not_a_plan_day"`).
 Seri ve dünya hesabına girer ([05 §2.2](05-is-kurallari.md#22-haftalık-planlar)).
 
-### `GET /v1/plans/history` 🔐
+### `GET /v1/plans/history?cursor=&limit=` 🔐
+
+Yeniden eskiye plan geçmişi: `{items:[{…plan, endedAt}], pageInfo}`. Aktif planın `endedAt` değeri `null`.
 
 ---
 
@@ -354,12 +383,24 @@ Aktif oruç yoksa `data: { "fast": null, "eatingWindow": {...} }` döner.
     "targetMinutes": 960, "elapsedMinutes": 104, "progress": 0.108,
     "goalReached": false,
     "stage": { "position": 1, "title": "Blood Sugar Rises", "rangeLabel": "0h - 2h",
-               "nextStageAt": "2026-10-06T21:30:00.000Z" },
+               "imageKey": "a1", "nextStageAt": "2026-10-06T21:30:00.000Z" },
     "serverTime": "2026-10-06T21:14:14.000Z" },
   "eatingWindow": null }
 ```
 
 İstemci, geri sayımı yerel saatte yürütür. `serverTime`, saat kaymasını düzeltmek için kullanılır.
+
+Son oruç bittikten sonra, yeme penceresi süresince (`1440 − plan.fastMinutes`, en az 60 dk):
+
+```jsonc
+{ "fast": null,
+  "eatingWindow": {
+    "lastFastId": "…", "startedAt": "…", "endsAt": "…", "eatMinutes": 480, "elapsedMinutes": 35,
+    "stage": { "key": "break", "title": "Orucu aç", "position": 1 },   // break → open → next
+    "suggestedNextStartAt": "…", "serverTime": "…" } }
+```
+
+Evreler: `break` = ilk max(%20, 30 dk), `next` = son 60 dk, arası `open`. Pencere dışında `eatingWindow: null`.
 
 ### `POST /v1/fasts` 🔐 — oruç başlat (idempotent)
 
@@ -370,7 +411,9 @@ Aktif oruç yoksa `data: { "fast": null, "eatingWindow": {...} }` döner.
 
 - Zaten aktif oruç varsa: 409 `ACTIVE_FAST_EXISTS` (`details.activeFastId`).
 - `startedAt` en fazla şimdiden 7 gün önce, en geç şimdiden 5 dk sonra olabilir.
-- Önceki seanslarla çakışmamalı.
+- Önceki seanslarla çakışmamalı: 409 `FAST_OVERLAP`.
+- İstemci `id` gönderip tekrar denerse aynı oruç **200** ile döner (ilk istek 201).
+- Tüm yazma uçları `Idempotency-Key` başlığını (8–64 karakter `[A-Za-z0-9_-]`) destekler: aynı anahtar + aynı gövde → saklı yanıt (`Idempotent-Replayed: true`); aynı anahtar + farklı gövde → 409 `IDEMPOTENCY_KEY_REUSED`; ilk istek hâlâ işleniyorsa 409 `CONFLICT`. Anahtarlar 24 sa saklanır.
 - **Yan etkiler:** bildirimler planlanır (hedefe ulaşma, yarı yol vb.), `fast.started` olayı yayınlanır.
 
 ### `PATCH /v1/fasts/:id` 🔐
@@ -391,11 +434,15 @@ Aktif oruç yoksa `data: { "fast": null, "eatingWindow": {...} }` döner.
 // yanıt
 { "fast": { …, "status": "completed", "durationMinutes": 975, "goalReached": true },
   "isFirstFast": true,
+  "warnings": [],                             // hedef + 12 sa aşıldıysa ["LONG_OVERRUN"]
   "streak": { "current": 6, "best": 12, "increased": true },
-  "xpGained": 15, "levelUp": null,
-  "world": { "levelUps": [ { "zone": "forest", "from": 1, "to": 2 } ], "health": "thriving" },
-  "challenges": [ { "code": "week_fasts_3", "progress": 2, "target": 3 } ] }
+  "xpGained": 15,                             // oruç XP'si + bu bitişle ulaşılan seri taşı XP'si
+  "levelUp": null,                            // ya da { "from": 1, "to": 2 }
+  "world": { "levelUps": [ { "zone": "forest", "from": 0, "to": 1 } ], "health": "thriving" },
+  "challenges": [ { "code": "week_fasts_3", "progress": 2, "target": 3, "status": "active" } ] }
 ```
+
+Bitirme, düzenleme, elle kayıt ve silme; günlük özetleri, seriyi, sayaçları ve XP'yi **aynı transaction'da** yeniden hesaplar ([05 §14](05-is-kurallari.md#14-yeniden-hesaplama-recompute-garantisi)). Bu yüzden yanıt döndüğünde `/user/progress` ve `/fasts/week` günceldir.
 
 - Süre hedefin altındaysa durum `endedEarly` olur. Yine de sayılır, ama seriye katkısı [05 §1](05-is-kurallari.md#1-oruç-seansı-durum-makinesi)'e göre belirlenir.
 
@@ -404,13 +451,15 @@ Aktif oruç yoksa `data: { "fast": null, "eatingWindow": {...} }` döner.
 | Uç | Açıklama |
 |---|---|
 | `POST /v1/fasts/:id/cancel` 🔐 | Yanlışlıkla başlatıldı. 10 dk içindeyse iz bırakmaz. Daha sonra ise `cancelled` olur, istatistiğe girmez |
-| `POST /v1/fasts/manual` 🔐 | Geçmiş oruç girme: `{startedAt, endedAt, targetMinutes?, feeling?, notes?}` |
+| `POST /v1/fasts/manual` 🔐 | Geçmiş oruç girme: `{startedAt, endedAt, targetMinutes?, feeling?, notes?}`. En fazla 30 gün geriye; `localDate` bitişin yerel günüdür |
 | `GET /v1/fasts?from=&to=&status=&cursor=&limit=` 🔐 | Geçmiş (Profil → Fasting History) |
 | `GET /v1/fasts/:id` 🔐 | Detay (not şifresi çözülmüş) |
-| `DELETE /v1/fasts/:id` 🔐 | Yumuşak silme + istatistik yeniden hesaplama |
-| `GET /v1/fasts/week?date=2026-10-06` 🔐 | Hafta şeridi (Pzt–Paz): `[{date, fastedMinutes, goalMinutes, progress, isRequiredDay}]`. Widget'ın `fasting_week` değeri de buradan gelir |
-| `GET /v1/fasts/stats?range=week\|month\|all` 🔐 | Toplamlar + grafik kovaları |
-| `POST /v1/fasts/:id/struggles` 🔐 | `{reason, tip?, tipCompleted, outcome?}`. Zorlanma olayı logu (oruç olmadan da `/v1/struggles` ile) |
+| `DELETE /v1/fasts/:id` 🔐 | Yumuşak silme + istatistik yeniden hesaplama. Aktif oruç silinemez (409; önce iptal) |
+| `GET /v1/fasts/week?date=2026-10-06` 🔐 | Hafta şeridi (Pzt–Paz; `date` yoksa bu hafta): `{weekStart, today, serverTime, days:[{date, dayType:"fast\|reduced\|normal", isRequiredDay, goalMinutes, fastedMinutes, progress, checkin, kept, isToday, isFuture}]}`. Aktif oruç bugüne canlı eklenir. `kept`: gelecek gün ve henüz tutulmamış bugün için `null`; nötr günde `null`. Widget'ın `fasting_week` değeri de buradan gelir |
+| `GET /v1/fasts/forecast` 🔐 | Fast Forecast v0: `{forecast:{available, successChance (0–1), basedOnFasts, toughestElapsedHour, toughestAt, fast:{active, startsAt, endsAt}}}`. Son 14 günde < 3 biten oruç → `{available:false}` (kart gizlenir). Başarı: `(hedefe ulaşan+1)/(biten+2)` + seri bonusu (gün başına %1, en çok %7), %5–%97. En zor saat: son 30 günün zorlanma olaylarında orucun en sık saati (≥ 3 olay). Oruç: aktifse o, yoksa planın yeme penceresi sonundan başlayan sıradaki |
+| `GET /v1/fasts/daily-tip` 🔐 | Günün ipucu: `{tip:{code, phase:"fast\|eat", date, text}}`. AI yok; katalogdaki `daily_tip` etiketlerinden (7 dil), oruç sürüyorsa `fast_*`, değilse `eat_*`; kullanıcı + yerel gün için sabit seçim |
+| `GET /v1/fasts/stats?range=week\|month\|year\|all` 🔐 | `{range, from, to, bucketSize:"day\|month", totals:{fasts, completedFasts, completionRate, totalFastedMinutes, longestFastMinutes, avgFastMinutes}, buckets}`. week/month: günlük `[{date, fastedMinutes, goalMinutes}]`; year/all: aylık `[{month, fastedMinutes, fasts}]`. `fasts` 60 dk ve üstü bitmiş oruçlardır |
+| `POST /v1/fasts/:id/struggles` 🔐 | `{reason, tip?, tipCompleted, outcome?}` → 201 `{id, elapsedMinutes}`. Zorlanma olayı logu (oruç olmadan da `/v1/struggles` ile; o zaman `elapsedMinutes: null`) |
 | `GET /v1/fasts/forecast` 🔐 | **Faz 7+.** `{dayType:"easy\|moderate\|hard", confidence, hungerPeakTime, riskZone:{start,end}, recommendedFastMinutes, curve:[7], peakIndex}` |
 | `GET /v1/fasts/daily-tip` 🔐 | **Faz 6+.** "Mochi's Plan for Today": `{fastMinutes, eatMinutes, startAt, endsAt, message}` |
 
@@ -420,21 +469,28 @@ Aktif oruç yoksa `data: { "fast": null, "eatingWindow": {...} }` döner.
 
 | Uç | Açıklama |
 |---|---|
-| `POST /v1/weights` 🔐 | `{id?, weightKg, recordedAt?}` → kayıt + bildirim kutusu ("Weight updates") |
-| `PATCH /v1/weights/:id` 🔐, `DELETE /v1/weights/:id` 🔐 | |
-| `GET /v1/weights?range=day\|week\|month&cursor=` 🔐 | Ham liste |
-| `GET /v1/weights/chart?range=day\|week\|month` 🔐 | 7 kova: `[{label, from, to, weightKg}]` (kovadaki son değer). `yAxis:{min,max}` sunucu tarafından hesaplanır (sabit 65–120 yerine). Etiketler `Accept-Language`'e göre yerelleştirilir |
-| `GET /v1/weights/summary` 🔐 | `{currentKg, startKg, goalKg, progress, changeKg, bmi, bmiCategory:"underweight\|normal\|overweight\|obese1\|obese2\|obese3", bmiBand:"low\|normal\|high", heightCm}` |
-| `PATCH /v1/weights/goal` 🔐 | `{goalWeightKg}` (profil ile aynı alan) |
+| `POST /v1/weights` 🔐 | `{id?, weightKg, recordedAt?}` → 201 `{entry:{id, weightKg, recordedAt, localDate, source}}`. Aynı `id` tekrar gelirse 200 ve aynı kayıt. `recordedAt` en fazla 365 gün geriye, 5 dk ileriye |
+| `PATCH /v1/weights/:id` 🔐 | `{weightKg?, recordedAt?}` → `{entry}` |
+| `DELETE /v1/weights/:id` 🔐 | Yumuşak silme |
+| `GET /v1/weights?from=&to=&cursor=&limit=` 🔐 | Ham liste, yeniden eskiye (`recordedAt`) |
+| `GET /v1/weights/chart?range=day\|week\|month` 🔐 | `{range, goalKg, yAxis:{min,max}, buckets:[{label, from, to, weightKg}]}`. 7 kova, kovadaki son ölçüm; ölçüm yoksa `null`. `yAxis` ölçümler **ve hedef** üzerinden hesaplanır (hedef çizgisi görünsün). Etiketler `Accept-Language`'e göre: day → "Çar", week → "5 Eki", month → "Eki" |
+| `GET /v1/weights/summary` 🔐 | `{currentKg, startKg, goalKg, progress, changeKg, bmi, bmiCategory:"underweight\|normal\|overweight\|obese1\|obese2\|obese3", bmiBand:"low\|normal\|high", heightCm, targetDate}` |
+| `PATCH /v1/weights/goal` 🔐 | `{goalWeightKg}` → özet + `warnings`. Profil güncellemesiyle aynı doğrulama (kilo verme hedefinde hedef ≤ güncel) |
+
+Her kilo yazması o günün özetini (`daily_summaries.weight_kg`) ve kilo XP'sini (günde bir, 3 XP) aynı transaction'da günceller. Onboarding kilosu XP vermez.
 
 ## 8. Su — `water`
 
 | Uç | Açıklama |
 |---|---|
-| `GET /v1/water/day?date=2026-10-06` 🔐 | `{date, totalMl, goalMl, progress, goalReached, glassSizeMl, entries:[{id, amountMl, loggedAt}]}` |
-| `POST /v1/water` 🔐 | `{id?, amountMl, loggedAt?}`. Yanıt güncel gün özetidir. Widget'tan gelen kayıtlar `source: widget` ile gelir |
-| `DELETE /v1/water/:id` 🔐 | Geri al = son kaydı sil |
-| `GET /v1/water/week?date=` 🔐 | `[{date, totalMl, goalMl, progress}]` |
+| `GET /v1/water/day?date=2026-10-06` 🔐 | `{date, totalMl, goalMl, progress, goalReached, glassSizeMl, entries:[{id, amountMl, loggedAt, source}], warnings}` |
+| `POST /v1/water` 🔐 | `{id?, amountMl (1–5000), loggedAt?, source?: "app"\|"widget"}`. Yanıt güncel gün özetidir (201; aynı `id` tekrar gelirse 200). `loggedAt` en fazla 7 gün geriye. Günlük toplam 6000 ml'yi aşınca `warnings: ["HIGH_WATER_INTAKE"]` |
+| `DELETE /v1/water/:id` 🔐 | Geri al. Yanıt güncel gün özetidir |
+| `GET /v1/water/week?date=` 🔐 | `{weekStart, days:[{date, totalMl, goalMl, progress, goalReached, isToday, isFuture}]}` (Pzt–Paz) |
+
+- Toplam, kaydın **yerel gününe** göre hesaplanır: 23:50'deki bardak o güne, 00:10'daki ertesi güne yazılır.
+- `goalMl`: bugün ve gelecek için güncel hedef, geçmiş gün için o günün anlık görüntüsü.
+- Hedefin tutturulduğu gün 5 XP verir ve `user_stats.water_goal_days` sayacına girer. Kayıt silinip hedefin altına düşülürse ikisi de geri alınır.
 
 Hatırlatıcı ayarları `PATCH /v1/user/settings` + `PATCH /v1/user/goals` üzerinden yapılır.
 
@@ -442,35 +498,47 @@ Hatırlatıcı ayarları `PATCH /v1/user/settings` + `PATCH /v1/user/goals` üze
 
 | Uç | Açıklama |
 |---|---|
-| `PUT /v1/steps/:date` 🔐 | `{steps, source:"manual"}` (upsert) |
-| `POST /v1/steps/sync` 🔐 | `{source:"appleHealth\|googleFit", days:[{date, steps, distanceM?, activeKcal?}]}`. En fazla 31 gün, toplu upsert |
-| `GET /v1/steps?range=week&date=` 🔐 | `{goal, days:[{date, steps, distanceKm, kcal, durationMin}]}`. Türetilmiş değerler sunucuda hesaplanır ([05 §8](05-is-kurallari.md#8-adım--kalori-türetmeleri)) |
+| `PUT /v1/steps/:date` 🔐 | `{steps, source?:"manual"}` (upsert). Gün sağlık uygulamasından senkronlanmışsa 409 `CONFLICT` (`details:{reason:"synced_day", source}`). Yanıt: o günün `GET /steps?range=day` çıktısı |
+| `POST /v1/steps/sync` 🔐 | `{source:"appleHealth\|googleFit", days:[{date, steps, distanceM?, activeKcal?}]}`. En fazla 31 gün, toplu upsert. Yanıt `{updated, skipped}` |
+| `GET /v1/steps?range=day\|week\|month&date=` 🔐 | `{range, from, to, goal, days:[{date, steps, distanceKm, kcal, durationMin, progress, source, isFuture}]}`. week = Pzt–Paz, month = takvim ayı |
+
+Türetilmiş değerler ([05 §8](05-is-kurallari.md#8-adım--kalori-türetmeleri)): sağlık uygulaması mesafe/kalori gönderdiyse o, yoksa boy ve kiloya göre formül. Tarih bugünden ileri ya da 31 günden eski olamaz (400).
 
 ## 10. Uyku — `sleep`
 
 | Uç | Açıklama |
 |---|---|
-| `POST /v1/sleep` 🔐 | `{id?, sleepStart, sleepEnd, quality?}` |
-| `PATCH/DELETE /v1/sleep/:id` 🔐 | |
-| `POST /v1/sleep/sync` 🔐 | Sağlık uygulamasından toplu aktarım |
-| `GET /v1/sleep/summary?date=` 🔐 | `{lastNight:{durationMin, sleepStart, sleepEnd}, goalMin, progress, schedule:{bedtime, wakeTime}, week:[{date, minutes}]}` |
+| `POST /v1/sleep` 🔐 | `{id?, sleepStart, sleepEnd, quality? (1–5)}` → 201 `{entry}`. Uyanış gününe (`localDate`) yazılır. En fazla 16 sa; başka kayıtla çakışırsa 409 `CONFLICT` (`details.reason: "sleep_overlap"`) |
+| `PATCH /v1/sleep/:id` 🔐, `DELETE /v1/sleep/:id` 🔐 | Düzenleme aynı kurallarla; silme yumuşak |
+| `POST /v1/sleep/sync` 🔐 | `{source:"appleHealth\|googleFit", entries:[{externalId, sleepStart, sleepEnd}]}` (en fazla 100). `externalId` ile idempotent: tekrar gönderim aynı kaydı günceller. Yanıt `{created, updated}` |
+| `GET /v1/sleep/summary?date=` 🔐 | `{date, lastNight:{…entry, totalMinutes} \| null, goalMin, progress, schedule:{bedtime, wakeTime}, week:[{date, minutes}]}`. `lastNight` günün en uzun kaydıdır; `totalMinutes` şekerlemeleri de içerir |
 
 ## 11. Öğün, beslenme ve fotoğraf analizi — `meals`, `nutrition`
 
 ### `POST /v1/meals/photo-analyses` 🔐 (kota: [09](09-yapay-zeka.md#4-kotalar))
 
-- `multipart/form-data`, alan `file` (≤ 10 MB) ve opsiyonel `hint` metni.
+- `multipart/form-data`, alan `file` (≤ 10 MB; jpeg/png/webp). Sonuç dili `Accept-Language`.
 - Yanıt **202**: `{ "analysisId": "…", "status": "queued", "pollAfterMs": 1500 }`.
+- Aynı fotoğraf 24 sa içinde tekrar gönderilirse önceki analiz döner; yeni AI çağrısı yapılmaz, hak düşmez.
+- Hatalar: `ai_processing` rızası yok → 403 `CONSENT_REQUIRED` (`details.consent: "aiProcessing"`); günlük kota doldu → 429 `QUOTA_EXCEEDED` (`details: {kind, limit, used, resetAt, upgradeAvailable}`); AI kapalı/devre açık/günlük bütçe doldu → 503 `UNAVAILABLE` (`details.reason: ai_disabled | ai_circuit_open | ai_budget`).
 
 ### `GET /v1/meals/photo-analyses/:id` 🔐
 
 ```jsonc
-{ "id": "…", "status": "succeeded",          // queued|processing|succeeded|notFood|failed
-  "photo": { "url": "https://media…/…_1024.webp?token=…", "thumbUrl": "…" },
-  "result": { "mealTitle": "Izgara tavuk ve fırın sebze", "kcal": 550,
-              "proteinG": 27, "carbsG": 64, "fatG": 22, "confidence": 0.78,
-              "items": [ { "name": "Izgara tavuk göğsü", "portion": "150 g", "kcal": 250 } ] } }
+{ "analysis": {
+    "id": "…", "status": "succeeded",          // queued|processing|succeeded|notFood|failed
+    "photo": <medya>,                          // §18 medya biçimi
+    "result": { "mealTitle": "Izgara tavuk ve fırın sebze", "kcal": 550,
+                "proteinG": 27, "carbsG": 64, "fatG": 22, "confidence": 0.78,
+                "items": [ { "name": "Izgara tavuk göğsü", "portion": "150 g", "kcal": 250,
+                             "proteinG": 46, "carbsG": 0, "fatG": 6 } ],
+                "notes": "Sos miktarı belirsiz",
+                "flags": [] },                 // totals_recomputed | macro_mismatch (sunucu düzeltmesi)
+    "error": null,                             // failed: {code: REFUSED|TRUNCATED|INVALID_OUTPUT|AI_UNAVAILABLE|AI_ERROR|TIMEOUT}
+    "createdAt": "…", "completedAt": "…" } }
 ```
+
+Başarısız analizde (ret, hata, zaman aşımı) kota iade edilir. `notFood` hak düşer (AI çağrısı yapıldı). Öğün `POST /v1/meals {analysisId, …}` ile kaydedilir: fotoğraf bağlanır, kaynak `aiPhoto` olur, değerler kullanıcı tarafından düzenlenebilir; analiz `succeeded` değilse 409.
 
 İstemci en fazla 30 sn boyunca 1.5 sn arayla yoklar (poll).
 
@@ -480,75 +548,91 @@ Hatırlatıcı ayarları `PATCH /v1/user/settings` + `PATCH /v1/user/goals` üze
 ### `POST /v1/meals` 🔐
 
 ```jsonc
-{ "id": "<uuid?>", "eatenAt": "…",
+{ "id": "<uuid?>", "eatenAt": "…",            // yoksa şimdi; en fazla 30 gün geriye
   "kind": "meal", "slot": "lunch", "dietType": "ketogenic", "feeling": "super",
-  "notes": "…",
+  "notes": "…",                                // şifreli saklanır, ≤ 1000
   "title": "…", "kcal": 550, "proteinG": 27, "carbsG": 64, "fatG": 22,
-  "analysisId": "…",                           // fotoğraflı ise; fotoğraf ve AI sonucu bağlanır
-  "source": "aiPhoto" | "manual" | "quickKcal" }
+  "photoMediaId": "…",                         // POST /v1/media ile yüklenmiş kendi fotoğrafı
+  "source": "manual" | "quickKcal" }           // "aiPhoto" + analysisId F6'da açılır
+// yanıt (201; aynı id tekrar gelirse 200)
+{ "meal": { …, "localDate": "2026-10-07", "photo": <medya> | null },
+  "activeFastId": "…" | null, "suggestEndFast": true }
 ```
 
-Aktif oruç varken öğün kaydedilirse yanıt `{ "activeFastId", "suggestEndFast": true }` döner. İstemci "orucu bitir?" diye sorar.
+Öğün aktif orucun başlangıcından sonra yenmişse `suggestEndFast: true` ve `activeFastId` döner. İstemci "orucu bitir?" diye sorar, onaylanırsa `POST /fasts/:id/finish` çağırır. Her öğün yazması o günün özetini (kcal, makrolar, öğün/ara öğün sayısı) ve öğün XP'sini (öğün başına 2, günde en fazla 5 öğün) aynı transaction'da günceller.
 
 ### Diğer öğün ve beslenme uçları
 
 | Uç | Açıklama |
 |---|---|
-| `GET /v1/meals?date=` veya `?from=&to=&cursor=` 🔐 | Öğün listesi (Meal Records zaman çizelgesi) |
-| `GET/PATCH/DELETE /v1/meals/:id` 🔐 | |
-| `GET /v1/nutrition/day?date=` 🔐 | `{kcal, kcalGoal, overKcal, burnedKcal, macros:{protein:{g,goalG,progress}, carbs:{…}, fat:{…}}, meals:[…]}`. Calories ve Protein Tracker ekranları |
-| `GET /v1/nutrition/week?date=&metric=protein\|kcal` 🔐 | Haftalık çubuk grafik |
+| `GET /v1/meals?date=` 🔐 | Günün zaman çizelgesi (eskiden yeniye, sayfasız) |
+| `GET /v1/meals?from=&to=&cursor=&limit=` 🔐 | Sayfalı geçmiş (yeniden eskiye) |
+| `GET/PATCH/DELETE /v1/meals/:id` 🔐 | `PATCH` kısmi; `notes: null` notu siler. Silme yumuşak |
+| `GET /v1/nutrition/day?date=` 🔐 | `{date, kcal, kcalGoal, progress, overKcal, burnedKcal, macros:{protein:{g, goalG, progress}, carbs:{…}, fat:{…}}, meals:[…]}`. Hedef: kullanıcının girdiği, yoksa öneri (bugünün adım kalorisi dahil). `eating_disorder_history` bayrağında tüm hedefler, `progress` ve `overKcal` `null` |
+| `GET /v1/nutrition/week?date=&metric=kcal\|protein` 🔐 | `{metric, weekStart, goal, days:[{date, value, progress, isToday, isFuture}]}` (Pzt–Paz) |
 
 ## 12. Açlık check-in — `hunger`
 
 | Uç | Açıklama |
 |---|---|
-| `POST /v1/hunger-checkins/evaluate` 🔐 | Durumsuz (stateless) skorlama. Sonuç ekranı için: `{symptoms[], q1, q2, bodyNotices[], q4}` → `{resultType, physicalScore, emotionalScore, safetyFlag, recommendations:[{code, title, body}]}` |
-| `POST /v1/hunger-checkins` 🔐 | Kaydet: aynı gövde + `{id?, notes?, mode}`. Sonuç sunucuda **yeniden hesaplanır**; istemcinin gönderdiği sonuca güvenilmez |
+| `POST /v1/hunger-checkins/evaluate` 🔐 | Durumsuz skorlama (sonuç ekranı): `{symptoms[], q1, q2, bodyNotices[], q4}` → `{resultType, physicalScore, emotionalScore, safetyFlag, scoringVersion, activeFastId, recommendations:[{code, title}]}`. Aktif oruç bağlamı sunucuda eklenir |
+| `POST /v1/hunger-checkins` 🔐 | Kaydet: aynı cevaplar + `{id?, mode:"quick\|full\|hungryNow", loggedAt?, notes?}`. Yanıt (201) `{checkin, …evaluate yanıtı}`. Sonuç sunucuda **yeniden hesaplanır**: istemci `resultType`/`physicalScore`/`emotionalScore`/`safetyFlag` gönderirse kabul edilir ama **yok sayılır** |
 | `GET /v1/hunger-checkins?date=&type=all\|physical\|emotional&cursor=` 🔐 | Geçmiş |
-| `GET /v1/hunger-checkins/summary?date=` 🔐 | `{today:{total, physical, emotional}, week:[{date, physical, emotional, fastedMinutes}]}` |
+| `GET /v1/hunger-checkins/summary?date=` 🔐 | `{today:{date, total, physical, emotional}, week:[{date, physical, emotional, fastedMinutes}]}` |
 | `DELETE /v1/hunger-checkins/:id` 🔐 | |
+
+- `recommendations[].title` `Accept-Language`'e göre katalogdan gelir (`catalog_labels`, ad alanı `hunger_rec`). Güvenlik bayrağında ilk öneri `safety_end_fast`'tir ve `activeFastId` "Orucu bitir" kısayolu için döner.
+- Check-in başına 2 XP, günde en fazla 3.
 
 ## 13. Mochi World & oyunlaştırma — `world`, `challenges`
 
 ### `GET /v1/world` 🔐
 
 ```jsonc
-{ "level": 4,                       // hesap seviyesi (XP)
+{ "level": 4, "xp": 380,            // hesap seviyesi (XP)
   "sceneLevel": 2,                  // bölgelerin max'ı (görsel)
   "health": "thriving",             // thriving|wilting|drought
   "worldProgress": 0.42,
   "zones": [
     { "zone": "forest", "metric": "completedFasts", "unit": "fasts",
-      "current": 12, "nextThreshold": 25, "level": 2, "ratioToNext": 0.13 },
-    { "zone": "lake",   "metric": "waterGoalDays",  "unit": "days",  "current": 9,  "nextThreshold": 14, "level": 2 },
-    { "zone": "summit", "metric": "weightLostKg",   "unit": "kg",    "current": 3.4,"nextThreshold": 5,  "level": 2 },
-    { "zone": "garden", "metric": "mealsLogged",    "unit": "meals", "current": 18, "nextThreshold": 30, "level": 2 } ],
-  "week": [ { "date": "2026-10-05", "fastedMinutes": 970 }, … ] }
+      "current": 12, "level": 2, "nextThreshold": 25, "ratioToNext": 0.133,
+      "thresholds": [3, 10, 25, 50] },
+    { "zone": "lake",   "metric": "waterGoalDays", "unit": "days",  "current": 9,   "level": 2, … },
+    { "zone": "summit", "metric": "weightLostKg",  "unit": "kg",    "current": 3.4, "level": 2, … },
+    { "zone": "garden", "metric": "mealsLogged",   "unit": "meals", "current": 18,  "level": 2, … } ],
+  "week": [ { "date": "2026-10-05", "fastedMinutes": 970, "kept": true }, … ] }
 ```
+
+- `level` ulaşılan en yüksek seviyedir (ada geri gitmez); `current` güncel metriktir. İstemci kendi `round(oran·4)` hesabını bırakır, `level`'ı kullanır. Bölge kartı `current / nextThreshold` gösterir.
+- Seri/sağlık gün döndüyse okumada yenilenir. Cache'siz (birkaç hafif sorgu).
+- Seviye atlamaları ve sağlık `POST /fasts/:id/finish` yanıtındaki `world` alanında döner; bildirimler F9'da.
 
 ### Challenge uçları
 
 | Uç | Açıklama |
 |---|---|
-| `GET /v1/challenges` 🔐 | Aktif katalog + benim katılımım: `[{code, title, subtitle, badge, targetCount, durationDays, participantsCount, participantAvatars:[url×3], isPremium, my:{status, progress, windowEnd} \| null}]` |
-| `GET /v1/challenges/featured` 🔐 | Ana sayfa kartı (tek kayıt) |
-| `POST /v1/challenges/:code/join` 🔐 | Rolling pencere başlar. Aktif katılım zaten varsa 409 |
-| `POST /v1/challenges/:code/leave` 🔐 | |
+| `GET /v1/challenges` 🔐 | `{items:[{code, title, subtitle, badge, description, metric, targetCount, durationDays, windowType, startsAt, endsAt, rewardXp, isPremium, isFeatured, participantsCount, participantAvatars:[], my:{id, status:"active\|completed\|failed\|left", progress, target, windowStart, windowEnd, completedAt} \| null}]}` (dile göre) |
+| `GET /v1/challenges/featured` 🔐 | `{challenge}` — öne çıkan (yoksa ilk). `/user/summary` → `featuredChallenge` aynı nesne |
+| `POST /v1/challenges/:code/join` 🔐 | `{challenge}`. Rolling pencere şimdi başlar (`durationDays`). Aktif katılım varsa 409 (`already_joined`); premium challenge → 402; sabit pencere açık değilse 409 (`challenge_not_open`). Tamamlanan challenge'a yeniden katılınabilir (yeni pencere) |
+| `POST /v1/challenges/:code/leave` 🔐 | `{challenge}` (`my.status: "left"`); aktif katılım yoksa 404 |
 
-## 14. Coach Mochi sohbeti — `chat` (ayrıntı: [09](09-yapay-zeka.md))
+- İlerleme her ilgili yazmada (öğün, oruç, su, açlık check-in'i) pencere içinde **yeniden sayılır** (silinen kayıt düşer). Hedefe ulaşınca `completed` + `rewardXp` XP (bir kez).
+- Süresi dolan aktif katılım saatlik işle `failed` olur.
+- `participantsCount`: aktif ya da tamamlamış **gerçek** katılımcı sayısı. `participantAvatars` izin ayarı olmadığı için boş; istemci jenerik maskot gösterir.
+
+## 14. Coach Mochi sohbeti — `chat` (ayrıntı: [09](09-yapay-zeka.md); model: **OpenAI**)
 
 | Uç | Açıklama |
 |---|---|
-| `GET /v1/chat/suggestions?context=general\|fasting\|hungerPhysical…` 🔐 | `[{code, text}]` |
-| `GET /v1/chat/quota` 🔐 | `{plan:"free\|premium", dailyLimit, usedToday, resetAt}` |
-| `GET /v1/chat/conversations?cursor=` 🔐 | Önce sabitlenenler, sonra `lastMessageAt` azalan sırada: `[{id, title, messageCount, lastMessageAt, isPinned}]` |
-| `POST /v1/chat/conversations` 🔐 | `{contextSource?, contextRef?}` → `{id}` |
-| `GET /v1/chat/conversations/:id/messages?cursor=&limit=50` 🔐 | Eskiden yeniye: `[{id, role:"user\|assistant", text, status, createdAt}]` |
-| `POST /v1/chat/conversations/:id/messages` 🔐💎* | **SSE akışı** (aşağıda). *Ücretsiz kullanıcıya günlük kota uygulanır |
+| `GET /v1/chat/suggestions?context=` 🔐 | `{items:[{code, text}]}` (dile göre). `context` kabul edilir; bağlama göre süzme henüz yok |
+| `GET /v1/chat/quota` 🔐 | §17b |
+| `GET /v1/chat/conversations?cursor=&limit=` 🔐 | İlk sayfada önce sabitlenenler, sonra son mesaja göre azalan: `{items:[{id, title, isPinned, messageCount, contextSource, lastMessageAt, createdAt}], pageInfo}` |
+| `POST /v1/chat/conversations` 🔐 | `{contextSource?: "direct\|hungerResult\|fastingStruggle\|suggestion", contextRef?}` → 201 `{conversation}`. `hungerResult` + check-in id'si → bağlamda `entry_point: hunger_result(physical)` |
+| `GET /v1/chat/conversations/:id/messages?cursor=&limit=50` 🔐 | Eskiden yeniye: `{items:[{id, role, text, status, safety, feedback, createdAt}], pageInfo}`; imleç daha eski mesajları getirir |
+| `POST /v1/chat/conversations/:id/messages` 🔐 | **SSE akışı** (aşağıda). Gövde `{id?, text (1–2000)}`. Günlük kota (ücretsiz 3) |
 | `PATCH /v1/chat/conversations/:id` 🔐 | `{isPinned?, title?}` |
-| `DELETE /v1/chat/conversations/:id` 🔐 | |
-| `POST /v1/chat/messages/:id/feedback` 🔐 | `{rating:"up\|down", reason?}` |
+| `DELETE /v1/chat/conversations/:id` 🔐 | Yumuşak silme |
+| `POST /v1/chat/messages/:id/feedback` 🔐 | `{rating:"up\|down", reason?}` (yalnızca kendi asistan mesajları) |
 
 **SSE sözleşmesi** (`Accept: text/event-stream`):
 
@@ -557,7 +641,7 @@ POST /v1/chat/conversations/:id/messages
 { "id": "<client uuid>", "text": "Kahve içebilir miyim?" }
 
 event: message.created
-data: {"userMessageId":"…","assistantMessageId":"…"}
+data: {"userMessageId":"…","assistantMessageId":"…","safety":"none"}
 
 event: delta
 data: {"text":"Evet squish! Sade kahve"}
@@ -566,15 +650,19 @@ event: delta
 data: {"text":" orucu bozmaz ☕"}
 
 event: message.completed
-data: {"assistantMessageId":"…","usage":{"remainingToday":7}}
+data: {"assistantMessageId":"…","status":"complete","safety":"none","usage":{"remainingToday":2}}
 
 event: error
-data: {"code":"QUOTA_EXCEEDED","message":"…","resetAt":"…"}
+data: {"code":"UNAVAILABLE","reason":"first_token_timeout|total_timeout|provider_error","assistantMessageId":"…"}
 ```
 
+- Akış açılmadan önceki hatalar **normal JSON** döner: 403 `CONSENT_REQUIRED` (`aiProcessing`), 404, 409 `REPLY_IN_PROGRESS` (aynı konuşmada eşzamanlı ikinci istek), 429 `QUOTA_EXCEEDED` (`details: {kind:"chat", limit, used, resetAt, upgradeAvailable}`), 503 `UNAVAILABLE` (`chat_disabled`, `chat_circuit_open`, `ai_budget`).
+- `safety: "urgent"`: kullanıcı mesajında tehlike belirtisi (bayılma, göğüs ağrısı, şiddetli baş dönmesi…; 7 dil). İstemci yanıtın altına "Acil durum" kartı ekler.
+- `status`: `complete` | `refused` (yerelleştirilmiş ret metni `delta` olarak gelir) | `interrupted` (istemci ayrıldı; o ana kadarki metin saklanır, tamamlanma olayı gönderilmez) | `failed` (`error` olayı; kota iade edilir).
 - Kalp atışı (heartbeat): her 15 sn'de `: ping`.
-- Aynı konuşmada eşzamanlı ikinci istek: 409 `REPLY_IN_PROGRESS`.
-- `Accept: application/json` gönderilirse akışsız tam yanıt döner (yedek yol).
+- Aynı `id` ile tekrar gönderim: yeni yanıt üretilmez; `message.created` (`replay: true`) + kayıtlı yanıt tek `delta` olarak döner.
+- `Accept: application/json`: akışsız tam yanıt `{userMessageId, assistantMessage, remainingToday}` (yedek yol).
+- Nginx bu yolda tamponlamayı kapatır (`deploy/nginx`); yanıt `X-Accel-Buffering: no` da gönderir.
 
 ## 15. Öğren (Insights) — `insights`
 
@@ -587,50 +675,98 @@ data: {"code":"QUOTA_EXCEEDED","message":"…","resetAt":"…"}
 | `PUT /v1/insights/articles/:slug/bookmark` 🔐, `DELETE …/bookmark` 🔐 | |
 | `GET /v1/insights/bookmarks` 🔐 | |
 
-## 16. Bildirimler — `notifications`
+## 16. Bildirimler — `notifications` (ayrıntı: [10](10-bildirimler.md))
 
 | Uç | Açıklama |
 |---|---|
-| `GET /v1/notifications?cursor=` 🔐 | `[{id, type, category, title, body, params, iconKey, deepLink, createdAt, readAt}]`. `title`/`body` sunucuda kullanıcının diline göre render edilir; `params` istemcide vurgulama için (ör. `weightKg`) |
+| `GET /v1/notifications?cursor=&limit=` 🔐 | `{items:[{id, type, category, title, body, params, iconKey, deepLink, createdAt, readAt}], pageInfo}` (yeniden eskiye). `title`/`body` okuma anında render edilir: `Accept-Language` varsa o dil, yoksa kullanıcının kayıtlı dili; sayılar dile göre (`72,4 kg`). `params` istemcide vurgulama için |
 | `GET /v1/notifications/unread-count` 🔐 | `{count}` |
-| `POST /v1/notifications/:id/read` 🔐, `POST /v1/notifications/read-all` 🔐 | |
-| `DELETE /v1/notifications/:id` 🔐 | Kaydırarak silme |
+| `POST /v1/notifications/:id/read` 🔐 | Okundu; başkasının kaydı 404 |
+| `POST /v1/notifications/read-all` 🔐 | `{updated}` |
+| `DELETE /v1/notifications/:id` 🔐 | Kaydırarak silme (yumuşak) |
 
-## 17. Abonelik — `subscription`
+- Push token'ı ve izin: `PUT /v1/devices/current {pushToken, pushEnabled}` (§3). Kategori anahtarları ve sessiz saatler: `PATCH /v1/user/settings` (`notifications.world` eklendi).
+- Push veri alanları: `{type, deepLink, notificationId}`; push metinleri sağlık değeri içermez.
+
+## 17. Abonelik — `subscription` (RevenueCat; ayrıntı: [11](11-abonelik.md))
+
+**Paywall istemcidedir** (RevenueCat Paywalls, `purchases_ui_flutter`); sunucuda paywall/ürün listesi ucu yoktur. Sunucu yalnızca abonelik durumunu RevenueCat'ten yansıtır ve yetki kararını verir.
 
 | Uç | Açıklama |
 |---|---|
-| `GET /v1/subscription` 🔐 | `{isPremium, entitlement, status, productId, store, periodType, expiresAt, willRenew, managementUrl}` |
-| `POST /v1/subscription/sync` 🔐 | Satın alma sonrası. Sunucu RevenueCat REST'ten doğrular ve günceller |
-| `POST /v1/webhooks/revenuecat` (webhook auth header) | [11](11-abonelik.md) |
+| `GET /v1/subscription` 🔐 | `{subscription:{isPremium, entitlement, status, productId, store, environment, periodType, willRenew, expiresAt, graceExpiresAt, managementUrl}}`. `status`: `active\|billing_issue\|in_grace\|expired\|refunded` ya da `null` (hiç abonelik yok) |
+| `POST /v1/subscription/sync` 🔐 | Satın alma / geri yükleme sonrası. Sunucu RevenueCat REST'ten çeker, yazar, önbelleği temizler; yanıt `GET` ile aynı. Saatte 20 |
+| `POST /v1/webhooks/revenuecat` | Oturumsuz; `Authorization` başlığı `REVENUECAT_WEBHOOK_AUTH` ile birebir aynı olmalı (yoksa 401; ayar yoksa 503). `{received, duplicate}`; işleme asenkron (`billing` kuyruğu) |
+
+- `isPremium` her yerde aynı kaynaktan: `/user/me`, giriş yanıtları, plan kilidi (402), katalog/insights kilitleri, AI kotaları (premium limitleri), premium challenge'lar.
+- Webhook'u worker işlediği için API'deki premium önbelleği en geç 30 sn eski kalabilir; istemci satın alma sonrası `sync` çağırır (anında).
+- RevenueCat `app_user_id` = bizim kullanıcı UUID'miz (`Purchases.logIn(userId)`).
+
+## 17b. AI kotası
+
+### `GET /v1/chat/quota` 🔐
+
+```jsonc
+{ "chat": { "used": 1, "limit": 3, "remaining": 2, "resetAt": "2026-10-07T21:00:00.000Z" },
+  "photoAnalysis": { "used": 0, "limit": 2, "remaining": 2, "resetAt": "…" },
+  "isPremium": false }
+```
+
+Limitler `app_config.limits`'ten; `resetAt` kullanıcının yerel gece yarısıdır.
 
 ## 18. Medya — `media`
 
 | Uç | Açıklama |
 |---|---|
-| `POST /v1/media` 🔐 | `multipart`, `purpose=mealPhoto` → `{id, url, thumbUrl}` (öğüne fotoğrafı AI'sız eklemek için) |
-| `DELETE /v1/media/:id` 🔐 | |
+| `POST /v1/media?purpose=mealPhoto` 🔐 | `multipart` (alan `file`) → 201 `{media}`. Aynı içerik 24 sa içinde tekrar gelirse 200 ve mevcut kayıt. Öğüne `POST/PATCH /v1/meals {photoMediaId}` ile bağlanır |
+| `GET /v1/media/:id` 🔐 | `{media}`: süresi dolan imzalı URL'leri yenilemek için. Yalnızca sahibine (başkasına 404) |
+| `DELETE /v1/media/:id` 🔐 | Dosyalar silinir; öğün/avatar bağlantısı kalkar |
 
-Medya URL'leri ilgili kaynakların yanıtına **imzalı** olarak gömülür. Ayrı bir "URL ver" ucu yoktur.
+**Medya biçimi** (yanıtlara gömülü, ör. `meal.photo`, `avatar`):
+
+```jsonc
+{ "id": "…",
+  "url": "https://<private-pull-zone>/u/<ownerKey>/meals/2026/10/<id>_1024.webp?token=…&expires=…",
+  "thumbUrl": "…_256.webp?token=…",
+  "variants": { "lg": "…", "md": "…", "thumb": "…" },
+  "width": 1024, "height": 768, "blurhash": "LKO2?U%2Tw=w]~RBVZRi};RPxuwH",
+  "expiresAt": "2026-10-07T18:00:00.000Z" }
+```
+
+- URL'ler **imzalıdır** (Bunny Token Authentication) ve saat başına yuvarlanmış süreyle (varsayılan ≥ 6 sa) döner. Ayrı bir "URL ver" ucu yoktur; süre dolunca kaynak yeniden çekilir (403 → yenile).
+- İstemci görsel cache anahtarı: **`${id}_${variant}`** (token değişse de aynı görsel tekrar inmez).
+- Geliştirmede (`MEDIA_DRIVER=local`) URL'ler API'nin `/media-files/*` ucuna gider; doğrulama Bunny edge'iyle aynıdır.
 
 ## 19. Yönetim — `admin` 🛡️ (faz 10)
 
-**Kimlik doğrulama:**
-- `/v1/admin/auth/login`: e-posta + şifre + TOTP.
-- Ayrı JWT `aud=admin`, 1 saat ömürlü.
-- IP allowlist uygulanır.
+**Kimlik doğrulama** ([06 §12](06-guvenlik.md#12-yönetim-paneli-güvenliği)):
+- `POST /v1/admin/auth/login {email, password, totp}` → `{token, expiresIn: 3600, admin: {…, mustChangePassword}}`. JWT `aud=mochifast-admin`, yenileme yok. TOTP zorunlu; aynı kod ikinci kez kabul edilmez. 5 hatalı denemede 15 dk kilit (kilitliyken de genel `401` döner).
+- `GET /v1/admin/auth/me`; `POST /v1/admin/auth/password {currentPassword, newPassword ≥ 12}` → yeni `{token}` (eski token'lar iptal); `POST /v1/admin/auth/logout` (bu yöneticinin tüm token'ları iptal).
+- Geçici şifreyle (oluşturma/sıfırlama sonrası) girişte yalnızca bu üç uç açıktır; diğerleri `403 password_change_required`.
+- Her uç `ADMIN_IP_ALLOWLIST`'ten geçer. Üretimde liste boşsa admin API kapalıdır (`403 admin_disabled`), bilinçli açmak için `ADMIN_ALLOW_ANY_IP=true`. İlk owner: `npm run admin:create -- <email> owner`.
 
-**Uçlar:**
+**Roller:** `owner` (her şey), `editor` (içerik, yapılandırma, medya), `support` (kullanıcı arama/işlem), `analyst` (raporlar). Rol dışı uç `403`.
 
-| Alan | Yapılabilecekler |
-|---|---|
-| İçerik | plan, evre, struggle, insights, FAQ, öneri, challenge, bildirim şablonu CRUD + çeviriler |
-| `app_config` | düzenleme |
-| Kullanıcı arama (destek) | id ya da e-posta ile; kişisel veri maskeli |
-| Destek işlemleri | oturumları sonlandır, premium tanımla (promotional), silme talebini hızlandır |
-| Raporlar | kayıt, aktif kullanıcı, dönüşüm, AI maliyeti |
+| Uç | İzin | Açıklama |
+|---|---|---|
+| `GET/POST /admin/admins`, `PATCH /admin/admins/:id`, `POST /admin/admins/:id/reset-credentials` | owner | Yönetici ekle (geçici şifre + `totp.otpauthUrl` yalnızca bu yanıtta), rol/aktiflik, şifre+TOTP sıfırlama |
+| `GET /admin/catalog` | editor | Bölümler: `content` (evreler, struggle, insights, FAQ, öneriler), `gamification` (challenge'lar), `notifications` (şablonlar), `plans`, `labels`; güncel sürüm |
+| `GET /admin/catalog/:section` | editor | Seed biçiminde doküman (tüm çeviriler) + `version` |
+| `PUT /admin/catalog/:section {document, baseVersion, note?}` | editor | Bölümü kaydeder: tek transaction, seed ile aynı yazıcı; `baseVersion` güncel değilse `409 stale_version`; bozuk doküman `400` (hiçbir şey değişmez). `catalog.version` artar. Panelde kaydedilen bölümü `npm run seed` artık ezmez |
+| `GET /admin/catalog/:section/versions[/:version]`, `POST /admin/catalog/:section/rollback {version}` | editor | Sürüm geçmişi (son 30) ve geri alma |
+| `GET /admin/config`, `PUT /admin/config/:key {platform?, value}`, `DELETE /admin/config/:key?platform=` | editor | `app_config`; `catalog.version` korunur |
+| `POST /admin/media?purpose=insightCover\|challengeImage\|planImage` | editor | Public zone, kalıcı URL (`p/<purpose>/…`) |
+| `POST /admin/users/search {q}` | support | Kimlik (UUID) ya da **tam** e-posta; ad/e-posta maskeli (`a***@g***.com`). POST: e-posta URL'de/loglarda görünmez |
+| `GET /admin/users/:id` | support | Durum, cihazlar, oturum sayısı, abonelik, silme talebi, rızalar, seviye/seri. Sağlık verisi yok |
+| `POST /admin/users/:id/sessions/revoke {reason}` | support | Tüm oturumları sonlandırır |
+| `POST /admin/users/:id/premium {duration, reason}` | support | RevenueCat promosyon premium + senkron |
+| `POST /admin/users/:id/deletion {reason}` | support | E-postayla gelen silme talebi: uygulamadaki silmeyle aynı (7 gün, geri alınabilir) |
+| `POST /admin/users/:id/deletion/expedite {reason}` | support | Bekleyen silme talebini şimdiye çeker (≤ 1 sa) |
+| `GET /admin/reports/overview?days=30` | analyst | UTC günlük: kayıt (misafir/kayıtlı), DAU (`user_activity_daily`), oruç başlatma/tamamlama, AI maliyeti, yeni abonelik; toplamlar: DAU/WAU/MAU, premium, ödeyen; aralıktaki hesapların hunisi (oluşan → onboarding → kayıt → abone) |
 
-Tüm yönetici işlemleri `audit_logs` tablosuna yazılır.
+Tüm yönetici işlemleri (arama ve görüntüleme dahil) `audit_logs`'a yazılır (`actor_type = admin`).
+
+**Web hesap silme (Play Store):** `GET /account/delete` — sade bilgi sayfası (HTML, tr/en, script yok): uygulamadan silme adımları ve destek e-postası. Uygulamaya erişemeyen kullanıcı e-postayla talep eder; destek `POST /admin/users/:id/deletion {reason}` ile uygulamadakiyle aynı talebi oluşturur. Firebase web uygulaması bilinçli olarak kullanılmaz.
 
 ## 20. Operasyon
 
@@ -640,13 +776,6 @@ Tüm yönetici işlemleri `audit_logs` tablosuna yazılır.
 | `GET /metrics` | Yalnızca iç ağ |
 | `GET /docs` | Dev/staging, basic auth |
 
-## Eski (prefix'siz) yollar — geçiş uyumluluğu
+## Eski (prefix'siz) yollar
 
-| Eski | Yeni |
-|---|---|
-| `POST /auth/register` | `POST /v1/auth/register` |
-| `GET /user/me` | `GET /v1/user/me` |
-| `GET /user/progress` | `GET /v1/user/progress` |
-| `PATCH /user/onboarding` | 200 + yok sayılır (`Deprecation: true`) |
-
-İstemci `/v1`'e geçtikten ve minimum sürüm yükseltildikten sonra eski yollar kaldırılır.
+Kaldırıldı (F11, lansman öncesi): `/auth/register`, `/user/me`, `/user/progress`, `PATCH /user/onboarding` artık 404. İstemci yalnızca `/v1` kullanır.

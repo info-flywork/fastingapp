@@ -22,7 +22,11 @@
     "entry_title": "Hi, I'm Mochi.\nlet's fast together.",
     "entry_subtitle": "Tell me a little about you and I'll build a fasting plan that actually fits your life.",
     "get_started": "Get Started",
-    "already_have_account": "I already have an account"
+    "already_have_account": "I already have an account",
+    "restore_account_title": "Restaurer ton compte ?",
+    "restore_account_body": "Ton compte sera supprimé le {date}. Veux-tu le restaurer et garder toute ta progression ?",
+    "restore_account_confirm": "Restaurer",
+    "restore_account_cancel": "Pas maintenant"
   },
   "onboarding": {
     "plan_ready_before": "Your plan is ",
@@ -729,7 +733,13 @@
     "weight_title": "Poids",
     "weight_today": "Aujourd'hui",
     "unit_lb": "kg",
-    "unit_kg": "kg"
+    "unit_kg": "kg",
+    "delete_account": "Supprimer le compte",
+    "delete_account_title": "Supprimer ton compte ?",
+    "delete_account_body": "Ton compte sera fermé maintenant et toutes tes données seront définitivement supprimées dans 7 jours. Si tu te reconnectes dans ces 7 jours, tu pourras le restaurer. Les abonnements doivent être résiliés séparément dans l'App Store ou Google Play.",
+    "delete_account_confirm": "Supprimer",
+    "delete_account_cancel": "Garder",
+    "delete_account_subscription_note": "Ton compte va être supprimé. N'oublie pas de résilier ton abonnement dans l'App Store ou Google Play."
   },
   "notifications": {
     "title": "Notifications",

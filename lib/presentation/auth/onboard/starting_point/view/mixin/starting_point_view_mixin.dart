@@ -8,33 +8,38 @@ mixin StartingPointViewMixin on State<StartingPointView> {
   void onWeightDelta(double delta) {
     final current = context.read<StartingPointBloc>().state.weightKg;
     context.read<StartingPointBloc>().add(
-          StartingPointWeightChanged(current + delta),
-        );
+      StartingPointWeightChanged(current + delta),
+    );
   }
 
   void onGoalWeightDelta(double delta) {
     final current = context.read<StartingPointBloc>().state.goalWeightKg;
     context.read<StartingPointBloc>().add(
-          StartingPointGoalWeightChanged(current + delta),
-        );
+      StartingPointGoalWeightChanged(current + delta),
+    );
   }
 
   void onHeightDelta(int delta) {
     final current = context.read<StartingPointBloc>().state.heightCm;
     context.read<StartingPointBloc>().add(
-          StartingPointHeightChanged(current + delta),
-        );
+      StartingPointHeightChanged(current + delta),
+    );
   }
 
   void onAgeDelta(int delta) {
     final current = context.read<StartingPointBloc>().state.age;
     context.read<StartingPointBloc>().add(
-          StartingPointAgeChanged(current + delta),
-        );
+      StartingPointAgeChanged(current + delta),
+    );
   }
 
   void onContinue() {
     final state = context.read<StartingPointBloc>().state;
+    getIt<OnboardingDraft>()
+      ..weightKg = state.weightKg
+      ..goalWeightKg = state.goalWeightKg
+      ..heightCm = state.heightCm
+      ..age = state.age;
     context.push(
       RoutePaths.doableHighlight.path,
       extra: StartingPointNavArgs(

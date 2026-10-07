@@ -10,6 +10,7 @@ mixin DietViewMixin on State<DietView> {
   }
 
   void onContinue() {
+    getIt<OnboardingDraft>().diet = context.read<DietBloc>().state.selected;
     context.push(RoutePaths.foodLoves.path);
   }
 }

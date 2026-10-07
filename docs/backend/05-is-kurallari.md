@@ -35,7 +35,7 @@ Hepsi tablo tabanlı birim testlerle %100 kapsanır. Parametreler (eşikler, pua
 - **İptal (10 dk kuralı):** Başlangıçtan sonraki 10 dk içinde iptal edilirse satır fiziksel olarak silinir. Daha sonra ise `cancelled` olarak işaretlenir.
 - **Otomatik kapanış:**
   - `planned_end_at + 12 sa` anında "Orucunu bitirmeyi unuttun mu?" bildirimi gönderilir.
-  - `started_at + 72 sa` anında seans `completed` + `auto_closed = 1` olur. `ended_at = planned_end_at` (hedefe ulaşıldığı varsayılır), kullanıcıya düzeltmesi için bildirim gider.
+  - `started_at + 72 sa` anında seans `completed` + `auto_closed = 1` olur. `ended_at = planned_end_at` (hedefe ulaşıldığı varsayılır), kullanıcıya düzeltmesi için bildirim gider (F9). `fast-autoclose` işi 15 dakikada bir çalışır. Otomatik kapanan seans XP ve seriye sayılır, en uzun oruç rekoruna sayılmaz.
   - Davranış [14 #3](14-acik-kararlar.md)'e göre değiştirilebilir.
 
 ### 1.4 Seansın güne atanması
@@ -145,7 +145,9 @@ döngü:
 best_streak = max(best_streak, streak)
 ```
 
-- Hesap `daily_summaries` üzerinden yapılır: tek sorgu ile son 400 gün okunur, döngü bellekte döner.
+- Hesap `daily_summaries` + `plan_day_checkins` üzerinden yapılır (tek sorgu). Uygulama (`stats.rules.js#computeStreaks`) aynı kuralı ilk günden bugüne **ileri doğru** yürütür; böylece tek geçişte `current`, `best_streak` ve geçmişteki her seri için kilometre taşları bulunur. Kullanıcı başına birkaç yüz gün, bellekte mikrosaniyeler sürer.
+- Boş günün tipi (zorunlu/nötr) ve hedefi, o gün geçerli plandan çözülür: `started_on ≤ D` olan en son plan (aynı gün değiştiyse yenisi). Hiç plan yoksa günlük 16 sa.
+- Haftalık planın oruç (`fast`) günü, %80 kuralı **ya da** `done` check-in ile tutulur.
 - Tetikleyiciler:
   - `fast.finished`
   - düzenleme veya silme
@@ -153,7 +155,7 @@ best_streak = max(best_streak, streak)
 
 **Seri bozulduğunda:** bildirim gider (`streak_lost`), dünyanın sağlığı etkilenir (§7).
 
-**Seri kilometre taşları:** 3, 7, 14, 30, 60, 100 gün. Her birinde XP verilir (§10) ve bildirim gider.
+**Seri kilometre taşları:** 3, 7, 14, 30, 60, 100 gün. Her birinde XP verilir (§10) ve bildirim gider (F9). Taş **her seri için bir kez** verilir (`ref_key = "<gün>:<serinin ilk günü>"`): seri bozulup yeniden 7'ye ulaşırsa XP yine kazanılır. Düzenleme/silme seriyi geriye dönük bozarsa ilgili taşın XP'si de düşer (deterministik yeniden hesaplama).
 
 **Seri dondurma (streak freeze):** Premium için faz 2 özelliği, [14 #9](14-acik-kararlar.md).
 
@@ -201,12 +203,13 @@ Bir sonraki orucun önerilen başlangıcı: `endedAt + eatMinutes` ya da planın
 - `resultType = P ≥ E ? physical : emotional`.
 - Eşitlikte `physical` seçilir. Gerçek açlığı "duygusal" diye geçiştirmemek daha güvenlidir.
 - `scoring_version` her kayıtla saklanır. Tablo değişirse eski kayıtlar etkilenmez.
-- Öneriler: `physical` → `physical_rec_1..3`, `emotional` → `emotional_rec_1..4`. Katalogdan dile göre döner.
+- Öneriler: `physical` → `physical_1..3`, `emotional` → `emotional_1..4` (`catalog_labels`, ad alanı `hunger_rec`; metinler uygulamanın `hunger_result_page.*_rec_*` çevirilerinden çıkarılır). Dile göre döner.
+- Bağlam, kayıt anındaki aktif orucun süresi ve hedefidir; kayıtla birlikte saklanır (`fasting_session_id`, `fasted_minutes`).
 
 ### 5.3 Güvenlik bayrağı
 `safetyFlag = true` olur, eğer:
 - Q3'te (`dizziness` **ve** `nausea`), ya da
-- (`dizziness` **veya** `nausea`) **ve** aktif oruç > 16 sa, ya da
+- (`dizziness` **veya** `nausea`; Q3'te ya da belirtilerde) **ve** aktif oruç > 16 sa, ya da
 - belirtilerde `dizziness` + `weakness`.
 
 Bayrak açıkken yanıtta öncelikli öneri olarak "Kendini iyi hissetmiyorsan orucunu bitirmen tamamen normal" (`hunger.safety_end_fast`) döner. İstemci bu öneriyle birlikte "Orucu bitir" kısayolunu gösterir.
@@ -261,7 +264,8 @@ s = +5 (man), −161 (woman), −78 (nonBinary / preferNotToSay — ortalama)
 | Zirve (summit) | Ulaşılan **en iyi** verilen kilo | `user_stats.best_weight_lost_kg = max(start − min(kilo))` | 1, 2, 5, 10 kg |
 | Bahçe (garden) | Kaydedilen öğün | `user_stats.meals_logged` | 3, 10, 30, 60 |
 
-- Eşikler `world_zone_thresholds` tablosunda tutulur ve yönetilebilir.
+- Eşikler `world_zone_thresholds` tablosunda tutulur ve yönetilebilir (`seeds/gamification.json`).
+- **Uygulama (F7):** metrikler ham veriden deterministik hesaplanır (`best_weight_lost_kg` = başlangıç − en düşük ölçüm; silinen ölçüm metriği düşürür). Görselin geri gitmemesi `user_world_zones.max_level_reached` ile sağlanır: gösterilen seviye = max(ulaşılan, güncel). Senkron her oruç/takipçi yazmasında aynı transaction'da; seviye yükselişi `levelUps` olarak döner.
 - Göl metriği ve zirvenin "en iyi değer" yaklaşımı ürün kararıdır ([14 #5](14-acik-kararlar.md)). Ada görsel olarak **geri gitmez**; gerileme "sağlık" ile ifade edilir.
 - Mevcut mock verisi bu tabloyla uyumlu: forest 3/10 → seviye 1.
 - `goal` yönü kilo almak (ör. `buildHabit` + hedef > başlangıç) ise zirve metriği "hedefe yaklaşılan kg" olur.
@@ -360,9 +364,9 @@ targetDate = today + clamp(weeks × 7, 7, 730) gün
 |---|---|---|
 | Oruç bitirildi (≥ 60 dk, completed/endedEarly) | 10 | – |
 | Hedefe ulaşıldı bonusu (hedef ≤ 24 sa ise) | +5 | – |
-| Öğün kaydı | 2 | 5 öğün |
+| Öğün kaydı (öğün ya da ara öğün) | 2 | 5 öğün |
 | Su hedefi günü | 5 | 1 |
-| Kilo kaydı | 3 | 1 |
+| Kilo kaydı (onboarding kilosu hariç) | 3 | 1 |
 | Açlık check-in | 2 | 3 |
 | Challenge tamamlama | `challenges.reward_xp` | – |
 | Seri kilometre taşı 3 / 7 / 14 / 30 / 60 / 100 | 20 / 50 / 100 / 200 / 300 / 500 | – |
@@ -373,7 +377,9 @@ gerekenXP(n) = 50 · n · (n − 1)        // L1=0, L2=100, L3=300, L4=600, L5=1
 level = gerekenXP(n) ≤ xp koşulunu sağlayan en büyük n
 ```
 
-**İdempotency:** `xp_events (user_id, reason, ref_id)` benzersizdir. Silme veya düzenlemede ilgili XP olayı silinir ve XP yeniden toplanır.
+**İdempotency:** `xp_events (user_id, reason, ref_key)` birincil anahtardır. Silme veya düzenlemede ilgili XP olayı silinir ve XP yeniden toplanır. Seviye de toplamdan türetilir: silme XP'yi eşiğin altına düşürürse seviye geri iner.
+
+**İlk oruç:** `user_stats.first_fast_completed_at` bir kez yazılır (canlı bitirme ya da elle girilen tamamlanmış oruç), sonra silme/düzenleme ile değişmez; kutlama ekranı iki kez gösterilmez.
 
 ## 11. Misafir hesap birleştirme
 
@@ -403,7 +409,7 @@ Misafir kullanıcı (`is_guest = 1`) Apple/Google ile giriş yaptığında:
 
 - Günlük toplam = `SUM(amount_ml)`. Koşullar: `local_date = D AND deleted_at IS NULL`.
 - **Gece yarısı sıfırlaması otomatiktir.** Toplam yerel güne göre hesaplandığı için istemcideki sıfırlanmama hatası backend ile ortadan kalkar.
-- **Hedef günü:** `water_ml(D) ≥ water_goal_ml(D)` ise `daily_summaries.water_goal_ml` anlık görüntüsü ile karşılaştırılır.
+- **Hedef günü:** `water_ml(D) ≥ water_goal_ml(D)` ise `daily_summaries.water_goal_ml` anlık görüntüsü ile karşılaştırılır. Anlık görüntü, o güne yapılan her su/adım/uyku/kilo yazmasında güncel hedefle yenilenir; yazma olmayan geçmiş gün değişmez.
   - Gün ilk kez hedefi geçince `water_goal_days += 1`.
   - Kayıt silinip hedefin altına düşülürse günlük özetten yeniden hesaplanır.
 - **Güvenlik:**
@@ -423,7 +429,7 @@ Misafir kullanıcı (`is_guest = 1`) Apple/Google ile giriş yaptığında:
   | `meals_logged` | meals |
   | `fasts_completed` | completed seanslar |
   | `water_goal_days` | su hedefi günleri |
-  | `streak_days` | pencere içindeki max seri |
+  | `streak_days` | pencere içindeki seri (F7: güncel seri, pencerede geçen gün sayısıyla sınırlı) |
   | `hunger_checkins` | açlık check-in'leri |
 
   Olaylar artımlı güncellenir. Silmede yeniden sayılır.
@@ -453,5 +459,8 @@ stats.recompute(userId, fromLocalDate):
 ```
 
 **Tetikleyiciler:**
-- Her gece 03:30 UTC: o gün değişen kullanıcılar için kontrol (`daily-rollup` işi).
-- Her düzenleme veya silme: anında (kullanıcı başına process içi kilit ile tekilleştirilir; API tek process, ADR 0005).
+- Günde bir: son 26 saatte oruç kaydı değişen kullanıcılar için tam yeniden hesaplama (`daily-rollup` işi). Zamanlayıcı yalnızca aralık destekler (`every_ms`); iş, worker'ın ilk açılışından itibaren 24 saatte bir çalışır, sabit 03:30 UTC değil.
+- Saatte bir: yerel gece yarısını yeni geçen saat dilimlerindeki serili kullanıcılar (`day-rollover` işi). Okuma uçları da bayat seriyi kendisi yeniler; iş, F9'da `streak_lost` bildirimini zamanında göndermek içindir.
+- Elle: `npm run stats:recompute [-- <userId>]` (kural değişikliği, veri düzeltmesi, ilk kurulum).
+- Her bitirme, elle kayıt, düzenleme, silme, check-in ve plan değişimi: anında, yazmayla **aynı transaction'da**. Kullanıcı satırı `SELECT … FOR UPDATE` ile kilitlidir; aynı kullanıcının eşzamanlı yeniden hesaplamaları sıraya girer (process içi kilit gerekmez, birden çok API kopyasında da doğru çalışır).
+- Maliyet: ~12 sorgu. DB gecikmesi baskın etkendir (yerel ağda ~10–30 ms; geliştirmedeki uzak DB'de ~50 ms × sorgu ≈ 1 sn).

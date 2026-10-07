@@ -1,3 +1,5 @@
+import 'package:fastingapp/domain/onboarding/onboarding_draft.dart';
+import 'package:fastingapp/core/di/injection.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:fastingapp/core/remote_images/app_image.dart';
 import 'package:fastingapp/core/router/route_paths.dart';

@@ -7,6 +7,7 @@ mixin AboutYouViewMixin on State<AboutYouView> {
 
   Future<void> onGenderSelected(OnboardingGender gender) async {
     context.read<AboutYouBloc>().add(AboutYouGenderSelected(gender));
+    getIt<OnboardingDraft>().gender = gender;
     await Future<void>.delayed(const Duration(milliseconds: 350));
     if (!mounted) return;
     await context.push(RoutePaths.privacyHighlight.path);

@@ -11,6 +11,7 @@ mixin FoodLovesViewMixin on State<FoodLovesView> {
 
   void onContinue() {
     final loves = context.read<FoodLovesBloc>().state.selected;
+    getIt<OnboardingDraft>().foodLoves = {...loves};
     context.push(
       RoutePaths.foodSkips.path,
       extra: FoodPrefsNavArgs(loves: loves),

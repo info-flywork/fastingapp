@@ -1,4 +1,6 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:fastingapp/core/dialogs/dialog_handler.dart';
+import 'package:fastingapp/core/dialogs/widgets/confirm_dialog.dart';
 import 'package:fastingapp/core/dialogs/widgets/end_fast_dialog.dart';
 import 'package:fastingapp/core/dialogs/widgets/fasting_time_dialog.dart';
 import 'package:fastingapp/core/dialogs/widgets/meal_date_picker_dialog.dart';
@@ -6,6 +8,7 @@ import 'package:fastingapp/core/dialogs/widgets/sign_out_dialog.dart';
 import 'package:fastingapp/core/dialogs/widgets/water_edit_dialog.dart';
 import 'package:fastingapp/core/dialogs/widgets/weight_edit_dialog.dart';
 import 'package:fastingapp/core/remote_images/app_image.dart';
+import 'package:fastingapp/generated/assets.gen.dart';
 import 'package:flutter/material.dart';
 
 /// Tüm dialog'ların tek giriş noktası (singleton). Feature katmanında
@@ -22,6 +25,40 @@ final class AppDialogs extends DialogHandler {
     return showNormalDialog<bool>(
       context: context,
       child: const SignOutDialog(),
+    );
+  }
+
+  /// Hesap silme onayı. `true` → onaylandı.
+  Future<bool?> showDeleteAccount(BuildContext context) {
+    return showNormalDialog<bool>(
+      context: context,
+      child: ConfirmDialog(
+        icon: Assets.icons.solarTrashBinTrashBoldDuotone,
+        title: 'profile.delete_account_title'.tr(),
+        body: 'profile.delete_account_body'.tr(),
+        confirmLabel: 'profile.delete_account_confirm'.tr(),
+        cancelLabel: 'profile.delete_account_cancel'.tr(),
+      ),
+    );
+  }
+
+  /// Silme talebi bekleyen hesaba girişte geri alma sorusu. `true` → geri al.
+  Future<bool?> showRestoreAccount(
+    BuildContext context, {
+    required DateTime scheduledFor,
+  }) {
+    final date = DateFormat.yMMMMd(
+      context.locale.toLanguageTag(),
+    ).format(scheduledFor.toLocal());
+    return showNormalDialog<bool>(
+      context: context,
+      child: ConfirmDialog(
+        icon: Assets.icons.solarTrashBinTrashBoldDuotone,
+        title: 'auth.restore_account_title'.tr(),
+        body: 'auth.restore_account_body'.tr(namedArgs: {'date': date}),
+        confirmLabel: 'auth.restore_account_confirm'.tr(),
+        cancelLabel: 'auth.restore_account_cancel'.tr(),
+      ),
     );
   }
 

@@ -11,6 +11,7 @@ mixin FoodSkipsViewMixin on State<FoodSkipsView> {
 
   void onContinue() {
     final skips = context.read<FoodSkipsBloc>().state.selected;
+    getIt<OnboardingDraft>().foodSkips = {...skips};
     context.push(
       RoutePaths.notedHighlight.path,
       extra: widget.prefs.copyWith(skips: skips),

@@ -1,6 +1,9 @@
 import 'package:fastingapp/core/router/route_paths.dart';
+import 'package:fastingapp/data/model/auth/auth_response.dart';
+import 'package:fastingapp/domain/auth/auth_exception.dart';
 import 'package:fastingapp/domain/auth/auth_repository.dart';
 import 'package:fastingapp/presentation/auth/bloc/auth_bloc.dart';
+import 'package:fastingapp/presentation/auth/bloc/auth_event.dart';
 import 'package:fastingapp/presentation/auth/welcome/bloc/welcome_event.dart';
 import 'package:fastingapp/presentation/auth/welcome/bloc/welcome_state.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -17,24 +20,30 @@ final class WelcomeBloc extends Bloc<WelcomeEvent, WelcomeState> {
     on<WelcomeGuestTapped>(_onGuestTapped);
   }
 
-  // ignore: unused_field — gerçek API bağlanınca kullanılacak
   final AuthRepository _authRepository;
-  // ignore: unused_field — gerçek API bağlanınca kullanılacak
   final AuthBloc _authBloc;
 
   /// Google ile giriş. Başarıda yönlenecek path döner.
-  Future<String> loginWithGoogle() => _fakeLogin();
+  Future<String> loginWithGoogle() =>
+      _complete(_authRepository.loginWithGoogle());
 
   /// Apple ile giriş. Başarıda yönlenecek path döner.
-  Future<String> loginWithApple() => _fakeLogin();
+  Future<String> loginWithApple() =>
+      _complete(_authRepository.loginWithApple());
 
   /// Misafir girişi. Başarıda yönlenecek path döner.
-  Future<String> loginAsGuest() => _fakeLogin();
+  Future<String> loginAsGuest() => _complete(_authRepository.loginAsGuest());
 
-  /// UI geliştirme: ağ isteği yok, sadece withLoading'i göstermek için delay.
-  /// TODO(team): AuthRepository.login + AuthLoggedIn ile değiştir.
-  Future<String> _fakeLogin() async {
-    await Future<void>.delayed(const Duration(milliseconds: 900));
+  /// Silme talebi bekleyen hesabı geri açıp girişi tamamlar.
+  Future<String> restoreAccount(
+    AccountPendingDeletionException<AuthResponse> pending,
+  ) => _complete(pending.restore());
+
+  /// Geri almayı reddetti: Firebase/Google oturumu da kapanır.
+  Future<void> discardPendingLogin() => _authRepository.logout();
+
+  Future<String> _complete(Future<AuthResponse> login) async {
+    _authBloc.add(AuthLoggedIn(await login));
     return RoutePaths.home.path;
   }
 

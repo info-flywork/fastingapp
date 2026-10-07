@@ -17,6 +17,10 @@ final class LocalizationManager {
 
   static const translationsPath = 'assets/translations';
 
+  /// Uygulamada seçili dil (cihaz dili değil). `MyApp` her build'de günceller;
+  /// ağ katmanı `Accept-Language` için okur.
+  static Locale current = fallbackLocale;
+
   /// Desteklenen diller arasında mı?
   static bool isSupported(Locale locale) =>
       supportedLocales.any((l) => l.languageCode == locale.languageCode);

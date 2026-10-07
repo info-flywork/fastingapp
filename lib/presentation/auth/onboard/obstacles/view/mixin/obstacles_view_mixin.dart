@@ -41,6 +41,7 @@ mixin ObstaclesViewMixin on State<ObstaclesView> {
 
   Future<void> onObstacleSelected(OnboardingObstacle obstacle) async {
     context.read<ObstaclesBloc>().add(ObstacleSelected(obstacle));
+    getIt<OnboardingDraft>().obstacles = {obstacle};
     await Future<void>.delayed(const Duration(milliseconds: 350));
     if (!mounted) return;
     await context.push(RoutePaths.obstacleHighlight.path);

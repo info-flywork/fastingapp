@@ -1,0 +1,54 @@
+{
+  "project_info": {
+    "project_number": "247049126883",
+    "project_id": "mochifast-a3808",
+    "storage_bucket": "mochifast-a3808.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:247049126883:android:0121bff8a6193880b056d6",
+        "android_client_info": {
+          "package_name": "com.flywork.mochifast"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "247049126883-qb063udj4hk9quu6iupnvl91dsuscoar.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.flywork.mochifast",
+            "certificate_hash": "2624e2ca16c44d44b593e99bbbd2c8a990972834"
+          }
+        },
+        {
+          "client_id": "247049126883-pqfhq0rr235jotcofp5dqc9j2l6g5l3k.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCQgFrWzD8Br8-1JMwBvujhqVJB-cJiShs"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "247049126883-pqfhq0rr235jotcofp5dqc9j2l6g5l3k.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "247049126883-v2qgvkg2g3q3b8col4ob1gkq29b4h357.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.flywork.mochifast"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

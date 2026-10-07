@@ -22,7 +22,11 @@
     "entry_title": "Merhaba, ben Mochi.\nHadi birlikte oruç tutalım.",
     "entry_subtitle": "Bana biraz kendinden bahset, hayatına gerçekten uyan bir oruç planı hazırlayayım.",
     "get_started": "Başla",
-    "already_have_account": "Zaten hesabım var"
+    "already_have_account": "Zaten hesabım var",
+    "restore_account_title": "Hesabın geri alınsın mı?",
+    "restore_account_body": "Hesabın {date} tarihinde silinecek. Geri alıp tüm ilerlemeni korumak ister misin?",
+    "restore_account_confirm": "Geri al",
+    "restore_account_cancel": "Şimdi değil"
   },
   "onboarding": {
     "plan_ready_before": "Planın ",
@@ -729,7 +733,13 @@
     "weight_title": "Kilo",
     "weight_today": "Bugün",
     "unit_lb": "lb",
-    "unit_kg": "kg"
+    "unit_kg": "kg",
+    "delete_account": "Hesabı Sil",
+    "delete_account_title": "Hesabın silinsin mi?",
+    "delete_account_body": "Hesabın hemen kapanır, tüm verilerin 7 gün sonra kalıcı olarak silinir. 7 gün içinde tekrar giriş yaparsan geri alabilirsin. Aboneliğini App Store veya Google Play'den ayrıca iptal etmelisin.",
+    "delete_account_confirm": "Sil",
+    "delete_account_cancel": "Vazgeç",
+    "delete_account_subscription_note": "Hesabın silinmek üzere. Aboneliğini App Store veya Google Play'den iptal etmeyi unutma."
   },
   "notifications": {
     "title": "Bildirimler",

@@ -93,10 +93,7 @@ final class ProfileMenuRow extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  title,
-                  style: titleStyle ?? AppTextStyles.profileRowTitle,
-                ),
+                Text(title, style: titleStyle ?? AppTextStyles.profileRowTitle),
                 if (subtitle != null) ...[
                   const SizedBox(height: 2),
                   Text(subtitle!, style: AppTextStyles.profileRowSubtitle),
@@ -104,10 +101,7 @@ final class ProfileMenuRow extends StatelessWidget {
               ],
             ),
           ),
-          if (trailing != null) ...[
-            const SizedBox(width: 8),
-            trailing!,
-          ],
+          if (trailing != null) ...[const SizedBox(width: 8), trailing!],
           if (showChevron) profileChevron(),
         ],
       ),
@@ -115,9 +109,7 @@ final class ProfileMenuRow extends StatelessWidget {
 
     return Material(
       color: ColorName.colorWhite,
-      child: onTap == null
-          ? content
-          : InkWell(onTap: onTap, child: content),
+      child: onTap == null ? content : InkWell(onTap: onTap, child: content),
     );
   }
 }
@@ -126,6 +118,30 @@ final class ProfileMenuRow extends StatelessWidget {
 final class ProfileLogoutCard extends StatelessWidget {
   const ProfileLogoutCard({required this.onTap, super.key});
 
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return ProfileDangerCard(
+      icon: Assets.icons.solarLogout2LineDuotone,
+      label: 'profile.log_out'.tr(),
+      onTap: onTap,
+    );
+  }
+}
+
+/// Geri dönüşü zor işlemler (çıkış, hesabı sil): kırmızı ikon ve metinli
+/// tek satır kart.
+final class ProfileDangerCard extends StatelessWidget {
+  const ProfileDangerCard({
+    required this.icon,
+    required this.label,
+    required this.onTap,
+    super.key,
+  });
+
+  final SvgGenImage icon;
+  final String label;
   final VoidCallback onTap;
 
   @override
@@ -155,7 +171,7 @@ final class ProfileLogoutCard extends StatelessWidget {
             ),
             child: Row(
               children: [
-                Assets.icons.solarLogout2LineDuotone.svg(
+                icon.svg(
                   width: 24,
                   height: 24,
                   colorFilter: const ColorFilter.mode(
@@ -165,10 +181,7 @@ final class ProfileLogoutCard extends StatelessWidget {
                 ),
                 const SizedBox(width: 12),
                 Expanded(
-                  child: Text(
-                    'profile.log_out'.tr(),
-                    style: AppTextStyles.profileLogout,
-                  ),
+                  child: Text(label, style: AppTextStyles.profileLogout),
                 ),
                 profileChevron(),
               ],

@@ -9,12 +9,16 @@ import 'package:fastingapp/core/managers/url_launcher_manager.dart';
 import 'package:fastingapp/core/network/dio_client.dart';
 import 'package:fastingapp/core/network/network_manager.dart';
 import 'package:fastingapp/domain/auth/auth_repository.dart';
+import 'package:fastingapp/domain/auth/social_auth_service.dart';
 import 'package:fastingapp/domain/notification/notifications_repository.dart';
+import 'package:fastingapp/domain/onboarding/onboarding_draft.dart';
+import 'package:fastingapp/domain/onboarding/onboarding_repository.dart';
 import 'package:fastingapp/domain/product/product_repository.dart';
 import 'package:fastingapp/domain/progress/progress_repository.dart';
 import 'package:fastingapp/domain/revenue_cat/revenue_cat_service.dart';
 import 'package:fastingapp/domain/user/user_repository.dart';
 import 'package:fastingapp/presentation/auth/bloc/auth_bloc.dart';
+import 'package:fastingapp/presentation/auth/bloc/auth_event.dart';
 import 'package:fastingapp/presentation/auth/onboard/about_you/bloc/about_you_bloc.dart';
 import 'package:fastingapp/presentation/auth/onboard/diet/bloc/diet_bloc.dart';
 import 'package:fastingapp/presentation/auth/onboard/fasting_plan/bloc/fasting_plan_bloc.dart';
@@ -52,19 +56,25 @@ Future<void> configureDependencies() async {
     ..registerLazySingleton<NotificationManager>(NotificationManager.new)
     ..registerLazySingleton<PermissionManager>(PermissionManager.new)
     ..registerLazySingleton<UrlLauncherManager>(UrlLauncherManager.new)
-    ..registerLazySingleton<DeviceManager>(DeviceManager.new)
+    ..registerLazySingleton<DeviceManager>(() => DeviceManager(getIt()))
     // ── Network ──
     ..registerLazySingleton<Dio>(
       () => DioClient.create(
         authCacheManager: getIt(),
-        // ignore: unnecessary_lambdas
-        authRepositoryProvider: () => getIt<AuthRepository>(),
+        deviceManager: getIt(),
+        // Lazy: Dio → AuthBloc → AuthRepository → Dio döngüsü kurulmaz.
+        onSessionEnded: () => getIt<AuthBloc>().add(const AuthSessionEnded()),
       ),
     )
     ..registerLazySingleton<NetworkManager>(() => NetworkManager(getIt()))
     // ── Repositories / Services ──
+    ..registerLazySingleton<SocialAuthService>(SocialAuthService.new)
     ..registerLazySingleton<AuthRepository>(
-      () => AuthRepository(getIt(), getIt(), getIt()),
+      () => AuthRepository(getIt(), getIt(), getIt(), getIt(), getIt()),
+    )
+    ..registerLazySingleton<OnboardingDraft>(OnboardingDraft.new)
+    ..registerLazySingleton<OnboardingRepository>(
+      () => OnboardingRepository(getIt(), getIt(), getIt(), getIt()),
     )
     ..registerLazySingleton<UserRepository>(() => UserRepository(getIt()))
     ..registerLazySingleton<ProductRepository>(

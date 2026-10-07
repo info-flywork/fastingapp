@@ -200,3 +200,4 @@ ON DUPLICATE KEY UPDATE water_ml = water_ml + VALUES(water_ml);
 **Yük testi (k6, faz 11):**
 - **Senaryo:** Sabah zirvesi. %60 summary + aktif oruç, %20 su/öğün yazma, %10 sohbet, %10 katalog.
 - **Hedef:** Lansman altyapısında 500 istek/sn, p95 hedefleri tutmalı.
+- **Betikler:** backend `loadtest/` (`create-users.js` + `morning-peak.js`, eşikler SLO'larla aynı). Yalnızca staging; sohbet mesajı gönderilmez (model maliyeti), sohbet listesi okunur.

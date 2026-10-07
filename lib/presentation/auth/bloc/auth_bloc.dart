@@ -1,4 +1,4 @@
-import 'package:fastingapp/data/model/user/user.dart';
+import 'package:fastingapp/data/model/auth/account_deletion.dart';
 import 'package:fastingapp/domain/auth/auth_repository.dart';
 import 'package:fastingapp/presentation/auth/bloc/auth_event.dart';
 import 'package:fastingapp/presentation/auth/bloc/auth_state.dart';
@@ -11,22 +11,34 @@ final class AuthBloc extends Bloc<AuthEvent, AuthState> {
     on<AuthCheckRequested>(_onCheckRequested);
     on<AuthLoggedIn>(_onLoggedIn);
     on<AuthLoggedOut>(_onLoggedOut);
+    on<AuthSessionEnded>(_onSessionEnded);
+    on<AuthUserUpdated>((event, emit) => emit(AuthAuthenticated(event.user)));
   }
 
   final AuthRepository _authRepository;
 
+  /// Hesap silme talebi; başarıda oturum kapanır. Apple penceresi kapatılırsa
+  /// `AuthCancelledException`. (Uzun iş: Future döner, loading view'da.)
+  Future<AccountDeletion> deleteAccount() async {
+    final result = await _authRepository.deleteAccount();
+    add(const AuthLoggedOut());
+    return result;
+  }
+
+  /// Açılış: token varsa önbellekteki kullanıcıyla oturum açık sayılır;
+  /// sunucu doğrulaması ilk API çağrısında olur (geçersizse ağ katmanı
+  /// [AuthSessionEnded] tetikler).
   Future<void> _onCheckRequested(
     AuthCheckRequested event,
     Emitter<AuthState> emit,
   ) async {
     try {
-      final isAuthenticated = await _authRepository
-          .isAuthenticated()
-          .timeout(const Duration(seconds: 5), onTimeout: () => false);
+      final user = await _authRepository.cachedSession().timeout(
+        const Duration(seconds: 5),
+        onTimeout: () => null,
+      );
       emit(
-        isAuthenticated
-            ? const AuthAuthenticated(User())
-            : const AuthUnauthenticated(),
+        user != null ? AuthAuthenticated(user) : const AuthUnauthenticated(),
       );
     } on Object {
       emit(const AuthUnauthenticated());
@@ -47,6 +59,15 @@ final class AuthBloc extends Bloc<AuthEvent, AuthState> {
     Emitter<AuthState> emit,
   ) async {
     await _authRepository.logout();
+    emit(const AuthUnauthenticated());
+  }
+
+  Future<void> _onSessionEnded(
+    AuthSessionEnded event,
+    Emitter<AuthState> emit,
+  ) async {
+    if (state is AuthUnauthenticated) return;
+    await _authRepository.endLocalSession();
     emit(const AuthUnauthenticated());
   }
 }

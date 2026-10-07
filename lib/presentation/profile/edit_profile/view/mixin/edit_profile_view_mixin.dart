@@ -24,6 +24,37 @@ mixin EditProfileViewMixin on State<EditProfileView> {
 
   void onBack() => context.pop();
 
+  /// Hesabı sil: onay → (Apple ise token iptali) → silme talebi → çıkış.
+  /// Hesap 7 gün içinde tekrar girişle geri alınabilir.
+  Future<void> onDeleteAccount() async {
+    final confirmed = await AppDialogs.instance.showDeleteAccount(context);
+    if (confirmed != true || !mounted) return;
+
+    try {
+      final result = await getIt<AuthBloc>().deleteAccount().withLoading(
+        context,
+      );
+      if (!mounted) return;
+      if (result.hasActiveSubscription) {
+        AppSnackbar.show(
+          context: context,
+          text: 'profile.delete_account_subscription_note'.tr(),
+          type: SnackBarType.warning,
+        );
+      }
+      context.go(RoutePaths.welcome.path);
+    } on AuthCancelledException {
+      return;
+    } on Exception catch (e) {
+      if (!mounted) return;
+      AppSnackbar.show(
+        context: context,
+        text: e.toString(),
+        type: SnackBarType.failure,
+      );
+    }
+  }
+
   Future<void> onChangePhoto() async {
     final source = await AppBottomSheets.instance.showPhotoSource(context);
     if (source == null || !mounted) return;

@@ -46,7 +46,7 @@ Doğrulama yereldir: Google'ın açık anahtarları (`securetoken@system.gservic
 
 **Misafir (backend'de, Firebase anonim girişi kullanılmaz):**
 - **Cihaz başına tek misafir:** `installId` ile hesap oluşturulur; aynı `installId` her zaman aynı misafire yeni oturum açar (yeni hesap açılmaz).
-- `installId` yeniden kurulumda değişmemeli: iOS'ta Keychain'de saklanan UUID, Android'de `ANDROID_ID` tabanlı kimlik ([13](13-flutter-entegrasyonu.md)).
+- `installId` misafirin tek kimlik bilgisidir: istemci **kriptografik rastgele** UUID v4 üretir ve güvenli depoda (iOS Keychain, Android Keystore/EncryptedSharedPreferences) saklar; cihazdan türetilen kimlik (`ANDROID_ID` vb.) kullanılmaz ([13](13-flutter-entegrasyonu.md)). Uygulama `DeviceManager` bunu yapar. Sunucu tarafı misafir sırrı (hash'iyle saklanan) ileride eklenebilir.
 - Misafir sosyal hesaba yükseltilince ya da başka hesaba geçilince misafir kimliği silinir; aynı cihazda sonraki misafir girişi yeni bir misafir açar (sosyal hesaba `installId` ile girilemez).
 - **Rate limit:**
   - IP başına 10/saat
@@ -177,20 +177,20 @@ refresh(rt):
 
 ## 7. Rate limit & kötüye kullanım
 
-`@fastify/rate-limit` bellek içi store ile kullanılır (API tek process; sayaçlar yeniden başlatmada sıfırlanır). Anahtar: oturumlu isteklerde `userId`, diğerlerinde IP.
+`@fastify/rate-limit` bellek içi store ile kullanılır (API tek process; sayaçlar yeniden başlatmada sıfırlanır). Anahtar: geçerli access token varsa `userId` (limit kimlik doğrulamadan önce çalıştığı için token anahtar üretiminde doğrulanır; sahte token başkasının sayacını tüketemez), yoksa IP; IPv6 adresleri /64 ağına indirgenir.
 
 | Kapsam | Limit |
 |---|---|
-| Global (IP) | 600 istek/dk |
-| Oturumlu kullanıcı (genel) | 300 istek/dk |
+| Global (kullanıcı ya da IP) | `RATE_LIMIT_GLOBAL_MAX` (600)/dk |
 | `POST /auth/*` (IP) | 20/dk, 100/saat |
-| `POST /auth/refresh` (oturum ailesi) | 30/saat |
-| `POST /auth/guest` | IP 10/saat, installId 5/saat |
-| Medya yükleme | 30/saat, 200/gün |
+| `POST /auth/refresh` (oturum ailesi) | 30/saat; mutlak oturum ömrü `REFRESH_ABSOLUTE_DAYS` (180 gün) |
+| Yeni misafir (`/auth/guest` ya da `/auth/register provider=guest`) | IP 10/saat (hangi uçtan olursa olsun), installId 5/saat |
+| Medya yükleme | 30/saat |
 | Fotoğraf analizi | Kota ([09](09-yapay-zeka.md#4-kotalar)) + 10/dk |
 | Sohbet mesajı | Kota + 1 eşzamanlı + 20/dk |
 | Veri dışa aktarma | 1/gün |
-| Webhook | IP allowlist yok (RevenueCat), yalnızca auth header + 100/sn |
+| Webhook | IP allowlist yok (RevenueCat), yalnızca auth header |
+| Yönetici girişi | IP 20/15 dk; hesap 5 hata → 15 dk kilit (genel hata döner) |
 
 **Yanıt ve ek korumalar:**
 - Limit aşımında 429 `RATE_LIMITED` ve `Retry-After` header'ı döner.
@@ -233,20 +233,21 @@ refresh(rt):
    - RevenueCat'e bilgi gider (abonelik iptali **kullanıcının mağazadan yapması gereken** bir işlemdir, uygulama bunu açıkça söyler)
 3. Kullanıcı süre içinde tekrar giriş yaparsa "Silme talebin var, geri almak ister misin?" sorusu gelir (`/user/me/restore`).
 4. Süre dolunca `account-delete` işi sırayla:
-   1. Apple refresh token'ı ile `appleid.apple.com/auth/revoke` çağrılır.
+   1. Firebase Authentication kullanıcısı silinir (Admin SDK, push ile aynı servis hesabı). Apple token iptali **istemcide** yapılır: silme onayında `FirebaseAuth.revokeTokenWithAuthorizationCode` (Apple yeniden yetkilendirme kodu ile). Sunucu Apple refresh token'ı tutmaz (0004'te kolon kaldırıldı).
    2. Bunny'deki tüm medya silinir ve purge edilir.
    3. RevenueCat `DELETE /subscribers/{id}` çağrılır (müşteri verisini silmek için).
    4. `DELETE FROM users WHERE id = ?` çalışır. FK cascade ile tüm kişisel tablolar gider.
    5. `audit_logs` kayıtları anonimleştirilir (`actor_id` NULL olur).
    6. Talep `completed` olur. Sentry ve log retention zaten süreli olduğundan ayrıca bir işlem yapılmaz.
-5. **Yedekler:** Silinen veri yedeklerde en fazla 35 gün kalır (PITR penceresi). Bu, aydınlatma metninde yazılır.
+5. **Yedekler:** Silinen veri yedeklerde en fazla 30 gün kalır (saatlik şifreli yedek, 30 gün saklama; `scripts/backup-db.sh`). Bu, aydınlatma metninde yazılır.
 
 ### 8.4 Saklama süreleri (retention)
 | Veri | Süre |
 |---|---|
 | Aktif hesap verisi | Hesap yaşadıkça |
-| İnaktif misafir hesap | 90 gün sonra silinir |
-| İnaktif kayıtlı hesap | 24 ay sonra uyarı e-postası/push, 30 gün sonra silme ([14 #11](14-acik-kararlar.md)) |
+| İnaktif misafir hesap | 90 gün sonra silinir (`users.last_active_at`, istekte saatte bir yazılır; aktif aboneliği olan hariç) |
+| Birleştirmede kapanan misafir | 30 gün sonra silinir |
+| İnaktif kayıtlı hesap | 24 ay sonra uyarı e-postası/push, 30 gün sonra silme ([14 #11](14-acik-kararlar.md)). **Henüz uygulanmadı** (e-posta kanalı yok) |
 | Yumuşak silinmiş kayıtlar | 30 gün |
 | Okunmuş bildirimler | 90 gün |
 | `push_deliveries` | 30 gün |
@@ -325,6 +326,16 @@ Ayrıntı: [09 §5](09-yapay-zeka.md#5-güvenlik-korkulukları).
   - Destek rolü PII'yi maskeli görür (`a***@g***.com`).
   - Ham sağlık verisi görüntüleme ayrı bir izin gerektirir ve gerekçe alanı ile loglanır.
 - **Denetim:** Her yönetici işlemi `audit_logs` tablosuna yazılır.
+- **Uygulama notları (F10):**
+  - argon2id Node'un yerleşik `crypto.argon2`'si ile (Node ≥ 24.7, ek bağımlılık yok); PHC biçimi.
+  - TOTP RFC 6238 (SHA1, 6 hane, 30 sn, ±1 adım); son kabul edilen adım saklanır, aynı kod tekrar kullanılamaz. Sır alan şifrelemesiyle saklanır.
+  - Bilinmeyen e-postada da şifre doğrulaması kadar süre harcanır (zamanlamadan hesap varlığı sızmaz); IP başına 15 dk'da 20 giriş denemesi.
+  - IP allowlist `ADMIN_IP_ALLOWLIST` (adres/CIDR, IPv4-mapped IPv6 dahil). Üretimde boşsa admin API **kapalı** (`403 admin_disabled`); bilinçli olarak her IP'ye açmak: `ADMIN_ALLOW_ANY_IP=true`.
+  - Token iptali: `admin_users.tokens_valid_after` — çıkış, şifre değişimi, sıfırlama, pasifleştirme ve rol değişikliğinde öncesinde verilmiş token'lar geçersiz.
+  - Geçici şifre (oluşturma/sıfırlama) ile girişte yalnızca `me`, şifre değiştirme ve çıkış açık (`403 password_change_required`).
+  - Kilitli hesap ayrı hata döndürmez (bilinmeyen hesapla aynı yanıt ve süre).
+  - Kullanıcı araması POST gövdesiyle (e-posta URL'de ve erişim loglarında görünmez).
+  - Kullanıcı arama yalnızca tam kimlik/e-posta ile (kısmi arama ile PII taraması yapılamaz); destek işlemleri gerekçe ister.
 
 ## 13. Tedarik zinciri & operasyon güvenliği
 
@@ -340,7 +351,7 @@ Ayrıntı: [09 §5](09-yapay-zeka.md#5-güvenlik-korkulukları).
   - `.env` dosya izni `600`; yalnızca uygulama kullanıcısı okuyabilir.
   - API önünde Nginx (TLS, gövde limiti); Node portu dışarıya açılmaz.
 - **Yedekleme:**
-  - Günlük tam yedek + binlog ile PITR (35 gün).
+  - Saatlik şifreli mantıksal yedek (mysqldump → AES-256 → Bunny, ayrı zone), 30 gün; cPanel MariaDB'de binlog/PITR yok → RPO ≤ 1 sa. Tatbikat: `scripts/restore-drill.sh`, kayıt: `docs/runbooks.md` (backend reposu).
   - Yedekler şifreli ve ayrı bir hesapta tutulur.
   - **Ayda bir geri yükleme tatbikatı** yapılır (runbook).
 - **Erişim:**

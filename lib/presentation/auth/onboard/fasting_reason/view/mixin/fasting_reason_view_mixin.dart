@@ -40,6 +40,7 @@ mixin FastingReasonViewMixin on State<FastingReasonView> {
   void onContinue() {
     final reason = context.read<FastingReasonBloc>().state.selected;
     if (reason == null) return;
+    getIt<OnboardingDraft>().fastingReason = reason;
     context.push(RoutePaths.reasonHighlight.path, extra: reason);
   }
 }

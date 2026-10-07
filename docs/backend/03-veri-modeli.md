@@ -396,6 +396,13 @@ CREATE TABLE struggle_events (
 
 ### 3.5 İçerik katalogları (`0005_content.sql`)
 
+> Uygulanan: `0006_content.sql`. Farklar: görseller mantıksal yol olarak saklanır (`image_idle/image_reached`,
+> `image`, `icon_image`); `struggle_translations` `intro` türü ve `session_*`, `done_button` alanlarını içerir;
+> makale aramasında `ngram` FULLTEXT yok (MariaDB'de bulunmuyor) — `search_text` üzerinde kelime başı eşleşmesi
+> uygulamada yapılır (içerik az, dil başına önbellekte). Küçük sıralı listeler (onboarding seçenekleri, sohbet
+> önerileri) için genel `catalog_items(namespace, code, sort_order, data JSON)` + metinleri `catalog_labels`'ta.
+> `user_insight_reads/bookmarks` henüz yok (okuma/yer imi özelliğiyle eklenir).
+
 ```sql
 -- Vücut evreleri (9) ve yeme penceresi evreleri (3) — tek tablo, tip ile ayrılır
 CREATE TABLE fasting_stages (
@@ -568,7 +575,7 @@ CREATE TABLE app_config (
 ) ENGINE=InnoDB;
 ```
 
-### 3.6 Takipçiler (`0006_trackers.sql`)
+### 3.6 Takipçiler (`0009_trackers.sql`; `weight_entries` → `0003_profile.sql`)
 
 ```sql
 CREATE TABLE weight_entries (
@@ -626,16 +633,19 @@ CREATE TABLE sleep_entries (
   tz                 VARCHAR(64)  NOT NULL,
   quality            TINYINT UNSIGNED NULL,        -- 1–5 (opsiyonel)
   source             ENUM('manual','apple_health','google_fit') NOT NULL DEFAULT 'manual',
+  external_id        VARCHAR(128) NULL,            -- sağlık örneğinin kimliği (senkron idempotent)
   created_at         DATETIME(3)  NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
   updated_at         DATETIME(3)  NOT NULL DEFAULT CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3),
   deleted_at         DATETIME(3)  NULL,
   PRIMARY KEY (id),
   KEY ix_sleep_user_date (user_id, local_date),
+  UNIQUE KEY uq_sleep_external (user_id, source, external_id),
   CONSTRAINT fk_sleep_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
   CONSTRAINT ck_sleep_order CHECK (sleep_end > sleep_start)
 ) ENGINE=InnoDB;
 
--- Öğün kayıtları + kalori/protein takibi TEK tabloda
+-- Öğün kayıtları + kalori/protein takibi TEK tabloda (meals ve hunger_checkins → `0010_meals_hunger.sql`;
+-- food_photo_analyses F5/F6'da)
 CREATE TABLE meals (
   id                 BINARY(16)   NOT NULL,
   user_id            BINARY(16)   NOT NULL,
@@ -655,7 +665,7 @@ CREATE TABLE meals (
   photo_media_id     BINARY(16)   NULL,
   analysis_id        BINARY(16)   NULL,
   source             ENUM('manual','ai_photo','quick_kcal') NOT NULL DEFAULT 'manual',
-  breaks_fast_session_id BINARY(16) NULL,          -- bu öğün bir orucu bitirdiyse
+  breaks_fast_session_id BINARY(16) NULL,          -- bu öğün bir orucu bitirdiyse (FK, SET NULL)
   created_at         DATETIME(3)  NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
   updated_at         DATETIME(3)  NOT NULL DEFAULT CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3),
   deleted_at         DATETIME(3)  NULL,
@@ -671,6 +681,7 @@ CREATE TABLE food_photo_analyses (
   media_id           BINARY(16)   NOT NULL,
   status             ENUM('queued','processing','succeeded','not_food','failed') NOT NULL DEFAULT 'queued',
   locale             VARCHAR(10)  NOT NULL,
+  quota_date         DATE         NOT NULL,       -- kotanın düşüldüğü yerel gün (iade aynı güne)
   model              VARCHAR(64)  NULL,
   prompt_version     VARCHAR(20)  NULL,
   result             JSON NULL,                    -- {mealTitle, items[], kcal, proteinG, carbsG, fatG, confidence}
@@ -703,20 +714,24 @@ CREATE TABLE hunger_checkins (
   safety_flag        TINYINT(1) NOT NULL DEFAULT 0,   -- baş dönmesi + bulantı vb.
   scoring_version    TINYINT UNSIGNED NOT NULL DEFAULT 1,
   notes_enc          VARBINARY(4096) NULL,
-  fasting_session_id BINARY(16) NULL,
+  fasting_session_id BINARY(16) NULL,             -- kayıt anındaki aktif oruç (FK, SET NULL)
+  fasted_minutes     SMALLINT UNSIGNED NULL,       -- bağlam puanının hesaplandığı oruç süresi
   created_at         DATETIME(3)  NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
   deleted_at         DATETIME(3)  NULL,
   PRIMARY KEY (id),
   KEY ix_hunger_user_date (user_id, local_date, result_type),
+  KEY ix_hunger_user_time (user_id, logged_at),
   CONSTRAINT fk_hunger_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 ) ENGINE=InnoDB;
 ```
 
-### 3.7 Özetler, istatistikler, oyunlaştırma (`0007_aggregates.sql`)
+### 3.7 Özetler, istatistikler, oyunlaştırma (`0008_aggregates.sql`; `user_stats` → `0003_profile.sql`)
 
 ```sql
--- Grafiklerin, serinin, hafta şeridinin ve dünyanın tek kaynağı. Olaylarla artımlı güncellenir,
--- gece işiyle yeniden doğrulanır (idempotent yeniden hesaplama).
+-- Grafiklerin, serinin, hafta şeridinin ve dünyanın tek kaynağı. Her oruç yazmasında aynı
+-- transaction'da yeniden yazılır, gece işiyle doğrulanır (idempotent yeniden hesaplama).
+-- Satır yalnızca etkinlik olan günler için açılır; boş günün hedefi ve seri durumu plan
+-- geçmişinden (user_plans.started_on) hesaplanır.
 CREATE TABLE daily_summaries (
   user_id            BINARY(16) NOT NULL,
   local_date         DATE       NOT NULL,
@@ -724,7 +739,6 @@ CREATE TABLE daily_summaries (
   fast_goal_minutes  SMALLINT UNSIGNED NULL,       -- o günün plan hedefi (anlık görüntü)
   fasts_completed    TINYINT UNSIGNED NOT NULL DEFAULT 0,
   is_required_fast_day TINYINT(1) NOT NULL DEFAULT 1, -- haftalık planlarda normal gün = 0
-  streak_counted     TINYINT(1) NOT NULL DEFAULT 0,
   water_ml           MEDIUMINT UNSIGNED NOT NULL DEFAULT 0,
   water_goal_ml      SMALLINT UNSIGNED NULL,
   steps              MEDIUMINT UNSIGNED NOT NULL DEFAULT 0,
@@ -769,22 +783,23 @@ CREATE TABLE user_stats (
   CONSTRAINT fk_stats_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 ) ENGINE=InnoDB;
 
+-- ref_key: oruçta seans id'si (hex), seri taşında "<gün>:<serinin ilk günü>".
+-- NULL'a izin veren ref_id + UNIQUE yerine: NULL değerler UNIQUE'i deler, aynı olay iki kez yazılabilirdi.
 CREATE TABLE xp_events (
-  id                 BINARY(16) NOT NULL,
   user_id            BINARY(16) NOT NULL,
   reason             ENUM('fast_completed','fast_goal_bonus','meal_logged','water_goal','weight_logged',
                           'hunger_checkin','challenge_completed','streak_milestone') NOT NULL,
+  ref_key            VARCHAR(64) NOT NULL,
   amount             SMALLINT NOT NULL,
-  ref_id             BINARY(16) NULL,
   local_date         DATE NOT NULL,
   created_at         DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
-  PRIMARY KEY (id),
-  UNIQUE KEY uq_xp_ref (user_id, reason, ref_id),   -- aynı olay iki kez puan vermez
+  PRIMARY KEY (user_id, reason, ref_key),           -- aynı olay iki kez puan vermez
   KEY ix_xp_user_date (user_id, local_date),
   CONSTRAINT fk_xp_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 ) ENGINE=InnoDB;
 
--- Mochi World bölge eşikleri (yönetilebilir)
+-- Mochi World ve challenge tabloları: `0014_gamification.sql` (F7). Farklar: challenges.participants_count YOK
+-- (gerçek sayı sorguyla); challenge_participants.ix_challenge_part_challenge eklendi; fixed pencere için CHECK.
 CREATE TABLE world_zone_thresholds (
   zone               ENUM('forest','lake','summit','garden') NOT NULL,
   level              TINYINT UNSIGNED NOT NULL,     -- 1..4
@@ -855,7 +870,9 @@ CREATE TABLE challenge_participants (
 ) ENGINE=InnoDB;
 ```
 
-### 3.8 Yapay zekâ & sohbet (`0008_ai.sql`)
+### 3.8 Yapay zekâ & sohbet (`0012_ai.sql`: analiz, kota, kullanım; `0013_chat.sql`: konuşma ve mesajlar)
+
+> `0013_chat.sql` farkları: `chat_conversations.summary_message_count`, `context_ref`; `chat_messages.safety ENUM('none','urgent')`, `feedback_reason`, `context_enc VARBINARY(8192)`. `chat_suggestions` tabloları oluşturulmadı: öneriler katalogda (`catalog_items`/`catalog_labels`, ad alanı `chat_suggestion`).
 
 ```sql
 CREATE TABLE chat_conversations (
@@ -917,11 +934,12 @@ CREATE TABLE chat_suggestion_translations (
 CREATE TABLE ai_usage_daily (
   user_id            BINARY(16) NOT NULL,
   usage_date         DATE NOT NULL,                 -- UTC gün (maliyet raporlaması)
-  feature            ENUM('chat','photo_analysis','daily_tip') NOT NULL,
+  feature            ENUM('chat','photo_analysis','daily_tip','chat_summary') NOT NULL,
   requests           SMALLINT UNSIGNED NOT NULL DEFAULT 0,
   input_tokens       INT UNSIGNED NOT NULL DEFAULT 0,
   output_tokens      INT UNSIGNED NOT NULL DEFAULT 0,
   cache_read_tokens  INT UNSIGNED NOT NULL DEFAULT 0,
+  cache_write_tokens INT UNSIGNED NOT NULL DEFAULT 0,
   cost_micro_usd     INT UNSIGNED NOT NULL DEFAULT 0,
   PRIMARY KEY (user_id, usage_date, feature),
   CONSTRAINT fk_ai_usage_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
@@ -942,7 +960,9 @@ CREATE TABLE ai_quota_daily (
 ) ENGINE=InnoDB;
 ```
 
-### 3.9 Bildirimler (`0009_notifications.sql`)
+### 3.9 Bildirimler (`0016_notifications.sql`; `notifications` inbox `0015`'te)
+
+> Farklar: `notification_templates.quiet_hours` / `max_delay_min` / `priority`; `scheduled_notifications.sent_at`, `category`, `pushed` (frekans sınırı join'siz sayılır); `notifications.type` için şablon FK'si yok (kodda doğrulanır); `user_settings.notif_world`.
 
 ```sql
 CREATE TABLE notification_templates (
@@ -1020,6 +1040,8 @@ CREATE TABLE push_deliveries (                       -- 30 gün saklanır
 ### 3.10 Abonelik (`0010_subscriptions.sql`)
 
 ```sql
+-- 0015_subscriptions.sql (F8). Farklar: store ENUM'una amazon/mac_app_store/rc_billing/other, period_type'a prepaid,
+-- management_url sütunu eklendi; original_transaction_id yok. notifications (inbox) da 0015'te, şablon FK'si F9'da.
 CREATE TABLE subscriptions (
   id                 BINARY(16) NOT NULL,
   user_id            BINARY(16) NOT NULL,
@@ -1064,7 +1086,7 @@ CREATE TABLE media (
   owner_user_id      BINARY(16) NULL,               -- NULL = yönetici içeriği
   purpose            ENUM('avatar','meal_photo','insight_cover','challenge_image','plan_image','data_export') NOT NULL,
   visibility         ENUM('private','public') NOT NULL,
-  storage_path       VARCHAR(400) NOT NULL,         -- 'u/<rand>/meals/2026/10/<id>.webp' (PII içermez)
+  storage_path       VARCHAR(400) NOT NULL,         -- varyant öneki 'u/<ownerKey>/meals/2026/10/<id>' (PII içermez)
   variants           JSON NULL,                     -- {"thumb":"…_256.webp","md":"…_1024.webp"}
   mime               VARCHAR(40) NOT NULL,          -- daima image/webp (yeniden kodlanmış)
   bytes              INT UNSIGNED NOT NULL,
@@ -1077,6 +1099,7 @@ CREATE TABLE media (
   deleted_at         DATETIME(3) NULL,
   PRIMARY KEY (id),
   KEY ix_media_owner (owner_user_id, purpose, created_at),
+  KEY ix_media_owner_hash (owner_user_id, sha256),  -- 24 sa içinde yinelenen yükleme
   KEY ix_media_status (status, created_at),
   CONSTRAINT fk_media_owner FOREIGN KEY (owner_user_id) REFERENCES users(id) ON DELETE SET NULL
 ) ENGINE=InnoDB;
@@ -1084,7 +1107,11 @@ CREATE TABLE media (
 -- kuyruğa atar ve satırları 'deleted' işaretler. Yetim satırlar temizlik işiyle silinir.
 ```
 
-### 3.12 Uyumluluk, yönetim, denetim (`0012_compliance_admin.sql`)
+### 3.12 Uyumluluk, yönetim, denetim (`0017_compliance.sql`; `audit_logs`, `user_consents` 0002'de, yönetici tabloları F10 2. hafta)
+
+> **0018_admin:** `admin_users` (+ `totp_last_step`, `failed_attempts`, `locked_until`; `totp_secret_enc` NOT NULL), `catalog_documents` (bölüm, sürüm, `source seed|admin`, seed biçimi doküman; son 30 sürüm), `user_activity_daily` (UTC gün × kullanıcı; DAU/MAU raporu, 400 gün).
+>
+> Uygulanan farklar: `account_deletion_requests.source` (`user` | `inactive_guest` | `guest_retired`) ve `last_error`; `data_export_requests.bytes`, `last_error`, `media_id` FK (SET NULL). Silme talebi geri alınabilir yalnızca `source = user` iken.
 
 ```sql
 CREATE TABLE account_deletion_requests (

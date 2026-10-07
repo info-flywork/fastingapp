@@ -13,6 +13,16 @@
 > Misafir kullanıcı da UUID'ye sahip olduğu için satın alma yapabilir.
 > Misafir hesap sosyal hesaba yükseltildiğinde **ID değişmez** ve abonelik korunur ([05 §11](05-is-kurallari.md#11-misafir-hesap-birleştirme)).
 
+## 1b. Uygulama (F8)
+
+- **Paywall:** tamamen RevenueCat (Paywalls, `purchases_ui_flutter`); sunucuda paywall kodu yok.
+- **Ayarlar:** `REVENUECAT_SECRET_API_KEY` (v1 REST, `sk_…`), `REVENUECAT_WEBHOOK_AUTH` (panelde webhook "Authorization header" değeriyle **birebir** aynı), `REVENUECAT_ENTITLEMENT=premium`, `REVENUECAT_ALLOW_SANDBOX` (boş: üretim dışında true, üretimde false).
+- **Kod:** `src/infra/revenuecat.js` (REST + `mapSubscriber` + `grantsAccess`), `src/modules/billing/` (entitlement önbelleği 30 sn, senkron, webhook, olay işi, premium kaybı, promosyon), `scripts/grant-premium.js` (`npm run premium:grant -- <userId> monthly`; panel F10'da).
+- **Durum eşlemesi:** iade → `refunded`; süresiz ya da süresi gelmemiş → `active` (ödeme sorunu varsa `billing_issue`, erişim sürer); süre geçmiş ama grace içinde → `in_grace` (erişim sürer); değilse `expired`. RevenueCat'te entitlement hiç yoksa kayıt `expired` yapılır.
+- **Bekleyen plan:** onboarding'de seçilip premium olmadığı için bekleyen plan (`pendingPlanCode`), premium gelir gelmez senkronda etkinleşir.
+- **Premium kaybı:** saatlik `premiumDowngrade` işi; aboneliği `expired`/`refunded` ve bitişi kullanıcının yerel gününe göre dün ya da önce olan kullanıcıların premium planı 16:8'e düşer, `notifications` tablosuna `premium_expired` kaydı (`{fromPlan, toPlan}`) yazılır. Push F9'da.
+- **TRANSFER:** olaydaki `transferred_from` / `transferred_to` kullanıcılarının hepsi senkronlanır. `$RCAnonymousID:` olayları `anonymous_user` notuyla kapanır (istemci sync ile düzeltir).
+
 ## 2. Premium özellik matrisi
 
 FAQ metnine ve mevcut UI'a göre:

@@ -36,6 +36,7 @@ mixin WeightHistoryViewMixin on State<WeightHistoryView> {
 
   Future<void> onHistorySelected(OnboardingWeightHistory history) async {
     context.read<WeightHistoryBloc>().add(WeightHistorySelected(history));
+    getIt<OnboardingDraft>().weightHistory = history;
     await Future<void>.delayed(const Duration(milliseconds: 350));
     if (!mounted) return;
     // "İlk seferim" engel sorusunu atlar; languageLevel eski stub (Level 1/2/3)

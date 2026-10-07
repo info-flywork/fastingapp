@@ -3,11 +3,17 @@ import 'dart:math' as math;
 
 import 'package:easy_localization/easy_localization.dart';
 import 'package:fastingapp/core/bottom_sheets/app_bottom_sheets.dart';
+import 'package:fastingapp/core/di/injection.dart';
 import 'package:fastingapp/core/dialogs/app_dialogs.dart';
 import 'package:fastingapp/core/router/route_paths.dart';
+import 'package:fastingapp/core/snackbar/app_snackbar.dart';
 import 'package:fastingapp/core/theme/app_text_styles.dart';
+import 'package:fastingapp/core/utils/enum/snackbar_type.dart';
+import 'package:fastingapp/core/utils/extensions/future_extensions.dart';
+import 'package:fastingapp/domain/auth/auth_exception.dart';
 import 'package:fastingapp/generated/assets.gen.dart';
 import 'package:fastingapp/generated/colors.gen.dart';
+import 'package:fastingapp/presentation/auth/bloc/auth_bloc.dart';
 import 'package:fastingapp/presentation/auth/onboard/about_you/bloc/about_you_bloc.dart';
 import 'package:fastingapp/presentation/auth/onboard/about_you/gender_options_catalog.dart';
 import 'package:fastingapp/presentation/auth/onboard/diet/bloc/diet_bloc.dart';
@@ -159,6 +165,12 @@ class _EditProfileViewState extends State<EditProfileView>
                   ),
                 ],
               ),
+            ),
+            const SizedBox(height: 24),
+            ProfileDangerCard(
+              icon: Assets.icons.solarTrashBinTrashBoldDuotone,
+              label: 'profile.delete_account'.tr(),
+              onTap: onDeleteAccount,
             ),
           ],
         ),
