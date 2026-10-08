@@ -140,6 +140,10 @@
                 android:name="android.appwidget.provider"
                 android:resource="@xml/fasting_widget_week_info" />
         </receiver>
+        <!-- FCM: kanalı belirtilmeyen bildirimler (MainActivity kanalları oluşturur). -->
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_channel_id"
+            android:value="default" />
     </application>
     <!-- Required to query activities that can process text, see:
          https://developer.android.com/training/package-visibility and

@@ -13,6 +13,7 @@ import 'package:fastingapp/core/widgets/app_button_decoration.dart';
 import 'package:fastingapp/core/widgets/bottom_navigation_bar/app_bottom_nav.dart';
 import 'package:fastingapp/core/widgets/flip_clock_unit.dart';
 import 'package:fastingapp/core/widgets/weight_progress_bar.dart';
+import 'package:fastingapp/data/model/user/home_summary.dart';
 import 'package:fastingapp/data/model/user/user.dart';
 import 'package:fastingapp/data/model/user/user_progress.dart';
 import 'package:fastingapp/generated/app_images.g.dart';
@@ -64,11 +65,17 @@ class _HomeViewState extends State<HomeView> with HomeViewMixin {
           builder: (context, state) {
             return switch (state) {
               HomeInitial() || HomeLoading() => const HomeLoadingBody(),
-              HomeLoaded(:final user, :final progress, :final isPremium) =>
+              HomeLoaded(
+                :final user,
+                :final progress,
+                :final isPremium,
+                :final summary,
+              ) =>
                 HomeLoadedBody(
                   user: user,
                   progress: progress,
                   isPremium: isPremium,
+                  summary: summary,
                   onPremiumTapped: onPremiumTapped,
                   onChatTapped: onChatTapped,
                   onWaterTapped: onWaterTapped,

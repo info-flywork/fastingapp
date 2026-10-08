@@ -58,6 +58,8 @@ Onboarding'in **başında** çağrılır. Sahte `local-onboarding-session` token
 
 Aynı `installId` için tekrar çağrılırsa mevcut misafir kullanıcıya **yeni oturum** açılır (yeni kullanıcı oluşturulmaz).
 
+**Misafir sırrı:** yanıtta `guestSecret` (`gs_…`) yalnızca yeni verildiğinde döner (misafir oluşturulurken ya da eski sırsız misafirin ilk girişinde); istemci güvenli depoda saklar ve aynı `installId` ile sonraki her girişte gövdede `guestSecret` gönderir. Eksik/yanlışsa `401 UNAUTHENTICATED {reason: "guest_secret_invalid"}` — istemci yeni `installId` ile yeni misafir açar. `POST /auth/register {provider:"guest"}` için de aynı kural.
+
 **Rate limit:**
 - IP başına 10/saat
 - installId başına 5/saat

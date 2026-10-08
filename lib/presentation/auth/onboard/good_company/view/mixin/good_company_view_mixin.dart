@@ -20,6 +20,12 @@ mixin GoodCompanyViewMixin on State<GoodCompanyView> {
       );
       return;
     }
+    // Bildirim izni: plan hazırken (hedef/yeme penceresi hatırlatmaları).
+    // Yanıt ne olursa olsun cihaz kaydı izni/token'ı sunucuya bildirir.
+    await getIt<PushService>().requestPermission().catchError(
+      (Object _) => false,
+    );
+    unawaited(getIt<AuthRepository>().registerDevice());
     if (!mounted) return;
     context.go(RoutePaths.login.path);
   }

@@ -18,4 +18,6 @@
     <string name="fasting_widget_omh_description">Plan ve motivasyon</string>
     <string name="fasting_widget_week_name">Bu hafta</string>
     <string name="fasting_widget_week_description">Haftalık oruç özeti</string>
+    <string name="notification_channel_default">Bildirimler</string>
+    <string name="notification_channel_quiet">Sessiz bildirimler</string>
 </resources>

@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 import 'dart:ui';
 
@@ -16,6 +17,9 @@ import 'package:fastingapp/data/model/auth/no_content.dart';
 import 'package:fastingapp/data/model/user/user.dart';
 import 'package:fastingapp/domain/auth/auth_exception.dart';
 import 'package:fastingapp/domain/auth/social_auth_service.dart';
+import 'package:fastingapp/domain/notification/push_service.dart';
+import 'package:flutter_timezone/flutter_timezone.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 
 /// Login, register, guest, refresh token ve profil işleri. (Doküman 7)
 final class AuthRepository {
@@ -25,6 +29,7 @@ final class AuthRepository {
     this._sharedPrefManager,
     this._deviceManager,
     this._socialAuthService,
+    this._pushService,
   );
 
   final NetworkManager _networkManager;
@@ -32,6 +37,7 @@ final class AuthRepository {
   final SharedPrefManager _sharedPrefManager;
   final DeviceManager _deviceManager;
   final SocialAuthService _socialAuthService;
+  final PushService _pushService;
 
   Future<AuthResponse> loginWithGoogle() async =>
       _register(await _socialAuthService.signInWithGoogle());
@@ -40,24 +46,36 @@ final class AuthRepository {
       _register(await _socialAuthService.signInWithApple());
 
   /// Cihaz başına tek misafir; aynı kurulum tekrar çağırırsa aynı hesap döner.
-  Future<AuthResponse> loginAsGuest({bool restoreAccount = false}) async {
+  /// Misafir sırrı oluşturulurken alınır, sonraki girişlerde gönderilir; sır
+  /// geçersizse (ör. Keychain silinmiş) yeni kurulum kimliğiyle yeni misafir.
+  Future<AuthResponse> loginAsGuest({
+    bool restoreAccount = false,
+    bool retried = false,
+  }) async {
     final request = AuthGuestRequest(
       installId: await _deviceManager.getDeviceId(),
       platform: _platform,
       locale: _locale,
       restoreAccount: restoreAccount ? true : null,
+      guestSecret: await _deviceManager.getGuestSecret(),
     );
-    return _pendingDeletionAware(
-      () async => _save(
-        await _networkManager.send<AuthResponse>(
+    try {
+      return await _pendingDeletionAware(() async {
+        final result = await _networkManager.send<AuthResponse>(
           path: '/auth/guest',
           method: RequestType.post,
           data: request.toJson(),
           parserModel: AuthResponse.fromJson,
-        ),
-      ),
-      restore: () => loginAsGuest(restoreAccount: true),
-    );
+        );
+        final secret = result?.guestSecret;
+        if (secret != null) await _deviceManager.saveGuestSecret(secret);
+        return _save(result);
+      }, restore: () => loginAsGuest(restoreAccount: true));
+    } on NetworkException catch (e) {
+      if (retried || e.details?['reason'] != 'guest_secret_invalid') rethrow;
+      await _deviceManager.resetInstall();
+      return loginAsGuest(restoreAccount: restoreAccount, retried: true);
+    }
   }
 
   /// Hesap silme talebi (7 gün sonra kalıcı). Apple ile girildiyse önce Apple
@@ -173,6 +191,40 @@ final class AuthRepository {
   }
 
   Future<bool> isAuthenticated() async => await cachedSession() != null;
+
+  /// Cihaz kaydı (`PUT /devices/current`): açılışta ve girişte. Sunucu cihazın
+  /// saat dilimini, dilini ve sürümünü günceller; push token burada
+  /// gönderilmez (alan gönderilmezse sunucu dokunmaz). Hata yutulur.
+  Future<void> registerDevice() async {
+    try {
+      final results = await Future.wait<String>([
+        FlutterTimezone.getLocalTimezone().then((t) => t.identifier),
+        PackageInfo.fromPlatform().then((p) => p.version),
+        _deviceManager.getDeviceId(),
+      ]);
+      final os = Platform.operatingSystemVersion;
+      final push = await _pushService.currentToken();
+      _pushService.listenTokenRefresh(() => unawaited(registerDevice()));
+      await _networkManager.send<NoContent>(
+        path: '/devices/current',
+        method: RequestType.put,
+        data: {
+          'installId': results[2],
+          'platform': _platform,
+          'appVersion': results[1],
+          'osVersion': os.length > 32 ? os.substring(0, 32) : os,
+          'timezone': results[0],
+          'locale': ?_locale,
+          'pushEnabled': push.enabled,
+          // Token yoksa alan gönderilmez (sunucudaki token korunur).
+          'pushToken': ?push.token,
+        },
+        parserModel: NoContent.fromJson,
+      );
+    } on Object {
+      // Kayıt bir sonraki açılışta tekrar denenir.
+    }
+  }
 
   bool isFirstLaunch() => _sharedPrefManager.isFirstLaunch;
 

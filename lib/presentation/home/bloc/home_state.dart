@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import 'package:fastingapp/data/model/user/home_summary.dart';
 import 'package:fastingapp/data/model/user/user.dart';
 import 'package:fastingapp/data/model/user/user_progress.dart';
 
@@ -22,14 +23,18 @@ final class HomeLoaded extends HomeState {
     required this.user,
     required this.progress,
     required this.isPremium,
+    this.summary,
   });
 
   final User user;
   final UserProgress progress;
   final bool isPremium;
 
+  /// Kartların gerçek verisi (`GET /user/summary`).
+  final HomeSummary? summary;
+
   @override
-  List<Object?> get props => [user, progress, isPremium];
+  List<Object?> get props => [user, progress, isPremium, summary];
 }
 
 final class HomeError extends HomeState {

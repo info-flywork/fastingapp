@@ -1,7 +1,11 @@
+import 'dart:async';
+
 import 'package:easy_localization/easy_localization.dart';
+import 'package:fastingapp/core/di/injection.dart';
 import 'package:fastingapp/core/theme/app_text_styles.dart';
 import 'package:fastingapp/core/widgets/app_button.dart';
 import 'package:fastingapp/core/widgets/app_button_decoration.dart';
+import 'package:fastingapp/domain/notification/notifications_repository.dart';
 import 'package:fastingapp/generated/app_images.g.dart';
 import 'package:fastingapp/generated/assets.gen.dart';
 import 'package:fastingapp/generated/colors.gen.dart';
@@ -24,6 +28,8 @@ final class AppNotificationItem {
     required this.hoursAgo,
     this.weightKg,
     this.bodyKey,
+    this.title,
+    this.body,
   });
 
   final String id;
@@ -32,6 +38,10 @@ final class AppNotificationItem {
   final int hoursAgo;
   final double? weightKg;
   final String? bodyKey;
+
+  /// Sunucunun hazırladığı metinler (varsa çeviri anahtarlarının yerine).
+  final String? title;
+  final String? body;
 }
 
 /// Bildirim kutusu — liste + boş durum + swipe silme.

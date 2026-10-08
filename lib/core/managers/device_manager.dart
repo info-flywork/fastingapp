@@ -12,6 +12,7 @@ final class DeviceManager {
   final FlutterSecureStorage _storage;
 
   static const _installIdKey = 'install_id';
+  static const _guestSecretKey = 'guest_secret';
 
   String? _cached;
 
@@ -25,6 +26,21 @@ final class DeviceManager {
       await _storage.write(key: _installIdKey, value: id);
     }
     return _cached = id;
+  }
+
+  /// Misafir sırrı (backend oluştururken bir kez verir); kurulum kimliğiyle
+  /// birlikte saklanır.
+  Future<String?> getGuestSecret() => _storage.read(key: _guestSecretKey);
+
+  Future<void> saveGuestSecret(String secret) =>
+      _storage.write(key: _guestSecretKey, value: secret);
+
+  /// Sır kaybolduysa (ya da geçersizse) eski misafire girilemez: yeni kurulum
+  /// kimliği ile yeni misafir açılır.
+  Future<void> resetInstall() async {
+    _cached = null;
+    await _storage.delete(key: _installIdKey);
+    await _storage.delete(key: _guestSecretKey);
   }
 
   static String _uuidV4() {

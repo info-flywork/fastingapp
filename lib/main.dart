@@ -3,6 +3,7 @@ import 'package:fastingapp/app.dart';
 import 'package:fastingapp/core/di/injection.dart';
 import 'package:fastingapp/core/init/app_init.dart';
 import 'package:fastingapp/core/managers/localization_manager.dart';
+import 'package:fastingapp/core/push/push_open_handler.dart';
 import 'package:flutter/widgets.dart';
 
 Future<void> main() async {
@@ -16,4 +17,6 @@ Future<void> main() async {
       child: const MyApp(),
     ),
   );
+  // Push'a dokunma: okundu + ilgili ekran.
+  PushOpenHandler.start();
 }

@@ -2,21 +2,34 @@ part of '../home_view.dart';
 
 /// Home kilo kayıtları kartı — su/adım kartlarının 12px altında.
 final class HomeWeightCard extends StatelessWidget {
-  const HomeWeightCard({this.onTap, this.onEditTap, super.key});
+  const HomeWeightCard({
+    this.currentKg,
+    this.startKg,
+    this.goalKg,
+    this.onTap,
+    this.onEditTap,
+    super.key,
+  });
 
+  /// Sunucu özetinden (`summary.weight`); kayıt yoksa null.
+  final double? currentKg;
+  final double? startKg;
+  final double? goalKg;
   final VoidCallback? onTap;
   final VoidCallback? onEditTap;
 
-  static const currentKg = 102.5;
-  static const _startKg = 112.2;
-  static const _targetKg = 75.2;
+  /// Düzenleme diyaloğu için kilo bilinmiyorsa başlangıç değeri.
+  static const fallbackKg = 70.0;
 
   @override
   Widget build(BuildContext context) {
-    final progress = ((_startKg - currentKg) / (_startKg - _targetKg)).clamp(
-      0.0,
-      1.0,
-    );
+    final current = currentKg ?? startKg ?? fallbackKg;
+    final start = startKg ?? current;
+    final target = goalKg ?? current;
+    final span = start - target;
+    final progress = span == 0
+        ? 0.0
+        : ((start - current) / span).clamp(0.0, 1.0);
 
     return GestureDetector(
       onTap: onTap,
@@ -52,10 +65,7 @@ final class HomeWeightCard extends StatelessWidget {
             Row(
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
-                Text(
-                  _formatKg(currentKg),
-                  style: AppTextStyles.homeWeightValue,
-                ),
+                Text(_formatKg(current), style: AppTextStyles.homeWeightValue),
                 Padding(
                   padding: const EdgeInsets.only(left: 4, bottom: 4),
                   child: Text(
@@ -80,17 +90,17 @@ final class HomeWeightCard extends StatelessWidget {
             const SizedBox(height: 16),
             WeightProgressBar(progress: progress),
             const SizedBox(height: 16),
-            const Row(
+            Row(
               children: [
                 Expanded(
                   child: _WeightBoundLabel(
                     labelKey: 'home.weight_start',
-                    kg: _startKg,
+                    kg: start,
                   ),
                 ),
                 _WeightBoundLabel(
                   labelKey: 'home.weight_target',
-                  kg: _targetKg,
+                  kg: target,
                   alignEnd: true,
                 ),
               ],

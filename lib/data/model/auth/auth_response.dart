@@ -8,15 +8,17 @@ part 'auth_response.g.dart';
 
 /// Giriş/kayıt yanıtı: token + kullanıcı.
 @JsonSerializable()
-final class AuthResponse extends Equatable
-    implements BaseModel<AuthResponse> {
-  const AuthResponse({this.token, this.user});
+final class AuthResponse extends Equatable implements BaseModel<AuthResponse> {
+  const AuthResponse({this.token, this.user, this.guestSecret});
 
   factory AuthResponse.fromJson(Map<String, dynamic> json) =>
       _$AuthResponseFromJson(json);
 
   final Token? token;
   final User? user;
+
+  /// Misafir sırrı: yalnızca yeni verildiğinde (güvenli depoda saklanır).
+  final String? guestSecret;
 
   @override
   AuthResponse fromJson(Map<String, dynamic> json) =>
@@ -26,5 +28,5 @@ final class AuthResponse extends Equatable
   Map<String, dynamic> toJson() => _$AuthResponseToJson(this);
 
   @override
-  List<Object?> get props => [token, user];
+  List<Object?> get props => [token, user, guestSecret];
 }

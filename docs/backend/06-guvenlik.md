@@ -46,7 +46,7 @@ Doğrulama yereldir: Google'ın açık anahtarları (`securetoken@system.gservic
 
 **Misafir (backend'de, Firebase anonim girişi kullanılmaz):**
 - **Cihaz başına tek misafir:** `installId` ile hesap oluşturulur; aynı `installId` her zaman aynı misafire yeni oturum açar (yeni hesap açılmaz).
-- `installId` misafirin tek kimlik bilgisidir: istemci **kriptografik rastgele** UUID v4 üretir ve güvenli depoda (iOS Keychain, Android Keystore/EncryptedSharedPreferences) saklar; cihazdan türetilen kimlik (`ANDROID_ID` vb.) kullanılmaz ([13](13-flutter-entegrasyonu.md)). Uygulama `DeviceManager` bunu yapar. Sunucu tarafı misafir sırrı (hash'iyle saklanan) ileride eklenebilir.
+- `installId` misafirin tek kimlik bilgisidir: istemci **kriptografik rastgele** UUID v4 üretir ve güvenli depoda (iOS Keychain, Android Keystore/EncryptedSharedPreferences) saklar; cihazdan türetilen kimlik (`ANDROID_ID` vb.) kullanılmaz ([13](13-flutter-entegrasyonu.md)). Uygulama `DeviceManager` bunu yapar. Ayrıca **misafir sırrı** (F11): misafir oluşturulurken sunucu `gs_…` (256 bit) sır üretip bir kez döner, `auth_identities.secret_hash`'te SHA-256'sı tutulur; aynı `installId` ile sonraki girişlerde `guestSecret` zorunludur (`401 guest_secret_invalid`). Eski sırsız misafirlere ilk girişte sır verilir. İstemci sırrı kaybederse yeni `installId` ile yeni misafir açar.
 - Misafir sosyal hesaba yükseltilince ya da başka hesaba geçilince misafir kimliği silinir; aynı cihazda sonraki misafir girişi yeni bir misafir açar (sosyal hesaba `installId` ile girilemez).
 - **Rate limit:**
   - IP başına 10/saat

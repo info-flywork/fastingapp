@@ -8,6 +8,7 @@ final class HomeLoadedBody extends StatelessWidget {
     required this.user,
     required this.progress,
     required this.isPremium,
+    required this.summary,
     required this.onPremiumTapped,
     required this.onChatTapped,
     required this.onWaterTapped,
@@ -22,6 +23,7 @@ final class HomeLoadedBody extends StatelessWidget {
   final User user;
   final UserProgress progress;
   final bool isPremium;
+  final HomeSummary? summary;
   final VoidCallback onPremiumTapped;
   final VoidCallback onChatTapped;
   final VoidCallback onWaterTapped;
@@ -51,7 +53,7 @@ final class HomeLoadedBody extends StatelessWidget {
   Widget _buildItem(int index) {
     return switch (index) {
       0 => HomeTopBar(
-        streakDays: progress.streakDays > 0 ? progress.streakDays : 3,
+        streakDays: progress.streakDays,
         isPremium: isPremium,
         onPremiumTapped: onPremiumTapped,
         onChatTapped: onChatTapped,
@@ -60,10 +62,20 @@ final class HomeLoadedBody extends StatelessWidget {
       2 => const HomeFastingCard(),
       3 => const HomeChallengeCard(),
       4 => HomeMetricCards(
+        waterMl: summary?.waterMl ?? 0,
+        waterGoalMl: summary?.waterGoalMl ?? 2500,
+        steps: summary?.steps ?? 0,
+        stepsGoal: summary?.stepsGoal ?? 8000,
         onWaterTapped: onWaterTapped,
         onStepsTapped: onStepsTapped,
       ),
-      5 => HomeWeightCard(onTap: onWeightTapped, onEditTap: onWeightEditTapped),
+      5 => HomeWeightCard(
+        currentKg: summary?.weightCurrentKg,
+        startKg: summary?.weightStartKg,
+        goalKg: summary?.weightGoalKg,
+        onTap: onWeightTapped,
+        onEditTap: onWeightEditTapped,
+      ),
       6 => const HomeMetabolicCard(),
       7 => HomeMealRecordsCard(onTap: onMealRecordsTapped),
       8 => HomeHungerTrackerCard(onTap: onHungerTrackerTapped),

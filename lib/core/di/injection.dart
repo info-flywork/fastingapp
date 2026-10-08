@@ -10,7 +10,9 @@ import 'package:fastingapp/core/network/dio_client.dart';
 import 'package:fastingapp/core/network/network_manager.dart';
 import 'package:fastingapp/domain/auth/auth_repository.dart';
 import 'package:fastingapp/domain/auth/social_auth_service.dart';
+import 'package:fastingapp/domain/fasting/forecast_repository.dart';
 import 'package:fastingapp/domain/notification/notifications_repository.dart';
+import 'package:fastingapp/domain/notification/push_service.dart';
 import 'package:fastingapp/domain/onboarding/onboarding_draft.dart';
 import 'package:fastingapp/domain/onboarding/onboarding_repository.dart';
 import 'package:fastingapp/domain/product/product_repository.dart';
@@ -69,8 +71,13 @@ Future<void> configureDependencies() async {
     ..registerLazySingleton<NetworkManager>(() => NetworkManager(getIt()))
     // ── Repositories / Services ──
     ..registerLazySingleton<SocialAuthService>(SocialAuthService.new)
+    ..registerLazySingleton<PushService>(PushService.new)
     ..registerLazySingleton<AuthRepository>(
-      () => AuthRepository(getIt(), getIt(), getIt(), getIt(), getIt()),
+      () =>
+          AuthRepository(getIt(), getIt(), getIt(), getIt(), getIt(), getIt()),
+    )
+    ..registerLazySingleton<ForecastRepository>(
+      () => ForecastRepository(getIt()),
     )
     ..registerLazySingleton<OnboardingDraft>(OnboardingDraft.new)
     ..registerLazySingleton<OnboardingRepository>(
@@ -105,5 +112,5 @@ Future<void> configureDependencies() async {
     ..registerFactory<FastingPlanBloc>(FastingPlanBloc.new)
     ..registerFactory<MealWindowBloc>(MealWindowBloc.new)
     ..registerFactory<LanguageLevelBloc>(() => LanguageLevelBloc(getIt()))
-    ..registerFactory<HomeBloc>(() => HomeBloc(getIt(), getIt()));
+    ..registerFactory<HomeBloc>(() => HomeBloc(getIt()));
 }

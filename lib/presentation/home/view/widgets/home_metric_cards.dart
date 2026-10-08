@@ -3,11 +3,19 @@ part of '../home_view.dart';
 /// Su ve adım metrik kartları (yan yana).
 final class HomeMetricCards extends StatelessWidget {
   const HomeMetricCards({
+    this.waterMl = 0,
+    this.waterGoalMl = 2500,
+    this.steps = 0,
+    this.stepsGoal = 8000,
     required this.onWaterTapped,
     required this.onStepsTapped,
     super.key,
   });
 
+  final int waterMl;
+  final int waterGoalMl;
+  final int steps;
+  final int stepsGoal;
   final VoidCallback onWaterTapped;
   final VoidCallback onStepsTapped;
 
@@ -21,13 +29,13 @@ final class HomeMetricCards extends StatelessWidget {
             child: _MetricCard(
               icon: AppImages.water,
               labelKey: 'home.water',
-              value: 600,
-              goal: 2500,
+              value: waterMl,
+              goal: waterGoalMl,
               valueKey: 'home.water_value',
               goalKey: 'home.water_goal',
               trackColor: ColorName.colorWaterTrack,
               fillColor: ColorName.colorWaterFill,
-              progress: 600 / 2500,
+              progress: _ratio(waterMl, waterGoalMl),
               liquid: true,
               onTap: onWaterTapped,
             ),
@@ -37,13 +45,13 @@ final class HomeMetricCards extends StatelessWidget {
             child: _MetricCard(
               icon: AppImages.steps,
               labelKey: 'home.steps',
-              value: 1000,
-              goal: 8000,
+              value: steps,
+              goal: stepsGoal,
               valueKey: 'home.steps_value',
               goalKey: 'home.steps_goal',
               trackColor: ColorName.colorStepsTrack,
               fillColor: ColorName.colorStepsFill,
-              progress: 1000 / 8000,
+              progress: _ratio(steps, stepsGoal),
               onTap: onStepsTapped,
             ),
           ),
@@ -52,6 +60,9 @@ final class HomeMetricCards extends StatelessWidget {
     );
   }
 }
+
+double _ratio(int value, int goal) =>
+    goal <= 0 ? 0 : (value / goal).clamp(0, 1).toDouble();
 
 final class _MetricCard extends StatelessWidget {
   const _MetricCard({

@@ -14,6 +14,7 @@ final class AuthGuestRequest extends Equatable
     this.locale,
     this.appVersion,
     this.restoreAccount,
+    this.guestSecret,
   });
 
   factory AuthGuestRequest.fromJson(Map<String, dynamic> json) =>
@@ -27,6 +28,9 @@ final class AuthGuestRequest extends Equatable
 
   /// Silme talebi bekleyen hesabı geri aç (409 ACCOUNT_PENDING_DELETION).
   final bool? restoreAccount;
+
+  /// Oluşturulurken dönen misafir sırrı (var olan misafire girişte zorunlu).
+  final String? guestSecret;
 
   @override
   AuthGuestRequest fromJson(Map<String, dynamic> json) =>
@@ -42,5 +46,6 @@ final class AuthGuestRequest extends Equatable
     locale,
     appVersion,
     restoreAccount,
+    guestSecret,
   ];
 }

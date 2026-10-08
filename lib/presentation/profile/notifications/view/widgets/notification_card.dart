@@ -158,7 +158,8 @@ class _NotificationCardState extends State<NotificationCard>
                                       children: [
                                         Expanded(
                                           child: Text(
-                                            widget.item.titleKey.tr(),
+                                            widget.item.title ??
+                                                widget.item.titleKey.tr(),
                                             style: AppTextStyles
                                                 .notificationsCardTitle,
                                           ),
@@ -229,6 +230,9 @@ final class _NotificationBody extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (item.body != null) {
+      return Text(item.body!, style: AppTextStyles.notificationsBody);
+    }
     if (item.kind == NotificationKind.weight && item.weightKg != null) {
       final value = item.weightKg! == item.weightKg!.roundToDouble()
           ? '${item.weightKg!.toInt()}kg'

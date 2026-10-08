@@ -341,7 +341,7 @@ class _FastingViewState extends State<FastingView> {
             onEditTap: () {
               AppDialogs.instance.showEditWeight(
                 context,
-                initialWeightKg: HomeWeightCard.currentKg,
+                initialWeightKg: HomeWeightCard.fallbackKg,
               );
             },
           ),

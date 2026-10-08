@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:easy_localization/easy_localization.dart';
@@ -6,6 +7,7 @@ import 'package:fastingapp/core/dialogs/app_dialogs.dart';
 import 'package:fastingapp/core/router/route_paths.dart';
 import 'package:fastingapp/core/theme/app_text_styles.dart';
 import 'package:fastingapp/core/widgets/bottom_navigation_bar/app_bottom_nav.dart';
+import 'package:fastingapp/domain/notification/notifications_repository.dart';
 import 'package:fastingapp/generated/app_images.g.dart';
 import 'package:fastingapp/generated/assets.gen.dart';
 import 'package:fastingapp/generated/colors.gen.dart';
@@ -140,6 +142,9 @@ class _ProfileViewState extends State<ProfileView> with ProfileViewMixin {
                     ProfileMenuRow(
                       icon: Assets.icons.solarBellLineDuotone,
                       title: 'profile.notification_inbox'.tr(),
+                      trailing: unreadNotifications > 0
+                          ? _UnreadBadge(count: unreadNotifications)
+                          : null,
                       onTap: onNotificationInbox,
                     ),
                     ProfileMenuRow(
@@ -170,6 +175,34 @@ class _ProfileViewState extends State<ProfileView> with ProfileViewMixin {
               const SizedBox(height: AppBottomNav.barClearance),
             ],
           ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Okunmamış bildirim rozeti (99+ kısaltılır).
+final class _UnreadBadge extends StatelessWidget {
+  const _UnreadBadge({required this.count});
+
+  final int count;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      constraints: const BoxConstraints(minWidth: 22),
+      padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
+      decoration: BoxDecoration(
+        color: ColorName.colorOptionNegative,
+        borderRadius: BorderRadius.circular(99),
+      ),
+      child: Text(
+        count > 99 ? '99+' : '$count',
+        textAlign: TextAlign.center,
+        style: const TextStyle(
+          color: ColorName.colorWhite,
+          fontSize: 12,
+          fontWeight: FontWeight.w700,
         ),
       ),
     );

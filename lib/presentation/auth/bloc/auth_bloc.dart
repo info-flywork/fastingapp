@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:fastingapp/data/model/auth/account_deletion.dart';
 import 'package:fastingapp/domain/auth/auth_repository.dart';
 import 'package:fastingapp/presentation/auth/bloc/auth_event.dart';
@@ -40,6 +42,8 @@ final class AuthBloc extends Bloc<AuthEvent, AuthState> {
       emit(
         user != null ? AuthAuthenticated(user) : const AuthUnauthenticated(),
       );
+      // Cihaz kaydı (saat dilimi, dil, sürüm) arka planda.
+      if (user != null) unawaited(_authRepository.registerDevice());
     } on Object {
       emit(const AuthUnauthenticated());
     }
@@ -52,6 +56,7 @@ final class AuthBloc extends Bloc<AuthEvent, AuthState> {
       return;
     }
     emit(AuthAuthenticated(user));
+    unawaited(_authRepository.registerDevice());
   }
 
   Future<void> _onLoggedOut(

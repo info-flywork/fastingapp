@@ -4,6 +4,24 @@ mixin ProfileViewMixin on State<ProfileView> {
   bool pushNotifications = true;
   bool healthSync = true;
 
+  /// Okunmamış bildirim sayısı (Bildirimler satırındaki rozet).
+  int unreadNotifications = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    unawaited(_loadUnread());
+  }
+
+  Future<void> _loadUnread() async {
+    try {
+      final count = await getIt<NotificationsRepository>().unreadCount();
+      if (mounted) setState(() => unreadNotifications = count);
+    } on Exception {
+      // Rozet gösterilmez.
+    }
+  }
+
   String get healthSyncTitle {
     if (Platform.isIOS) return 'profile.sync_apple_health'.tr();
     return 'profile.sync_google_fit'.tr();
@@ -41,8 +59,10 @@ mixin ProfileViewMixin on State<ProfileView> {
     context.pushNamed(RoutePaths.insights.name);
   }
 
-  void onNotificationInbox() {
-    context.pushNamed(RoutePaths.notifications.name);
+  Future<void> onNotificationInbox() async {
+    await context.pushNamed(RoutePaths.notifications.name);
+    // Kutu açılınca hepsi okundu sayılır; dönüşte rozet tazelenir.
+    await _loadUnread();
   }
 
   void onLanguage() {

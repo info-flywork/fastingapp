@@ -45,7 +45,11 @@ mixin HomeViewMixin on State<HomeView> {
   Future<void> onWeightEditTapped() async {
     await AppDialogs.instance.showEditWeight(
       context,
-      initialWeightKg: HomeWeightCard.currentKg,
+      initialWeightKg: switch (context.read<HomeBloc>().state) {
+        HomeLoaded(:final summary) =>
+          summary?.weightCurrentKg ?? HomeWeightCard.fallbackKg,
+        _ => HomeWeightCard.fallbackKg,
+      },
     );
   }
 }

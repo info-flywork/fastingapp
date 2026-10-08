@@ -1,9 +1,12 @@
+import 'dart:async';
 import 'dart:math' as math;
 import 'dart:ui' as ui;
 
 import 'package:easy_localization/easy_localization.dart';
+import 'package:fastingapp/core/di/injection.dart';
 import 'package:fastingapp/core/remote_images/app_image.dart';
 import 'package:fastingapp/core/theme/app_text_styles.dart';
+import 'package:fastingapp/domain/fasting/forecast_repository.dart';
 import 'package:fastingapp/generated/app_images.g.dart';
 import 'package:fastingapp/generated/colors.gen.dart';
 import 'package:flutter/material.dart';
@@ -24,9 +27,41 @@ final class FastingFastForecastCard extends StatefulWidget {
 
 class _FastingFastForecastCardState extends State<FastingFastForecastCard> {
   var _day = _ForecastDay.easy;
+  FastForecast? _forecast;
+
+  @override
+  void initState() {
+    super.initState();
+    unawaited(_load());
+  }
+
+  Future<void> _load() async {
+    try {
+      final forecast = await getIt<ForecastRepository>().getForecast();
+      if (!mounted) return;
+      setState(() {
+        _forecast = forecast;
+        _day = _dayFor(forecast.successChance);
+      });
+    } on Exception {
+      if (mounted)
+        setState(() => _forecast = const FastForecast(available: false));
+    }
+  }
+
+  /// Başarı ihtimaline göre günün zorluğu.
+  static _ForecastDay _dayFor(double? chance) => switch (chance) {
+    null => _ForecastDay.easy,
+    >= 0.75 => _ForecastDay.easy,
+    >= 0.5 => _ForecastDay.moderate,
+    _ => _ForecastDay.hard,
+  };
 
   @override
   Widget build(BuildContext context) {
+    final forecast = _forecast;
+    // Yükleniyor ya da yeterli geçmiş yok → kart gösterilmez.
+    if (forecast == null || !forecast.available) return const SizedBox.shrink();
     return Container(
       margin: const EdgeInsets.fromLTRB(16, 12, 16, 0),
       padding: const EdgeInsets.fromLTRB(12, 12, 12, 24),
@@ -44,9 +79,9 @@ class _FastingFastForecastCardState extends State<FastingFastForecastCard> {
             onChanged: (value) => setState(() => _day = value),
           ),
           const SizedBox(height: 16),
-          _ForecastSummary(day: _day),
+          _ForecastSummary(day: _day, chance: forecast.successChance),
           const SizedBox(height: 16),
-          const _MetricsRow(),
+          _MetricsRow(forecast: forecast),
           const SizedBox(height: 16),
           SizedBox(height: 180, child: _ForecastChart(day: _day)),
         ],
@@ -179,9 +214,10 @@ final class _DaySegment extends StatelessWidget {
 }
 
 final class _ForecastSummary extends StatelessWidget {
-  const _ForecastSummary({required this.day});
+  const _ForecastSummary({required this.day, required this.chance});
 
   final _ForecastDay day;
+  final double? chance;
 
   @override
   Widget build(BuildContext context) {
@@ -222,7 +258,10 @@ final class _ForecastSummary extends StatelessWidget {
               style: AppTextStyles.fastingForecastLabel,
             ),
             const SizedBox(height: 4),
-            Text('87%', style: AppTextStyles.fastingForecastConfidence),
+            Text(
+              chance == null ? '–' : '${(chance! * 100).round()}%',
+              style: AppTextStyles.fastingForecastConfidence,
+            ),
           ],
         ),
       ],
@@ -231,16 +270,25 @@ final class _ForecastSummary extends StatelessWidget {
 }
 
 final class _MetricsRow extends StatelessWidget {
-  const _MetricsRow();
+  const _MetricsRow({required this.forecast});
+
+  final FastForecast forecast;
 
   @override
   Widget build(BuildContext context) {
+    String clock(DateTime t) => DateFormat.Hm().format(t);
+    final peak = forecast.toughestAt;
+    final start = forecast.fastStartsAt;
+    final end = forecast.fastEndsAt;
+    final fastMinutes = start != null && end != null
+        ? end.difference(start).inMinutes
+        : null;
     return Row(
       children: [
         Expanded(
           child: _MetricCell(
             icon: AppImages.stonks,
-            value: '14:00',
+            value: peak == null ? '–' : clock(peak),
             label: 'fasting_page.forecast_hunger_pack'.tr(),
           ),
         ),
@@ -248,7 +296,10 @@ final class _MetricsRow extends StatelessWidget {
         Expanded(
           child: _MetricCell(
             icon: AppImages.redWarning,
-            value: '13:30 - 14:30',
+            value: peak == null
+                ? '–'
+                : '${clock(peak.subtract(const Duration(minutes: 30)))} - '
+                      '${clock(peak.add(const Duration(minutes: 30)))}',
             label: 'fasting_page.forecast_risk_zone'.tr(),
           ),
         ),
@@ -256,7 +307,10 @@ final class _MetricsRow extends StatelessWidget {
         Expanded(
           child: _MetricCell(
             icon: AppImages.sandClock,
-            value: '16h:00',
+            value: fastMinutes == null
+                ? '–'
+                : '${fastMinutes ~/ 60}h:'
+                      '${(fastMinutes % 60).toString().padLeft(2, '0')}',
             label: 'fasting_page.forecast_recommended'.tr(),
           ),
         ),

@@ -13,6 +13,7 @@ AuthGuestRequest _$AuthGuestRequestFromJson(Map<String, dynamic> json) =>
       locale: json['locale'] as String?,
       appVersion: json['appVersion'] as String?,
       restoreAccount: json['restoreAccount'] as bool?,
+      guestSecret: json['guestSecret'] as String?,
     );
 
 Map<String, dynamic> _$AuthGuestRequestToJson(AuthGuestRequest instance) =>
@@ -22,4 +23,5 @@ Map<String, dynamic> _$AuthGuestRequestToJson(AuthGuestRequest instance) =>
       'locale': ?instance.locale,
       'appVersion': ?instance.appVersion,
       'restoreAccount': ?instance.restoreAccount,
+      'guestSecret': ?instance.guestSecret,
     };
