@@ -1,14 +1,19 @@
+import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:easy_localization/easy_localization.dart';
+import 'package:fastingapp/core/di/injection.dart';
 import 'package:fastingapp/core/dialogs/app_dialogs.dart';
 import 'package:fastingapp/core/router/route_paths.dart';
 import 'package:fastingapp/core/theme/app_text_styles.dart';
 import 'package:fastingapp/core/widgets/app_button.dart';
 import 'package:fastingapp/core/widgets/app_button_decoration.dart';
+import 'package:fastingapp/core/widgets/app_shimmer.dart';
+import 'package:fastingapp/domain/nutrition/meals_repository.dart';
 import 'package:fastingapp/generated/app_images.g.dart';
 import 'package:fastingapp/generated/assets.gen.dart';
 import 'package:fastingapp/generated/colors.gen.dart';
+import 'package:fastingapp/presentation/meal_records/meal_detail_args.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
@@ -55,11 +60,16 @@ class _MealRecordsViewState extends State<MealRecordsView>
                 ),
               ),
               Expanded(
-                child: hasMealsForSelectedDate
+                child: loading
+                    ? const _MealRecordsShimmer()
+                    : hasMealsForSelectedDate
                     ? SingleChildScrollView(
                         padding: const EdgeInsets.fromLTRB(16, 24, 16, 24),
                         physics: const ClampingScrollPhysics(),
-                        child: _MealTimeline(onMealTap: onMealCardTapped),
+                        child: _MealTimeline(
+                          meals: meals,
+                          onMealTap: onMealCardTapped,
+                        ),
                       )
                     : const _MealRecordsEmptyState(),
               ),
@@ -136,6 +146,36 @@ final class _MealRecordsHeader extends StatelessWidget {
   }
 }
 
+final class _MealRecordsShimmer extends StatelessWidget {
+  const _MealRecordsShimmer();
+
+  @override
+  Widget build(BuildContext context) {
+    return AppShimmer(
+      child: ListView(
+        padding: const EdgeInsets.fromLTRB(16, 24, 16, 24),
+        physics: const NeverScrollableScrollPhysics(),
+        children: const [
+          AppShimmerBone(
+            height: 88,
+            borderRadius: BorderRadius.all(Radius.circular(16)),
+          ),
+          SizedBox(height: 12),
+          AppShimmerBone(
+            height: 88,
+            borderRadius: BorderRadius.all(Radius.circular(16)),
+          ),
+          SizedBox(height: 12),
+          AppShimmerBone(
+            height: 88,
+            borderRadius: BorderRadius.all(Radius.circular(16)),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 final class _CircleIconButton extends StatelessWidget {
   const _CircleIconButton({required this.onTap, required this.child});
 
@@ -192,9 +232,39 @@ final class _MealRecordsEmptyState extends StatelessWidget {
 
 /// Home’daki timeline ile aynı yapı.
 final class _MealTimeline extends StatelessWidget {
-  const _MealTimeline({required this.onMealTap});
+  const _MealTimeline({required this.meals, required this.onMealTap});
 
-  final VoidCallback onMealTap;
+  final List<MealRecord> meals;
+  final ValueChanged<String> onMealTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        for (var i = 0; i < meals.length; i++) ...[
+          if (i > 0) const SizedBox(height: 20),
+          _MealTimelineRow(
+            meal: meals[i],
+            showLineBelow: i < meals.length - 1,
+            onTap: () => onMealTap(meals[i].id),
+          ),
+        ],
+      ],
+    );
+  }
+}
+
+final class _MealTimelineRow extends StatelessWidget {
+  const _MealTimelineRow({
+    required this.meal,
+    required this.showLineBelow,
+    required this.onTap,
+  });
+
+  final MealRecord meal;
+  final bool showLineBelow;
+  final VoidCallback onTap;
 
   static const _lineColor = Color(0x993C3C43);
   static const _dotSize = 8.0;
@@ -217,14 +287,15 @@ final class _MealTimeline extends StatelessWidget {
                     shape: BoxShape.circle,
                   ),
                 ),
-                Expanded(
-                  child: Center(
-                    child: Container(
-                      width: 1.5,
-                      color: _lineColor.withValues(alpha: 0.4),
+                if (showLineBelow)
+                  Expanded(
+                    child: Center(
+                      child: Container(
+                        width: 1.5,
+                        color: _lineColor.withValues(alpha: 0.4),
+                      ),
                     ),
                   ),
-                ),
               ],
             ),
           ),
@@ -233,9 +304,9 @@ final class _MealTimeline extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const _MealTimestamp(),
+                _MealTimestamp(eatenAt: meal.eatenAt),
                 const SizedBox(height: 10),
-                _MealEntryCard(onTap: onMealTap),
+                _MealEntryCard(meal: meal, onTap: onTap),
               ],
             ),
           ),
@@ -246,25 +317,46 @@ final class _MealTimeline extends StatelessWidget {
 }
 
 final class _MealTimestamp extends StatelessWidget {
-  const _MealTimestamp();
+  const _MealTimestamp({required this.eatenAt});
+
+  final DateTime eatenAt;
 
   @override
   Widget build(BuildContext context) {
-    return Text(
-      'home.meal_sample_time'.tr(),
-      style: AppTextStyles.homeMealTimestamp,
-    );
+    final locale = context.locale.toString();
+    final label = DateFormat('MMMM d, HH:mm', locale).format(eatenAt);
+    return Text(label, style: AppTextStyles.homeMealTimestamp);
   }
 }
 
 /// Figma: 16r / pad 12 / border 2 #F6F6F6 / gap 16.
 final class _MealEntryCard extends StatelessWidget {
-  const _MealEntryCard({required this.onTap});
+  const _MealEntryCard({required this.meal, required this.onTap});
 
+  final MealRecord meal;
   final VoidCallback onTap;
+
+  static String? _dietTagKey(String? dietType) => switch (dietType) {
+    'ketogenic' => 'home.meal_tag_keto',
+    'lowCarb' => 'meal_detail.diet_low_carb_title',
+    'mixed' => 'meal_detail.diet_mixed_title',
+    'highCarb' => 'meal_detail.diet_high_carb_title',
+    'notSure' => 'meal_detail.diet_not_sure_title',
+    _ => null,
+  };
+
+  static String? _kindTagKey(String? kind) => switch (kind) {
+    'meal' => 'home.meal_tag_full',
+    'snack' => 'meal_detail.kind_snack',
+    _ => null,
+  };
 
   @override
   Widget build(BuildContext context) {
+    final title = meal.title;
+    final dietKey = _dietTagKey(meal.dietType);
+    final kindKey = _kindTagKey(meal.kind);
+
     return GestureDetector(
       onTap: onTap,
       behavior: HitTestBehavior.opaque,
@@ -285,23 +377,44 @@ final class _MealEntryCard extends StatelessWidget {
                 color: ColorName.colorStepsTrack,
                 borderRadius: BorderRadius.circular(12),
               ),
+              clipBehavior: Clip.antiAlias,
               alignment: Alignment.center,
-              child: AppImages.orangeBell.image(
-                width: 32,
-                height: 32,
-                fit: BoxFit.contain,
-              ),
+              child: meal.photoUrl != null
+                  ? Image.network(
+                      meal.photoUrl!,
+                      width: 56,
+                      height: 56,
+                      fit: BoxFit.cover,
+                      errorBuilder: (_, _, _) => AppImages.orangeBell.image(
+                        width: 32,
+                        height: 32,
+                        fit: BoxFit.contain,
+                      ),
+                    )
+                  : AppImages.orangeBell.image(
+                      width: 44,
+                      height: 44,
+                      fit: BoxFit.contain,
+                    ),
             ),
             const SizedBox(width: 16),
-            const Expanded(
-              child: Wrap(
-                spacing: 10,
-                runSpacing: 8,
-                children: [
-                  _MealTag(labelKey: 'home.meal_tag_full'),
-                  _MealTag(labelKey: 'home.meal_tag_keto'),
-                ],
-              ),
+            Expanded(
+              child: title != null && title.isNotEmpty
+                  ? Text(title, style: AppTextStyles.homeMealRecordsTitle)
+                  : Wrap(
+                      spacing: 10,
+                      runSpacing: 8,
+                      children: [
+                        if (meal.kcal != null)
+                          _MealTag(
+                            labelKey: 'home.meal_tag_full',
+                            labelOverride: '${meal.kcal} kcal',
+                          )
+                        else if (kindKey != null)
+                          _MealTag(labelKey: kindKey),
+                        if (dietKey != null) _MealTag(labelKey: dietKey),
+                      ],
+                    ),
             ),
             const SizedBox(width: 8),
             Padding(
@@ -320,9 +433,10 @@ final class _MealEntryCard extends StatelessWidget {
 }
 
 final class _MealTag extends StatelessWidget {
-  const _MealTag({required this.labelKey});
+  const _MealTag({required this.labelKey, this.labelOverride});
 
   final String labelKey;
+  final String? labelOverride;
 
   @override
   Widget build(BuildContext context) {
@@ -332,7 +446,10 @@ final class _MealTag extends StatelessWidget {
         color: ColorName.colorHomeChipBg,
         borderRadius: BorderRadius.circular(9999),
       ),
-      child: Text(labelKey.tr(), style: AppTextStyles.homeMealTag),
+      child: Text(
+        labelOverride ?? labelKey.tr(),
+        style: AppTextStyles.homeMealTag,
+      ),
     );
   }
 }

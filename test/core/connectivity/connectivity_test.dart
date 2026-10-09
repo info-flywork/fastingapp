@@ -32,6 +32,7 @@ void main() {
       changes: changes.stream,
       probe: probe.call,
       retryInterval: const Duration(milliseconds: 20),
+      offlineDebounce: const Duration(milliseconds: 20),
     );
   });
 
@@ -46,6 +47,9 @@ void main() {
       probe.online = false;
       service.start();
       await pumpEventQueue();
+      // Offline debounce bitmeden hâlâ çevrimiçi varsayılır.
+      expect(service.isOnline.value, isTrue);
+      await Future<void>.delayed(const Duration(milliseconds: 40));
       expect(service.isOnline.value, isFalse);
 
       probe.online = true;
@@ -55,18 +59,27 @@ void main() {
     },
   );
 
-  test('ağ kapanınca yoklama beklemeden çevrimdışı', () async {
+  test('ağ kapanınca debounce sonrası çevrimdışı; kısa none blip yanıp sönmez', () async {
     service.start();
     await pumpEventQueue();
     final before = probe.calls;
+
+    // Anlık none → hemen wifi: offline sayfası açılmaz.
     changes.add([ConnectivityResult.none]);
     await pumpEventQueue();
-    expect(service.isOnline.value, isFalse);
-    expect(probe.calls, before);
-
+    expect(service.isOnline.value, isTrue);
     changes.add([ConnectivityResult.wifi]);
     await pumpEventQueue();
+    await Future<void>.delayed(const Duration(milliseconds: 40));
     expect(service.isOnline.value, isTrue);
+
+    // Kalıcı none: debounce sonrası çevrimdışı (yoklama yok).
+    changes.add([ConnectivityResult.none]);
+    await pumpEventQueue();
+    expect(service.isOnline.value, isTrue);
+    await Future<void>.delayed(const Duration(milliseconds: 40));
+    expect(service.isOnline.value, isFalse);
+    expect(probe.calls, greaterThanOrEqualTo(before));
   });
 
   test('eşzamanlı kontroller tek yoklamada birleşir; kontrol sırasında '

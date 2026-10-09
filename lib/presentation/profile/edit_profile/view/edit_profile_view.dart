@@ -11,6 +11,7 @@ import 'package:fastingapp/core/theme/app_text_styles.dart';
 import 'package:fastingapp/core/utils/enum/snackbar_type.dart';
 import 'package:fastingapp/core/utils/extensions/future_extensions.dart';
 import 'package:fastingapp/domain/auth/auth_exception.dart';
+import 'package:fastingapp/domain/profile/profile_repository.dart';
 import 'package:fastingapp/generated/assets.gen.dart';
 import 'package:fastingapp/generated/colors.gen.dart';
 import 'package:fastingapp/presentation/auth/bloc/auth_bloc.dart';
@@ -26,10 +27,14 @@ import 'package:fastingapp/presentation/auth/onboard/food_skips/bloc/food_skips_
 import 'package:fastingapp/presentation/auth/onboard/food_skips/food_skips_options_catalog.dart';
 import 'package:fastingapp/presentation/auth/onboard/goal/bloc/goal_bloc.dart';
 import 'package:fastingapp/presentation/auth/onboard/goal/goal_options_catalog.dart';
+import 'package:fastingapp/presentation/profile/bloc/profile_bloc.dart';
 import 'package:fastingapp/presentation/profile/edit_profile/view/edit_height_view.dart';
 import 'package:fastingapp/presentation/profile/view/widgets/profile_menu_card.dart';
 import 'package:fastingapp/presentation/profile/view/widgets/profile_section.dart';
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 
@@ -47,8 +52,26 @@ final class EditProfileView extends StatefulWidget {
 
 class _EditProfileViewState extends State<EditProfileView>
     with EditProfileViewMixin {
+  /// Seçim yoksa yer tutucu.
+  static String _label<T>(T? value, String Function(T) titleKey) =>
+      value == null ? EditProfileViewMixin.placeholder : titleKey(value).tr();
+
   @override
   Widget build(BuildContext context) {
+    return BlocConsumer<ProfileBloc, ProfileState>(
+      bloc: getIt<ProfileBloc>(),
+      listenWhen: (prev, curr) =>
+          curr.saveError != null && prev.saveError != curr.saveError,
+      listener: (context, state) => onSaveError(state.saveError!),
+      builder: _buildBody,
+    );
+  }
+
+  Widget _buildBody(BuildContext context, ProfileState state) {
+    final p = state.profile;
+    final waiting =
+        state.status == ProfileStatus.initial ||
+        state.status == ProfileStatus.loading;
     return Scaffold(
       backgroundColor: ColorName.colorProfileBack,
       body: SafeArea(
@@ -58,122 +81,171 @@ class _EditProfileViewState extends State<EditProfileView>
           padding: const EdgeInsets.fromLTRB(16, 8, 16, 32),
           children: [
             EditProfileHeader(
-              initials: 'AE',
-              photoPath: photoPath,
+              initials: state.initials,
+              photoPath: state.localPhotoPath,
+              avatarUrl: state.avatarUrl,
               onBack: onBack,
-              onChangePhoto: onChangePhoto,
+              onChangePhoto: state.isLoaded ? onChangePhoto : null,
             ),
             const SizedBox(height: 24),
-            ProfileSection(
-              title: 'profile.basic_information'.tr(),
-              child: ProfileMenuCard(
-                children: [
-                  ProfileMenuRow(
-                    icon: Assets.icons.solarPen2LineDuotone,
-                    title: 'profile.name'.tr(),
-                    titleStyle: AppTextStyles.editProfileLabel,
-                    trailing: Text(
-                      displayName,
-                      style: AppTextStyles.editProfileValue,
+            if (waiting)
+              const Padding(
+                padding: EdgeInsets.only(top: 48),
+                child: Center(child: CupertinoActivityIndicator()),
+              )
+            else if (state.status == ProfileStatus.failure)
+              _LoadError(
+                message: state.loadError ?? 'common.failed'.tr(),
+                onRetry: onRetry,
+              )
+            else ...[
+              ProfileSection(
+                title: 'profile.basic_information'.tr(),
+                child: ProfileMenuCard(
+                  children: [
+                    ProfileMenuRow(
+                      icon: Assets.icons.solarPen2LineDuotone,
+                      title: 'profile.name'.tr(),
+                      titleStyle: AppTextStyles.editProfileLabel,
+                      trailing: Text(
+                        (state.name ?? '').isEmpty
+                            ? EditProfileViewMixin.placeholder
+                            : state.name!,
+                        style: AppTextStyles.editProfileValue,
+                      ),
+                      onTap: onEditName,
                     ),
-                    onTap: onEditName,
-                  ),
-                  ProfileMenuRow(
-                    icon: Assets.icons.solarTargetLineDuotone,
-                    title: 'profile.fasting_target'.tr(),
-                    titleStyle: AppTextStyles.editProfileLabel,
-                    trailing: Text(
-                      GoalOptionsCatalog.titleKeyFor(fastingTarget).tr(),
-                      style: AppTextStyles.editProfileValue,
+                    ProfileMenuRow(
+                      icon: Assets.icons.solarTargetLineDuotone,
+                      title: 'profile.fasting_target'.tr(),
+                      titleStyle: AppTextStyles.editProfileLabel,
+                      trailing: Text(
+                        _label(p.goal, GoalOptionsCatalog.titleKeyFor),
+                        style: AppTextStyles.editProfileValue,
+                      ),
+                      onTap: onEditFastingTarget,
                     ),
-                    onTap: onEditFastingTarget,
-                  ),
-                  ProfileMenuRow(
-                    icon: Assets.icons.solarWeigherLineDuotone,
-                    title: 'profile.weight_kg'.tr(),
-                    titleStyle: AppTextStyles.editProfileLabel,
-                    trailing: Text(
-                      _formatWeight(weightKg),
-                      style: AppTextStyles.editProfileValue,
+                    ProfileMenuRow(
+                      icon: Assets.icons.solarWeigherLineDuotone,
+                      title: 'profile.weight_kg'.tr(),
+                      titleStyle: AppTextStyles.editProfileLabel,
+                      trailing: Text(
+                        formatWeight(p.currentWeightKg),
+                        style: AppTextStyles.editProfileValue,
+                      ),
+                      onTap: onEditWeight,
                     ),
-                    onTap: onEditWeight,
-                  ),
-                  ProfileMenuRow(
-                    icon: Assets.icons.healthiconsHeightOutline,
-                    title: 'profile.height_cm'.tr(),
-                    titleStyle: AppTextStyles.editProfileLabel,
-                    trailing: Text(
-                      '$heightCm',
-                      style: AppTextStyles.editProfileValue,
+                    ProfileMenuRow(
+                      icon: Assets.icons.healthiconsHeightOutline,
+                      title: 'profile.height_cm'.tr(),
+                      titleStyle: AppTextStyles.editProfileLabel,
+                      trailing: Text(
+                        p.heightCm?.toString() ??
+                            EditProfileViewMixin.placeholder,
+                        style: AppTextStyles.editProfileValue,
+                      ),
+                      onTap: onEditHeight,
                     ),
-                    onTap: onEditHeight,
-                  ),
-                  ProfileMenuRow(
-                    icon: Assets.icons.icons8Gender,
-                    title: 'profile.gender'.tr(),
-                    titleStyle: AppTextStyles.editProfileLabel,
-                    trailing: Text(
-                      GenderOptionsCatalog.titleKeyFor(gender).tr(),
-                      style: AppTextStyles.editProfileValue,
+                    ProfileMenuRow(
+                      icon: Assets.icons.icons8Gender,
+                      title: 'profile.gender'.tr(),
+                      titleStyle: AppTextStyles.editProfileLabel,
+                      trailing: Text(
+                        _label(p.gender, GenderOptionsCatalog.titleKeyFor),
+                        style: AppTextStyles.editProfileValue,
+                      ),
+                      onTap: onEditGender,
                     ),
-                    onTap: onEditGender,
-                  ),
-                ],
+                  ],
+                ),
               ),
-            ),
-            const SizedBox(height: 24),
-            ProfileSection(
-              title: 'profile.diet_information'.tr(),
-              child: ProfileMenuCard(
-                children: [
-                  ProfileMenuRow(
-                    icon: Assets.icons.solarCart3LineDuotone,
-                    title: 'profile.diet_type'.tr(),
-                    titleStyle: AppTextStyles.editProfileLabel,
-                    trailing: Text(
-                      DietOptionsCatalog.titleKeyFor(dietType).tr(),
-                      style: AppTextStyles.editProfileValue,
+              const SizedBox(height: 24),
+              ProfileSection(
+                title: 'profile.diet_information'.tr(),
+                child: ProfileMenuCard(
+                  children: [
+                    ProfileMenuRow(
+                      icon: Assets.icons.solarCart3LineDuotone,
+                      title: 'profile.diet_type'.tr(),
+                      titleStyle: AppTextStyles.editProfileLabel,
+                      trailing: Text(
+                        _label(p.diet, DietOptionsCatalog.titleKeyFor),
+                        style: AppTextStyles.editProfileValue,
+                      ),
+                      onTap: onEditDietType,
                     ),
-                    onTap: onEditDietType,
-                  ),
-                  EditProfileChipsRow(
-                    icon: Assets.icons.hugeiconsBanana,
-                    title: 'profile.preferred_foods'.tr(),
-                    chips: preferredFoods
-                        .map((e) => FoodLovesOptionsCatalog.titleKeyFor(e).tr())
-                        .toList(),
-                    onTap: onEditPreferredFoods,
-                  ),
-                  EditProfileChipsRow(
-                    icon: Assets.icons.solarDislikeLineDuotone,
-                    title: 'profile.skipped_foods'.tr(),
-                    chips: skippedFoods
-                        .map((e) => FoodSkipsOptionsCatalog.titleKeyFor(e).tr())
-                        .toList(),
-                    variant: EditProfileChipVariant.negative,
-                    onTap: onEditSkippedFoods,
-                  ),
-                  ProfileMenuRow(
-                    icon: Assets.icons.solarClockCircleLineDuotone,
-                    title: 'profile.fasting_plan'.tr(),
-                    titleStyle: AppTextStyles.editProfileLabel,
-                    trailing: Text(
-                      FastingPlanOptionsCatalog.titleKeyFor(fastingPlan).tr(),
-                      style: AppTextStyles.editProfileValue,
+                    EditProfileChipsRow(
+                      icon: Assets.icons.hugeiconsBanana,
+                      title: 'profile.preferred_foods'.tr(),
+                      chips: p.foodLoves
+                          .map(
+                            (e) => FoodLovesOptionsCatalog.titleKeyFor(e).tr(),
+                          )
+                          .toList(),
+                      onTap: onEditPreferredFoods,
                     ),
-                    onTap: onEditFastingPlan,
-                  ),
-                ],
+                    EditProfileChipsRow(
+                      icon: Assets.icons.solarDislikeLineDuotone,
+                      title: 'profile.skipped_foods'.tr(),
+                      chips: p.foodSkips
+                          .map(
+                            (e) => FoodSkipsOptionsCatalog.titleKeyFor(e).tr(),
+                          )
+                          .toList(),
+                      variant: EditProfileChipVariant.negative,
+                      onTap: onEditSkippedFoods,
+                    ),
+                    ProfileMenuRow(
+                      icon: Assets.icons.solarClockCircleLineDuotone,
+                      title: 'profile.fasting_plan'.tr(),
+                      titleStyle: AppTextStyles.editProfileLabel,
+                      trailing: Text(
+                        _label(
+                          state.plan,
+                          FastingPlanOptionsCatalog.titleKeyFor,
+                        ),
+                        style: AppTextStyles.editProfileValue,
+                      ),
+                      onTap: onEditFastingPlan,
+                    ),
+                  ],
+                ),
               ),
-            ),
-            const SizedBox(height: 24),
-            ProfileDangerCard(
-              icon: Assets.icons.solarTrashBinTrashBoldDuotone,
-              label: 'profile.delete_account'.tr(),
-              onTap: onDeleteAccount,
-            ),
+              const SizedBox(height: 24),
+              ProfileDangerCard(
+                icon: Assets.icons.solarTrashBinTrashBoldDuotone,
+                label: 'profile.delete_account'.tr(),
+                onTap: onDeleteAccount,
+              ),
+            ],
           ],
         ),
+      ),
+    );
+  }
+}
+
+/// Profil yüklenemedi: sunucu mesajı + tekrar dene.
+final class _LoadError extends StatelessWidget {
+  const _LoadError({required this.message, required this.onRetry});
+
+  final String message;
+  final VoidCallback onRetry;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(top: 48),
+      child: Column(
+        children: [
+          Text(
+            message,
+            textAlign: TextAlign.center,
+            style: AppTextStyles.editProfileLabel,
+          ),
+          const SizedBox(height: 12),
+          CupertinoButton(onPressed: onRetry, child: Text('common.retry'.tr())),
+        ],
       ),
     );
   }

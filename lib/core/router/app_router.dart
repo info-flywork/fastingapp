@@ -1,8 +1,8 @@
 import 'package:fastingapp/core/di/injection.dart';
 import 'package:fastingapp/core/router/go_router_refresh_stream.dart';
 import 'package:fastingapp/core/router/route_paths.dart';
-import 'package:fastingapp/data/model/onboarding/onboarding_result.dart';
 import 'package:fastingapp/core/widgets/bottom_navigation_bar/main_wrapper.dart';
+import 'package:fastingapp/data/model/onboarding/onboarding_result.dart';
 import 'package:fastingapp/presentation/auth/bloc/auth_bloc.dart';
 import 'package:fastingapp/presentation/auth/bloc/auth_state.dart';
 import 'package:fastingapp/presentation/auth/entry/view/entry_view.dart';
@@ -47,7 +47,6 @@ import 'package:fastingapp/presentation/auth/splash/bloc/splash_bloc.dart';
 import 'package:fastingapp/presentation/auth/splash/bloc/splash_event.dart';
 import 'package:fastingapp/presentation/auth/splash/view/splash_view.dart';
 import 'package:fastingapp/presentation/auth/welcome/bloc/welcome_bloc.dart';
-import 'package:fastingapp/presentation/auth/welcome/view/welcome_view.dart';
 import 'package:fastingapp/presentation/body_history/view/body_history_view.dart';
 import 'package:fastingapp/presentation/calories_tracker/view/calories_camera_view.dart';
 import 'package:fastingapp/presentation/calories_tracker/view/calories_result_view.dart';
@@ -66,8 +65,10 @@ import 'package:fastingapp/presentation/fasting/view/fasting_struggle_view.dart'
 import 'package:fastingapp/presentation/fasting/view/fasting_view.dart';
 import 'package:fastingapp/presentation/home/bloc/home_bloc.dart';
 import 'package:fastingapp/presentation/home/bloc/home_event.dart';
+import 'package:fastingapp/presentation/home/bloc/home_state.dart';
 import 'package:fastingapp/presentation/home/view/home_view.dart';
 import 'package:fastingapp/presentation/hunger_tracker/hunger_result_type.dart';
+import 'package:fastingapp/presentation/hunger_tracker/hunger_session_args.dart';
 import 'package:fastingapp/presentation/hunger_tracker/hunger_symptom.dart';
 import 'package:fastingapp/presentation/hunger_tracker/view/hunger_check_view.dart';
 import 'package:fastingapp/presentation/hunger_tracker/view/hunger_first_question_view.dart';
@@ -82,6 +83,7 @@ import 'package:fastingapp/presentation/hunger_tracker/view/hunger_tracker_view.
 import 'package:fastingapp/presentation/insights/insight_topic.dart';
 import 'package:fastingapp/presentation/insights/view/insight_detail_view.dart';
 import 'package:fastingapp/presentation/insights/view/insights_view.dart';
+import 'package:fastingapp/presentation/meal_records/meal_detail_args.dart';
 import 'package:fastingapp/presentation/meal_records/view/meal_detail_view.dart';
 import 'package:fastingapp/presentation/meal_records/view/meal_records_view.dart';
 import 'package:fastingapp/presentation/mochi_world/view/mochi_world_view.dart';
@@ -89,6 +91,7 @@ import 'package:fastingapp/presentation/plans/plan_detail_args.dart';
 import 'package:fastingapp/presentation/plans/plans_catalog.dart';
 import 'package:fastingapp/presentation/plans/view/plan_detail_view.dart';
 import 'package:fastingapp/presentation/plans/view/plans_view.dart';
+import 'package:fastingapp/presentation/profile/bloc/profile_bloc.dart';
 import 'package:fastingapp/presentation/profile/edit_profile/view/edit_diet_type_view.dart';
 import 'package:fastingapp/presentation/profile/edit_profile/view/edit_fasting_plan_view.dart';
 import 'package:fastingapp/presentation/profile/edit_profile/view/edit_fasting_target_view.dart';
@@ -121,7 +124,6 @@ final _publicPaths = <String>{
     RoutePaths.splash,
     RoutePaths.entry,
     RoutePaths.login,
-    RoutePaths.welcome,
     RoutePaths.onboarding,
     RoutePaths.goalHighlight,
     RoutePaths.aboutYou,
@@ -194,14 +196,6 @@ final GoRouter appRouter = GoRouter(
       builder: (context, state) => BlocProvider(
         create: (_) => getIt<WelcomeBloc>(),
         child: const LoginView(),
-      ),
-    ),
-    GoRoute(
-      path: RoutePaths.welcome.path,
-      name: RoutePaths.welcome.name,
-      builder: (context, state) => BlocProvider(
-        create: (_) => getIt<WelcomeBloc>(),
-        child: const WelcomeView(),
       ),
     ),
     // Onboarding ilk adım: hedef seçimi.
@@ -390,7 +384,24 @@ final GoRouter appRouter = GoRouter(
       path: RoutePaths.water.path,
       name: RoutePaths.water.name,
       parentNavigatorKey: rootNavigatorKey,
-      builder: (context, state) => const WaterView(),
+      builder: (context, state) {
+        final extra = state.extra;
+        int? initialMl;
+        int? dailyGoalMl;
+        if (extra is Map) {
+          initialMl = extra['initialMl'] as int?;
+          dailyGoalMl = extra['dailyGoalMl'] as int?;
+        }
+        final home = getIt<HomeBloc>().state;
+        if (home is HomeLoaded) {
+          initialMl ??= home.summary?.waterMl;
+          dailyGoalMl ??= home.summary?.waterGoalMl;
+        }
+        return WaterView(
+          initialMl: initialMl ?? 0,
+          dailyGoalMl: dailyGoalMl ?? 2500,
+        );
+      },
       routes: [
         GoRoute(
           path: RoutePaths.waterReminder.path,
@@ -525,6 +536,7 @@ final GoRouter appRouter = GoRouter(
         final args = extra is FastingFinishArgs
             ? extra
             : FastingFinishArgs(
+                fastId: '',
                 planTitle: '16-8',
                 start: DateTime.now().subtract(
                   const Duration(hours: 12, minutes: 12, seconds: 39),
@@ -573,7 +585,16 @@ final GoRouter appRouter = GoRouter(
       path: RoutePaths.mealDetail.path,
       name: RoutePaths.mealDetail.name,
       parentNavigatorKey: rootNavigatorKey,
-      builder: (context, state) => const MealDetailView(),
+      builder: (context, state) {
+        final extra = state.extra;
+        if (extra is MealDetailArgs) {
+          return MealDetailView(
+            mealId: extra.mealId,
+            initialEatenAt: extra.initialEatenAt,
+          );
+        }
+        return const MealDetailView();
+      },
     ),
     GoRoute(
       path: RoutePaths.hungerTracker.path,
@@ -641,8 +662,12 @@ final GoRouter appRouter = GoRouter(
       name: RoutePaths.hungerResult.name,
       parentNavigatorKey: rootNavigatorKey,
       builder: (context, state) {
-        final type = state.extra is HungerResultType
-            ? state.extra! as HungerResultType
+        final extra = state.extra;
+        if (extra is HungerSessionArgs) {
+          return HungerResultView(type: extra.resultType, session: extra);
+        }
+        final type = extra is HungerResultType
+            ? extra
             : HungerResultType.physical;
         return HungerResultView(type: type);
       },
@@ -652,8 +677,12 @@ final GoRouter appRouter = GoRouter(
       name: RoutePaths.hungerLog.name,
       parentNavigatorKey: rootNavigatorKey,
       builder: (context, state) {
-        final type = state.extra is HungerResultType
-            ? state.extra! as HungerResultType
+        final extra = state.extra;
+        if (extra is HungerSessionArgs) {
+          return HungerLogView(type: extra.resultType, session: extra);
+        }
+        final type = extra is HungerResultType
+            ? extra
             : HungerResultType.physical;
         return HungerLogView(type: type);
       },
@@ -704,10 +733,19 @@ final GoRouter appRouter = GoRouter(
             GoRoute(
               path: RoutePaths.home.path,
               name: RoutePaths.home.name,
-              builder: (context, state) => BlocProvider(
-                create: (_) => getIt<HomeBloc>()..add(const HomeStarted()),
-                child: const HomeView(),
-              ),
+              builder: (context, state) {
+                final home = getIt<HomeBloc>();
+                // Splash ısıtmadıysa (veya timeout) burada başlat.
+                if (home.state is HomeInitial || home.state is HomeError) {
+                  home.add(const HomeStarted());
+                }
+                // Profil (yüklüyse dokunmaz): Profili Düzenle hazır açılır.
+                getIt<ProfileBloc>().add(const ProfileStarted());
+                return BlocProvider<HomeBloc>.value(
+                  value: home,
+                  child: const HomeView(),
+                );
+              },
             ),
           ],
         ),

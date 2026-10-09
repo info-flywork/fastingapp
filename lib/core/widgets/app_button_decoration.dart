@@ -342,14 +342,25 @@ final class AppButtonDecoration {
 
   /// Water Reminder CTA — mavi pill (#4682EE), 48h.
   factory AppButtonDecoration.water() {
+    return AppButtonDecoration.accent(
+      ColorName.colorWaterAction,
+      height: 48,
+      fontSize: 16,
+    );
+  }
+
+  /// Tek renk accent pill (su / adım takvim onay vs.).
+  factory AppButtonDecoration.accent(
+    Color color, {
+    double height = 60,
+    double fontSize = 16,
+  }) {
     return AppButtonDecoration(
-      gradient: const LinearGradient(
-        colors: [ColorName.colorWaterAction, ColorName.colorWaterAction],
-      ),
+      gradient: LinearGradient(colors: [color, color]),
       borderColor: ColorName.colorWhite.withValues(alpha: 0.15),
       borderWidth: 1,
       borderRadius: BorderRadius.circular(99999),
-      height: 48,
+      height: height,
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 14),
       gap: 8,
       innerShadowColor: ColorName.colorWhite.withValues(alpha: 0.55),
@@ -358,7 +369,7 @@ final class AppButtonDecoration {
       labelColor: ColorName.colorWhite,
       fontFamily: FontFamily.sFProDisplay,
       fontWeight: FontWeight.w600,
-      defaultFontSize: 16,
+      defaultFontSize: fontSize,
       lineHeight: 24,
       letterSpacingPercent: -0.02,
     );

@@ -4,6 +4,7 @@ import 'package:fastingapp/core/dialogs/widgets/confirm_dialog.dart';
 import 'package:fastingapp/core/dialogs/widgets/end_fast_dialog.dart';
 import 'package:fastingapp/core/dialogs/widgets/fasting_time_dialog.dart';
 import 'package:fastingapp/core/dialogs/widgets/meal_date_picker_dialog.dart';
+import 'package:fastingapp/core/dialogs/widgets/plan_change_while_fasting_dialog.dart';
 import 'package:fastingapp/core/dialogs/widgets/sign_out_dialog.dart';
 import 'package:fastingapp/core/dialogs/widgets/water_edit_dialog.dart';
 import 'package:fastingapp/core/dialogs/widgets/weight_edit_dialog.dart';
@@ -76,12 +77,14 @@ final class AppDialogs extends DialogHandler {
     BuildContext context, {
     required DateTime initialDate,
     bool includeTime = false,
+    Color? accentColor,
   }) {
     return showNormalDialog<MealDatePickerResult>(
       context: context,
       child: MealDatePickerDialog(
         initialDate: initialDate,
         includeTime: includeTime,
+        accentColor: accentColor,
       ),
     );
   }
@@ -120,6 +123,16 @@ final class AppDialogs extends DialogHandler {
     return showNormalDialog<bool>(
       context: context,
       child: const EndFastDialog(),
+    );
+  }
+
+  /// Aktif oruç varken plan değiştirme. Barrier ile kapanırsa `null`.
+  Future<PlanChangeWhileFastingAction?> showPlanChangeWhileFasting(
+    BuildContext context,
+  ) {
+    return showNormalDialog<PlanChangeWhileFastingAction>(
+      context: context,
+      child: const PlanChangeWhileFastingDialog(),
     );
   }
 

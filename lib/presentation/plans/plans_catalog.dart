@@ -25,24 +25,35 @@ final class PlansCardData {
   final bool isLocked;
 
   Color get accentColor => switch (tone) {
-        PlansChipTone.breakfast => ColorName.colorMealPositive,
-        PlansChipTone.dinner => ColorName.colorPlanChipDinnerText,
-        PlansChipTone.advanced => ColorName.colorMealPositive,
-      };
+    PlansChipTone.breakfast => ColorName.colorMealPositive,
+    PlansChipTone.dinner => ColorName.colorPlanChipDinnerText,
+    PlansChipTone.advanced => ColorName.colorMealPositive,
+  };
 
   Color get chipBg => switch (tone) {
-        PlansChipTone.breakfast => ColorName.colorPlanChipBreakfastBg,
-        PlansChipTone.dinner => ColorName.colorPlanChipDinnerBg,
-        PlansChipTone.advanced => ColorName.colorPlanChipBreakfastBg,
-      };
+    PlansChipTone.breakfast => ColorName.colorPlanChipBreakfastBg,
+    PlansChipTone.dinner => ColorName.colorPlanChipDinnerBg,
+    PlansChipTone.advanced => ColorName.colorPlanChipBreakfastBg,
+  };
 
   Color get chipFg => switch (tone) {
-        PlansChipTone.breakfast => ColorName.colorPlanChipBreakfastText,
-        PlansChipTone.dinner => ColorName.colorPlanChipDinnerText,
-        PlansChipTone.advanced => ColorName.colorPlanChipBreakfastText,
-      };
+    PlansChipTone.breakfast => ColorName.colorPlanChipBreakfastText,
+    PlansChipTone.dinner => ColorName.colorPlanChipDinnerText,
+    PlansChipTone.advanced => ColorName.colorPlanChipBreakfastText,
+  };
 
   String get selectionKey => '$title|$chipKey|${tone.name}';
+
+  /// Backend plan kodu (`seeds/plans.json`): `16-8` → `16_8`, `OMAD` → `omad`.
+  String get planCode => title.toLowerCase().replaceAll('-', '_');
+
+  /// `PUT /plans/current` zamanlaması; ileri seviye planlarda sunucu
+  /// varsayılanı.
+  String? get timing => switch (tone) {
+    PlansChipTone.breakfast => 'skipBreakfast',
+    PlansChipTone.dinner => 'skipDinner',
+    PlansChipTone.advanced => null,
+  };
 
   @override
   bool operator ==(Object other) =>
@@ -55,6 +66,26 @@ final class PlansCardData {
 
 /// Plans sekmesi — her seviye 2 bağımsız yatay satır.
 abstract final class PlansCatalog {
+  static const all = [
+    ...beginnerRow1,
+    ...beginnerRow2,
+    ...advancedRow1,
+    ...advancedRow2,
+  ];
+
+  /// Sunucudaki etkin plana karşılık gelen kart (kod + zamanlama; zamanlama
+  /// eşleşmezse yalnızca kod). Katalogda yoksa null.
+  static PlansCardData? forPlan(String? planCode, {String? timing}) {
+    if (planCode == null) return null;
+    final norm = timing?.toLowerCase().replaceAll('_', '');
+    final sameCode = all.where((c) => c.planCode == planCode).toList();
+    if (sameCode.isEmpty) return null;
+    return sameCode.firstWhere(
+      (c) => c.timing?.toLowerCase() == norm,
+      orElse: () => sameCode.first,
+    );
+  }
+
   /// Başlangıç — üst satır (kahvaltı atla).
   static const beginnerRow1 = <PlansCardData>[
     PlansCardData(

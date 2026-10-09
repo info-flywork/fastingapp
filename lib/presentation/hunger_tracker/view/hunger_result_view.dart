@@ -9,6 +9,8 @@ import 'package:fastingapp/generated/app_images.g.dart';
 import 'package:fastingapp/generated/assets.gen.dart';
 import 'package:fastingapp/generated/colors.gen.dart';
 import 'package:fastingapp/presentation/hunger_tracker/hunger_result_type.dart';
+import 'package:fastingapp/presentation/hunger_tracker/hunger_session_args.dart';
+import 'package:fastingapp/presentation/hunger_tracker/hunger_symptom.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
@@ -17,9 +19,10 @@ part 'mixin/hunger_result_view_mixin.dart';
 
 /// Hızlı kontrol sonucu — physical / emotional.
 final class HungerResultView extends StatefulWidget {
-  const HungerResultView({required this.type, super.key});
+  const HungerResultView({required this.type, this.session, super.key});
 
   final HungerResultType type;
+  final HungerSessionArgs? session;
 
   @override
   State<HungerResultView> createState() => _HungerResultViewState();

@@ -12,12 +12,15 @@ import 'package:flutter/foundation.dart';
 ///   olayı kaçsa da bağlantı gelince sayfa kendiliğinden kapanır.
 /// - [reconnects] her yeniden bağlanmada artar: boş kalmış görseller bunu
 ///   dinleyip yeniden yüklenir.
+/// - Offline'a geçiş kısa gecikmeyle uygulanır: iOS'ta anlık `none` olayı
+///   veya tek seferlik probe hatası sayfayı yanıp söndürmesin.
 final class ConnectivityService {
   /// Uygulamada [instance] kullanılır; parametreler testler içindir.
   ConnectivityService({
     this._changes,
     Future<bool> Function()? probe,
     this._retryInterval = const Duration(seconds: 5),
+    this._offlineDebounce = const Duration(milliseconds: 750),
   }) : _probe = probe ?? _probeCdn;
 
   static ConnectivityService instance = ConnectivityService();
@@ -34,6 +37,7 @@ final class ConnectivityService {
   final Stream<List<ConnectivityResult>>? _changes;
   final Future<bool> Function() _probe;
   final Duration _retryInterval;
+  final Duration _offlineDebounce;
 
   /// Açılışta "çevrimiçi" varsayılır: kontrol bitmeden sayfa yanıp sönmez.
   final ValueNotifier<bool> isOnline = ValueNotifier(true);
@@ -42,6 +46,7 @@ final class ConnectivityService {
 
   StreamSubscription<List<ConnectivityResult>>? _subscription;
   Timer? _retryTimer;
+  Timer? _offlineDebounceTimer;
   Future<bool>? _pending;
 
   void start() {
@@ -50,6 +55,7 @@ final class ConnectivityService {
       results,
     ) {
       if (results.every((r) => r == ConnectivityResult.none)) {
+        // Anlık none blip'leri debounce ile yutulur; kalıcıysa sayfa açılır.
         _set(online: false);
       } else {
         unawaited(checkNow());
@@ -74,7 +80,30 @@ final class ConnectivityService {
   }
 
   void _set({required bool online}) {
+    if (online) {
+      _offlineDebounceTimer?.cancel();
+      _offlineDebounceTimer = null;
+      _apply(online: true);
+      return;
+    }
+    // Zaten çevrimdışıysa debounce yok; yeniden deneme zamanlayıcısı sürsün.
+    if (!isOnline.value) {
+      _retryTimer ??= Timer.periodic(
+        _retryInterval,
+        (_) => unawaited(checkNow()),
+      );
+      return;
+    }
+    _offlineDebounceTimer?.cancel();
+    _offlineDebounceTimer = Timer(_offlineDebounce, () {
+      _offlineDebounceTimer = null;
+      _apply(online: false);
+    });
+  }
+
+  void _apply({required bool online}) {
     final wasOnline = isOnline.value;
+    if (wasOnline == online) return;
     isOnline.value = online;
     if (online) {
       _retryTimer?.cancel();
@@ -105,6 +134,7 @@ final class ConnectivityService {
   @visibleForTesting
   Future<void> dispose() async {
     _retryTimer?.cancel();
+    _offlineDebounceTimer?.cancel();
     await _subscription?.cancel();
   }
 }

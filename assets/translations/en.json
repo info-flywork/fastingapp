@@ -355,7 +355,9 @@
     "widget_today": "Today",
     "widget_lets_do_this": "Let's do this!",
     "widget_this_week": "This Week",
-    "widget_keep_going": "Keep going!\nYou're on a roll."
+    "widget_keep_going": "Keep going!\nYou're on a roll.",
+    "start_now_cta": "Start fasting now",
+    "plan_changed_next": "Plan updated. The new plan applies from your next fast."
   },
   "fasting_struggle": {
     "back": "Back to timer",
@@ -624,10 +626,13 @@
     "add_water": "Add Water",
     "edit_goal_title": "Daily water goal",
     "edit_goal_hint": "ml",
-    "save": "Save"
+    "save": "Save",
+    "goal_range_error": "Daily goal must be between {}–{} ml.",
+    "glass_range_error": "Glass size must be between {}–{} ml."
   },
   "steps_page": {
     "today": "Today",
+    "yesterday": "Yesterday",
     "unit": "steps",
     "daily_target_prefix": "Daily target: ",
     "goal_achieved": "Goal achieved!",
@@ -739,7 +744,12 @@
     "delete_account_body": "Your account will be closed now and all your data permanently deleted in 7 days. Signing in again within 7 days lets you restore it. Subscriptions must be cancelled separately in the App Store or Google Play.",
     "delete_account_confirm": "Delete",
     "delete_account_cancel": "Keep",
-    "delete_account_subscription_note": "Your account is scheduled for deletion. Don't forget to cancel your subscription in the App Store or Google Play."
+    "delete_account_subscription_note": "Your account is scheduled for deletion. Don't forget to cancel your subscription in the App Store or Google Play.",
+    "restore_purchases": "Restore purchases",
+    "restore_success": "Your Premium is active again.",
+    "restore_none": "No purchases found to restore.",
+    "restore_failed": "Couldn't restore purchases. Please try again.",
+    "guest_name": "Guest"
   },
   "notifications": {
     "title": "Notifications",
@@ -841,7 +851,14 @@
     "detail_thu": "Thu",
     "detail_fri": "Fri",
     "detail_sat": "Sat",
-    "detail_sun": "Sun"
+    "detail_sun": "Sun",
+    "plan_saved": "Your plan is updated.",
+    "plan_restarted": "Plan updated and your fast restarted with the same data.",
+    "active_fast_title": "You're fasting right now",
+    "active_fast_body": "Switching plans will affect your current fast. What would you like to do?",
+    "active_fast_cancel_existing": "End fast",
+    "active_fast_reject": "Keep fasting",
+    "active_fast_restart_same": "Continue with same time"
   },
   "calories_page": {
     "eaten": "Eated {}",
@@ -915,7 +932,16 @@
     "meal_yogurt_title": "Yogurt & Nuts",
     "meal_yogurt_meta": "17:00 Snack",
     "meal_yogurt_protein": "15g",
-    "meal_yogurt_kcal": "220 kcal"
+    "meal_yogurt_kcal": "220 kcal",
+    "empty_meals": "No meals logged today. Start with a photo or add one manually.",
+    "goal_fmt": "/ {}g",
+    "goal_unknown": "/ —",
+    "meal_untitled": "Meal",
+    "kind_breakfast": "Breakfast",
+    "kind_lunch": "Lunch",
+    "kind_dinner": "Dinner",
+    "kind_snack": "Snack",
+    "kind_other": "Meal"
   },
   "insights_page": {
     "brand_mochi": "Mochi",

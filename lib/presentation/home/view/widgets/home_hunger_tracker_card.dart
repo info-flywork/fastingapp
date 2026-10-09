@@ -2,9 +2,16 @@ part of '../home_view.dart';
 
 /// Home Hunger Tracker kartı — meal records'ın altında.
 final class HomeHungerTrackerCard extends StatelessWidget {
-  const HomeHungerTrackerCard({required this.onTap, super.key});
+  const HomeHungerTrackerCard({
+    required this.onTap,
+    this.physicalCount = 0,
+    this.emotionalCount = 0,
+    super.key,
+  });
 
   final VoidCallback onTap;
+  final int physicalCount;
+  final int emotionalCount;
 
   @override
   Widget build(BuildContext context) {
@@ -37,7 +44,10 @@ final class HomeHungerTrackerCard extends StatelessWidget {
                 Assets.icons.solarAltArrowUpLineDuotoneRight.svg(),
               ],
             ),
-            const _HungerStrip(),
+            _HungerStrip(
+              physicalCount: physicalCount,
+              emotionalCount: emotionalCount,
+            ),
             const SizedBox(height: 16),
             Text(
               'home.hunger_question'.tr(),
@@ -65,7 +75,13 @@ final class HomeHungerTrackerCard extends StatelessWidget {
 }
 
 final class _HungerStrip extends StatelessWidget {
-  const _HungerStrip();
+  const _HungerStrip({
+    required this.physicalCount,
+    required this.emotionalCount,
+  });
+
+  final int physicalCount;
+  final int emotionalCount;
 
   static const _stripH = 80.0;
   static const _stageH = 135.0;
@@ -111,6 +127,7 @@ final class _HungerStrip extends StatelessWidget {
                 ),
                 const SizedBox(width: 10),
                 _EmojiTile(
+                  count: physicalCount,
                   child: AppImages.unhappyv2.image(
                     width: 40,
                     height: 40,
@@ -119,6 +136,7 @@ final class _HungerStrip extends StatelessWidget {
                 ),
                 const Spacer(),
                 _EmojiTile(
+                  count: emotionalCount,
                   child: AppImages.tonguev2.image(
                     width: 40,
                     height: 40,
@@ -153,33 +171,58 @@ final class _HungerStrip extends StatelessWidget {
 
 /// Sadece unhappy / tongue — 40×40 beyaz, radius 8, shadow.
 final class _EmojiTile extends StatelessWidget {
-  const _EmojiTile({required this.child});
+  const _EmojiTile({required this.child, this.count = 0});
 
   final Widget child;
+  final int count;
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: 40,
-      height: 40,
-      decoration: BoxDecoration(
-        color: ColorName.colorWhite,
-        borderRadius: BorderRadius.circular(8),
-        boxShadow: const [
-          BoxShadow(
-            color: Color(0x0D0C0C0D),
-            offset: Offset(0, 1),
-            blurRadius: 4,
+    return Stack(
+      clipBehavior: Clip.none,
+      children: [
+        Container(
+          width: 40,
+          height: 40,
+          decoration: BoxDecoration(
+            color: ColorName.colorWhite,
+            borderRadius: BorderRadius.circular(8),
+            boxShadow: const [
+              BoxShadow(
+                color: Color(0x0D0C0C0D),
+                offset: Offset(0, 1),
+                blurRadius: 4,
+              ),
+              BoxShadow(
+                color: Color(0x1A0C0C0D),
+                offset: Offset(0, 1),
+                blurRadius: 4,
+              ),
+            ],
           ),
-          BoxShadow(
-            color: Color(0x1A0C0C0D),
-            offset: Offset(0, 1),
-            blurRadius: 4,
+          alignment: Alignment.center,
+          child: child,
+        ),
+        if (count > 0)
+          Positioned(
+            top: -4,
+            right: -4,
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1),
+              decoration: BoxDecoration(
+                color: ColorName.colorBrandStrong,
+                borderRadius: BorderRadius.circular(999),
+              ),
+              child: Text(
+                count > 9 ? '9+' : '$count',
+                style: AppTextStyles.homeMealTag.copyWith(
+                  color: ColorName.colorWhite,
+                  fontSize: 10,
+                ),
+              ),
+            ),
           ),
-        ],
-      ),
-      alignment: Alignment.center,
-      child: child,
+      ],
     );
   }
 }

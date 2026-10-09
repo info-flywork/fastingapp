@@ -1,4 +1,8 @@
+import 'dart:async';
+
 import 'package:easy_localization/easy_localization.dart';
+import 'package:fastingapp/core/di/injection.dart';
+import 'package:fastingapp/domain/trackers/trackers_repository.dart';
 import 'package:fastingapp/core/remote_images/app_image.dart';
 import 'package:fastingapp/core/theme/app_text_styles.dart';
 import 'package:fastingapp/core/widgets/horseshoe_arc.dart';
@@ -10,10 +14,15 @@ import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 
 /// Profil → Uyku. Yarım daire, haftalık bar ve program kartları.
-final class SleepView extends StatelessWidget {
+final class SleepView extends StatefulWidget {
   const SleepView({super.key});
 
-  static const _hours = <double>[8, 6.4, 7, 7, 7, 7.1, 8.6];
+  @override
+  State<SleepView> createState() => _SleepViewState();
+}
+
+final class _SleepViewState extends State<SleepView> {
+  SleepSummary? _summary;
 
   static const _dayKeys = [
     'sleep_page.day_mon',
@@ -26,8 +35,45 @@ final class SleepView extends StatelessWidget {
   ];
 
   @override
+  void initState() {
+    super.initState();
+    unawaited(_load());
+  }
+
+  Future<void> _load() async {
+    try {
+      final summary = await getIt<TrackersRepository>().getSleepSummary();
+      if (mounted) setState(() => _summary = summary);
+    } on Object {
+      // Boş özet — UI sıfır değerleri gösterir
+    }
+  }
+
+  static String _formatMinutes(int? minutes) {
+    if (minutes == null || minutes <= 0) return '—';
+    final h = minutes ~/ 60;
+    final m = minutes % 60;
+    if (m == 0) return '${h}h';
+    return '${h}h ${m}m';
+  }
+
+  static String _goalHours(int goalMin) {
+    final h = goalMin / 60;
+    return '${h.toStringAsFixed(1)}h';
+  }
+
+  @override
   Widget build(BuildContext context) {
     final bottom = MediaQuery.paddingOf(context).bottom;
+    final summary = _summary;
+    final progress = summary?.progress ?? 0;
+    final lastNight = _formatMinutes(summary?.lastNightMinutes);
+    final weekHours = summary?.weekMinutes.isNotEmpty == true
+        ? summary!.weekMinutes.map((m) => m / 60).toList()
+        : List<double>.filled(7, 0);
+    final bedtime = summary?.bedtime ?? '—';
+    final wakeTime = summary?.wakeTime ?? '—';
+    final goalText = summary != null ? _goalHours(summary.goalMin) : '—';
 
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: SystemUiOverlayStyle.dark,
@@ -48,15 +94,21 @@ final class SleepView extends StatelessWidget {
                   physics: const ClampingScrollPhysics(),
                   padding: EdgeInsets.fromLTRB(16, 8, 16, bottom + 24),
                   children: [
-                    const _SleepArc(),
+                    _SleepArc(
+                      progress: progress.clamp(0.0, 1.0),
+                      durationText: lastNight,
+                    ),
                     const SizedBox(height: 8),
-                    const _BoundRow(),
+                    _BoundRow(bedtime: bedtime, wakeTime: wakeTime),
                     const SizedBox(height: 20),
                     const _HourAxis(),
                     const SizedBox(height: 8),
-                    for (var i = 0; i < _hours.length; i++) ...[
-                      _SleepDayBar(labelKey: _dayKeys[i], hours: _hours[i]),
-                      if (i != _hours.length - 1) const SizedBox(height: 16),
+                    for (var i = 0; i < weekHours.length; i++) ...[
+                      _SleepDayBar(
+                        labelKey: _dayKeys[i],
+                        hours: weekHours[i],
+                      ),
+                      if (i != weekHours.length - 1) const SizedBox(height: 16),
                     ],
                     const SizedBox(height: 24),
                     Text(
@@ -64,28 +116,28 @@ final class SleepView extends StatelessWidget {
                       style: AppTextStyles.sleepSectionTitle,
                     ),
                     const SizedBox(height: 12),
-                    const Row(
+                    Row(
                       children: [
                         Expanded(
                           child: _ScheduleCard(
                             icon: _ScheduleIcon.bedtime,
-                            valueKey: 'sleep_page.bedtime_value',
+                            valueText: bedtime,
                             labelKey: 'sleep_page.bedtime',
                           ),
                         ),
-                        SizedBox(width: 10),
+                        const SizedBox(width: 10),
                         Expanded(
                           child: _ScheduleCard(
                             icon: _ScheduleIcon.wake,
-                            valueKey: 'sleep_page.wakeup_value',
+                            valueText: wakeTime,
                             labelKey: 'sleep_page.wakeup',
                           ),
                         ),
-                        SizedBox(width: 10),
+                        const SizedBox(width: 10),
                         Expanded(
                           child: _ScheduleCard(
                             icon: _ScheduleIcon.goal,
-                            valueKey: 'sleep_page.goal_value',
+                            valueText: goalText,
                             labelKey: 'sleep_page.goal',
                           ),
                         ),
@@ -161,14 +213,15 @@ final class _CircleBackButton extends StatelessWidget {
 }
 
 final class _SleepArc extends StatelessWidget {
-  const _SleepArc();
+  const _SleepArc({required this.progress, required this.durationText});
 
-  static const _progress = 0.78;
+  final double progress;
+  final String durationText;
 
   @override
   Widget build(BuildContext context) {
     return TweenAnimationBuilder<double>(
-      tween: Tween(begin: 0, end: _progress),
+      tween: Tween(begin: 0, end: progress),
       duration: const Duration(milliseconds: 1100),
       curve: Curves.easeOutCubic,
       builder: (context, progress, child) {
@@ -190,16 +243,18 @@ final class _SleepArc extends StatelessWidget {
           ),
         );
       },
-      child: const Padding(
-        padding: EdgeInsets.only(top: 36),
-        child: _ArcCaption(),
+      child: Padding(
+        padding: const EdgeInsets.only(top: 36),
+        child: _ArcCaption(durationText: durationText),
       ),
     );
   }
 }
 
 final class _ArcCaption extends StatelessWidget {
-  const _ArcCaption();
+  const _ArcCaption({required this.durationText});
+
+  final String durationText;
 
   @override
   Widget build(BuildContext context) {
@@ -208,14 +263,17 @@ final class _ArcCaption extends StatelessWidget {
       children: [
         Text('sleep_page.last_night'.tr(), style: AppTextStyles.sleepCaption),
         const SizedBox(height: 2),
-        Text('sleep_page.duration'.tr(), style: AppTextStyles.sleepDuration),
+        Text(durationText, style: AppTextStyles.sleepDuration),
       ],
     );
   }
 }
 
 final class _BoundRow extends StatelessWidget {
-  const _BoundRow();
+  const _BoundRow({required this.bedtime, required this.wakeTime});
+
+  final String bedtime;
+  final String wakeTime;
 
   @override
   Widget build(BuildContext context) {
@@ -229,10 +287,7 @@ final class _BoundRow extends StatelessWidget {
                 'sleep_page.bedtime'.tr(),
                 style: AppTextStyles.sleepBoundLabel,
               ),
-              Text(
-                'sleep_page.bedtime_value'.tr(),
-                style: AppTextStyles.sleepBoundValue,
-              ),
+              Text(bedtime, style: AppTextStyles.sleepBoundValue),
             ],
           ),
         ),
@@ -244,10 +299,7 @@ final class _BoundRow extends StatelessWidget {
                 'sleep_page.wake_up'.tr(),
                 style: AppTextStyles.sleepBoundLabel,
               ),
-              Text(
-                'sleep_page.wake_up_value'.tr(),
-                style: AppTextStyles.sleepBoundValue,
-              ),
+              Text(wakeTime, style: AppTextStyles.sleepBoundValue),
             ],
           ),
         ),
@@ -335,12 +387,12 @@ enum _ScheduleIcon { bedtime, wake, goal }
 final class _ScheduleCard extends StatelessWidget {
   const _ScheduleCard({
     required this.icon,
-    required this.valueKey,
+    required this.valueText,
     required this.labelKey,
   });
 
   final _ScheduleIcon icon;
-  final String valueKey;
+  final String valueText;
   final String labelKey;
 
   @override
@@ -362,7 +414,7 @@ final class _ScheduleCard extends StatelessWidget {
             _asset.image(width: 48, height: 48, fit: BoxFit.contain),
             const SizedBox(height: 6),
             Text(
-              valueKey.tr(),
+              valueText,
               textAlign: TextAlign.center,
               style: AppTextStyles.sleepCardValue,
             ),

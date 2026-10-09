@@ -355,7 +355,9 @@
     "widget_today": "Heute",
     "widget_lets_do_this": "Los geht's!",
     "widget_this_week": "Diese Woche",
-    "widget_keep_going": "Weiter so!\nDu bist im Flow."
+    "widget_keep_going": "Weiter so!\nDu bist im Flow.",
+    "start_now_cta": "Jetzt fasten",
+    "plan_changed_next": "Plan aktualisiert. Der neue Plan gilt ab deinem nächsten Fasten."
   },
   "fasting_struggle": {
     "back": "Zurück zum Timer",
@@ -624,10 +626,13 @@
     "add_water": "Wasser hinzufügen",
     "edit_goal_title": "Tägliches Wasserziel",
     "edit_goal_hint": "ml",
-    "save": "Speichern"
+    "save": "Speichern",
+    "goal_range_error": "Tagesziel muss zwischen {}–{} ml liegen.",
+    "glass_range_error": "Glasgröße muss zwischen {}–{} ml liegen."
   },
   "steps_page": {
     "today": "Heute",
+    "yesterday": "Gestern",
     "unit": "Schritte",
     "daily_target_prefix": "Tagesziel: ",
     "goal_achieved": "Ziel erreicht!",
@@ -739,7 +744,12 @@
     "delete_account_body": "Dein Konto wird sofort geschlossen und alle Daten werden nach 7 Tagen endgültig gelöscht. Wenn du dich innerhalb von 7 Tagen wieder anmeldest, kannst du es wiederherstellen. Abos musst du separat im App Store oder bei Google Play kündigen.",
     "delete_account_confirm": "Löschen",
     "delete_account_cancel": "Behalten",
-    "delete_account_subscription_note": "Dein Konto wird gelöscht. Vergiss nicht, dein Abo im App Store oder bei Google Play zu kündigen."
+    "delete_account_subscription_note": "Dein Konto wird gelöscht. Vergiss nicht, dein Abo im App Store oder bei Google Play zu kündigen.",
+    "restore_purchases": "Käufe wiederherstellen",
+    "restore_success": "Dein Premium ist wieder aktiv.",
+    "restore_none": "Keine Käufe zum Wiederherstellen gefunden.",
+    "restore_failed": "Käufe konnten nicht wiederhergestellt werden. Bitte versuche es erneut.",
+    "guest_name": "Gast"
   },
   "notifications": {
     "title": "Benachrichtigungen",
@@ -841,7 +851,14 @@
     "detail_thu": "Do",
     "detail_fri": "Fr",
     "detail_sat": "Sa",
-    "detail_sun": "So"
+    "detail_sun": "So",
+    "plan_saved": "Dein Plan wurde aktualisiert.",
+    "plan_restarted": "Plan aktualisiert und Fasten mit denselben Daten neu gestartet.",
+    "active_fast_title": "Du fastest gerade",
+    "active_fast_body": "Ein Planwechsel betrifft dein laufendes Fasten. Was möchtest du tun?",
+    "active_fast_cancel_existing": "Fasten beenden",
+    "active_fast_reject": "Weiter fasten",
+    "active_fast_restart_same": "Mit derselben Zeit weiter"
   },
   "calories_page": {
     "eaten": "Gegessen {}",
@@ -915,7 +932,16 @@
     "meal_yogurt_title": "Joghurt und Nüsse",
     "meal_yogurt_meta": "17:00 Snack",
     "meal_yogurt_protein": "15g",
-    "meal_yogurt_kcal": "220 kcal"
+    "meal_yogurt_kcal": "220 kcal",
+    "empty_meals": "Heute noch keine Mahlzeiten. Starte mit einem Foto oder füge eine hinzu.",
+    "goal_fmt": "/ {}g",
+    "goal_unknown": "/ —",
+    "meal_untitled": "Mahlzeit",
+    "kind_breakfast": "Frühstück",
+    "kind_lunch": "Mittagessen",
+    "kind_dinner": "Abendessen",
+    "kind_snack": "Snack",
+    "kind_other": "Mahlzeit"
   },
   "insights_page": {
     "brand_mochi": "Mochi",

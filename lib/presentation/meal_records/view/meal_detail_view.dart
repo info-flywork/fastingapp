@@ -1,17 +1,26 @@
+import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:easy_localization/easy_localization.dart';
+import 'package:fastingapp/core/di/injection.dart';
 import 'package:fastingapp/core/dialogs/app_dialogs.dart';
+import 'package:fastingapp/core/network/network_exception.dart';
 import 'package:fastingapp/core/remote_images/app_image.dart';
+import 'package:fastingapp/core/snackbar/app_snackbar.dart';
+import 'package:fastingapp/core/sync/data_sync.dart';
 import 'package:fastingapp/core/theme/app_text_styles.dart';
+import 'package:fastingapp/core/utils/enum/snackbar_type.dart';
 import 'package:fastingapp/core/widgets/app_button.dart';
 import 'package:fastingapp/core/widgets/app_button_decoration.dart';
+import 'package:fastingapp/core/widgets/app_loading.dart';
 import 'package:fastingapp/core/widgets/onboarding/onboarding_option_card.dart';
 import 'package:fastingapp/core/widgets/onboarding/onboarding_option_card_style.dart';
+import 'package:fastingapp/domain/nutrition/meals_repository.dart';
 import 'package:fastingapp/generated/app_images.g.dart';
 import 'package:fastingapp/generated/assets.gen.dart';
 import 'package:fastingapp/generated/colors.gen.dart';
 import 'package:fastingapp/generated/fonts.gen.dart';
+import 'package:fastingapp/presentation/fasting/fasting_finish_flow.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
@@ -26,7 +35,10 @@ enum MealFeeling { meh, good, superFeeling }
 
 /// Öğün kaydı detay / düzenleme — meal card’dan açılır.
 final class MealDetailView extends StatefulWidget {
-  const MealDetailView({super.key});
+  const MealDetailView({this.mealId, this.initialEatenAt, super.key});
+
+  final String? mealId;
+  final DateTime? initialEatenAt;
 
   @override
   State<MealDetailView> createState() => _MealDetailViewState();
@@ -59,37 +71,54 @@ class _MealDetailViewState extends State<MealDetailView>
                 child: _MealDetailHeader(),
               ),
               Expanded(
-                child: SingleChildScrollView(
-                  padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
-                  physics: const ClampingScrollPhysics(),
-                  child: Column(
-                    children: [
-                      _MealTimeCard(
-                        label: mealTimeLabel(context),
-                        onEdit: onMealTimeEditTapped,
+                child: loading
+                    ? const Center(child: AppLoading())
+                    : loadError != null
+                    ? Center(
+                        child: Padding(
+                          padding: const EdgeInsets.all(24),
+                          child: Text(
+                            loadError!,
+                            textAlign: TextAlign.center,
+                            style: AppTextStyles.notificationsEmptySubtitle,
+                          ),
+                        ),
+                      )
+                    : SingleChildScrollView(
+                        padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
+                        physics: const ClampingScrollPhysics(),
+                        child: Column(
+                          children: [
+                            _MealTimeCard(
+                              label: mealTimeLabel(context),
+                              onEdit: onMealTimeEditTapped,
+                            ),
+                            const SizedBox(height: 12),
+                            _MealOrSnackCard(
+                              selected: mealKind,
+                              onSelected: onMealKindSelected,
+                            ),
+                            const SizedBox(height: 12),
+                            _DietTypeCard(
+                              selected: dietChoice,
+                              onSelected: onDietSelected,
+                            ),
+                            const SizedBox(height: 12),
+                            _FeelingCard(
+                              selected: feeling,
+                              onSelected: onFeelingSelected,
+                            ),
+                            const SizedBox(height: 12),
+                            _NotesCard(controller: notesController),
+                          ],
+                        ),
                       ),
-                      const SizedBox(height: 12),
-                      _MealOrSnackCard(
-                        selected: mealKind,
-                        onSelected: onMealKindSelected,
-                      ),
-                      const SizedBox(height: 12),
-                      _DietTypeCard(
-                        selected: dietChoice,
-                        onSelected: onDietSelected,
-                      ),
-                      const SizedBox(height: 12),
-                      _FeelingCard(
-                        selected: feeling,
-                        onSelected: onFeelingSelected,
-                      ),
-                      const SizedBox(height: 12),
-                      _NotesCard(controller: notesController),
-                    ],
-                  ),
-                ),
               ),
-              _SaveBar(bottomInset: bottom, onSave: onSaveTapped),
+              _SaveBar(
+                bottomInset: bottom,
+                saving: saving,
+                onSave: loading || loadError != null ? null : onSaveTapped,
+              ),
             ],
           ),
         ),
@@ -526,10 +555,15 @@ final class _NotesCard extends StatelessWidget {
 }
 
 final class _SaveBar extends StatelessWidget {
-  const _SaveBar({required this.bottomInset, required this.onSave});
+  const _SaveBar({
+    required this.bottomInset,
+    required this.onSave,
+    this.saving = false,
+  });
 
   final double bottomInset;
-  final VoidCallback onSave;
+  final VoidCallback? onSave;
+  final bool saving;
 
   @override
   Widget build(BuildContext context) {
@@ -542,7 +576,7 @@ final class _SaveBar extends StatelessWidget {
       ),
       child: AppButton(
         label: 'meal_records_page.save_your_meal'.tr(),
-        onPressed: onSave,
+        onPressed: saving ? null : onSave,
         decoration: AppButtonDecoration.primary(),
         showIcon: false,
       ),

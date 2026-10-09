@@ -13,6 +13,12 @@ final class ChatMessage extends Equatable {
   final String text;
   final ChatSender sender;
 
+  ChatMessage copyWith({String? text}) => ChatMessage(
+    id: id,
+    text: text ?? this.text,
+    sender: sender,
+  );
+
   @override
   List<Object?> get props => [id, text, sender];
 }
@@ -56,11 +62,17 @@ final class ChatSessionState extends Equatable {
     this.messages = const [],
     this.history = const [],
     this.isAiTyping = false,
+    this.isLoadingHistory = false,
+    this.activeConversationId,
+    this.errorMessage,
   });
 
   final List<ChatMessage> messages;
   final List<ChatHistoryItem> history;
   final bool isAiTyping;
+  final bool isLoadingHistory;
+  final String? activeConversationId;
+  final String? errorMessage;
 
   bool get hasConversation => messages.isNotEmpty || isAiTyping;
 
@@ -68,14 +80,31 @@ final class ChatSessionState extends Equatable {
     List<ChatMessage>? messages,
     List<ChatHistoryItem>? history,
     bool? isAiTyping,
+    bool? isLoadingHistory,
+    String? activeConversationId,
+    String? errorMessage,
+    bool clearError = false,
+    bool clearActiveConversation = false,
   }) {
     return ChatSessionState(
       messages: messages ?? this.messages,
       history: history ?? this.history,
       isAiTyping: isAiTyping ?? this.isAiTyping,
+      isLoadingHistory: isLoadingHistory ?? this.isLoadingHistory,
+      activeConversationId: clearActiveConversation
+          ? null
+          : (activeConversationId ?? this.activeConversationId),
+      errorMessage: clearError ? null : (errorMessage ?? this.errorMessage),
     );
   }
 
   @override
-  List<Object?> get props => [messages, history, isAiTyping];
+  List<Object?> get props => [
+    messages,
+    history,
+    isAiTyping,
+    isLoadingHistory,
+    activeConversationId,
+    errorMessage,
+  ];
 }

@@ -24,7 +24,11 @@ mixin LoginViewMixin on State<LoginView> {
       if (!mounted) return;
       AppSnackbar.show(
         context: context,
-        text: e.toString(),
+        text: switch (e) {
+          NetworkException(:final message) => message,
+          AuthException(:final message) => message,
+          _ => e.toString(),
+        },
         type: SnackBarType.failure,
       );
     }

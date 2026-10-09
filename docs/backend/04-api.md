@@ -75,7 +75,7 @@ Mevcut istemci yolu korunur. `POST /v1/auth/social` ve `POST /v1/auth/firebase` 
   "fullName": { "givenName": "Atilla", "familyName": "E." },  // Apple adı yalnızca ilk girişte istemciye gelir
   "deviceId": "<installId>" }
 // yanıt 200 (mevcut hesap) | 201 (yeni hesap)
-{ "token": {…}, "user": {…}, "isNewUser": true, "linkedFromGuest": true, "mergedFromGuest": false }
+{ "token": {…}, "user": {…}, "isNewUser": true, "linkedFromGuest": true }
 ```
 
 **Davranış:**
@@ -83,13 +83,11 @@ Mevcut istemci yolu korunur. `POST /v1/auth/social` ve `POST /v1/auth/firebase` 
 | Durum | Ne olur |
 |---|---|
 | Header'da **misafir oturumu** var + sosyal kimlik yeni | Misafir hesap sosyal hesaba **yükseltilir**: aynı `userId`, onboarding/oruç verileri korunur, `isGuest=false` |
-| Header'da misafir var + sosyal kimlik **başka bir hesaba** bağlı | `409 ACCOUNT_LINK_CONFLICT`. `details.options = ["switch_account","merge"]`. Varsayılan: kullanıcı mevcut hesaba geçer, misafir verisi `merge` seçilirse taşınır ([05 §11](05-is-kurallari.md#11-misafir-hesap-birleştirme)) |
+| Header'da misafir var + sosyal kimlik **başka bir hesaba** bağlı | O hesaba geçilir (200). Birleştirme yok: misafir verisi taşınmaz; misafir hesap **silinmez**, yalnızca oturumu kapanır ([05 §11](05-is-kurallari.md)) |
 | Header yok + kimlik bulundu | Giriş yapılır |
 | Header yok + kimlik yok | Yeni kullanıcı oluşturulur |
 
-**Çakışma akışı:** İlk çağrı `mergeGuest` olmadan yapılır; çakışma varsa 409 döner. İstemci kullanıcıya sorar ve aynı isteği
-`"mergeGuest": false` (mevcut hesaba geç; misafir `pending_deletion`) ya da `"mergeGuest": true` (misafir verisi taşınır) ile tekrarlar.
-Her iki durumda da misafir oturumları iptal edilir ve misafirin `installId`'si artık giriş için kullanılamaz.
+Hesaba geçişte misafirin oturumları iptal edilir; misafir hesap cihazda kalır, aynı `installId` + misafir sırrıyla `POST /v1/auth/guest` onu yeniden açar.
 
 ### `POST /v1/auth/refresh` 🔓
 

@@ -381,7 +381,7 @@ level = gerekenXP(n) ≤ xp koşulunu sağlayan en büyük n
 
 **İlk oruç:** `user_stats.first_fast_completed_at` bir kez yazılır (canlı bitirme ya da elle girilen tamamlanmış oruç), sonra silme/düzenleme ile değişmez; kutlama ekranı iki kez gösterilmez.
 
-## 11. Misafir hesap birleştirme
+## 11. Misafir hesap birleştirme (yok) ve hesaba geçiş
 
 Misafir kullanıcı (`is_guest = 1`) Apple/Google ile giriş yaptığında:
 
@@ -390,20 +390,12 @@ Misafir kullanıcı (`is_guest = 1`) Apple/Google ile giriş yaptığında:
    - `is_guest = 0`, isim ve e-posta doldurulur.
    - Kullanıcı ID'si **değişmez**, RevenueCat app_user_id aynı kalır.
 2. **Sosyal kimlik mevcut bir hesaba bağlıysa:**
-   - Varsayılan olarak mevcut hesaba geçilir. Misafir hesap `pending_deletion` olur ve 30 gün sonra silinir.
-   - İstemci `merge` isterse (`POST /v1/auth/register {…, "mergeGuest": true}`) şunlar hedef hesaba taşınır (tek transaction, `user_id` güncellemesi):
-     - fasting_sessions, weight/water/meals/sleep/hunger kayıtları
-     - medya sahipliği
-   - Ardından hedef hesabın `recompute`'u çalışır.
-   - Çakışmalar:
+   - O hesaba geçilir (soru sorulmaz). **Hesap birleştirme yoktur** (ürün kararı, 2026-10-08): misafirin verisi taşınmaz.
+   - Misafir hesap **silinmez**, yalnızca oturumları iptal edilir. Misafir cihazda kalıcı, ayrı bir hesaptır: "Misafir olarak
+     devam et" aynı misafiri (verisiyle) açar.
+   - Abonelik: RevenueCat'te hesaplar ayrıdır; misafirde satın alma varsa RevenueCat `TRANSFER` olayıyla taşınır.
 
-     | Veri | Kural |
-     |---|---|
-     | Aktif oruç ikisinde de var | Hedefteki korunur, misafirdeki `endedEarly` olarak kapatılır |
-     | Profil | Hedefinki korunur |
-     | Abonelik | RevenueCat `TRANSFER` olayı ile yönetilir |
-
-3. **İnaktif misafirler:** 90 gün işlem yapmamış misafir hesaplar temizlik işiyle silinir. Aydınlatma metninde yazılır.
+3. **Misafirler süreyle silinmez** (ürün kararı, 2026-10-08): kullanılmasa da kalır; yalnızca kullanıcı uygulamadan silebilir (Hesabı Sil). Aydınlatma metninde yazılır.
 
 ## 12. Su
 

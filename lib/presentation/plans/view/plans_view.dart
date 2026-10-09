@@ -1,14 +1,20 @@
 import 'dart:ui';
 
 import 'package:easy_localization/easy_localization.dart';
+import 'package:fastingapp/core/di/injection.dart';
 import 'package:fastingapp/core/router/route_paths.dart';
 import 'package:fastingapp/core/theme/app_text_styles.dart';
+import 'package:fastingapp/domain/revenue_cat/revenue_cat_service.dart';
 import 'package:fastingapp/generated/app_images.g.dart';
 import 'package:fastingapp/generated/colors.gen.dart';
+import 'package:fastingapp/presentation/fasting/bloc/fasting_session_cubit.dart';
+import 'package:fastingapp/presentation/fasting/bloc/fasting_session_state.dart';
+import 'package:fastingapp/presentation/plans/plan_change_flow.dart';
 import 'package:fastingapp/presentation/plans/plan_detail_args.dart';
 import 'package:fastingapp/presentation/plans/plans_catalog.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
 const _kHeaderHeight = 56.0;
@@ -27,19 +33,36 @@ final class PlansView extends StatefulWidget {
 }
 
 class _PlansViewState extends State<PlansView> {
-  PlansCardData? _selected;
+  FastingSessionCubit get _session => getIt<FastingSessionCubit>();
+
+  /// Seçili kart = sunucudaki etkin plan.
+  PlansCardData? _selectedFor(FastingSessionState state) =>
+      PlansCatalog.forPlan(state.plan?.planCode, timing: state.plan?.timing);
 
   Future<void> _openPlanDetail({
     required PlansCardData data,
     required String detailTitleKey,
   }) async {
-    if (data.isLocked) return;
-    final result = await context.pushNamed<PlansCardData>(
+    if (data.isLocked) {
+      // Premium plan: paywall; satın alınmazsa açılmaz.
+      final revenueCat = getIt<RevenueCatService>();
+      final premium =
+          revenueCat.isPremium.value || await revenueCat.presentPaywall();
+      if (!premium || !mounted) return;
+    }
+    final result = await context.pushNamed<PlanSelection>(
       RoutePaths.planDetail.name,
       extra: PlanDetailArgs(plan: data, pageTitleKey: detailTitleKey),
     );
     if (!mounted || result == null) return;
-    setState(() => _selected = result);
+    await applyPlanChange(
+      context: context,
+      session: _session,
+      planCode: result.plan.planCode,
+      timing: result.hasCustomWindow ? 'custom' : result.plan.timing,
+      eatStart: result.eatStart,
+      eatEnd: result.eatEnd,
+    );
   }
 
   @override
@@ -64,32 +87,36 @@ class _PlansViewState extends State<PlansView> {
             Expanded(
               child: ColoredBox(
                 color: ColorName.colorWhite,
-                child: ListView(
-                  physics: const ClampingScrollPhysics(),
-                  padding: EdgeInsets.only(bottom: bottom + 100),
-                  children: [
-                    _PlansSection(
-                      titleKey: 'plans.beginner_title',
-                      emphasisKey: 'plans.beginner_emphasis',
-                      restKey: 'plans.beginner_rest',
-                      detailTitleKey: 'plans.detail_beginner_title',
-                      row1: PlansCatalog.beginnerRow1,
-                      row2: PlansCatalog.beginnerRow2,
-                      selected: _selected,
-                      onOpenPlan: _openPlanDetail,
-                    ),
-                    const SizedBox(height: 32),
-                    _PlansSection(
-                      titleKey: 'plans.advanced_title',
-                      emphasisKey: 'plans.advanced_emphasis',
-                      restKey: 'plans.advanced_rest',
-                      detailTitleKey: 'plans.detail_advanced_title',
-                      row1: PlansCatalog.advancedRow1,
-                      row2: PlansCatalog.advancedRow2,
-                      selected: _selected,
-                      onOpenPlan: _openPlanDetail,
-                    ),
-                  ],
+                child: BlocBuilder<FastingSessionCubit, FastingSessionState>(
+                  bloc: _session,
+                  buildWhen: (a, b) => a.plan != b.plan,
+                  builder: (context, session) => ListView(
+                    physics: const ClampingScrollPhysics(),
+                    padding: EdgeInsets.only(bottom: bottom + 100),
+                    children: [
+                      _PlansSection(
+                        titleKey: 'plans.beginner_title',
+                        emphasisKey: 'plans.beginner_emphasis',
+                        restKey: 'plans.beginner_rest',
+                        detailTitleKey: 'plans.detail_beginner_title',
+                        row1: PlansCatalog.beginnerRow1,
+                        row2: PlansCatalog.beginnerRow2,
+                        selected: _selectedFor(session),
+                        onOpenPlan: _openPlanDetail,
+                      ),
+                      const SizedBox(height: 32),
+                      _PlansSection(
+                        titleKey: 'plans.advanced_title',
+                        emphasisKey: 'plans.advanced_emphasis',
+                        restKey: 'plans.advanced_rest',
+                        detailTitleKey: 'plans.detail_advanced_title',
+                        row1: PlansCatalog.advancedRow1,
+                        row2: PlansCatalog.advancedRow2,
+                        selected: _selectedFor(session),
+                        onOpenPlan: _openPlanDetail,
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),
@@ -260,6 +287,15 @@ final class _PlanCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Premium kullanıcıda kilit görünmez.
+    return ValueListenableBuilder<bool>(
+      valueListenable: getIt<RevenueCatService>().isPremium,
+      builder: (context, isPremium, _) =>
+          _buildCard(locked: data.isLocked && !isPremium),
+    );
+  }
+
+  Widget _buildCard({required bool locked}) {
     return GestureDetector(
       onTap: () => onOpenPlan(data: data, detailTitleKey: detailTitleKey),
       child: Container(
@@ -275,7 +311,7 @@ final class _PlanCard extends StatelessWidget {
         ),
         child: ClipRRect(
           borderRadius: BorderRadius.circular(isSelected ? 14 : 16),
-          child: data.isLocked ? _buildLockedBody() : _buildCardBody(),
+          child: locked ? _buildLockedBody() : _buildCardBody(),
         ),
       ),
     );

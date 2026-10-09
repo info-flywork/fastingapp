@@ -49,7 +49,7 @@
 | Cache / kuyruk | **Redis yok** (ADR 0005, `mochifast-backend/docs/adr/0005-redis-yok.md`). Cache: process içi LRU (API tek process). Kuyruk: MySQL `jobs` tablosu, `SKIP LOCKED` ile worker; tekrarlı işler `job_schedules` |
 | Kimlik doğrulama | Apple / Google **Firebase Authentication** ile (backend Firebase ID token'ı doğrular), misafir backend'de (cihaz başına tek). Kısa ömürlü JWT (EdDSA, 15 dk) + dönen (rotating) refresh token (60 gün), yeniden kullanım tespiti |
 | Medya | Bunny Storage (DE) + 2 pull zone: public (uzun cache) ve private (Token Authentication ile imzalı URL). `sharp` ile yeniden kodlama, EXIF/GPS temizliği |
-| Yapay zekâ | Anthropic Claude (`@anthropic-ai/sdk`). Sohbet SSE ile akıyor, fotoğraf analizi yapılandırılmış çıktı (JSON Schema) ile dönüyor, kotalar MySQL'de (`ai_quota_daily`) |
+| Yapay zekâ | OpenAI (`openai` SDK). Sohbet SSE ile akıyor, fotoğraf analizi yapılandırılmış çıktı (JSON Schema) ile dönüyor, kotalar MySQL'de (`ai_quota_daily`) |
 | Push | Firebase Cloud Messaging (HTTP v1, iOS dahil) |
 | Abonelik | RevenueCat webhook + REST doğrulama; `premium` entitlement'ı |
 | Kimlikler | UUIDv7, `BINARY(16)` saklanır, API'de string. İstemci çevrimdışı oluşturma için kendi UUID'sini gönderebilir |

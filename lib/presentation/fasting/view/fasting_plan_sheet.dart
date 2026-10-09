@@ -1,7 +1,10 @@
+import 'dart:async';
 import 'dart:ui';
 
 import 'package:easy_localization/easy_localization.dart';
+import 'package:fastingapp/core/di/injection.dart';
 import 'package:fastingapp/core/theme/app_text_styles.dart';
+import 'package:fastingapp/domain/revenue_cat/revenue_cat_service.dart';
 import 'package:fastingapp/generated/app_images.g.dart';
 import 'package:fastingapp/generated/colors.gen.dart';
 import 'package:fastingapp/presentation/plans/plans_catalog.dart';
@@ -180,10 +183,27 @@ final class _PlanCard extends StatelessWidget {
     ),
   ];
 
+  /// Kilitli plan: paywall; premium olunca plan seçilir.
+  Future<void> _unlockAndPick(BuildContext context) async {
+    final premium = await getIt<RevenueCatService>().presentPaywall();
+    if (premium && context.mounted) Navigator.pop(context, plan);
+  }
+
   @override
   Widget build(BuildContext context) {
+    // Premium kullanıcıda kilit görünmez.
+    return ValueListenableBuilder<bool>(
+      valueListenable: getIt<RevenueCatService>().isPremium,
+      builder: (context, isPremium, _) =>
+          _buildCard(context, locked: plan.isLocked && !isPremium),
+    );
+  }
+
+  Widget _buildCard(BuildContext context, {required bool locked}) {
     return GestureDetector(
-      onTap: plan.isLocked ? null : () => Navigator.pop(context, plan),
+      onTap: locked
+          ? () => unawaited(_unlockAndPick(context))
+          : () => Navigator.pop(context, plan),
       child: Container(
         width: _kCardWidth,
         height: _kCardHeight,
@@ -197,9 +217,7 @@ final class _PlanCard extends StatelessWidget {
         ),
         child: ClipRRect(
           borderRadius: BorderRadius.circular(selected ? 14 : 16),
-          child: plan.isLocked
-              ? _LockedBody(plan: plan)
-              : _CardBody(plan: plan),
+          child: locked ? _LockedBody(plan: plan) : _CardBody(plan: plan),
         ),
       ),
     );

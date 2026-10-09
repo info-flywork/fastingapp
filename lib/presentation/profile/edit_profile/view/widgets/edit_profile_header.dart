@@ -7,13 +7,24 @@ final class EditProfileHeader extends StatelessWidget {
     required this.onBack,
     required this.onChangePhoto,
     this.photoPath,
+    this.avatarUrl,
     super.key,
   });
 
   final String initials;
+
+  /// Yeni seçilen yerel fotoğraf (öncelikli).
   final String? photoPath;
+
+  /// Sunucudaki avatar.
+  final String? avatarUrl;
   final VoidCallback onBack;
-  final VoidCallback onChangePhoto;
+  final VoidCallback? onChangePhoto;
+
+  /// Baş harfler; ad yoksa kişi simgesi.
+  Widget _initialsText() => initials.isEmpty
+      ? const Icon(Icons.person_rounded, color: ColorName.colorWhite, size: 36)
+      : Text(initials, style: AppTextStyles.editProfileInitials);
 
   @override
   Widget build(BuildContext context) {
@@ -79,7 +90,15 @@ final class EditProfileHeader extends StatelessWidget {
                     height: 72,
                     fit: BoxFit.cover,
                   )
-                : Text(initials, style: AppTextStyles.editProfileInitials),
+                : avatarUrl != null
+                ? Image.network(
+                    avatarUrl!,
+                    width: 72,
+                    height: 72,
+                    fit: BoxFit.cover,
+                    errorBuilder: (_, _, _) => _initialsText(),
+                  )
+                : _initialsText(),
           ),
         ),
         const SizedBox(height: 10),

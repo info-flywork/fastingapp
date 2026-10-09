@@ -1,12 +1,18 @@
+import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:easy_localization/easy_localization.dart';
-import 'package:fastingapp/core/remote_images/app_image.dart';
+import 'package:fastingapp/core/di/injection.dart';
+import 'package:fastingapp/core/network/network_exception.dart';
 import 'package:fastingapp/core/router/route_paths.dart';
+import 'package:fastingapp/core/snackbar/app_snackbar.dart';
 import 'package:fastingapp/core/theme/app_text_styles.dart';
+import 'package:fastingapp/core/utils/enum/snackbar_type.dart';
 import 'package:fastingapp/core/widgets/app_button.dart';
 import 'package:fastingapp/core/widgets/app_button_decoration.dart';
+import 'package:fastingapp/core/widgets/app_shimmer.dart';
 import 'package:fastingapp/core/widgets/horseshoe_arc.dart';
+import 'package:fastingapp/domain/nutrition/nutrition_repository.dart';
 import 'package:fastingapp/generated/app_images.g.dart';
 import 'package:fastingapp/generated/assets.gen.dart';
 import 'package:fastingapp/generated/colors.gen.dart';
@@ -14,35 +20,25 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 
-/// Kalori takibi → Protein takibi.
-final class ProteinTrackerView extends StatelessWidget {
+/// Kalori takibi → Protein takibi (`GET /v1/nutrition/day` + `/week?metric=protein`).
+final class ProteinTrackerView extends StatefulWidget {
   const ProteinTrackerView({super.key});
 
-  static const _meals = <_Meal>[
-    _Meal(
-      image: _MealImage.eggs,
-      titleKey: 'protein_page.meal_eggs_title',
-      metaKey: 'protein_page.meal_eggs_meta',
-      proteinKey: 'protein_page.meal_eggs_protein',
-      kcalKey: 'protein_page.meal_eggs_kcal',
-    ),
-    _Meal(
-      image: _MealImage.salad,
-      titleKey: 'protein_page.meal_salad_title',
-      metaKey: 'protein_page.meal_salad_meta',
-      proteinKey: 'protein_page.meal_salad_protein',
-      kcalKey: 'protein_page.meal_salad_kcal',
-    ),
-    _Meal(
-      image: _MealImage.yogurt,
-      titleKey: 'protein_page.meal_yogurt_title',
-      metaKey: 'protein_page.meal_yogurt_meta',
-      proteinKey: 'protein_page.meal_yogurt_protein',
-      kcalKey: 'protein_page.meal_yogurt_kcal',
-    ),
-  ];
+  @override
+  State<ProteinTrackerView> createState() => _ProteinTrackerViewState();
+}
 
-  static const _week = <int>[125, 80, 90, 130, 40, 60, 70];
+class _ProteinTrackerViewState extends State<ProteinTrackerView> {
+  final _nutrition = getIt<NutritionRepository>();
+
+  /// Cache yoksa ilk frame'de shimmer; cache varken asla full-page loading yok.
+  bool _showShimmer = false;
+  bool _hasContent = false;
+  /// İlk içerik sonrası gauge/bar animasyonu bir kez; sessiz refresh'te sıfırlama yok.
+  bool _playEntrance = true;
+  String? _error;
+  NutritionDay _day = NutritionDay.empty();
+  NutritionWeek _week = NutritionWeek.empty();
 
   static const _dayKeys = [
     'sleep_page.day_mon',
@@ -55,8 +51,97 @@ final class ProteinTrackerView extends StatelessWidget {
   ];
 
   @override
+  void initState() {
+    super.initState();
+    _seedLocal();
+    if (!_hasContent) {
+      _showShimmer = true;
+    } else {
+      _scheduleEntranceDone();
+    }
+    unawaited(_load(force: true));
+  }
+
+  void _seedLocal() {
+    final cachedDay = _nutrition.cachedDay();
+    final cachedWeek = _nutrition.cachedWeek(metric: 'protein');
+    if (cachedDay == null && cachedWeek == null) return;
+    if (cachedDay != null) _day = cachedDay;
+    if (cachedWeek != null) _week = cachedWeek;
+    _hasContent = true;
+  }
+
+  void _scheduleEntranceDone() {
+    if (!_playEntrance) return;
+    Future<void>.delayed(const Duration(milliseconds: 950), () {
+      if (!mounted || !_playEntrance) return;
+      setState(() => _playEntrance = false);
+    });
+  }
+
+  Future<void> _load({bool force = true}) async {
+    final needShimmer = !_hasContent;
+    if (needShimmer && mounted) {
+      setState(() {
+        _showShimmer = true;
+        _error = null;
+      });
+    } else if (mounted) {
+      setState(() => _error = null);
+    }
+    try {
+      final results = await Future.wait([
+        _nutrition.getDay(force: force),
+        _nutrition.getWeek(metric: 'protein', force: force),
+      ]);
+      if (!mounted) return;
+      final revealFromShimmer = _showShimmer || !_hasContent;
+      setState(() {
+        _day = results[0] as NutritionDay;
+        _week = results[1] as NutritionWeek;
+        _hasContent = true;
+        _showShimmer = false;
+      });
+      if (revealFromShimmer) _scheduleEntranceDone();
+    } on NetworkException catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _showShimmer = false;
+        _error = e.message;
+      });
+    } on Object catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _showShimmer = false;
+        _error = e.toString();
+      });
+    }
+  }
+
+  Future<void> _onCalculate() async {
+    await context.pushNamed(RoutePaths.caloriesCamera.name);
+    if (mounted) await _load(force: true);
+  }
+
+  @override
   Widget build(BuildContext context) {
     final bottom = MediaQuery.paddingOf(context).bottom;
+    final protein = _day.macros.protein;
+    final currentG = protein.g.round();
+    final goalG = protein.goalG?.round();
+    final arcProgress = protein.progressOrZero;
+
+    if (_error != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted || _error == null) return;
+        AppSnackbar.show(
+          context: context,
+          text: _error!,
+          type: SnackBarType.failure,
+        );
+        setState(() => _error = null);
+      });
+    }
 
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: SystemUiOverlayStyle.dark,
@@ -73,38 +158,129 @@ final class ProteinTrackerView extends StatelessWidget {
                 child: _ProteinHeader(),
               ),
               Expanded(
-                child: ListView(
-                  physics: const ClampingScrollPhysics(),
-                  padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
-                  children: [
-                    const _ProteinArc(),
-                    const SizedBox(height: 8),
-                    Text(
-                      'protein_page.today'.tr(),
-                      style: AppTextStyles.sleepSectionTitle,
-                    ),
-                    const SizedBox(height: 4),
-                    for (var i = 0; i < _meals.length; i++) ...[
-                      _MealCard(meal: _meals[i]),
-                      if (i != _meals.length - 1) const SizedBox(height: 12),
-                    ],
-                    const SizedBox(height: 24),
-                    Text(
-                      'protein_page.week'.tr(),
-                      style: AppTextStyles.sleepSectionTitle,
-                    ),
-                    const SizedBox(height: 12),
-                    for (var i = 0; i < _week.length; i++) ...[
-                      _WeekBar(labelKey: _dayKeys[i], grams: _week[i]),
-                      if (i != _week.length - 1) const SizedBox(height: 12),
-                    ],
-                  ],
-                ),
+                child: _showShimmer
+                    ? const _ProteinShimmerBody()
+                    : RefreshIndicator(
+                        onRefresh: () => _load(force: true),
+                        child: ListView(
+                          physics: const AlwaysScrollableScrollPhysics(
+                            parent: ClampingScrollPhysics(),
+                          ),
+                          padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
+                          children: [
+                            _ProteinArc(
+                              progress: arcProgress,
+                              currentG: currentG,
+                              goalG: goalG,
+                              animate: _playEntrance,
+                            ),
+                            const SizedBox(height: 8),
+                            Text(
+                              'protein_page.today'.tr(),
+                              style: AppTextStyles.sleepSectionTitle,
+                            ),
+                            const SizedBox(height: 4),
+                            if (!_day.hasMeals)
+                              Padding(
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 24,
+                                ),
+                                child: Text(
+                                  'protein_page.empty_meals'.tr(),
+                                  textAlign: TextAlign.center,
+                                  style: AppTextStyles.proteinMealMeta,
+                                ),
+                              )
+                            else
+                              for (var i = 0; i < _day.meals.length; i++) ...[
+                                _MealCard(meal: _day.meals[i]),
+                                if (i != _day.meals.length - 1)
+                                  const SizedBox(height: 12),
+                              ],
+                            const SizedBox(height: 24),
+                            Text(
+                              'protein_page.week'.tr(),
+                              style: AppTextStyles.sleepSectionTitle,
+                            ),
+                            const SizedBox(height: 12),
+                            ..._weekBars(goalG),
+                          ],
+                        ),
+                      ),
               ),
-              _CalculateBar(bottomInset: math.max(bottom, 24)),
+              _CalculateBar(
+                bottomInset: math.max(bottom, 24),
+                onCalculate: _onCalculate,
+              ),
             ],
           ),
         ),
+      ),
+    );
+  }
+
+  List<Widget> _weekBars(int? goalG) {
+    final days = _week.days;
+    if (days.isEmpty) {
+      return [
+        for (var i = 0; i < 7; i++) ...[
+          _WeekBar(
+            labelKey: _dayKeys[i],
+            grams: 0,
+            maxGrams: (goalG ?? 120).toDouble(),
+            animate: _playEntrance,
+          ),
+          if (i != 6) const SizedBox(height: 12),
+        ],
+      ];
+    }
+    final maxValue = days.fold<double>(0, (m, d) => math.max(m, d.value));
+    final maxGrams = math.max(maxValue, (goalG ?? 0).toDouble()).clamp(1, 9999);
+    return [
+      for (var i = 0; i < days.length; i++) ...[
+        _WeekBar(
+          labelKey: _dayKeys[i.clamp(0, _dayKeys.length - 1)],
+          grams: days[i].value.round(),
+          maxGrams: maxGrams.toDouble(),
+          animate: _playEntrance,
+        ),
+        if (i != days.length - 1) const SizedBox(height: 12),
+      ],
+    ];
+  }
+}
+
+final class _ProteinShimmerBody extends StatelessWidget {
+  const _ProteinShimmerBody();
+
+  @override
+  Widget build(BuildContext context) {
+    return AppShimmer(
+      child: ListView(
+        physics: const NeverScrollableScrollPhysics(),
+        padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
+        children: const [
+          AppShimmerBone(
+            height: 200,
+            borderRadius: BorderRadius.all(Radius.circular(20)),
+          ),
+          SizedBox(height: 16),
+          AppShimmerBone(
+            height: 24,
+            width: 120,
+            borderRadius: BorderRadius.all(Radius.circular(8)),
+          ),
+          SizedBox(height: 12),
+          AppShimmerBone(
+            height: 120,
+            borderRadius: BorderRadius.all(Radius.circular(16)),
+          ),
+          SizedBox(height: 16),
+          AppShimmerBone(
+            height: 160,
+            borderRadius: BorderRadius.all(Radius.circular(16)),
+          ),
+        ],
       ),
     );
   }
@@ -169,87 +345,94 @@ final class _CircleBackButton extends StatelessWidget {
 }
 
 final class _ProteinArc extends StatelessWidget {
-  const _ProteinArc();
+  const _ProteinArc({
+    required this.progress,
+    required this.currentG,
+    required this.animate,
+    this.goalG,
+  });
 
-  static const _progress = 75 / 120;
+  final double progress;
+  final int currentG;
+  final bool animate;
+  final int? goalG;
 
   @override
   Widget build(BuildContext context) {
-    return TweenAnimationBuilder<double>(
-      tween: Tween(begin: 0, end: _progress),
-      duration: const Duration(milliseconds: 1100),
-      curve: Curves.easeOutCubic,
-      builder: (context, progress, child) {
-        return Center(
-          child: SizedBox(
-            width: HorseshoeArc.diameterDefault,
-            height: HorseshoeArc.diameterDefault * 0.82,
-            child: Stack(
-              alignment: Alignment.center,
-              children: [
-                HorseshoeArc(
-                  progress: progress,
-                  minProgress: 0,
-                  trackColor: ColorName.colorUnitToggleBg,
-                ),
-                child!,
-              ],
-            ),
+    Widget frame(double value) {
+      return Center(
+        child: SizedBox(
+          width: HorseshoeArc.diameterDefault,
+          height: HorseshoeArc.diameterDefault * 0.82,
+          child: Stack(
+            alignment: Alignment.center,
+            children: [
+              HorseshoeArc(
+                progress: value,
+                minProgress: 0,
+                trackColor: ColorName.colorUnitToggleBg,
+              ),
+              _ArcCaption(currentG: currentG, goalG: goalG),
+            ],
           ),
-        );
-      },
-      child: const _ArcCaption(),
+        ),
+      );
+    }
+
+    if (!animate) return frame(progress);
+    return TweenAnimationBuilder<double>(
+      tween: Tween(begin: 0, end: progress),
+      duration: const Duration(milliseconds: 900),
+      curve: Curves.easeOutCubic,
+      builder: (context, animated, _) => frame(animated),
     );
   }
 }
 
 final class _ArcCaption extends StatelessWidget {
-  const _ArcCaption();
+  const _ArcCaption({required this.currentG, this.goalG});
+
+  final int currentG;
+  final int? goalG;
 
   @override
   Widget build(BuildContext context) {
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Text('protein_page.current'.tr(), style: AppTextStyles.proteinHero),
-        Text('protein_page.goal'.tr(), style: AppTextStyles.proteinGoal),
+        Text('$currentG', style: AppTextStyles.proteinHero),
+        Text(
+          goalG == null
+              ? 'protein_page.goal_unknown'.tr()
+              : 'protein_page.goal_fmt'.tr(args: ['$goalG']),
+          style: AppTextStyles.proteinGoal,
+        ),
       ],
     );
   }
 }
 
-enum _MealImage { eggs, salad, yogurt }
-
-@immutable
-final class _Meal {
-  const _Meal({
-    required this.image,
-    required this.titleKey,
-    required this.metaKey,
-    required this.proteinKey,
-    required this.kcalKey,
-  });
-
-  final _MealImage image;
-  final String titleKey;
-  final String metaKey;
-  final String proteinKey;
-  final String kcalKey;
-
-  AppImageAsset get asset => switch (image) {
-    _MealImage.eggs => AppImages.scramlbedEggs,
-    _MealImage.salad => AppImages.grilledSalad,
-    _MealImage.yogurt => AppImages.yogurt,
-  };
-}
-
 final class _MealCard extends StatelessWidget {
   const _MealCard({required this.meal});
 
-  final _Meal meal;
+  final NutritionMeal meal;
 
   @override
   Widget build(BuildContext context) {
+    final locale = context.locale.toString();
+    final time = DateFormat.Hm(locale).format(meal.eatenAt);
+    final kind = meal.slot ?? meal.kind;
+    final kindKey = kind == null ? null : 'protein_page.kind_$kind';
+    final kindLabel = kindKey == null
+        ? null
+        : () {
+            final t = kindKey.tr();
+            return t == kindKey ? 'protein_page.kind_other'.tr() : t;
+          }();
+    final meta = kindLabel == null ? time : '$time · $kindLabel';
+    final title =
+        meal.title.isEmpty ? 'protein_page.meal_untitled'.tr() : meal.title;
+
     return DecoratedBox(
       decoration: BoxDecoration(
         color: ColorName.colorWhite,
@@ -264,7 +447,23 @@ final class _MealCard extends StatelessWidget {
         child: Row(
           children: [
             ClipOval(
-              child: meal.asset.image(width: 48, height: 48, fit: BoxFit.cover),
+              child: meal.photoUrl != null
+                  ? Image.network(
+                      meal.photoUrl!,
+                      width: 48,
+                      height: 48,
+                      fit: BoxFit.cover,
+                      errorBuilder: (_, _, _) => AppImages.grilledSalad.image(
+                        width: 48,
+                        height: 48,
+                        fit: BoxFit.cover,
+                      ),
+                    )
+                  : AppImages.grilledSalad.image(
+                      width: 48,
+                      height: 48,
+                      fit: BoxFit.cover,
+                    ),
             ),
             const SizedBox(width: 10),
             Expanded(
@@ -272,14 +471,14 @@ final class _MealCard extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    meal.titleKey.tr(),
+                    title,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: AppTextStyles.proteinMealTitle,
                   ),
                   const SizedBox(height: 6),
                   Text(
-                    meal.metaKey.tr(),
+                    meta,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: AppTextStyles.proteinMealMeta,
@@ -292,10 +491,13 @@ final class _MealCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
                 Text(
-                  meal.proteinKey.tr(),
+                  'protein_page.grams'.tr(args: ['${meal.proteinG.round()}']),
                   style: AppTextStyles.proteinMealGrams,
                 ),
-                Text(meal.kcalKey.tr(), style: AppTextStyles.proteinMealKcal),
+                Text(
+                  '${meal.kcal} ${'calories_page.kcal'.tr()}',
+                  style: AppTextStyles.proteinMealKcal,
+                ),
               ],
             ),
           ],
@@ -306,16 +508,21 @@ final class _MealCard extends StatelessWidget {
 }
 
 final class _WeekBar extends StatelessWidget {
-  const _WeekBar({required this.labelKey, required this.grams});
+  const _WeekBar({
+    required this.labelKey,
+    required this.grams,
+    required this.maxGrams,
+    required this.animate,
+  });
 
   final String labelKey;
   final int grams;
-
-  static const _maxGrams = 130.0;
+  final double maxGrams;
+  final bool animate;
 
   @override
   Widget build(BuildContext context) {
-    final target = (grams / _maxGrams).clamp(0.0, 1.0);
+    final target = maxGrams <= 0 ? 0.0 : (grams / maxGrams).clamp(0.0, 1.0);
 
     return Row(
       children: [
@@ -324,37 +531,43 @@ final class _WeekBar extends StatelessWidget {
           child: Text(labelKey.tr(), style: AppTextStyles.sleepDayLabel),
         ),
         Expanded(
-          child: TweenAnimationBuilder<double>(
-            tween: Tween(begin: 0, end: target),
-            duration: const Duration(milliseconds: 1100),
-            curve: Curves.easeOutCubic,
-            builder: (context, animated, _) {
-              return LayoutBuilder(
-                builder: (context, constraints) {
-                  const reserve = 52.0;
-                  final barMax = math.max(0, constraints.maxWidth - reserve);
-                  return Row(
-                    children: [
-                      SizedBox(
-                        width: barMax * animated,
-                        height: 14,
-                        child: const DecoratedBox(
-                          decoration: BoxDecoration(
-                            color: ColorName.colorPremiumGradientStart,
-                            borderRadius: BorderRadius.all(
-                              Radius.circular(999),
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              const reserve = 52.0;
+              final barMax = math.max(0.0, constraints.maxWidth - reserve);
+
+              Widget bar(double t) {
+                return Row(
+                  children: [
+                    SizedBox(
+                      width: barMax * t,
+                      height: 14,
+                      child: t <= 0
+                          ? null
+                          : const DecoratedBox(
+                              decoration: BoxDecoration(
+                                color: ColorName.colorPremiumGradientStart,
+                                borderRadius: BorderRadius.all(
+                                  Radius.circular(999),
+                                ),
+                              ),
                             ),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      Text(
-                        'protein_page.grams'.tr(args: ['$grams']),
-                        style: AppTextStyles.sleepDayLabel,
-                      ),
-                    ],
-                  );
-                },
+                    ),
+                    const Spacer(),
+                    Text(
+                      'protein_page.grams'.tr(args: ['$grams']),
+                      style: AppTextStyles.sleepDayLabel,
+                    ),
+                  ],
+                );
+              }
+
+              if (!animate) return bar(target);
+              return TweenAnimationBuilder<double>(
+                tween: Tween(begin: 0, end: target),
+                duration: const Duration(milliseconds: 900),
+                curve: Curves.easeOutCubic,
+                builder: (context, animated, _) => bar(animated),
               );
             },
           ),
@@ -365,9 +578,10 @@ final class _WeekBar extends StatelessWidget {
 }
 
 final class _CalculateBar extends StatelessWidget {
-  const _CalculateBar({required this.bottomInset});
+  const _CalculateBar({required this.bottomInset, required this.onCalculate});
 
   final double bottomInset;
+  final Future<void> Function() onCalculate;
 
   @override
   Widget build(BuildContext context) {
@@ -380,7 +594,7 @@ final class _CalculateBar extends StatelessWidget {
         padding: EdgeInsets.fromLTRB(16, 16, 16, bottomInset),
         child: AppButton(
           label: 'protein_page.calculate'.tr(),
-          onPressed: () => context.pushNamed(RoutePaths.caloriesCamera.name),
+          onPressed: onCalculate,
           decoration: AppButtonDecoration.hungerResult(),
         ),
       ),

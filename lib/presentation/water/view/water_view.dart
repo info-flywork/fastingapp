@@ -3,14 +3,22 @@ import 'dart:math' as math;
 import 'dart:ui' show ImageFilter, lerpDouble;
 
 import 'package:easy_localization/easy_localization.dart';
+import 'package:fastingapp/core/di/injection.dart';
 import 'package:fastingapp/core/dialogs/app_dialogs.dart';
 import 'package:fastingapp/core/dialogs/widgets/water_edit_dialog.dart';
 import 'package:fastingapp/core/home_widgets/water_widget_sync.dart';
 import 'package:fastingapp/core/router/route_paths.dart';
+import 'package:fastingapp/core/snackbar/app_snackbar.dart';
+import 'package:fastingapp/core/sync/data_sync.dart';
 import 'package:fastingapp/core/theme/app_text_styles.dart';
+import 'package:fastingapp/core/utils/enum/snackbar_type.dart';
+import 'package:fastingapp/core/widgets/day_switch_transition.dart';
+import 'package:fastingapp/domain/trackers/trackers_repository.dart';
 import 'package:fastingapp/generated/app_images.g.dart';
 import 'package:fastingapp/generated/assets.gen.dart';
 import 'package:fastingapp/generated/colors.gen.dart';
+import 'package:fastingapp/presentation/home/bloc/home_bloc.dart';
+import 'package:fastingapp/presentation/home/bloc/home_state.dart';
 import 'package:fastingapp/presentation/water/reminder/water_reminder_result.dart';
 import 'package:fastingapp/presentation/water/water_glass_icons.dart';
 import 'package:flutter/material.dart';
@@ -25,7 +33,7 @@ const _kWaterRulerWidth = 36.0;
 
 /// Su takip detay — animasyonlu su seviyesi, baloncuklar, dalgıç mascot.
 final class WaterView extends StatefulWidget {
-  const WaterView({this.initialMl = 100, this.dailyGoalMl = 2500, super.key});
+  const WaterView({this.initialMl = 0, this.dailyGoalMl = 2500, super.key});
 
   final int initialMl;
   final int dailyGoalMl;
@@ -40,7 +48,7 @@ class _WaterViewState extends State<WaterView>
   void initState() {
     super.initState();
     initWaterControllers();
-    unawaited(bindWaterWidget());
+    unawaited(bootstrapWaterDay());
   }
 
   @override
@@ -207,23 +215,33 @@ class _WaterViewState extends State<WaterView>
                           onReminder: openReminder,
                           dateLabel: waterDateLabel(context),
                           onDateTap: onWaterDateTapped,
+                          onPrevDay: onWaterPrevDay,
+                          onNextDay: onWaterNextDay,
+                          canGoPrev: canGoPrevWaterDay,
+                          canGoNext: canGoNextWaterDay,
+                          dayNavDirection: dayNavDirection,
+                          selectedDate: selectedDate,
                         ),
                       ),
                       Expanded(
-                        child: Align(
-                          alignment: Alignment.topCenter,
-                          child: Padding(
-                            padding: EdgeInsets.fromLTRB(
-                              lerpDouble(48, 16, celebrationTValue) ?? 48,
-                              8,
-                              lerpDouble(24, 16, celebrationTValue) ?? 24,
-                              0,
-                            ),
-                            child: _WaterStats(
-                              currentMl: currentMl,
-                              dailyGoalMl: dailyGoalMl,
-                              celebrationT: celebrationTValue,
-                              onEditGoal: editDailyGoal,
+                        child: DaySwitchTransition(
+                          date: selectedDate,
+                          direction: dayNavDirection,
+                          child: Align(
+                            alignment: Alignment.topCenter,
+                            child: Padding(
+                              padding: EdgeInsets.fromLTRB(
+                                lerpDouble(48, 16, celebrationTValue) ?? 48,
+                                8,
+                                lerpDouble(24, 16, celebrationTValue) ?? 24,
+                                0,
+                              ),
+                              child: _WaterStats(
+                                currentMl: currentMl,
+                                dailyGoalMl: dailyGoalMl,
+                                celebrationT: celebrationTValue,
+                                onEditGoal: isWaterToday ? editDailyGoal : null,
+                              ),
                             ),
                           ),
                         ),
@@ -235,10 +253,17 @@ class _WaterViewState extends State<WaterView>
                   left: 20,
                   right: 0,
                   bottom: bottom + 16,
-                  child: _WaterControls(
-                    addMl: addMl,
-                    onAdd: addWater,
-                    onRemove: removeWater,
+                  child: IgnorePointer(
+                    ignoring: !isWaterToday,
+                    child: AnimatedOpacity(
+                      opacity: isWaterToday ? 1 : 0,
+                      duration: const Duration(milliseconds: 220),
+                      child: _WaterControls(
+                        addMl: addMl,
+                        onAdd: addWater,
+                        onRemove: removeWater,
+                      ),
+                    ),
                   ),
                 ),
               ],
@@ -256,15 +281,30 @@ final class _WaterHeader extends StatelessWidget {
     required this.onReminder,
     required this.dateLabel,
     required this.onDateTap,
+    required this.onPrevDay,
+    required this.onNextDay,
+    required this.canGoPrev,
+    required this.canGoNext,
+    required this.dayNavDirection,
+    required this.selectedDate,
   });
 
   final VoidCallback onBack;
   final VoidCallback onReminder;
   final String dateLabel;
   final VoidCallback onDateTap;
+  final VoidCallback onPrevDay;
+  final VoidCallback onNextDay;
+  final bool canGoPrev;
+  final bool canGoNext;
+  final int dayNavDirection;
+  final DateTime selectedDate;
 
   @override
   Widget build(BuildContext context) {
+    final chevronIdle = ColorName.colorTitle.withValues(alpha: 0.35);
+    final chevronDisabled = ColorName.colorTitle.withValues(alpha: 0.15);
+
     return Padding(
       padding: const EdgeInsets.fromLTRB(32, 16, 16, 0),
       child: Row(
@@ -274,9 +314,12 @@ final class _WaterHeader extends StatelessWidget {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(
-                  Icons.chevron_left_rounded,
-                  color: ColorName.colorTitle.withValues(alpha: 0.35),
+                _DayChevron(
+                  icon: Icons.chevron_left_rounded,
+                  enabled: canGoPrev,
+                  enabledColor: chevronIdle,
+                  disabledColor: chevronDisabled,
+                  onTap: onPrevDay,
                 ),
                 GestureDetector(
                   onTap: onDateTap,
@@ -286,12 +329,19 @@ final class _WaterHeader extends StatelessWidget {
                       horizontal: 4,
                       vertical: 8,
                     ),
-                    child: Text(dateLabel, style: AppTextStyles.waterToday),
+                    child: DaySwitchTransition(
+                      date: selectedDate,
+                      direction: dayNavDirection,
+                      child: Text(dateLabel, style: AppTextStyles.waterToday),
+                    ),
                   ),
                 ),
-                Icon(
-                  Icons.chevron_right_rounded,
-                  color: ColorName.colorTitle.withValues(alpha: 0.35),
+                _DayChevron(
+                  icon: Icons.chevron_right_rounded,
+                  enabled: canGoNext,
+                  enabledColor: chevronIdle,
+                  disabledColor: chevronDisabled,
+                  onTap: onNextDay,
                 ),
               ],
             ),
@@ -346,18 +396,53 @@ final class _CircleIconButton extends StatelessWidget {
   }
 }
 
+final class _DayChevron extends StatelessWidget {
+  const _DayChevron({
+    required this.icon,
+    required this.enabled,
+    required this.enabledColor,
+    required this.disabledColor,
+    required this.onTap,
+  });
+
+  final IconData icon;
+  final bool enabled;
+  final Color enabledColor;
+  final Color disabledColor;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: enabled ? onTap : null,
+        customBorder: const CircleBorder(),
+        child: SizedBox(
+          width: 40,
+          height: 40,
+          child: Icon(
+            icon,
+            color: enabled ? enabledColor : disabledColor,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 final class _WaterStats extends StatelessWidget {
   const _WaterStats({
     required this.currentMl,
     required this.dailyGoalMl,
     required this.celebrationT,
-    required this.onEditGoal,
+    this.onEditGoal,
   });
 
   final int currentMl;
   final int dailyGoalMl;
   final double celebrationT;
-  final VoidCallback onEditGoal;
+  final VoidCallback? onEditGoal;
 
   @override
   Widget build(BuildContext context) {

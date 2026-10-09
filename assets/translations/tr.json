@@ -355,7 +355,9 @@
     "widget_lets_do_this": "Hadi yapalım!",
     "widget_this_week": "Bu Hafta",
     "widget_keep_going": "Devam et!\nHarika gidiyorsun.",
-    "share_meal": "Mochi ile öğün vakti.\n\nPlan: {}\nÖğün penceresi açık.\nBaşlangıç: {}\nBitiş: {}\nSeri: {} gün"
+    "share_meal": "Mochi ile öğün vakti.\n\nPlan: {}\nÖğün penceresi açık.\nBaşlangıç: {}\nBitiş: {}\nSeri: {} gün",
+    "start_now_cta": "Orucu şimdi başlat",
+    "plan_changed_next": "Plan güncellendi. Yeni plan bir sonraki orucunda geçerli olacak."
   },
   "fasting_struggle": {
     "back": "Zaman göstergesine dön",
@@ -624,10 +626,13 @@
     "add_water": "Su ekle",
     "edit_goal_title": "Günlük su hedefi",
     "edit_goal_hint": "ml",
-    "save": "Kaydet"
+    "save": "Kaydet",
+    "goal_range_error": "Günlük hedef {}–{} ml arasında olmalı.",
+    "glass_range_error": "Bardak boyutu {}–{} ml arasında olmalı."
   },
   "steps_page": {
     "today": "Bugün",
+    "yesterday": "Dün",
     "unit": "adım",
     "daily_target_prefix": "Günlük hedef: ",
     "goal_achieved": "Hedef tamamlandı!",
@@ -739,7 +744,12 @@
     "delete_account_body": "Hesabın hemen kapanır, tüm verilerin 7 gün sonra kalıcı olarak silinir. 7 gün içinde tekrar giriş yaparsan geri alabilirsin. Aboneliğini App Store veya Google Play'den ayrıca iptal etmelisin.",
     "delete_account_confirm": "Sil",
     "delete_account_cancel": "Vazgeç",
-    "delete_account_subscription_note": "Hesabın silinmek üzere. Aboneliğini App Store veya Google Play'den iptal etmeyi unutma."
+    "delete_account_subscription_note": "Hesabın silinmek üzere. Aboneliğini App Store veya Google Play'den iptal etmeyi unutma.",
+    "restore_purchases": "Satın alımları geri yükle",
+    "restore_success": "Premium'un yeniden etkin.",
+    "restore_none": "Geri yüklenecek satın alım bulunamadı.",
+    "restore_failed": "Satın alımlar geri yüklenemedi. Lütfen tekrar dene.",
+    "guest_name": "Misafir"
   },
   "notifications": {
     "title": "Bildirimler",
@@ -841,7 +851,14 @@
     "detail_thu": "Per",
     "detail_fri": "Cum",
     "detail_sat": "Cmt",
-    "detail_sun": "Paz"
+    "detail_sun": "Paz",
+    "plan_saved": "Planın güncellendi.",
+    "plan_restarted": "Plan güncellendi ve orucun aynı verilerle yeniden başladı.",
+    "active_fast_title": "Devam eden bir orucun var",
+    "active_fast_body": "Yeni plana geçersen şu anki oruç etkilenecek. Ne yapmak istersin?",
+    "active_fast_cancel_existing": "Orucu iptal et",
+    "active_fast_reject": "Vazgeç",
+    "active_fast_restart_same": "Aynı süreyle devam et"
   },
   "calories_page": {
     "eaten": "Yenilen {}",
@@ -915,7 +932,16 @@
     "meal_yogurt_title": "Yoğurt ve Kuruyemiş",
     "meal_yogurt_meta": "17:00 Atıştırmalık",
     "meal_yogurt_protein": "15g",
-    "meal_yogurt_kcal": "220 kcal"
+    "meal_yogurt_kcal": "220 kcal",
+    "empty_meals": "Bugün henüz öğün kaydı yok. Fotoğrafla veya manuel ekleyerek başla.",
+    "goal_fmt": "/ {}g",
+    "goal_unknown": "/ —",
+    "meal_untitled": "Öğün",
+    "kind_breakfast": "Kahvaltı",
+    "kind_lunch": "Öğle",
+    "kind_dinner": "Akşam",
+    "kind_snack": "Atıştırmalık",
+    "kind_other": "Öğün"
   },
   "insights_page": {
     "brand_mochi": "Mochi",

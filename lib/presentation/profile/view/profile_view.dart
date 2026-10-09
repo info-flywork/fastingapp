@@ -5,20 +5,27 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:fastingapp/core/di/injection.dart';
 import 'package:fastingapp/core/dialogs/app_dialogs.dart';
 import 'package:fastingapp/core/router/route_paths.dart';
+import 'package:fastingapp/core/snackbar/app_snackbar.dart';
 import 'package:fastingapp/core/theme/app_text_styles.dart';
+import 'package:fastingapp/core/utils/enum/snackbar_type.dart';
 import 'package:fastingapp/core/widgets/bottom_navigation_bar/app_bottom_nav.dart';
 import 'package:fastingapp/domain/notification/notifications_repository.dart';
+import 'package:fastingapp/domain/revenue_cat/revenue_cat_service.dart';
 import 'package:fastingapp/generated/app_images.g.dart';
 import 'package:fastingapp/generated/assets.gen.dart';
 import 'package:fastingapp/generated/colors.gen.dart';
 import 'package:fastingapp/presentation/auth/bloc/auth_bloc.dart';
 import 'package:fastingapp/presentation/auth/bloc/auth_event.dart';
 import 'package:fastingapp/presentation/chat/view/widgets/ai_chat_header_icon.dart';
+import 'package:fastingapp/presentation/home/bloc/home_bloc.dart';
+import 'package:fastingapp/presentation/home/bloc/home_state.dart';
+import 'package:fastingapp/presentation/profile/bloc/profile_bloc.dart';
 import 'package:fastingapp/presentation/profile/view/widgets/profile_menu_card.dart';
 import 'package:fastingapp/presentation/profile/view/widgets/profile_section.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
 part 'mixin/profile_view_mixin.dart';
@@ -61,12 +68,29 @@ class _ProfileViewState extends State<ProfileView> with ProfileViewMixin {
             physics: const ClampingScrollPhysics(),
             padding: const EdgeInsets.fromLTRB(16, 12, 16, 32),
             children: [
-              ProfileHeader(
-                displayName: 'Atilla E.',
-                initials: 'AE',
-                streakDays: 3,
-                isPremium: true,
-                onChatTapped: onChatTapped,
+              // Ad ve avatar ProfileBloc'tan, seri ana sayfa özetinden.
+              BlocBuilder<ProfileBloc, ProfileState>(
+                bloc: getIt<ProfileBloc>(),
+                builder: (context, profile) {
+                  final name = profile.name?.trim() ?? '';
+                  return BlocSelector<HomeBloc, HomeState, int>(
+                    bloc: getIt<HomeBloc>(),
+                    selector: (state) =>
+                        state is HomeLoaded ? state.progress.streakDays : 0,
+                    builder: (context, streakDays) => ProfileHeader(
+                      // Adı olmayan (misafir) hesap.
+                      displayName: name.isEmpty
+                          ? 'profile.guest_name'.tr()
+                          : name,
+                      initials: profile.initials,
+                      avatarUrl: profile.avatarUrl,
+                      localPhotoPath: profile.localPhotoPath,
+                      streakDays: streakDays,
+                      isPremium: isPremium,
+                      onChatTapped: onChatTapped,
+                    ),
+                  );
+                },
               ),
               const SizedBox(height: 24),
               ProfileSection(
@@ -90,8 +114,10 @@ class _ProfileViewState extends State<ProfileView> with ProfileViewMixin {
                   ],
                 ),
               ),
-              const SizedBox(height: 12),
-              ProfilePremiumCard(onGetPremium: onGetPremium),
+              if (!isPremium) ...[
+                const SizedBox(height: 12),
+                ProfilePremiumCard(onGetPremium: onGetPremium),
+              ],
               const SizedBox(height: 24),
               ProfileSection(
                 title: 'profile.activity_data'.tr(),
@@ -156,6 +182,11 @@ class _ProfileViewState extends State<ProfileView> with ProfileViewMixin {
                       icon: Assets.icons.solarQuestionCircleLineDuotone,
                       title: 'profile.faq'.tr(),
                       onTap: onFaq,
+                    ),
+                    ProfileMenuRow(
+                      icon: Assets.icons.solarCart3LineDuotone,
+                      title: 'profile.restore_purchases'.tr(),
+                      onTap: onRestorePurchases,
                     ),
                     ProfileMenuRow(
                       icon: Assets.icons.solarHandStarsLineDuotone,

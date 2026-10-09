@@ -119,8 +119,7 @@ Mobil ekip, her fazın "İstemci işleri" bölümünü aynı sprintte yürütür
   - giriş
   - kayıt
   - misafir yükseltme
-  - `ACCOUNT_LINK_CONFLICT`
-  - `mergeGuest` ([05 §11](05-is-kurallari.md#11-misafir-hesap-birleştirme))
+  - başka hesaba bağlı kimlikte o hesaba geçiş (birleştirme yok, [05 §11](05-is-kurallari.md))
 - [ ] Refresh token rotasyonu:
   - aile (family) takibi
   - yeniden kullanım tespiti
@@ -147,7 +146,7 @@ Mobil ekip, her fazın "İstemci işleri" bölümünü aynı sprintte yürütür
 
 ### Kabul kriterleri
 - Misafir → onboarding → Apple (Firebase) ile giriş akışında **aynı userId** korunur. Onboarding verileri kaybolmaz.
-- Mevcut bir Apple hesabıyla misafirden giriş yapılınca 409 döner. `mergeGuest` ile veriler taşınır (entegrasyon testi).
+- Mevcut bir Apple hesabıyla misafirden giriş yapılınca o hesaba geçilir; misafir verisi taşınmaz (entegrasyon testi).
 - Kullanılmış refresh token tekrar kullanılınca tüm aile iptal edilir ve 401 `REFRESH_REUSED` döner (test).
 - 15 dk sonra access token 401 `TOKEN_EXPIRED` verir. Refresh ile yeni çift alınır.
 - `local-onboarding-session` gibi geçersiz bir token 401 döner.
@@ -515,7 +514,7 @@ Mobil ekip, her fazın "İstemci işleri" bölümünü aynı sprintte yürütür
   - yasal metin sürümü değişince yeniden onay (`requiredConsents`)
   - rıza geri çekme davranışları (sağlık → kayıt 403, pazarlama → bildirim kapalı)
 - [x] **Saklama (retention) işleri:**
-  - inaktif misafir (90 gün), birleştirmede kapanan misafir (30 gün)
+  - ~~inaktif misafir (90 gün), birleştirmede kapanan misafir (30 gün)~~ — misafirler silinmez (2026-10-08)
   - yumuşak silinenler (30 gün), okunmuş bildirimler (90 gün)
   - `push_deliveries` (F9), audit (13 ay), kapanmış oturumlar (30 gün)
   - [ ] inaktif kayıtlı hesap (24 ay + uyarı) — e-posta kanalı gelince

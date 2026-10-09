@@ -47,7 +47,7 @@ Doğrulama yereldir: Google'ın açık anahtarları (`securetoken@system.gservic
 **Misafir (backend'de, Firebase anonim girişi kullanılmaz):**
 - **Cihaz başına tek misafir:** `installId` ile hesap oluşturulur; aynı `installId` her zaman aynı misafire yeni oturum açar (yeni hesap açılmaz).
 - `installId` misafirin tek kimlik bilgisidir: istemci **kriptografik rastgele** UUID v4 üretir ve güvenli depoda (iOS Keychain, Android Keystore/EncryptedSharedPreferences) saklar; cihazdan türetilen kimlik (`ANDROID_ID` vb.) kullanılmaz ([13](13-flutter-entegrasyonu.md)). Uygulama `DeviceManager` bunu yapar. Ayrıca **misafir sırrı** (F11): misafir oluşturulurken sunucu `gs_…` (256 bit) sır üretip bir kez döner, `auth_identities.secret_hash`'te SHA-256'sı tutulur; aynı `installId` ile sonraki girişlerde `guestSecret` zorunludur (`401 guest_secret_invalid`). Eski sırsız misafirlere ilk girişte sır verilir. İstemci sırrı kaybederse yeni `installId` ile yeni misafir açar.
-- Misafir sosyal hesaba yükseltilince ya da başka hesaba geçilince misafir kimliği silinir; aynı cihazda sonraki misafir girişi yeni bir misafir açar (sosyal hesaba `installId` ile girilemez).
+- Misafir sosyal hesaba yükseltilince misafir kimliği silinir (hesap artık sosyal hesaptır; sonraki misafir girişi yeni misafir açar). Başka hesaba geçilince misafir kimliği ve hesabı kalır; aynı cihazda misafir girişi onu açar.
 - **Rate limit:**
   - IP başına 10/saat
   - installId başına 5/saat
@@ -245,8 +245,7 @@ refresh(rt):
 | Veri | Süre |
 |---|---|
 | Aktif hesap verisi | Hesap yaşadıkça |
-| İnaktif misafir hesap | 90 gün sonra silinir (`users.last_active_at`, istekte saatte bir yazılır; aktif aboneliği olan hariç) |
-| Birleştirmede kapanan misafir | 30 gün sonra silinir |
+| Misafir hesap | Süreyle silinmez (cihazda kalıcı; ürün kararı 2026-10-08). Kullanıcı uygulamadan silebilir |
 | İnaktif kayıtlı hesap | 24 ay sonra uyarı e-postası/push, 30 gün sonra silme ([14 #11](14-acik-kararlar.md)). **Henüz uygulanmadı** (e-posta kanalı yok) |
 | Yumuşak silinmiş kayıtlar | 30 gün |
 | Okunmuş bildirimler | 90 gün |
@@ -262,7 +261,7 @@ refresh(rt):
 |---|---|---|
 | Barındırma (AB) | Tümü | AB bölgesi |
 | Bunny.net (AB, DE storage) | Fotoğraflar | DPA imzalanacak |
-| Anthropic (ABD) | Sohbet metni, fotoğraf (analiz anında) | DPA. API verisi model eğitiminde kullanılmaz (ticari şartlar). KVKK yurt dışı aktarım: standart sözleşme + Kurul'a bildirim |
+| OpenAI (ABD) | Sohbet metni, fotoğraf (analiz anında) | DPA. API verisi varsayılan olarak model eğitiminde kullanılmaz (API şartları). KVKK yurt dışı aktarım: standart sözleşme + Kurul'a bildirim |
 | Google Firebase (FCM) | Push token, bildirim metni | Bildirim metinlerine sağlık detayı konmaz (ör. "Kilonu güncelledik" yazılır, kilo değeri yazılmaz) |
 | RevenueCat (ABD) | app_user_id (UUID), satın alma | E-posta veya isim gönderilmez |
 | Sentry | Hata bağlamı | PII scrubbing açık, `sendDefaultPii: false` |

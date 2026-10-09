@@ -16,7 +16,7 @@
 | Görsel | `sharp` + `file-type` | Yeniden kodlama, EXIF temizleme, yeniden boyutlandırma, magic-byte kontrolü |
 | Zaman | `luxon` | IANA saat dilimi ile `local_date` hesaplama |
 | UUID | `uuid` (v7) | Zaman sıralı birincil anahtarlar |
-| AI | `@anthropic-ai/sdk` | Claude: sohbet (stream), görüntü analizi (yapılandırılmış çıktı) |
+| AI | `openai` | OpenAI: sohbet (stream), görüntü analizi (yapılandırılmış çıktı) |
 | Push | `firebase-admin` | FCM HTTP v1 (iOS dahil) |
 | Hata takibi | `@sentry/node` | Release ve ortam etiketli istisnalar |
 | Metrik | `prom-client` | `/metrics` (yalnızca iç ağ) |
@@ -46,7 +46,7 @@ Mobil uygulama ──HTTPS──► Nginx (TLS: certbot, HSTS, gzip)
                  └────────────┬─────────────┘   ve rate limit
              ┌────────────────┼────────────────┐
              ▼                ▼                ▼
-        MySQL 8.4        Bunny Storage    Anthropic / FCM /
+        MySQL 8.4        Bunny Storage    OpenAI / FCM /
         (iş verisi +     (DE)             RevenueCat / Apple /
          jobs kuyruğu)                    Google
              ▲
@@ -110,7 +110,7 @@ mochifast-backend/
 │   │   ├── queue.js             # MySQL iş kuyruğu (enqueue, worker) + tekrarlı iş zamanlayıcısı
 │   │   ├── cache.js             # process içi LRU: get/set/del/delPrefix/getOrSet (single-flight)
 │   │   ├── bunny.js             # storage PUT/DELETE, purge, signUrl
-│   │   ├── anthropic.js         # Claude istemcisi
+│   │   ├── openai.js            # OpenAI istemcisi (sohbet + görüntü)
 │   │   ├── fcm.js
 │   │   ├── revenuecat.js
 │   │   ├── firebase-auth.js     # Firebase ID token doğrulama
@@ -164,7 +164,7 @@ mochifast-backend/
 route  ──►  service  ──►  repository  ──►  mysql2
   │            │
   │            ├──► başka modülün service'i (asla repository'si değil)
-  │            ├──► infra (cache, queue, bunny, anthropic…)
+  │            ├──► infra (cache, queue, bunny, openai…)
   │            └──► domain olayı yayınla (events bus, process içi)
   └──► yalnızca: şema, auth kancası, service çağrısı, yanıt
 ```
@@ -293,9 +293,9 @@ BUNNY_PULL_PRIVATE_HOST=media.mochifast.app BUNNY_PULL_PRIVATE_TOKEN_KEY=
 BUNNY_PULL_PUBLIC_HOST=cdn.mochifast.app
 BUNNY_API_KEY=              # purge için (hesap API anahtarı)
 
-ANTHROPIC_API_KEY=
-AI_CHAT_MODEL=claude-opus-5-5
-AI_VISION_MODEL=claude-opus-5-5
+OPENAI_API_KEY=
+OPENAI_CHAT_MODEL=
+OPENAI_VISION_MODEL=gpt-4o
 
 FCM_SERVICE_ACCOUNT_JSON=   # base64
 REVENUECAT_SECRET_API_KEY= REVENUECAT_WEBHOOK_AUTH=
@@ -340,7 +340,6 @@ ADMIN_ALLOWED_ORIGINS=https://admin.mochifast.app
 | `CONFLICT` | 409 | Ör. zaten aktif oruç var (`ACTIVE_FAST_EXISTS`) |
 | `FAST_OVERLAP` | 409 | Seans zaman aralıkları çakışıyor |
 | `IDEMPOTENCY_KEY_REUSED` | 409 | Aynı anahtar farklı gövdeyle |
-| `ACCOUNT_LINK_CONFLICT` | 409 | Sosyal hesap başka kullanıcıya bağlı |
 | `GONE` | 410 | Silinmiş hesap |
 | `PAYLOAD_TOO_LARGE` | 413 | |
 | `UNSUPPORTED_MEDIA_TYPE` | 415 | |

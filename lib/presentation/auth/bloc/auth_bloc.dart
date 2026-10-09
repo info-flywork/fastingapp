@@ -1,9 +1,13 @@
 import 'dart:async';
 
+import 'package:fastingapp/core/di/injection.dart';
 import 'package:fastingapp/data/model/auth/account_deletion.dart';
 import 'package:fastingapp/domain/auth/auth_repository.dart';
 import 'package:fastingapp/presentation/auth/bloc/auth_event.dart';
 import 'package:fastingapp/presentation/auth/bloc/auth_state.dart';
+import 'package:fastingapp/presentation/home/bloc/home_bloc.dart';
+import 'package:fastingapp/presentation/home/bloc/home_event.dart';
+import 'package:fastingapp/presentation/profile/bloc/profile_bloc.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 /// Uygulama geneli oturum durumu (global singleton). Router guard bu state'i
@@ -55,6 +59,12 @@ final class AuthBloc extends Bloc<AuthEvent, AuthState> {
       emit(const AuthUnauthenticated());
       return;
     }
+    // Başka hesaba geçildiyse (ör. misafirden mevcut hesaba) önceki
+    // kullanıcının ekran verisi bırakılır.
+    final previous = state;
+    if (previous is AuthAuthenticated && previous.user.id != user.id) {
+      _clearHomeCache();
+    }
     emit(AuthAuthenticated(user));
     unawaited(_authRepository.registerDevice());
   }
@@ -64,6 +74,7 @@ final class AuthBloc extends Bloc<AuthEvent, AuthState> {
     Emitter<AuthState> emit,
   ) async {
     await _authRepository.logout();
+    _clearHomeCache();
     emit(const AuthUnauthenticated());
   }
 
@@ -73,6 +84,17 @@ final class AuthBloc extends Bloc<AuthEvent, AuthState> {
   ) async {
     if (state is AuthUnauthenticated) return;
     await _authRepository.endLocalSession();
+    _clearHomeCache();
     emit(const AuthUnauthenticated());
+  }
+
+  /// Önceki kullanıcının ekran verisi bırakılır (ana sayfa + profil).
+  void _clearHomeCache() {
+    if (getIt.isRegistered<HomeBloc>()) {
+      getIt<HomeBloc>().add(const HomeCleared());
+    }
+    if (getIt.isRegistered<ProfileBloc>()) {
+      getIt<ProfileBloc>().add(const ProfileCleared());
+    }
   }
 }

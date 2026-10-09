@@ -1,14 +1,24 @@
+import 'package:fastingapp/generated/colors.gen.dart';
 import 'package:flutter/material.dart';
 
-/// Snackbar tipi; renk ve ikon merkezi olarak buradan gelir.
-///
-/// Not: Renkler, flutter_gen üretimi tamamlandığında `ColorName` ile
-/// değiştirilmelidir (doküman 9.4). Şimdilik yer tutucu Material renkleri.
+/// Snackbar tipi; renk ve ikon merkezi olarak buradan gelir. (Doküman 9.4)
 enum SnackBarType {
-  success(color: Color(0xFF00B894), icon: Icons.check_circle_outline),
-  failure(color: Color(0xFFE30A17), icon: Icons.error_outline),
-  info(color: Color(0xFF2D9CDB), icon: Icons.info_outline),
-  warning(color: Color(0xFFF39C12), icon: Icons.warning_amber_outlined);
+  success(
+    color: ColorName.colorSuccessGreen,
+    icon: Icons.check_rounded,
+  ),
+  failure(
+    color: ColorName.colorErrorRed,
+    icon: Icons.close_rounded,
+  ),
+  info(
+    color: ColorName.colorBmi1,
+    icon: Icons.info_rounded,
+  ),
+  warning(
+    color: ColorName.colorWarningOrange,
+    icon: Icons.priority_high_rounded,
+  );
 
   const SnackBarType({required this.color, required this.icon});
 

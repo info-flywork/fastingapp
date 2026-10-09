@@ -1,15 +1,24 @@
+import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:easy_localization/easy_localization.dart';
+import 'package:fastingapp/core/di/injection.dart';
+import 'package:fastingapp/core/network/network_exception.dart';
 import 'package:fastingapp/core/router/route_paths.dart';
+import 'package:fastingapp/core/snackbar/app_snackbar.dart';
 import 'package:fastingapp/core/theme/app_text_styles.dart';
+import 'package:fastingapp/core/utils/enum/snackbar_type.dart';
 import 'package:fastingapp/core/widgets/app_button.dart';
 import 'package:fastingapp/core/widgets/app_button_decoration.dart';
+import 'package:fastingapp/core/widgets/app_shimmer.dart';
 import 'package:fastingapp/core/widgets/arc_progress_gauge.dart';
 import 'package:fastingapp/core/widgets/onboarding/onboarding_stepper_field.dart';
 import 'package:fastingapp/core/widgets/weight_progress_bar.dart';
+import 'package:fastingapp/domain/nutrition/nutrition_repository.dart';
 import 'package:fastingapp/generated/app_images.g.dart';
 import 'package:fastingapp/generated/colors.gen.dart';
+import 'package:fastingapp/presentation/home/bloc/home_bloc.dart';
+import 'package:fastingapp/presentation/home/bloc/home_state.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
@@ -35,6 +44,18 @@ class _CaloriesTrackerViewState extends State<CaloriesTrackerView>
     final width = MediaQuery.sizeOf(context).width;
     final headerHeight = width * _CaloriesHeader.imageAspect;
 
+    if (errorMessage != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted || errorMessage == null) return;
+        AppSnackbar.show(
+          context: context,
+          text: errorMessage!,
+          type: SnackBarType.failure,
+        );
+        setState(() => errorMessage = null);
+      });
+    }
+
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: SystemUiOverlayStyle.dark,
       child: Scaffold(
@@ -43,57 +64,90 @@ class _CaloriesTrackerViewState extends State<CaloriesTrackerView>
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Expanded(
-              child: SingleChildScrollView(
-                physics: const ClampingScrollPhysics(),
-                child: Stack(
-                  clipBehavior: Clip.none,
-                  children: [
-                    Positioned(
-                      top: 0,
-                      left: 0,
-                      right: 0,
-                      child: _CaloriesHeader(
-                        topInset: top,
-                        eatenKcal: eatenKcal,
-                        overKcal: overKcal,
-                        height: headerHeight,
+              child: showShimmer
+                  ? _CaloriesShimmerBody(
+                      topInset: top,
+                      headerHeight: headerHeight,
+                      cardOverlap: _cardOverlap,
+                    )
+                  : RefreshIndicator(
+                      onRefresh: () => loadDay(force: true),
+                      child: SingleChildScrollView(
+                        physics: const AlwaysScrollableScrollPhysics(
+                          parent: ClampingScrollPhysics(),
+                        ),
+                        child: Stack(
+                          clipBehavior: Clip.none,
+                          children: [
+                            Positioned(
+                              top: 0,
+                              left: 0,
+                              right: 0,
+                              child: _CaloriesHeader(
+                                topInset: top,
+                                eatenKcal: eatenKcal,
+                                overKcal: overKcal ?? 0,
+                                height: headerHeight,
+                              ),
+                            ),
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                              children: [
+                                SizedBox(
+                                  height: headerHeight - _cardOverlap + 24,
+                                ),
+                                Padding(
+                                  padding: const EdgeInsets.fromLTRB(
+                                    16,
+                                    0,
+                                    16,
+                                    16,
+                                  ),
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.stretch,
+                                    children: [
+                                      _CalorieTrackingCard(
+                                        carbsG: carbsG,
+                                        proteinG: proteinG,
+                                        fatG: fatG,
+                                        carbsProgress: carbsProgress,
+                                        proteinProgress: proteinProgress,
+                                        fatProgress: fatProgress,
+                                      ),
+                                      const SizedBox(height: 16),
+                                      AppButton(
+                                        label: 'calories_page.protein_tracker'
+                                            .tr(),
+                                        onPressed: onProteinTracker,
+                                        decoration: AppButtonDecoration.dark(),
+                                        showIcon: false,
+                                      ),
+                                      const SizedBox(height: 16),
+                                      _BurnedCard(
+                                        burnedKcal: burnedKcal,
+                                        startKg: startKg,
+                                        goalKg: goalKg,
+                                        progress: weightProgress,
+                                      ),
+                                      const SizedBox(height: 20),
+                                      OnboardingStepperField(
+                                        label: 'calories_page.add_daily_manual'
+                                            .tr(),
+                                        displayValue: '$manualKcal',
+                                        unit: 'calories_page.kcal'.tr(),
+                                        onDecrement: onManualDecrement,
+                                        onIncrement: onManualIncrement,
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
                       ),
                     ),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        SizedBox(height: headerHeight - _cardOverlap + 24),
-                        Padding(
-                          padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.stretch,
-                            children: [
-                              const _CalorieTrackingCard(),
-                              const SizedBox(height: 16),
-                              AppButton(
-                                label: 'calories_page.protein_tracker'.tr(),
-                                onPressed: onProteinTracker,
-                                decoration: AppButtonDecoration.dark(),
-                                showIcon: false,
-                              ),
-                              const SizedBox(height: 16),
-                              const _BurnedCard(),
-                              const SizedBox(height: 20),
-                              OnboardingStepperField(
-                                label: 'calories_page.add_daily_manual'.tr(),
-                                displayValue: '$manualKcal',
-                                unit: 'calories_page.kcal'.tr(),
-                                onDecrement: onManualDecrement,
-                                onIncrement: onManualIncrement,
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
             ),
             _CalculateBar(
               bottomInset: math.max(bottom, 24),
@@ -101,6 +155,76 @@ class _CaloriesTrackerViewState extends State<CaloriesTrackerView>
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+/// İlk yüklemede full-page spinner yerine iskelet.
+final class _CaloriesShimmerBody extends StatelessWidget {
+  const _CaloriesShimmerBody({
+    required this.topInset,
+    required this.headerHeight,
+    required this.cardOverlap,
+  });
+
+  final double topInset;
+  final double headerHeight;
+  final double cardOverlap;
+
+  @override
+  Widget build(BuildContext context) {
+    return SingleChildScrollView(
+      physics: const NeverScrollableScrollPhysics(),
+      child: Stack(
+        clipBehavior: Clip.none,
+        children: [
+          Positioned(
+            top: 0,
+            left: 0,
+            right: 0,
+            child: _CaloriesHeader(
+              topInset: topInset,
+              eatenKcal: 0,
+              overKcal: 0,
+              height: headerHeight,
+            ),
+          ),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              SizedBox(height: headerHeight - cardOverlap + 24),
+              AppShimmer(
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+                  child: Column(
+                    children: const [
+                      AppShimmerBone(
+                        height: 168,
+                        borderRadius: BorderRadius.all(Radius.circular(20)),
+                      ),
+                      SizedBox(height: 16),
+                      AppShimmerBone(
+                        height: 52,
+                        borderRadius: BorderRadius.all(Radius.circular(999)),
+                      ),
+                      SizedBox(height: 16),
+                      AppShimmerBone(
+                        height: 140,
+                        borderRadius: BorderRadius.all(Radius.circular(16)),
+                      ),
+                      SizedBox(height: 20),
+                      AppShimmerBone(
+                        height: 72,
+                        borderRadius: BorderRadius.all(Radius.circular(16)),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }
@@ -214,7 +338,23 @@ final class _CaloriesHeader extends StatelessWidget {
 }
 
 final class _CalorieTrackingCard extends StatelessWidget {
-  const _CalorieTrackingCard();
+  const _CalorieTrackingCard({
+    required this.carbsG,
+    required this.proteinG,
+    required this.fatG,
+    required this.carbsProgress,
+    required this.proteinProgress,
+    required this.fatProgress,
+  });
+
+  final double carbsG;
+  final double proteinG;
+  final double fatG;
+  final double carbsProgress;
+  final double proteinProgress;
+  final double fatProgress;
+
+  String _grams(double g) => '${g.round()}g';
 
   @override
   Widget build(BuildContext context) {
@@ -249,9 +389,9 @@ final class _CalorieTrackingCard extends StatelessWidget {
               Expanded(
                 child: Center(
                   child: ArcProgressGauge(
-                    progress: 0.72,
+                    progress: carbsProgress,
                     color: ColorName.colorPremiumGradientStart,
-                    valueText: '271g',
+                    valueText: _grams(carbsG),
                     label: 'calories_page.carbs'.tr(),
                     size: 100,
                     valueStyle: AppTextStyles.caloriesMacroValue,
@@ -261,9 +401,9 @@ final class _CalorieTrackingCard extends StatelessWidget {
               Expanded(
                 child: Center(
                   child: ArcProgressGauge(
-                    progress: 0.55,
+                    progress: proteinProgress,
                     color: ColorName.colorStepsFill,
-                    valueText: '150g',
+                    valueText: _grams(proteinG),
                     label: 'calories_page.protein'.tr(),
                     size: 100,
                     valueStyle: AppTextStyles.caloriesMacroValue,
@@ -273,9 +413,9 @@ final class _CalorieTrackingCard extends StatelessWidget {
               Expanded(
                 child: Center(
                   child: ArcProgressGauge(
-                    progress: 0.68,
+                    progress: fatProgress,
                     color: ColorName.colorMetabolicFast,
-                    valueText: '280g',
+                    valueText: _grams(fatG),
                     label: 'calories_page.fat'.tr(),
                     size: 100,
                     valueStyle: AppTextStyles.caloriesMacroValue,
@@ -291,15 +431,21 @@ final class _CalorieTrackingCard extends StatelessWidget {
 }
 
 final class _BurnedCard extends StatelessWidget {
-  const _BurnedCard();
+  const _BurnedCard({
+    required this.burnedKcal,
+    required this.progress,
+    this.startKg,
+    this.goalKg,
+  });
 
-  static const _burnedKcal = 651;
-  static const _startKg = 112.2;
-  static const _goalKg = 75.2;
-  static const _progress = 0.55;
+  final int burnedKcal;
+  final double? startKg;
+  final double? goalKg;
+  final double progress;
 
   @override
   Widget build(BuildContext context) {
+    final hasWeight = startKg != null && goalKg != null;
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
@@ -323,7 +469,7 @@ final class _BurnedCard extends StatelessWidget {
           Row(
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
-              Text('$_burnedKcal', style: AppTextStyles.caloriesBurnedValue),
+              Text('$burnedKcal', style: AppTextStyles.caloriesBurnedValue),
               Padding(
                 padding: const EdgeInsets.only(left: 4, bottom: 4),
                 child: Text(
@@ -333,44 +479,48 @@ final class _BurnedCard extends StatelessWidget {
               ),
             ],
           ),
-          const SizedBox(height: 16),
-          const WeightProgressBar(progress: _progress),
-          const SizedBox(height: 16),
-          Row(
-            children: [
-              Expanded(
-                child: Text.rich(
+          if (hasWeight) ...[
+            const SizedBox(height: 16),
+            WeightProgressBar(progress: progress),
+            const SizedBox(height: 16),
+            Row(
+              children: [
+                Expanded(
+                  child: Text.rich(
+                    TextSpan(
+                      children: [
+                        TextSpan(
+                          text: '${'calories_page.start'.tr()} ',
+                          style: AppTextStyles.homeWeightBoundLabel,
+                        ),
+                        TextSpan(
+                          text:
+                              '${startKg!.toStringAsFixed(1)}${'home.weight_unit'.tr()}',
+                          style: AppTextStyles.homeWeightBoundValue,
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                Text.rich(
                   TextSpan(
                     children: [
                       TextSpan(
-                        text: '${'calories_page.start'.tr()} ',
+                        text: '${'calories_page.goal'.tr()} ',
                         style: AppTextStyles.homeWeightBoundLabel,
                       ),
                       TextSpan(
-                        text: '$_startKg${'home.weight_unit'.tr()}',
+                        text:
+                            '${goalKg!.toStringAsFixed(1)}${'home.weight_unit'.tr()}',
                         style: AppTextStyles.homeWeightBoundValue,
                       ),
                     ],
                   ),
+                  textAlign: TextAlign.end,
                 ),
-              ),
-              Text.rich(
-                TextSpan(
-                  children: [
-                    TextSpan(
-                      text: '${'calories_page.goal'.tr()} ',
-                      style: AppTextStyles.homeWeightBoundLabel,
-                    ),
-                    TextSpan(
-                      text: '$_goalKg${'home.weight_unit'.tr()}',
-                      style: AppTextStyles.homeWeightBoundValue,
-                    ),
-                  ],
-                ),
-                textAlign: TextAlign.end,
-              ),
-            ],
-          ),
+              ],
+            ),
+          ],
         ],
       ),
     );

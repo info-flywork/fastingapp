@@ -23,7 +23,15 @@ mixin HomeViewMixin on State<HomeView> {
   }
 
   void onWaterTapped() {
-    context.pushNamed(RoutePaths.water.name);
+    final home = context.read<HomeBloc>().state;
+    final summary = home is HomeLoaded ? home.summary : null;
+    context.pushNamed(
+      RoutePaths.water.name,
+      extra: {
+        'initialMl': summary?.waterMl ?? 0,
+        'dailyGoalMl': summary?.waterGoalMl ?? 2500,
+      },
+    );
   }
 
   void onStepsTapped() {
@@ -42,14 +50,12 @@ mixin HomeViewMixin on State<HomeView> {
     context.pushNamed(RoutePaths.hungerTracker.name);
   }
 
-  Future<void> onWeightEditTapped() async {
-    await AppDialogs.instance.showEditWeight(
-      context,
-      initialWeightKg: switch (context.read<HomeBloc>().state) {
-        HomeLoaded(:final summary) =>
-          summary?.weightCurrentKg ?? HomeWeightCard.fallbackKg,
-        _ => HomeWeightCard.fallbackKg,
-      },
-    );
-  }
+  /// Kalem: yeni kilo kaydı (`POST /weights`), ardından özet ve profil tazelenir.
+  Future<void> onWeightEditTapped() => WeightEntryFlow.open(
+    context,
+    currentKg: switch (context.read<HomeBloc>().state) {
+      HomeLoaded(:final summary) => summary?.weightCurrentKg,
+      _ => null,
+    },
+  );
 }

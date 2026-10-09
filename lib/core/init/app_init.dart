@@ -31,6 +31,6 @@ final class AppInit {
     connectivity.reconnects.addListener(
       () => unawaited(RemoteImageStore.instance.syncInBackground()),
     );
-    // TODO(team): env yükleme, RevenueCat init vb.
+    // RevenueCat: DI'dan sonra `main` içinde (RevenueCatService.init).
   }
 }

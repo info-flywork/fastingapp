@@ -2,7 +2,12 @@ import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:easy_localization/easy_localization.dart';
+import 'package:fastingapp/core/di/injection.dart';
+import 'package:fastingapp/core/dialogs/app_dialogs.dart';
+import 'package:fastingapp/core/sync/data_sync.dart';
 import 'package:fastingapp/core/theme/app_text_styles.dart';
+import 'package:fastingapp/core/widgets/day_switch_transition.dart';
+import 'package:fastingapp/domain/trackers/trackers_repository.dart';
 import 'package:fastingapp/generated/app_images.g.dart';
 import 'package:fastingapp/generated/assets.gen.dart';
 import 'package:fastingapp/generated/colors.gen.dart';
@@ -18,7 +23,7 @@ const _kStepsHeaderHeight = 56.0;
 /// haftalık grafik.
 final class StepsView extends StatefulWidget {
   const StepsView({
-    this.initialSteps = 1000,
+    this.initialSteps = 0,
     this.dailyGoalSteps = 8000,
     super.key,
   });
@@ -70,40 +75,53 @@ class _StepsViewState extends State<StepsView>
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    const SizedBox(
+                    SizedBox(
                       height: _kStepsHeaderHeight,
                       width: double.infinity,
-                      child: _StepsHeader(),
+                      child: _StepsHeader(
+                        dateLabel: stepsDateLabel(context),
+                        onDateTap: onStepsDateTapped,
+                        onPrevDay: onStepsPrevDay,
+                        onNextDay: onStepsNextDay,
+                        canGoPrev: canGoPrevStepsDay,
+                        canGoNext: canGoNextStepsDay,
+                        dayNavDirection: dayNavDirection,
+                        selectedDate: selectedDate,
+                      ),
                     ),
                     Expanded(
-                      child: SingleChildScrollView(
-                        padding: EdgeInsets.fromLTRB(20, 8, 20, bottom + 24),
-                        physics: const ClampingScrollPhysics(),
-                        child: Column(
-                          children: [
-                            _StepsRing(
-                              progress: progress,
-                              currentSteps: currentSteps,
-                              goalReached: goalReached,
-                            ),
-                            const SizedBox(height: 12),
-                            _StepsGoalRow(
-                              dailyGoalSteps: dailyGoalSteps,
-                              goalReached: goalReached,
-                            ),
-                            const SizedBox(height: 28),
-                            _StepsStatsRow(
-                              calories: caloriesKcal,
-                              distanceKm: distanceKm,
-                              durationMin: durationMin,
-                            ),
-                            const SizedBox(height: 28),
-                            _StepsWeeklyChart(
-                              values: weeklySteps,
-                              goal: dailyGoalSteps,
-                              todayIndex: todayWeekIndex,
-                            ),
-                          ],
+                      child: DaySwitchTransition(
+                        date: selectedDate,
+                        direction: dayNavDirection,
+                        child: SingleChildScrollView(
+                          padding: EdgeInsets.fromLTRB(20, 8, 20, bottom + 24),
+                          physics: const ClampingScrollPhysics(),
+                          child: Column(
+                            children: [
+                              _StepsRing(
+                                progress: progress,
+                                currentSteps: currentSteps,
+                                goalReached: goalReached,
+                              ),
+                              const SizedBox(height: 12),
+                              _StepsGoalRow(
+                                dailyGoalSteps: dailyGoalSteps,
+                                goalReached: goalReached,
+                              ),
+                              const SizedBox(height: 28),
+                              _StepsStatsRow(
+                                calories: caloriesKcal,
+                                distanceKm: distanceKm,
+                                durationMin: durationMin,
+                              ),
+                              const SizedBox(height: 28),
+                              _StepsWeeklyChart(
+                                values: weeklySteps,
+                                goal: dailyGoalSteps,
+                                todayIndex: todayWeekIndex,
+                              ),
+                            ],
+                          ),
                         ),
                       ),
                     ),
@@ -119,10 +137,31 @@ class _StepsViewState extends State<StepsView>
 }
 
 final class _StepsHeader extends StatelessWidget {
-  const _StepsHeader();
+  const _StepsHeader({
+    required this.dateLabel,
+    required this.onDateTap,
+    required this.onPrevDay,
+    required this.onNextDay,
+    required this.canGoPrev,
+    required this.canGoNext,
+    required this.dayNavDirection,
+    required this.selectedDate,
+  });
+
+  final String dateLabel;
+  final VoidCallback onDateTap;
+  final VoidCallback onPrevDay;
+  final VoidCallback onNextDay;
+  final bool canGoPrev;
+  final bool canGoNext;
+  final int dayNavDirection;
+  final DateTime selectedDate;
 
   @override
   Widget build(BuildContext context) {
+    final chevronIdle = ColorName.colorTitle.withValues(alpha: 0.35);
+    final chevronDisabled = ColorName.colorTitle.withValues(alpha: 0.15);
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16),
       child: Row(
@@ -142,20 +181,75 @@ final class _StepsHeader extends StatelessWidget {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(
-                  Icons.chevron_left_rounded,
-                  color: ColorName.colorTitle.withValues(alpha: 0.35),
+                _DayChevron(
+                  icon: Icons.chevron_left_rounded,
+                  enabled: canGoPrev,
+                  enabledColor: chevronIdle,
+                  disabledColor: chevronDisabled,
+                  onTap: onPrevDay,
                 ),
-                Text('steps_page.today'.tr(), style: AppTextStyles.stepsToday),
-                Icon(
-                  Icons.chevron_right_rounded,
-                  color: ColorName.colorTitle.withValues(alpha: 0.35),
+                GestureDetector(
+                  onTap: onDateTap,
+                  behavior: HitTestBehavior.opaque,
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 4,
+                      vertical: 8,
+                    ),
+                    child: DaySwitchTransition(
+                      date: selectedDate,
+                      direction: dayNavDirection,
+                      child: Text(dateLabel, style: AppTextStyles.stepsToday),
+                    ),
+                  ),
+                ),
+                _DayChevron(
+                  icon: Icons.chevron_right_rounded,
+                  enabled: canGoNext,
+                  enabledColor: chevronIdle,
+                  disabledColor: chevronDisabled,
+                  onTap: onNextDay,
                 ),
               ],
             ),
           ),
           const SizedBox(width: 44),
         ],
+      ),
+    );
+  }
+}
+
+final class _DayChevron extends StatelessWidget {
+  const _DayChevron({
+    required this.icon,
+    required this.enabled,
+    required this.enabledColor,
+    required this.disabledColor,
+    required this.onTap,
+  });
+
+  final IconData icon;
+  final bool enabled;
+  final Color enabledColor;
+  final Color disabledColor;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: enabled ? onTap : null,
+        customBorder: const CircleBorder(),
+        child: SizedBox(
+          width: 40,
+          height: 40,
+          child: Icon(
+            icon,
+            color: enabled ? enabledColor : disabledColor,
+          ),
+        ),
       ),
     );
   }

@@ -2,7 +2,9 @@ part of '../home_view.dart';
 
 /// Haftanın günleri şeridi (Pzt–Paz) — Figma week strip.
 final class HomeWeekStrip extends StatelessWidget {
-  const HomeWeekStrip({super.key});
+  const HomeWeekStrip({this.days = const [], super.key});
+
+  final List<SummaryWeekDay> days;
 
   static const _dayKeys = [
     'home.week_mon',
@@ -28,7 +30,11 @@ final class HomeWeekStrip extends StatelessWidget {
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
     final monday = today.subtract(Duration(days: today.weekday - 1));
-    final selectedIndex = today.weekday - 1;
+    var selectedIndex = today.weekday - 1;
+    if (days.isNotEmpty) {
+      final idx = days.indexWhere((d) => d.isToday);
+      if (idx >= 0) selectedIndex = idx;
+    }
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
@@ -41,7 +47,7 @@ final class HomeWeekStrip extends StatelessWidget {
                 dayKey: _dayKeys[i],
                 date: monday.add(Duration(days: i)),
                 selected: i == selectedIndex,
-                hours: i == selectedIndex ? 10 : null,
+                hours: _hoursForDay(i),
                 textOpacity: _fadeForDistance(i - selectedIndex),
               ),
             ),
@@ -49,6 +55,14 @@ final class HomeWeekStrip extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  int? _hoursForDay(int index) {
+    if (days.length != 7 || index >= days.length) return null;
+    final day = days[index];
+    if (day.isFuture) return null;
+    if (day.fastedHours <= 0) return null;
+    return day.fastedHours;
   }
 }
 

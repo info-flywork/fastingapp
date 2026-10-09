@@ -1,26 +1,34 @@
 part of '../edit_profile_view.dart';
 
+/// Profili Düzenle: veri [ProfileBloc]'tan (splash / ana sayfada ısıtılır);
+/// mixin yalnızca seçim ekranlarını açar ve sonucu event olarak iletir.
 mixin EditProfileViewMixin on State<EditProfileView> {
-  String? photoPath;
-  String displayName = 'Alex E.';
-  OnboardingGoal fastingTarget = OnboardingGoal.loseWeight;
-  OnboardingFastingPlan fastingPlan = OnboardingFastingPlan.sixteenEight;
-  OnboardingGender gender = OnboardingGender.man;
-  OnboardingDiet dietType = OnboardingDiet.vegetarian;
-  Set<OnboardingFoodLove> preferredFoods = {
-    OnboardingFoodLove.chicken,
-    OnboardingFoodLove.fish,
-    OnboardingFoodLove.rice,
-    OnboardingFoodLove.pasta,
-  };
-  Set<OnboardingFoodSkip> skippedFoods = {
-    OnboardingFoodSkip.mushrooms,
-    OnboardingFoodSkip.olives,
-    OnboardingFoodSkip.onions,
-  };
-  double weightKg = 74;
-  int heightCm = 173;
-  int age = 29;
+  ProfileBloc get _bloc => getIt<ProfileBloc>();
+  UserProfile get _profile => _bloc.state.profile;
+
+  /// Değer yoksa (onboarding bitmemiş hesap) gösterilen yer tutucu.
+  static const placeholder = '–';
+
+  static const _defaultWeightKg = 70.0;
+  static const _defaultHeightCm = 170;
+  static const _defaultAge = 30;
+
+  @override
+  void initState() {
+    super.initState();
+    // Isıtılmadıysa (ör. ağ hatası) burada yüklenir; yüklüyse dokunmaz.
+    _bloc.add(const ProfileStarted());
+  }
+
+  void onRetry() => _bloc.add(const ProfileStarted());
+
+  void onSaveError(ProfileSaveError error) {
+    AppSnackbar.show(
+      context: context,
+      text: error.message ?? 'common.failed'.tr(),
+      type: SnackBarType.failure,
+    );
+  }
 
   void onBack() => context.pop();
 
@@ -42,7 +50,7 @@ mixin EditProfileViewMixin on State<EditProfileView> {
           type: SnackBarType.warning,
         );
       }
-      context.go(RoutePaths.welcome.path);
+      context.go(RoutePaths.login.path);
     } on AuthCancelledException {
       return;
     } on Exception catch (e) {
@@ -66,38 +74,43 @@ mixin EditProfileViewMixin on State<EditProfileView> {
       imageQuality: 85,
     );
     if (file == null || !mounted) return;
-
-    setState(() => photoPath = file.path);
+    _bloc.add(ProfilePhotoPicked(file.path));
   }
 
   Future<void> onEditName() async {
+    final current = _bloc.state.name ?? '';
     final result = await AppBottomSheets.instance.showEditName(
       context,
-      initialName: displayName,
+      initialName: current,
     );
-    if (result == null || !mounted) return;
-    setState(() => displayName = result);
+    final name = result?.trim();
+    if (name == null || name.isEmpty || name == current) return;
+    _bloc.add(ProfileNameChanged(name));
   }
 
   Future<void> onEditFastingTarget() async {
     final result = await context.pushNamed<OnboardingGoal>(
       RoutePaths.editFastingTarget.name,
-      extra: fastingTarget,
+      extra: _profile.goal,
     );
-    if (result == null || !mounted) return;
-    setState(() => fastingTarget = result);
+    if (result == null || result == _profile.goal) return;
+    _save({'goal': result.name}, _profile.copyWith(goal: result));
   }
 
   Future<void> onEditWeight() async {
     final result = await AppDialogs.instance.showEditWeight(
       context,
-      initialWeightKg: weightKg,
+      initialWeightKg: _profile.currentWeightKg ?? _defaultWeightKg,
     );
-    if (result == null || !mounted) return;
-    setState(() => weightKg = result.weightKg);
+    if (result == null) return;
+    final kg = (result.weightKg * 10).round() / 10;
+    if (kg == _profile.currentWeightKg) return;
+    // Sunucu yeni bir kilo kaydı açar (profilde tek değer tutulmaz).
+    _save({'weightKg': kg}, _profile.copyWith(currentWeightKg: kg));
   }
 
-  String _formatWeight(double kg) {
+  String formatWeight(double? kg) {
+    if (kg == null) return placeholder;
     final rounded = (kg * 10).round() / 10;
     if (rounded == rounded.roundToDouble()) {
       return rounded.toStringAsFixed(0);
@@ -108,57 +121,74 @@ mixin EditProfileViewMixin on State<EditProfileView> {
   Future<void> onEditHeight() async {
     final result = await context.pushNamed<HeightEditResult>(
       RoutePaths.editHeight.name,
-      extra: HeightEditResult(heightCm: heightCm, age: age),
+      extra: HeightEditResult(
+        heightCm: _profile.heightCm ?? _defaultHeightCm,
+        age: _profile.age ?? _defaultAge,
+      ),
     );
-    if (result == null || !mounted) return;
-    setState(() {
-      heightCm = result.heightCm;
-      age = result.age;
-    });
+    if (result == null) return;
+    if (result.heightCm == _profile.heightCm && result.age == _profile.age) {
+      return;
+    }
+    _save({
+      'heightCm': result.heightCm,
+      'age': result.age,
+    }, _profile.copyWith(heightCm: result.heightCm, age: result.age));
   }
 
   Future<void> onEditGender() async {
     final result = await context.pushNamed<OnboardingGender>(
       RoutePaths.editGender.name,
-      extra: gender,
+      extra: _profile.gender,
     );
-    if (result == null || !mounted) return;
-    setState(() => gender = result);
+    if (result == null || result == _profile.gender) return;
+    _save({'gender': result.name}, _profile.copyWith(gender: result));
   }
 
   Future<void> onEditDietType() async {
     final result = await context.pushNamed<OnboardingDiet>(
       RoutePaths.editDietType.name,
-      extra: dietType,
+      extra: _profile.diet,
     );
-    if (result == null || !mounted) return;
-    setState(() => dietType = result);
+    if (result == null || result == _profile.diet) return;
+    _save({'diet': result.name}, _profile.copyWith(diet: result));
   }
 
   Future<void> onEditPreferredFoods() async {
     final result = await context.pushNamed<Set<OnboardingFoodLove>>(
       RoutePaths.editPreferredFoods.name,
-      extra: preferredFoods.toList(),
+      extra: _profile.foodLoves.toList(),
     );
-    if (result == null || !mounted) return;
-    setState(() => preferredFoods = result);
+    // Sunucu en az bir tercih ister.
+    if (result == null || result.isEmpty) return;
+    if (setEquals(result, _profile.foodLoves)) return;
+    _save({
+      'foodLoves': result.map((e) => e.name).toList(),
+    }, _profile.copyWith(foodLoves: result));
   }
 
   Future<void> onEditSkippedFoods() async {
     final result = await context.pushNamed<Set<OnboardingFoodSkip>>(
       RoutePaths.editSkippedFoods.name,
-      extra: skippedFoods.toList(),
+      extra: _profile.foodSkips.toList(),
     );
-    if (result == null || !mounted) return;
-    setState(() => skippedFoods = result);
+    if (result == null || setEquals(result, _profile.foodSkips)) return;
+    _save({
+      'foodSkips': result.map((e) => e.name).toList(),
+    }, _profile.copyWith(foodSkips: result));
   }
 
+  /// Bir sonraki oruçtan geçerli; premium plan için paywall bloc'ta.
   Future<void> onEditFastingPlan() async {
+    final current = _bloc.state.plan;
     final result = await context.pushNamed<OnboardingFastingPlan>(
       RoutePaths.editFastingPlan.name,
-      extra: fastingPlan,
+      extra: current,
     );
-    if (result == null || !mounted) return;
-    setState(() => fastingPlan = result);
+    if (result == null || result == current) return;
+    _bloc.add(ProfilePlanChanged(result));
   }
+
+  void _save(Map<String, dynamic> fields, UserProfile optimistic) =>
+      _bloc.add(ProfileFieldsChanged(fields: fields, optimistic: optimistic));
 }

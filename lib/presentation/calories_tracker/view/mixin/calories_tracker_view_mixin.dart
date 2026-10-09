@@ -5,9 +5,110 @@ mixin CaloriesTrackerViewMixin on State<CaloriesTrackerView> {
   static const _manualMin = 0;
   static const _manualMax = 5000;
 
-  int eatenKcal = 3143;
-  int overKcal = 273;
-  int manualKcal = 500;
+  final _nutrition = getIt<NutritionRepository>();
+
+  /// İlk açılışta cache yoksa shimmer; cache varsa asla full-page loading yok.
+  bool showShimmer = false;
+  bool hasContent = false;
+  String? errorMessage;
+
+  int eatenKcal = 0;
+  int? overKcal;
+  int burnedKcal = 0;
+  int manualKcal = 0;
+
+  double carbsG = 0;
+  double proteinG = 0;
+  double fatG = 0;
+  double carbsProgress = 0;
+  double proteinProgress = 0;
+  double fatProgress = 0;
+
+  double? startKg;
+  double? goalKg;
+  double weightProgress = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _seedLocal();
+    // Cache varsa anında göster; ağ tazelemesi sessiz (spinner yok).
+    unawaited(loadDay(force: true));
+  }
+
+  void _seedLocal() {
+    final cached = _nutrition.cachedDay();
+    if (cached != null) {
+      _applyDay(cached);
+      hasContent = true;
+    }
+    _seedWeightFromHome();
+  }
+
+  void _seedWeightFromHome() {
+    final home = getIt<HomeBloc>().state;
+    if (home is! HomeLoaded) return;
+    final s = home.summary;
+    final start = s?.weightStartKg;
+    final goal = s?.weightGoalKg;
+    final current = s?.weightCurrentKg;
+    var wProgress = 0.0;
+    if (start != null && goal != null && start != goal && current != null) {
+      wProgress = ((start - current) / (start - goal)).clamp(0.0, 1.0);
+    }
+    startKg = start ?? startKg;
+    goalKg = goal ?? goalKg;
+    weightProgress = wProgress;
+  }
+
+  void _applyDay(NutritionDay day) {
+    eatenKcal = day.kcal;
+    overKcal = day.overKcal;
+    burnedKcal = day.burnedKcal;
+    carbsG = day.macros.carbs.g;
+    proteinG = day.macros.protein.g;
+    fatG = day.macros.fat.g;
+    carbsProgress = day.macros.carbs.progressOrZero;
+    proteinProgress = day.macros.protein.progressOrZero;
+    fatProgress = day.macros.fat.progressOrZero;
+  }
+
+  Future<void> loadDay({bool force = true}) async {
+    final needShimmer = !hasContent;
+    if (needShimmer && mounted) {
+      setState(() {
+        showShimmer = true;
+        errorMessage = null;
+      });
+    } else if (mounted) {
+      setState(() => errorMessage = null);
+    }
+
+    try {
+      final day = await _nutrition.getDay(force: force);
+      // Protein tracker açılınca week beklemesin.
+      unawaited(_nutrition.getWeek(metric: 'protein'));
+      if (!mounted) return;
+      _seedWeightFromHome();
+      setState(() {
+        _applyDay(day);
+        hasContent = true;
+        showShimmer = false;
+      });
+    } on NetworkException catch (e) {
+      if (!mounted) return;
+      setState(() {
+        showShimmer = false;
+        errorMessage = e.message;
+      });
+    } on Object catch (e) {
+      if (!mounted) return;
+      setState(() {
+        showShimmer = false;
+        errorMessage = e.toString();
+      });
+    }
+  }
 
   void onManualDecrement() {
     if (manualKcal <= _manualMin) return;
@@ -27,7 +128,9 @@ mixin CaloriesTrackerViewMixin on State<CaloriesTrackerView> {
     context.pushNamed(RoutePaths.proteinTracker.name);
   }
 
-  void onCalculate() {
-    context.pushNamed(RoutePaths.caloriesCamera.name);
+  /// Kamera → analiz → kayıt; dönünce sessiz taze (spinner yok).
+  Future<void> onCalculate() async {
+    await context.pushNamed(RoutePaths.caloriesCamera.name);
+    if (mounted) await loadDay(force: true);
   }
 }

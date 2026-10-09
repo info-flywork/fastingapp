@@ -19,8 +19,10 @@ final class FastingStartSheet extends StatefulWidget {
 class _FastingStartSheetState extends State<FastingStartSheet> {
   static const _itemExtent = 56.0;
   static const _visibleCount = 5;
-  static const _pastDays = 30;
-  static const _futureDays = 14;
+  // Sunucu kuralı (fasting.rules.js): başlangıç en fazla 7 gün geri, ileri
+  // tarih yok.
+  static const _pastDays = 7;
+  static const _futureDays = 0;
   static const _loopPasses = 80;
   static const _hourCount = 24;
   static const _minuteCount = 60;
@@ -70,9 +72,9 @@ class _FastingStartSheetState extends State<FastingStartSheet> {
 
   void _save() {
     final day = _dates[_dateIndex];
-    Navigator.of(
-      context,
-    ).pop(DateTime(day.year, day.month, day.day, _hour, _minute));
+    final picked = DateTime(day.year, day.month, day.day, _hour, _minute);
+    final now = DateTime.now();
+    Navigator.of(context).pop(picked.isAfter(now) ? now : picked);
   }
 
   String _dateLabel(int index) {

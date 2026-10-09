@@ -33,6 +33,7 @@ class _LanguagesViewState extends State<LanguagesView> {
     return Scaffold(
       backgroundColor: ColorName.colorProfileBack,
       body: SafeArea(
+        bottom: false,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [

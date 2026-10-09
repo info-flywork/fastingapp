@@ -10,14 +10,21 @@ import 'package:fastingapp/core/network/dio_client.dart';
 import 'package:fastingapp/core/network/network_manager.dart';
 import 'package:fastingapp/domain/auth/auth_repository.dart';
 import 'package:fastingapp/domain/auth/social_auth_service.dart';
+import 'package:fastingapp/domain/chat/chat_repository.dart';
+import 'package:fastingapp/domain/fasting/fasting_repository.dart';
 import 'package:fastingapp/domain/fasting/forecast_repository.dart';
+import 'package:fastingapp/domain/hunger/hunger_repository.dart';
 import 'package:fastingapp/domain/notification/notifications_repository.dart';
 import 'package:fastingapp/domain/notification/push_service.dart';
+import 'package:fastingapp/domain/nutrition/meals_repository.dart';
+import 'package:fastingapp/domain/nutrition/nutrition_repository.dart';
 import 'package:fastingapp/domain/onboarding/onboarding_draft.dart';
 import 'package:fastingapp/domain/onboarding/onboarding_repository.dart';
 import 'package:fastingapp/domain/product/product_repository.dart';
+import 'package:fastingapp/domain/profile/profile_repository.dart';
 import 'package:fastingapp/domain/progress/progress_repository.dart';
 import 'package:fastingapp/domain/revenue_cat/revenue_cat_service.dart';
+import 'package:fastingapp/domain/trackers/trackers_repository.dart';
 import 'package:fastingapp/domain/user/user_repository.dart';
 import 'package:fastingapp/presentation/auth/bloc/auth_bloc.dart';
 import 'package:fastingapp/presentation/auth/bloc/auth_event.dart';
@@ -36,7 +43,9 @@ import 'package:fastingapp/presentation/auth/onboard/weight_history/bloc/weight_
 import 'package:fastingapp/presentation/auth/splash/bloc/splash_bloc.dart';
 import 'package:fastingapp/presentation/auth/welcome/bloc/welcome_bloc.dart';
 import 'package:fastingapp/presentation/chat/bloc/chat_session_cubit.dart';
+import 'package:fastingapp/presentation/fasting/bloc/fasting_session_cubit.dart';
 import 'package:fastingapp/presentation/home/bloc/home_bloc.dart';
+import 'package:fastingapp/presentation/profile/bloc/profile_bloc.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:get_it/get_it.dart';
 
@@ -73,32 +82,67 @@ Future<void> configureDependencies() async {
     ..registerLazySingleton<SocialAuthService>(SocialAuthService.new)
     ..registerLazySingleton<PushService>(PushService.new)
     ..registerLazySingleton<AuthRepository>(
-      () =>
-          AuthRepository(getIt(), getIt(), getIt(), getIt(), getIt(), getIt()),
+      () => AuthRepository(
+        getIt(),
+        getIt(),
+        getIt(),
+        getIt(),
+        getIt(),
+        getIt(),
+        getIt(),
+      ),
     )
     ..registerLazySingleton<ForecastRepository>(
       () => ForecastRepository(getIt()),
     )
+    ..registerLazySingleton<FastingRepository>(() => FastingRepository(getIt()))
     ..registerLazySingleton<OnboardingDraft>(OnboardingDraft.new)
     ..registerLazySingleton<OnboardingRepository>(
       () => OnboardingRepository(getIt(), getIt(), getIt(), getIt()),
     )
     ..registerLazySingleton<UserRepository>(() => UserRepository(getIt()))
+    ..registerLazySingleton<ProfileRepository>(
+      () => ProfileRepository(getIt(), getIt(), getIt()),
+    )
     ..registerLazySingleton<ProductRepository>(
       () => ProductRepository(getIt(), getIt()),
     )
     ..registerLazySingleton<NotificationsRepository>(
       () => NotificationsRepository(getIt()),
     )
+    ..registerLazySingleton<ChatRepository>(
+      () => ChatRepository(getIt(), getIt()),
+    )
+    ..registerLazySingleton<NutritionRepository>(
+      () => NutritionRepository(getIt()),
+    )
+    ..registerLazySingleton<MealsRepository>(
+      () => MealsRepository(getIt(), getIt(), getIt()),
+    )
+    ..registerLazySingleton<TrackersRepository>(
+      () => TrackersRepository(getIt()),
+    )
+    ..registerLazySingleton<HungerRepository>(() => HungerRepository(getIt()))
     ..registerLazySingleton<ProgressRepository>(
       () => ProgressRepository(getIt()),
     )
-    ..registerLazySingleton<RevenueCatService>(RevenueCatService.new)
+    ..registerLazySingleton<RevenueCatService>(
+      () => RevenueCatService(getIt(), getIt()),
+    )
     // ── Global BLoCs (singleton) ──
     ..registerLazySingleton<AuthBloc>(() => AuthBloc(getIt()))
-    ..registerLazySingleton<ChatSessionCubit>(ChatSessionCubit.new)
+    ..registerLazySingleton<ChatSessionCubit>(
+      () => ChatSessionCubit(getIt(), getIt()),
+    )
+    ..registerLazySingleton<FastingSessionCubit>(
+      () => FastingSessionCubit(getIt(), getIt()),
+    )
+    ..registerLazySingleton<HomeBloc>(() => HomeBloc(getIt()))
+    ..registerLazySingleton<ProfileBloc>(
+      () => ProfileBloc(getIt(), getIt(), getIt()),
+    )
     // ── Ekran BLoC'ları (factory) ──
-    ..registerFactory<SplashBloc>(() => SplashBloc(getIt()))
+    ..registerFactory<SplashBloc>(() => SplashBloc(getIt(), getIt(), getIt()))
     ..registerFactory<WelcomeBloc>(() => WelcomeBloc(getIt(), getIt()))
     ..registerFactory<GoalBloc>(GoalBloc.new)
     ..registerFactory<AboutYouBloc>(AboutYouBloc.new)
@@ -111,6 +155,5 @@ Future<void> configureDependencies() async {
     ..registerFactory<FastingReasonBloc>(FastingReasonBloc.new)
     ..registerFactory<FastingPlanBloc>(FastingPlanBloc.new)
     ..registerFactory<MealWindowBloc>(MealWindowBloc.new)
-    ..registerFactory<LanguageLevelBloc>(() => LanguageLevelBloc(getIt()))
-    ..registerFactory<HomeBloc>(() => HomeBloc(getIt()));
+    ..registerFactory<LanguageLevelBloc>(() => LanguageLevelBloc(getIt()));
 }

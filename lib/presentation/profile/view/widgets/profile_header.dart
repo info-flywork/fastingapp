@@ -8,14 +8,32 @@ final class ProfileHeader extends StatelessWidget {
     required this.streakDays,
     required this.isPremium,
     required this.onChatTapped,
+    this.avatarUrl,
+    this.localPhotoPath,
     super.key,
   });
 
   final String displayName;
   final String initials;
+  final String? avatarUrl;
+
+  /// Yeni seçilen, yüklenmekte olan fotoğraf (öncelikli).
+  final String? localPhotoPath;
   final int streakDays;
   final bool isPremium;
   final VoidCallback onChatTapped;
+
+  /// Baş harfler; ad yoksa kişi simgesi.
+  Widget _initialsText() => initials.isEmpty
+      ? const Icon(Icons.person_rounded, color: ColorName.colorWhite, size: 26)
+      : Text(
+          initials,
+          style: AppTextStyles.profileName.copyWith(
+            color: ColorName.colorWhite,
+            fontSize: 16,
+            height: 1,
+          ),
+        );
 
   @override
   Widget build(BuildContext context) {
@@ -29,14 +47,23 @@ final class ProfileHeader extends StatelessWidget {
             color: ColorName.colorTitle,
             shape: BoxShape.circle,
           ),
-          child: Text(
-            initials,
-            style: AppTextStyles.profileName.copyWith(
-              color: ColorName.colorWhite,
-              fontSize: 16,
-              height: 1,
-            ),
-          ),
+          clipBehavior: Clip.antiAlias,
+          child: localPhotoPath != null
+              ? Image.file(
+                  File(localPhotoPath!),
+                  width: 48,
+                  height: 48,
+                  fit: BoxFit.cover,
+                )
+              : avatarUrl != null
+              ? Image.network(
+                  avatarUrl!,
+                  width: 48,
+                  height: 48,
+                  fit: BoxFit.cover,
+                  errorBuilder: (_, _, _) => _initialsText(),
+                )
+              : _initialsText(),
         ),
         const SizedBox(width: 12),
         Expanded(

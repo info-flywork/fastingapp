@@ -2,8 +2,9 @@ part of '../home_view.dart';
 
 /// Home öğün kayıtları kartı — metabolic kartının altında.
 final class HomeMealRecordsCard extends StatelessWidget {
-  const HomeMealRecordsCard({this.onTap, super.key});
+  const HomeMealRecordsCard({this.lastMeal, this.onTap, super.key});
 
+  final SummaryLastMeal? lastMeal;
   final VoidCallback? onTap;
 
   @override
@@ -39,7 +40,7 @@ final class HomeMealRecordsCard extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 16),
-            const _MealTimeline(),
+            _MealTimeline(lastMeal: lastMeal),
             const SizedBox(height: 16),
             AppButton(
               label: 'home.save_a_meal'.tr(),
@@ -55,13 +56,16 @@ final class HomeMealRecordsCard extends StatelessWidget {
 }
 
 final class _MealTimeline extends StatelessWidget {
-  const _MealTimeline();
+  const _MealTimeline({this.lastMeal});
+
+  final SummaryLastMeal? lastMeal;
 
   static const _lineColor = Color(0x993C3C43);
   static const _dotSize = 8.0;
 
   @override
   Widget build(BuildContext context) {
+    if (lastMeal == null) return const SizedBox.shrink();
     return IntrinsicHeight(
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -90,13 +94,13 @@ final class _MealTimeline extends StatelessWidget {
             ),
           ),
           const SizedBox(width: 8),
-          const Expanded(
+          Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _MealTimestamp(),
-                SizedBox(height: 10),
-                _MealEntryCard(),
+                _MealTimestamp(eatenAt: lastMeal!.eatenAt),
+                const SizedBox(height: 10),
+                _MealEntryCard(title: lastMeal!.title, kcal: lastMeal!.kcal),
               ],
             ),
           ),
@@ -107,19 +111,23 @@ final class _MealTimeline extends StatelessWidget {
 }
 
 final class _MealTimestamp extends StatelessWidget {
-  const _MealTimestamp();
+  const _MealTimestamp({required this.eatenAt});
+
+  final DateTime eatenAt;
 
   @override
   Widget build(BuildContext context) {
-    return Text(
-      'home.meal_sample_time'.tr(),
-      style: AppTextStyles.homeMealTimestamp,
-    );
+    final locale = context.locale.toString();
+    final label = DateFormat('MMMM d, HH:mm', locale).format(eatenAt);
+    return Text(label, style: AppTextStyles.homeMealTimestamp);
   }
 }
 
 final class _MealEntryCard extends StatelessWidget {
-  const _MealEntryCard();
+  const _MealEntryCard({this.title, this.kcal});
+
+  final String? title;
+  final int? kcal;
 
   @override
   Widget build(BuildContext context) {
@@ -147,15 +155,21 @@ final class _MealEntryCard extends StatelessWidget {
             ),
           ),
           const SizedBox(width: 16),
-          const Expanded(
-            child: Wrap(
-              spacing: 10,
-              runSpacing: 8,
-              children: [
-                _MealTag(labelKey: 'home.meal_tag_full'),
-                _MealTag(labelKey: 'home.meal_tag_keto'),
-              ],
-            ),
+          Expanded(
+            child: title != null && title!.isNotEmpty
+                ? Text(title!, style: AppTextStyles.homeMealRecordsTitle)
+                : Wrap(
+                    spacing: 10,
+                    runSpacing: 8,
+                    children: [
+                      if (kcal != null)
+                        _MealTag(
+                          labelKey: 'home.meal_tag_full',
+                          labelOverride: '$kcal kcal',
+                        ),
+                      const _MealTag(labelKey: 'home.meal_tag_keto'),
+                    ],
+                  ),
           ),
           const SizedBox(width: 8),
           Padding(
@@ -173,9 +187,10 @@ final class _MealEntryCard extends StatelessWidget {
 }
 
 final class _MealTag extends StatelessWidget {
-  const _MealTag({required this.labelKey});
+  const _MealTag({required this.labelKey, this.labelOverride});
 
   final String labelKey;
+  final String? labelOverride;
 
   @override
   Widget build(BuildContext context) {
@@ -185,7 +200,10 @@ final class _MealTag extends StatelessWidget {
         color: ColorName.colorHomeChipBg,
         borderRadius: BorderRadius.circular(9999),
       ),
-      child: Text(labelKey.tr(), style: AppTextStyles.homeMealTag),
+      child: Text(
+        labelOverride ?? labelKey.tr(),
+        style: AppTextStyles.homeMealTag,
+      ),
     );
   }
 }

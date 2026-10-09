@@ -170,7 +170,7 @@ ON DUPLICATE KEY UPDATE water_ml = water_ml + VALUES(water_ml);
 - **Serileştirme:** Fastify yanıt şemaları fast-json-stringify kullanır. `JSON.stringify`'dan 2–3 kat hızlıdır.
 - **Ağır CPU işleri** (görsel işleme, zip, şifreleme döngüleri) API process'inde değil, **worker** process'inde çalışır.
   - Avatar yükleme senkrondur ama küçüktür. `sharp`'ın libuv thread havuzunu kullanır, `UV_THREADPOOL_SIZE=8`.
-- **Dış çağrılar** (Anthropic, RevenueCat, Bunny, FCM):
+- **Dış çağrılar** (OpenAI, RevenueCat, Bunny, FCM):
   - Hepsinde `AbortSignal.timeout` vardır.
   - Hata veren servise karşı devre kesici (circuit breaker) uygulanır: art arda 5 hatada 30 sn açık kalır.
 - **SSE akışları:**

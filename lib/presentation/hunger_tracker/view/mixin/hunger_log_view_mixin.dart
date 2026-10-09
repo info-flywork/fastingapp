@@ -3,6 +3,9 @@ part of '../hunger_log_view.dart';
 mixin HungerLogViewMixin on State<HungerLogView> {
   late final TextEditingController notesController;
   late final DateTime loggedAt;
+  bool saving = false;
+
+  HungerRepository get _hunger => getIt<HungerRepository>();
 
   @override
   void initState() {
@@ -24,8 +27,31 @@ mixin HungerLogViewMixin on State<HungerLogView> {
     return '$today, $time';
   }
 
-  void onSaveTapped() {
-    context.pushNamed(RoutePaths.hungerSuccess.name);
+  Future<void> onSaveTapped() async {
+    if (saving) return;
+    final session = widget.session;
+    // Cevaplanmış soru akışı yoksa kaydedilecek bir şey yok.
+    if (session == null) {
+      context.pop();
+      return;
+    }
+    setState(() => saving = true);
+    try {
+      await _hunger.saveCheckin(
+        flow: session.flow,
+        mode: 'quick',
+        notes: notesController.text.trim(),
+      );
+      if (!mounted) return;
+      DataSync.afterWrite();
+      context.pushNamed(RoutePaths.hungerSuccess.name);
+    } on Object catch (e) {
+      // Kaydedilmediyse başarı ekranı gösterilmez.
+      if (!mounted) return;
+      AppSnackbar.showError(context, e);
+    } finally {
+      if (mounted) setState(() => saving = false);
+    }
   }
 
   void onSkipTapped() {

@@ -2,30 +2,63 @@ part of '../home_view.dart';
 
 /// Oruç kartı: maskot + flip-clock geri sayım.
 final class HomeFastingCard extends StatefulWidget {
-  const HomeFastingCard({super.key});
+  const HomeFastingCard({
+    this.activeFast,
+    this.eatingWindow,
+    this.serverTime,
+    super.key,
+  });
+
+  final ActiveFast? activeFast;
+  final EatingWindow? eatingWindow;
+  final DateTime? serverTime;
 
   @override
   State<HomeFastingCard> createState() => _HomeFastingCardState();
 }
 
 class _HomeFastingCardState extends State<HomeFastingCard> {
-  static const _initial = Duration(hours: 6, minutes: 12, seconds: 39);
-
-  late Duration _remaining;
   Timer? _timer;
+  late DateTime _anchor = DateTime.now();
+
+  Duration get _remaining {
+    final at = _anchor;
+    final offset = clockOffsetFromServer(widget.serverTime, at);
+    if (widget.activeFast != null) {
+      return FastingLiveMetrics.active(
+        fast: widget.activeFast!,
+        fetchedAt: at,
+        clockOffset: offset,
+      ).remainingToPlannedEnd;
+    }
+    if (widget.eatingWindow != null) {
+      return FastingLiveMetrics.eating(
+        window: widget.eatingWindow!,
+        fetchedAt: at,
+        clockOffset: offset,
+      ).remainingToPlannedEnd;
+    }
+    return Duration.zero;
+  }
 
   @override
   void initState() {
     super.initState();
-    _remaining = _initial;
     _timer = Timer.periodic(const Duration(seconds: 1), (_) {
       if (!mounted) return;
-      if (_remaining.inSeconds <= 0) {
-        _timer?.cancel();
-        return;
-      }
-      setState(() => _remaining -= const Duration(seconds: 1));
+      setState(() {});
     });
+  }
+
+  @override
+  void didUpdateWidget(covariant HomeFastingCard oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.activeFast?.id != widget.activeFast?.id ||
+        oldWidget.eatingWindow?.endsAt != widget.eatingWindow?.endsAt ||
+        oldWidget.serverTime != widget.serverTime) {
+      _anchor = DateTime.now();
+      setState(() {});
+    }
   }
 
   @override
@@ -36,9 +69,10 @@ class _HomeFastingCardState extends State<HomeFastingCard> {
 
   @override
   Widget build(BuildContext context) {
-    final hours = _remaining.inHours;
-    final minutes = _remaining.inMinutes.remainder(60);
-    final seconds = _remaining.inSeconds.remainder(60);
+    final rem = _remaining;
+    final hours = rem.inHours;
+    final minutes = rem.inMinutes.remainder(60);
+    final seconds = rem.inSeconds.remainder(60);
 
     return Container(
       margin: const EdgeInsets.fromLTRB(16, 16, 16, 0),

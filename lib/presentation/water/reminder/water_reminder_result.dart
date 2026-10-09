@@ -8,12 +8,14 @@ final class WaterReminderResult {
     required this.glassSizeMl,
     required this.unit,
     required this.notificationsEnabled,
+    this.customGlassSizes = const [],
   });
 
   final int dailyGoalMl;
   final int glassSizeMl;
   final String unit;
   final bool notificationsEnabled;
+  final List<int> customGlassSizes;
 }
 
 /// Water Reminder açılış argümanları.
@@ -24,10 +26,12 @@ final class WaterReminderArgs {
     required this.glassSizeMl,
     this.unit = 'ml',
     this.notificationsEnabled = false,
+    this.customGlassSizes = const [],
   });
 
   final int dailyGoalMl;
   final int glassSizeMl;
   final String unit;
   final bool notificationsEnabled;
+  final List<int> customGlassSizes;
 }

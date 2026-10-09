@@ -1,6 +1,9 @@
+import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:easy_localization/easy_localization.dart';
+import 'package:fastingapp/core/di/injection.dart';
+import 'package:fastingapp/presentation/fasting/bloc/fasting_session_cubit.dart';
 import 'package:fastingapp/core/remote_images/app_image.dart';
 import 'package:fastingapp/core/theme/app_text_styles.dart';
 import 'package:fastingapp/generated/app_images.g.dart';
@@ -24,6 +27,17 @@ final class FastingBodyStatusView extends StatefulWidget {
 class _FastingBodyStatusViewState extends State<FastingBodyStatusView> {
   final _scroll = ScrollController();
   var _step = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    final cubit = getIt<FastingSessionCubit>();
+    final pos = cubit.state.fast?.stage?.position;
+    if (pos != null && pos > 0) {
+      _step = (pos - 1).clamp(0, _stages.length - 1);
+    }
+    unawaited(cubit.ensureBodyStages());
+  }
 
   @override
   void dispose() {

@@ -24,7 +24,6 @@ enum RoutePaths {
   buildingPlan('/building-plan', 'buildingPlan'),
   weightProjection('/weight-projection', 'weightProjection'),
   goodCompany('/good-company', 'goodCompany'),
-  welcome('/welcome', 'welcome'),
   languageLevel('/language-level', 'languageLevel'),
   home('/home', 'home'),
   fasting('/fasting', 'fasting'),

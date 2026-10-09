@@ -16,7 +16,7 @@ Kaynak: veri modeli ([03](03-veri-modeli.md)), KVKK ([06 §8](06-guvenlik.md#8-k
 | Veri paylaşımı (Play tanımıyla) | **Hayır.** Aşağıdaki hizmet sağlayıcılar yalnızca bizim adımıza işler (Play'de "paylaşım" sayılmaz) |
 
 Hizmet sağlayıcılar (veri işleyenler): Barındırma (AB), Bunny.net (fotoğraf depolama, AB),
-Anthropic (fotoğraf analizi: fotoğraf + öğün bilgisi), OpenAI (sohbet metni), Google Firebase
+OpenAI (fotoğraf analizi: fotoğraf + öğün bilgisi; sohbet metni), Google Firebase
 (giriş, push), RevenueCat (satın alma), Sentry (hata raporu, PII'siz).
 
 ## App Store — App Privacy ("Data Used to Track You": yok)

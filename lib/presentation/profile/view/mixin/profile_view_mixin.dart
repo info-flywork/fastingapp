@@ -7,10 +7,30 @@ mixin ProfileViewMixin on State<ProfileView> {
   /// Okunmamış bildirim sayısı (Bildirimler satırındaki rozet).
   int unreadNotifications = 0;
 
+  RevenueCatService get _revenueCat => getIt<RevenueCatService>();
+
+  /// Premium rozeti; premium kartı yalnızca premium değilken görünür.
+  bool get isPremium => _revenueCat.isPremium.value;
+
+  bool _restoring = false;
+
   @override
   void initState() {
     super.initState();
+    _revenueCat.isPremium.addListener(_onPremiumChanged);
     unawaited(_loadUnread());
+    // Isıtılmadıysa başlık için profil yüklenir (yüklüyse dokunmaz).
+    getIt<ProfileBloc>().add(const ProfileStarted());
+  }
+
+  @override
+  void dispose() {
+    _revenueCat.isPremium.removeListener(_onPremiumChanged);
+    super.dispose();
+  }
+
+  void _onPremiumChanged() {
+    if (mounted) setState(() {});
   }
 
   Future<void> _loadUnread() async {
@@ -39,7 +59,32 @@ mixin ProfileViewMixin on State<ProfileView> {
     context.pushNamed(RoutePaths.editProfile.name);
   }
 
-  void onGetPremium() {}
+  void onGetPremium() => unawaited(_revenueCat.presentPaywall());
+
+  Future<void> onRestorePurchases() async {
+    if (_restoring) return;
+    _restoring = true;
+    try {
+      final premium = await _revenueCat.restore();
+      if (!mounted) return;
+      AppSnackbar.show(
+        context: context,
+        text: premium
+            ? 'profile.restore_success'.tr()
+            : 'profile.restore_none'.tr(),
+        type: premium ? SnackBarType.success : SnackBarType.info,
+      );
+    } on Object {
+      if (!mounted) return;
+      AppSnackbar.show(
+        context: context,
+        text: 'profile.restore_failed'.tr(),
+        type: SnackBarType.failure,
+      );
+    } finally {
+      _restoring = false;
+    }
+  }
 
   void onWeightLossTracker() {
     context.pushNamed(RoutePaths.bodyHistory.name);
@@ -87,6 +132,6 @@ mixin ProfileViewMixin on State<ProfileView> {
 
     getIt<AuthBloc>().add(const AuthLoggedOut());
     if (!mounted) return;
-    context.go(RoutePaths.welcome.path);
+    context.go(RoutePaths.login.path);
   }
 }

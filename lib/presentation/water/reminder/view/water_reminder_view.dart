@@ -1,10 +1,14 @@
+import 'dart:async';
+
 import 'package:easy_localization/easy_localization.dart';
+import 'package:fastingapp/core/di/injection.dart';
 import 'package:fastingapp/core/dialogs/app_dialogs.dart';
 import 'package:fastingapp/core/dialogs/widgets/water_edit_dialog.dart';
 import 'package:fastingapp/core/remote_images/app_image.dart';
 import 'package:fastingapp/core/theme/app_text_styles.dart';
 import 'package:fastingapp/core/widgets/app_button.dart';
 import 'package:fastingapp/core/widgets/app_button_decoration.dart';
+import 'package:fastingapp/domain/trackers/trackers_repository.dart';
 import 'package:fastingapp/generated/app_images.g.dart';
 import 'package:fastingapp/generated/colors.gen.dart';
 import 'package:fastingapp/presentation/profile/view/widgets/edit_profile_app_bar.dart';
@@ -43,14 +47,41 @@ class _WaterReminderViewState extends State<WaterReminderView> {
     _unit = args?.unit == 'oz' ? WaterVolumeUnit.oz : WaterVolumeUnit.ml;
     _glassSizeMl = args?.glassSizeMl ?? 300;
     _customSizes = [
-      if (!_presetSizes.contains(_glassSizeMl) && _glassSizeMl > 0)
+      ...?args?.customGlassSizes.where((ml) => !_presetSizes.contains(ml)),
+      if (!_presetSizes.contains(_glassSizeMl) &&
+          _glassSizeMl > 0 &&
+          !(args?.customGlassSizes.contains(_glassSizeMl) ?? false))
         _glassSizeMl,
     ];
+    unawaited(_loadNotificationPref());
+  }
+
+  Future<void> _loadNotificationPref() async {
+    try {
+      final settings = await getIt<TrackersRepository>().getSettings();
+      if (!mounted) return;
+      setState(() => _notificationsEnabled = settings.waterNotifications);
+    } on Object {
+      // Args / yerel değerle kal.
+    }
   }
 
   List<int> get _allSizes => [..._presetSizes, ..._customSizes];
 
   String get _unitLabel => _unit == WaterVolumeUnit.ml ? 'ml' : 'oz';
+
+  static const _mlPerOz = 29.5735295625;
+
+  /// Hedef her zaman ml tutulur; etiket seçili birime çevrilir.
+  String get _dailyGoalLabel {
+    if (_unit == WaterVolumeUnit.ml) return '$_dailyGoalMl ml';
+    final oz = _dailyGoalMl / _mlPerOz;
+    final rounded = (oz * 10).round() / 10;
+    final text = rounded == rounded.roundToDouble()
+        ? rounded.toStringAsFixed(0)
+        : rounded.toStringAsFixed(1);
+    return '$text oz';
+  }
 
   Future<void> _editDailyGoal() async {
     final result = await AppDialogs.instance.showEditWaterValue(
@@ -103,6 +134,7 @@ class _WaterReminderViewState extends State<WaterReminderView> {
         glassSizeMl: _glassSizeMl,
         unit: _unitLabel,
         notificationsEnabled: _notificationsEnabled,
+        customGlassSizes: List<int>.of(_customSizes),
       ),
     );
   }
@@ -142,7 +174,7 @@ class _WaterReminderViewState extends State<WaterReminderView> {
                     ),
                     const SizedBox(height: 16),
                     _SettingsCard(
-                      dailyGoalLabel: '$_dailyGoalMl $_unitLabel',
+                      dailyGoalLabel: _dailyGoalLabel,
                       unitLabel: _unitLabel,
                       glassSizeMl: _glassSizeMl,
                       sizes: _allSizes,

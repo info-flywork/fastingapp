@@ -13,7 +13,7 @@ mixin HungerSecondQuestionViewMixin on State<HungerSecondQuestionView> {
     if (selected == null) return;
     context.pushNamed(
       RoutePaths.hungerThirdQuestion.name,
-      extra: flowArgs,
+      extra: flowArgs.copyWith(q2: selected!.name),
     );
   }
 }

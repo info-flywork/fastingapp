@@ -1,7 +1,9 @@
+import 'package:fastingapp/core/di/injection.dart';
 import 'package:fastingapp/core/router/route_paths.dart';
 import 'package:fastingapp/data/model/auth/auth_response.dart';
 import 'package:fastingapp/domain/auth/auth_exception.dart';
 import 'package:fastingapp/domain/auth/auth_repository.dart';
+import 'package:fastingapp/domain/onboarding/onboarding_draft.dart';
 import 'package:fastingapp/presentation/auth/bloc/auth_bloc.dart';
 import 'package:fastingapp/presentation/auth/bloc/auth_event.dart';
 import 'package:fastingapp/presentation/auth/welcome/bloc/welcome_event.dart';
@@ -42,9 +44,16 @@ final class WelcomeBloc extends Bloc<WelcomeEvent, WelcomeState> {
   /// Geri almayı reddetti: Firebase/Google oturumu da kapanır.
   Future<void> discardPendingLogin() => _authRepository.logout();
 
+  /// Onboarding'i bitmiş hesap ana sayfaya; bitmemiş (ör. çıkış sonrası
+  /// açılan yeni misafir) onboarding'e, cevaplar baştan (splash'teki kural).
   Future<String> _complete(Future<AuthResponse> login) async {
-    _authBloc.add(AuthLoggedIn(await login));
-    return RoutePaths.home.path;
+    final response = await login;
+    _authBloc.add(AuthLoggedIn(response));
+    if (response.user?.isAnsweredQuestions ?? false) {
+      return RoutePaths.home.path;
+    }
+    getIt<OnboardingDraft>().reset();
+    return RoutePaths.onboarding.path;
   }
 
   Future<void> _onGoogleTapped(

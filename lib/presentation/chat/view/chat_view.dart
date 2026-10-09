@@ -3,13 +3,16 @@ import 'dart:math' as math;
 import 'package:easy_localization/easy_localization.dart';
 import 'package:fastingapp/core/di/injection.dart';
 import 'package:fastingapp/core/router/route_paths.dart';
+import 'package:fastingapp/core/snackbar/app_snackbar.dart';
 import 'package:fastingapp/core/theme/app_text_styles.dart';
+import 'package:fastingapp/core/utils/enum/snackbar_type.dart';
 import 'package:fastingapp/generated/app_images.g.dart';
 import 'package:fastingapp/generated/assets.gen.dart';
 import 'package:fastingapp/generated/colors.gen.dart';
 import 'package:fastingapp/presentation/chat/bloc/chat_session_cubit.dart';
 import 'package:fastingapp/presentation/chat/bloc/chat_session_state.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -27,6 +30,8 @@ class _ChatViewState extends State<ChatView> {
   final _focusNode = FocusNode();
   final _scrollController = ScrollController();
   late final ChatSessionCubit _cubit = getIt<ChatSessionCubit>();
+  /// Kullanıcı yukarı kaydırdıysa otomatik kaydırmayı durdur.
+  var _stickToBottom = true;
 
   static const _suggestions = <String>[
     'chat.suggestion_hungry',
@@ -34,6 +39,13 @@ class _ChatViewState extends State<ChatView> {
     'chat.suggestion_weight',
     'chat.suggestion_eat',
   ];
+
+  @override
+  void initState() {
+    super.initState();
+    // Geçmiş listesini arka planda taze tut.
+    _cubit.loadHistory();
+  }
 
   @override
   void dispose() {
@@ -44,20 +56,47 @@ class _ChatViewState extends State<ChatView> {
     super.dispose();
   }
 
-  void _scrollToBottom() {
-    WidgetsBinding.instance.addPostFrameCallback((_) {
+  void _scrollToBottom({bool animated = true}) {
+    if (!_stickToBottom) return;
+
+    void jump() {
       if (!_scrollController.hasClients) return;
-      _scrollController.animateTo(
-        _scrollController.position.maxScrollExtent,
-        duration: const Duration(milliseconds: 280),
-        curve: Curves.easeOutCubic,
-      );
+      final target = _scrollController.position.maxScrollExtent;
+      if (animated) {
+        _scrollController.animateTo(
+          target,
+          duration: const Duration(milliseconds: 220),
+          curve: Curves.easeOutCubic,
+        );
+      } else {
+        _scrollController.jumpTo(target);
+      }
+    }
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      jump();
+      // Baloncuk giriş animasyonu ve metin büyümesi layout'u geciktirir.
+      WidgetsBinding.instance.addPostFrameCallback((_) => jump());
     });
+    Future<void>.delayed(const Duration(milliseconds: 120), jump);
+    Future<void>.delayed(const Duration(milliseconds: 340), jump);
+  }
+
+  bool _chatContentChanged(ChatSessionState prev, ChatSessionState next) {
+    if (prev.messages.length != next.messages.length) return true;
+    if (prev.isAiTyping != next.isAiTyping) return true;
+    if (prev.messages.isEmpty || next.messages.isEmpty) {
+      return prev.messages.isNotEmpty != next.messages.isNotEmpty;
+    }
+    final pl = prev.messages.last;
+    final nl = next.messages.last;
+    return pl.id != nl.id || pl.text != nl.text;
   }
 
   Future<void> _sendText(String raw) async {
     final text = raw.trim();
     if (text.isEmpty || _cubit.state.isAiTyping) return;
+    _stickToBottom = true;
     _controller.clear();
     _focusNode.unfocus();
     await _cubit.sendMessage(text);
@@ -94,12 +133,26 @@ class _ChatViewState extends State<ChatView> {
     final messages = state.messages;
     final isTyping = state.isAiTyping;
 
-    return ListView.builder(
-      controller: _scrollController,
-      physics: const ClampingScrollPhysics(),
-      padding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
-      itemCount: messages.length + (isTyping ? 1 : 0),
-      itemBuilder: (context, index) {
+    return NotificationListener<ScrollNotification>(
+      onNotification: (notification) {
+        if (!_scrollController.hasClients) return false;
+        if (notification is UserScrollNotification &&
+            notification.direction == ScrollDirection.reverse) {
+          _stickToBottom = false;
+        } else if (notification is ScrollUpdateNotification) {
+          final pos = _scrollController.position;
+          if (pos.maxScrollExtent - pos.pixels <= 72) {
+            _stickToBottom = true;
+          }
+        }
+        return false;
+      },
+      child: ListView.builder(
+        controller: _scrollController,
+        physics: const ClampingScrollPhysics(),
+        padding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
+        itemCount: messages.length + (isTyping ? 1 : 0),
+        itemBuilder: (context, index) {
         if (isTyping && index == messages.length) {
           return const _AppearOnce(
             key: ValueKey('typing'),
@@ -109,9 +162,11 @@ class _ChatViewState extends State<ChatView> {
         final message = messages[index];
         return _AppearOnce(
           key: ValueKey(message.id),
+          onLayoutChanged: _stickToBottom ? _scrollToBottom : null,
           child: _MessageBubble(message: message),
         );
       },
+      ),
     );
   }
 
@@ -128,10 +183,25 @@ class _ChatViewState extends State<ChatView> {
               child: BlocConsumer<ChatSessionCubit, ChatSessionState>(
                 bloc: _cubit,
                 listenWhen: (prev, next) =>
-                    prev.messages.length != next.messages.length ||
-                    prev.isAiTyping != next.isAiTyping,
-                listener: (context, state) => _scrollToBottom(),
+                    _chatContentChanged(prev, next) ||
+                    prev.errorMessage != next.errorMessage,
+                listener: (context, state) {
+                  _scrollToBottom(animated: state.messages.length > 1);
+                  final error = state.errorMessage;
+                  if (error != null && error.isNotEmpty) {
+                    AppSnackbar.show(
+                      context: context,
+                      text: error,
+                      type: SnackBarType.failure,
+                    );
+                    _cubit.clearError();
+                  }
+                },
+                buildWhen: (prev, next) => _chatContentChanged(prev, next),
                 builder: (context, state) {
+                  if (_stickToBottom && state.hasConversation) {
+                    _scrollToBottom(animated: false);
+                  }
                   return AnimatedSwitcher(
                     duration: const Duration(milliseconds: 280),
                     switchInCurve: Curves.easeOutCubic,
@@ -163,9 +233,14 @@ class _ChatViewState extends State<ChatView> {
 
 /// Key sabit kaldığı sürece animasyon bir kez çalışır.
 final class _AppearOnce extends StatefulWidget {
-  const _AppearOnce({required this.child, super.key});
+  const _AppearOnce({
+    required this.child,
+    this.onLayoutChanged,
+    super.key,
+  });
 
   final Widget child;
+  final VoidCallback? onLayoutChanged;
 
   @override
   State<_AppearOnce> createState() => _AppearOnceState();
@@ -184,7 +259,19 @@ class _AppearOnceState extends State<_AppearOnce>
   );
 
   @override
+  void initState() {
+    super.initState();
+    _curved.addListener(_onAppearLayout);
+  }
+
+  void _onAppearLayout() {
+    if (!_curved.isAnimating) return;
+    widget.onLayoutChanged?.call();
+  }
+
+  @override
   void dispose() {
+    _curved.removeListener(_onAppearLayout);
     _controller.dispose();
     super.dispose();
   }

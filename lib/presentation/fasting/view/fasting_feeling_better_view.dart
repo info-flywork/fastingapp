@@ -7,7 +7,7 @@ import 'package:fastingapp/core/widgets/app_button.dart';
 import 'package:fastingapp/core/widgets/app_button_decoration.dart';
 import 'package:fastingapp/generated/assets.gen.dart';
 import 'package:fastingapp/generated/colors.gen.dart';
-import 'package:fastingapp/presentation/fasting/view/fasting_end_signal.dart';
+import 'package:fastingapp/presentation/fasting/fasting_finish_flow.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
@@ -22,8 +22,9 @@ final class FastingFeelingBetterView extends StatelessWidget {
   Future<void> _endFast(BuildContext context) async {
     final confirmed = await AppDialogs.instance.showEndFast(context);
     if (confirmed != true || !context.mounted) return;
-    FastingEndSignal.request();
+    // Zamanlayıcıya dön, üstünde bitirme ekranı (kayıt orada).
     context.goNamed(RoutePaths.fasting.name);
+    await FastingFinishFlow.open();
   }
 
   @override

@@ -1,7 +1,10 @@
 import 'dart:math' as math;
 
 import 'package:easy_localization/easy_localization.dart';
+import 'package:fastingapp/core/di/injection.dart';
 import 'package:fastingapp/core/remote_images/app_image.dart';
+import 'package:fastingapp/domain/hunger/hunger_repository.dart';
+import 'package:fastingapp/presentation/hunger_tracker/hunger_session_args.dart';
 import 'package:fastingapp/core/router/route_paths.dart';
 import 'package:fastingapp/core/theme/app_text_styles.dart';
 import 'package:fastingapp/core/widgets/app_button.dart';

@@ -19,17 +19,21 @@ final class NetworkManager {
     Map<String, dynamic>? queryParameters,
   }) async {
     try {
+      // Global Content-Type: application/json iken gövdesiz POST/PATCH/PUT/DELETE
+      // Fastify'da "İstek gövdesi okunamadı" (empty JSON body) üretir.
+      final requestBody = data ??
+          (method == RequestType.get ? null : const <String, dynamic>{});
       final response = await _dio.request<Map<String, dynamic>>(
         path,
-        data: data,
+        data: requestBody,
         queryParameters: queryParameters,
         options: Options(method: method.value),
       );
 
-      final body = response.data;
-      if (body == null) return null;
+      final responseBody = response.data;
+      if (responseBody == null) return null;
 
-      final parsed = BaseResponse<T>.fromJson(body, parserModel);
+      final parsed = BaseResponse<T>.fromJson(responseBody, parserModel);
       return parsed.data;
     } on DioException catch (e) {
       throw NetworkException.fromDio(e);

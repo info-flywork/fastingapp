@@ -1,15 +1,20 @@
 import 'dart:math' as math;
 
 import 'package:easy_localization/easy_localization.dart';
+import 'package:fastingapp/core/di/injection.dart';
 import 'package:fastingapp/core/remote_images/app_image.dart';
 import 'package:fastingapp/core/router/route_paths.dart';
+import 'package:fastingapp/core/snackbar/app_snackbar.dart';
+import 'package:fastingapp/core/sync/data_sync.dart';
 import 'package:fastingapp/core/theme/app_text_styles.dart';
 import 'package:fastingapp/core/widgets/app_button.dart';
 import 'package:fastingapp/core/widgets/app_button_decoration.dart';
+import 'package:fastingapp/domain/hunger/hunger_repository.dart';
 import 'package:fastingapp/generated/app_images.g.dart';
 import 'package:fastingapp/generated/assets.gen.dart';
 import 'package:fastingapp/generated/colors.gen.dart';
 import 'package:fastingapp/presentation/hunger_tracker/hunger_result_type.dart';
+import 'package:fastingapp/presentation/hunger_tracker/hunger_session_args.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
@@ -18,9 +23,10 @@ part 'mixin/hunger_log_view_mixin.dart';
 
 /// Açlığı trackera kaydetme ekranı.
 final class HungerLogView extends StatefulWidget {
-  const HungerLogView({required this.type, super.key});
+  const HungerLogView({required this.type, this.session, super.key});
 
   final HungerResultType type;
+  final HungerSessionArgs? session;
 
   @override
   State<HungerLogView> createState() => _HungerLogViewState();

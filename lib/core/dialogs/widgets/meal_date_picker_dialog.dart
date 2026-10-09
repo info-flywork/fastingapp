@@ -17,15 +17,20 @@ final class MealDatePickerResult {
 }
 
 /// Öğün kayıtları tarih seçici — kompakt custom takvim.
+///
+/// [accentColor] verilirse seçili gün / bugün / onay CTA o renkte olur
+/// (su / adım ekranları). Yoksa varsayılan yeşil CTA.
 final class MealDatePickerDialog extends StatefulWidget {
   const MealDatePickerDialog({
     required this.initialDate,
     this.includeTime = false,
+    this.accentColor,
     super.key,
   });
 
   final DateTime initialDate;
   final bool includeTime;
+  final Color? accentColor;
 
   @override
   State<MealDatePickerDialog> createState() => _MealDatePickerDialogState();
@@ -115,6 +120,12 @@ class _MealDatePickerDialogState extends State<MealDatePickerDialog> {
     });
   }
 
+  Color get _accent =>
+      widget.accentColor ?? ColorName.colorCtaGradientBottom;
+
+  Color get _accentTop =>
+      widget.accentColor ?? ColorName.colorCtaGradientTop;
+
   @override
   Widget build(BuildContext context) {
     final localizations = MaterialLocalizations.of(context);
@@ -122,6 +133,10 @@ class _MealDatePickerDialogState extends State<MealDatePickerDialog> {
     final selectedLabel = widget.includeTime
         ? DateFormat.yMMMMd(locale).add_jm().format(_selected)
         : DateFormat.yMMMMd(locale).format(DateUtils.dateOnly(_selected));
+    final accent = _accent;
+    final buttonDecoration = widget.accentColor != null
+        ? AppButtonDecoration.accent(accent)
+        : AppButtonDecoration.primary();
 
     return Dialog(
       backgroundColor: Colors.transparent,
@@ -216,6 +231,7 @@ class _MealDatePickerDialogState extends State<MealDatePickerDialog> {
                                         selectedYear: _displayedMonth.year,
                                         firstYear: _firstDate.year,
                                         lastYear: _lastDate.year,
+                                        accent: accent,
                                         onYearTap: _onYearTap,
                                       )
                                     : Column(
@@ -232,6 +248,8 @@ class _MealDatePickerDialogState extends State<MealDatePickerDialog> {
                                             firstDate: _firstDate,
                                             lastDate: _lastDate,
                                             localizations: localizations,
+                                            accent: accent,
+                                            accentTop: _accentTop,
                                             onDayTap: _onDayTap,
                                           ),
                                         ],
@@ -264,7 +282,7 @@ class _MealDatePickerDialogState extends State<MealDatePickerDialog> {
                       AppButton(
                         label: 'meal_records_page.confirm_date'.tr(),
                         onPressed: _onConfirm,
-                        decoration: AppButtonDecoration.primary(),
+                        decoration: buttonDecoration,
                         showIcon: false,
                         fontSize: 16,
                       ),
@@ -283,20 +301,14 @@ class _MealDatePickerDialogState extends State<MealDatePickerDialog> {
                 color: ColorName.colorFlipClock,
                 shape: BoxShape.circle,
                 border: Border.all(color: ColorName.colorWhite, width: 3),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.08),
-                    blurRadius: 12,
-                    offset: const Offset(0, 4),
-                  ),
-                ],
               ),
+              clipBehavior: Clip.antiAlias,
               alignment: Alignment.center,
               child: Assets.icons.solarCalendarMarkLineDuotone.svg(
                 width: 32,
                 height: 32,
-                colorFilter: const ColorFilter.mode(
-                  ColorName.colorTitle,
+                colorFilter: ColorFilter.mode(
+                  widget.accentColor ?? ColorName.colorTitle,
                   BlendMode.srcIn,
                 ),
               ),
@@ -464,6 +476,8 @@ final class _DayGrid extends StatelessWidget {
     required this.firstDate,
     required this.lastDate,
     required this.localizations,
+    required this.accent,
+    required this.accentTop,
     required this.onDayTap,
   });
 
@@ -473,6 +487,8 @@ final class _DayGrid extends StatelessWidget {
   final DateTime firstDate;
   final DateTime lastDate;
   final MaterialLocalizations localizations;
+  final Color accent;
+  final Color accentTop;
   final ValueChanged<DateTime> onDayTap;
 
   @override
@@ -494,6 +510,8 @@ final class _DayGrid extends StatelessWidget {
           isSelected: DateUtils.isSameDay(date, selected),
           isToday: DateUtils.isSameDay(date, today),
           enabled: !date.isBefore(firstDate) && !date.isAfter(lastDate),
+          accent: accent,
+          accentTop: accentTop,
           onTap: () => onDayTap(date),
         ),
       );
@@ -533,6 +551,8 @@ final class _DayCell extends StatelessWidget {
     required this.isSelected,
     required this.isToday,
     required this.enabled,
+    required this.accent,
+    required this.accentTop,
     required this.onTap,
   });
 
@@ -540,6 +560,8 @@ final class _DayCell extends StatelessWidget {
   final bool isSelected;
   final bool isToday;
   final bool enabled;
+  final Color accent;
+  final Color accentTop;
   final VoidCallback onTap;
 
   @override
@@ -552,28 +574,25 @@ final class _DayCell extends StatelessWidget {
     } else if (isSelected) {
       fg = ColorName.colorWhite;
       decoration = BoxDecoration(
-        gradient: const LinearGradient(
+        gradient: LinearGradient(
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
-          colors: [
-            ColorName.colorCtaGradientTop,
-            ColorName.colorCtaGradientBottom,
-          ],
+          colors: [accentTop, accent],
         ),
         shape: BoxShape.circle,
         boxShadow: [
           BoxShadow(
-            color: ColorName.colorCtaGradientBottom.withValues(alpha: 0.35),
+            color: accent.withValues(alpha: 0.35),
             blurRadius: 8,
             offset: const Offset(0, 3),
           ),
         ],
       );
     } else if (isToday) {
-      fg = ColorName.colorCtaGradientBottom;
+      fg = accent;
       decoration = BoxDecoration(
         shape: BoxShape.circle,
-        border: Border.all(color: ColorName.colorCtaGradientBottom, width: 1.5),
+        border: Border.all(color: accent, width: 1.5),
       );
     } else {
       fg = ColorName.colorTitle;
@@ -615,12 +634,14 @@ final class _YearGrid extends StatelessWidget {
     required this.selectedYear,
     required this.firstYear,
     required this.lastYear,
+    required this.accent,
     required this.onYearTap,
   });
 
   final int selectedYear;
   final int firstYear;
   final int lastYear;
+  final Color accent;
   final ValueChanged<int> onYearTap;
 
   @override
@@ -636,9 +657,7 @@ final class _YearGrid extends StatelessWidget {
         children: [
           for (final year in years)
             Material(
-              color: year == selectedYear
-                  ? ColorName.colorCtaGradientBottom
-                  : ColorName.colorWhite,
+              color: year == selectedYear ? accent : ColorName.colorWhite,
               borderRadius: BorderRadius.circular(12),
               clipBehavior: Clip.antiAlias,
               child: InkWell(

@@ -83,6 +83,7 @@ final class OnboardingDraft {
       'terms': termsVersion,
       'privacy': privacyVersion,
       'healthData': true,
+      'aiProcessing': true,
     },
   };
 

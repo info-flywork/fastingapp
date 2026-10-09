@@ -4,14 +4,14 @@
 
 | Kavram | Değer |
 |---|---|
-| Entitlement | `premium` (tek entitlement; tüm premium özellikler buna bağlı) |
+| Entitlement | `mochifast_pro` (tek entitlement; tüm premium özellikler buna bağlı; sunucuda `REVENUECAT_ENTITLEMENT`) |
 | Ürünler (öneri) | `mochifast_premium_monthly`, `mochifast_premium_yearly` (deneme süreli), ileride `lifetime` |
 | Offering | `default` (paywall), A/B için ek offering'ler RevenueCat panelinden |
 | `app_user_id` | **Bizim kullanıcı UUID'miz**. İstemci giriş/misafir oturumu sonrası `Purchases.logIn(userId)` çağırır |
 | Doğruluk kaynağı | RevenueCat (mağaza makbuz doğrulaması orada). Bizim DB'miz **yansıtılmış** durumdur |
 
 > Misafir kullanıcı da UUID'ye sahip olduğu için satın alma yapabilir.
-> Misafir hesap sosyal hesaba yükseltildiğinde **ID değişmez** ve abonelik korunur ([05 §11](05-is-kurallari.md#11-misafir-hesap-birleştirme)).
+> Misafir hesap sosyal hesaba yükseltildiğinde **ID değişmez** ve abonelik korunur ([05 §11](05-is-kurallari.md)).
 
 ## 1b. Uygulama (F8)
 

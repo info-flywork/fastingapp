@@ -355,7 +355,9 @@
     "widget_today": "Hoy",
     "widget_lets_do_this": "¡Hagamos esto!",
     "widget_this_week": "Esta semana",
-    "widget_keep_going": "¡Sigue adelante!\nEstás en racha."
+    "widget_keep_going": "¡Sigue adelante!\nEstás en racha.",
+    "start_now_cta": "Empezar ayuno ahora",
+    "plan_changed_next": "Plan actualizado. El nuevo plan se aplicará en tu próximo ayuno."
   },
   "fasting_struggle": {
     "back": "Volver al cronómetro",
@@ -624,10 +626,13 @@
     "add_water": "agregar agua",
     "edit_goal_title": "Meta diaria de agua",
     "edit_goal_hint": "ml",
-    "save": "Ahorrar"
+    "save": "Ahorrar",
+    "goal_range_error": "El objetivo diario debe estar entre {}–{} ml.",
+    "glass_range_error": "El tamaño del vaso debe estar entre {}–{} ml."
   },
   "steps_page": {
     "today": "Hoy",
+    "yesterday": "Ayer",
     "unit": "pasos",
     "daily_target_prefix": "Objetivo diario:",
     "goal_achieved": "¡Objetivo conseguido!",
@@ -739,7 +744,12 @@
     "delete_account_body": "Tu cuenta se cerrará ahora y todos tus datos se eliminarán de forma permanente en 7 días. Si vuelves a iniciar sesión en esos 7 días, podrás restaurarla. Las suscripciones deben cancelarse por separado en App Store o Google Play.",
     "delete_account_confirm": "Eliminar",
     "delete_account_cancel": "Conservar",
-    "delete_account_subscription_note": "Tu cuenta se eliminará. No olvides cancelar tu suscripción en App Store o Google Play."
+    "delete_account_subscription_note": "Tu cuenta se eliminará. No olvides cancelar tu suscripción en App Store o Google Play.",
+    "restore_purchases": "Restaurar compras",
+    "restore_success": "Tu Premium vuelve a estar activo.",
+    "restore_none": "No se encontraron compras para restaurar.",
+    "restore_failed": "No se pudieron restaurar las compras. Inténtalo de nuevo.",
+    "guest_name": "Invitado"
   },
   "notifications": {
     "title": "Notificaciones",
@@ -841,7 +851,14 @@
     "detail_thu": "Jue",
     "detail_fri": "Vie",
     "detail_sat": "Se sentó",
-    "detail_sun": "Sol"
+    "detail_sun": "Sol",
+    "plan_saved": "Tu plan se ha actualizado.",
+    "plan_restarted": "Plan actualizado y ayuno reiniciado con los mismos datos.",
+    "active_fast_title": "Estás en ayuno ahora",
+    "active_fast_body": "Cambiar de plan afectará tu ayuno actual. ¿Qué quieres hacer?",
+    "active_fast_cancel_existing": "Terminar ayuno",
+    "active_fast_reject": "Seguir en ayuno",
+    "active_fast_restart_same": "Continuar con el mismo tiempo"
   },
   "calories_page": {
     "eaten": "Comido {}",
@@ -915,7 +932,16 @@
     "meal_yogurt_title": "Yogur y frutos secos",
     "meal_yogurt_meta": "17:00 Merienda",
     "meal_yogurt_protein": "15g",
-    "meal_yogurt_kcal": "220 kilocalorías"
+    "meal_yogurt_kcal": "220 kilocalorías",
+    "empty_meals": "Aún no hay comidas hoy. Empieza con una foto o añádela manualmente.",
+    "goal_fmt": "/ {}g",
+    "goal_unknown": "/ —",
+    "meal_untitled": "Comida",
+    "kind_breakfast": "Desayuno",
+    "kind_lunch": "Almuerzo",
+    "kind_dinner": "Cena",
+    "kind_snack": "Tentempié",
+    "kind_other": "Comida"
   },
   "insights_page": {
     "brand_mochi": "Mochi",

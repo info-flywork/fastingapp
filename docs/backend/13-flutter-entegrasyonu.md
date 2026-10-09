@@ -43,7 +43,7 @@ Fazlar [12-yol-haritasi.md](12-yol-haritasi.md) ile hizalıdır.
 | 4 | `DeviceManager.getDeviceId()`: **cihaz başına sabit** `installId` (cihaz başına tek misafir). iOS: Keychain'de saklanan UUID (yeniden kurulumda korunur). Android: `ANDROID_ID`'den türetilen UUID | `device_manager.dart` |
 | 5 | `AuthBloc` başlangıçta önbellekteki kullanıcıyı (`getUser()`) yükler, ardından `/v1/user/me` ile doğrular. Splash token varsa `/home`'a yönlendirir (şu an hep `/entry`) | `auth_bloc.dart`, splash |
 | 6 | Router `_protectedPaths` doldurulur (oturumsuz kullanıcı korumalı ekranlara giremez) | `app_router.dart` |
-| 7 | Misafirden sosyal hesaba geçişte `409 ACCOUNT_LINK_CONFLICT` diyaloğu: "Bu Apple hesabı başka bir MochiFast hesabına bağlı. O hesaba geç / verilerimi taşı" | yeni |
+| 7 | ~~Hesap çakışması diyaloğu~~ — gerek yok: kimlik başka hesaba bağlıysa sunucu doğrudan o hesaba geçer (birleştirme yok, 05 §11) | – |
 | 8 | Çıkış: `POST /v1/auth/logout` + `FirebaseAuth.signOut()` + yerel temizlik. Hesap silmede Apple için `revokeTokenWithAuthorizationCode` (F10) | `auth_repository.dart` |
 | 9 | Girişten sonra RevenueCat `Purchases.logIn(user.id)` (F8) | `revenue_cat_service.dart` |
 

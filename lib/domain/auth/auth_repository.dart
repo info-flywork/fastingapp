@@ -18,6 +18,7 @@ import 'package:fastingapp/data/model/user/user.dart';
 import 'package:fastingapp/domain/auth/auth_exception.dart';
 import 'package:fastingapp/domain/auth/social_auth_service.dart';
 import 'package:fastingapp/domain/notification/push_service.dart';
+import 'package:fastingapp/domain/revenue_cat/revenue_cat_service.dart';
 import 'package:flutter_timezone/flutter_timezone.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 
@@ -30,6 +31,7 @@ final class AuthRepository {
     this._deviceManager,
     this._socialAuthService,
     this._pushService,
+    this._revenueCat,
   );
 
   final NetworkManager _networkManager;
@@ -38,6 +40,7 @@ final class AuthRepository {
   final DeviceManager _deviceManager;
   final SocialAuthService _socialAuthService;
   final PushService _pushService;
+  final RevenueCatService _revenueCat;
 
   Future<AuthResponse> loginWithGoogle() async =>
       _register(await _socialAuthService.signInWithGoogle());
@@ -116,12 +119,11 @@ final class AuthRepository {
 
   /// Firebase ID token ile giriş ya da kayıt. Misafir oturumu varsa backend
   /// hesabı yükseltir (Authorization header'ı interceptor ekler).
+  /// Kimlik başka bir hesaba bağlıysa sunucu o hesaba geçer (birleştirme yok).
   Future<AuthResponse> _register(
     SocialCredential credential, {
     bool restoreAccount = false,
   }) async {
-    // TODO(team): 409 ACCOUNT_LINK_CONFLICT → kullanıcıya sor, mergeGuest ile
-    // tekrar gönder.
     final hasName =
         credential.givenName != null || credential.familyName != null;
     final request = AuthRegisterRequest(
@@ -157,6 +159,9 @@ final class AuthRepository {
     final user = result.user;
     if (token != null) await _authCacheManager.saveToken(token);
     if (user != null) await _authCacheManager.saveUser(user);
+    // Tüm girişler buradan geçer (onboarding misafiri dahil): RevenueCat
+    // kimliği = kullanıcı UUID'si. Girişi bekletmez.
+    unawaited(_revenueCat.logIn(user?.id));
     return result;
   }
 
@@ -176,8 +181,10 @@ final class AuthRepository {
     await endLocalSession();
   }
 
-  /// Yalnızca yerel oturum (token, kullanıcı, Firebase/Google) temizlenir.
+  /// Yalnızca yerel oturum (token, kullanıcı, Firebase/Google, RevenueCat)
+  /// temizlenir.
   Future<void> endLocalSession() async {
+    await _revenueCat.logOut();
     await _socialAuthService.signOut().catchError((_) {});
     await _authCacheManager.clearAll();
   }

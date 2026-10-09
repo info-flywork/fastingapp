@@ -25,7 +25,7 @@ final class BuildingPlanProgressBar extends StatelessWidget {
         final t = progress.clamp(0.0, 1.0);
         final tip = width * t;
         final fillWidth = tip.clamp(0.0, width);
-        // Head merkezi progress ucunda; %100’de sağ kenara oturur (yarı taşabilir).
+        // Head merkezi progress ucunda; %100’de sağ kenara oturur.
         final headLeft = (tip - _headSize / 2).clamp(
           0.0,
           width - _headSize / 2,

@@ -5,28 +5,22 @@
 | Özellik | Ekran | Çağrı tipi | Model (varsayılan) |
 |---|---|---|---|
 | **Coach Mochi sohbeti** | `/chat`, son sohbetler, açlık sonucu → "Talk to Mochi" | Streaming (SSE'ye aktarılır) | **OpenAI** (`OPENAI_CHAT_MODEL`; ürün kararı, F6) |
-| **Fotoğraftan besin analizi** | Kalori kamerası → sonuç | Tek çağrı, yapılandırılmış çıktı (JSON Schema), görüntü girdisi | `claude-opus-5-5`, `effort: medium` |
-| **Günün planı ipucu** ("Mochi's Plan for Today") — faz 7 | Oruç sekmesi kartı | Gece toplu üretim (Message Batches API, %50 indirimli) | `claude-opus-5-5`, `effort: low` |
+| **Fotoğraftan besin analizi** | Kalori kamerası → sonuç | Tek çağrı, yapılandırılmış çıktı (JSON Schema), görüntü girdisi | **OpenAI** (`OPENAI_VISION_MODEL`, varsayılan `gpt-4o`) |
+| **Günün planı ipucu** ("Mochi's Plan for Today") | Oruç sekmesi kartı | AI yok: katalogdaki ipuçlarından gün + kullanıcıya göre deterministik seçim (`GET /v1/fasts/daily-tip`) | – |
 | Sohbet özeti (uzun konuşmalar) | – | Tek çağrı | OpenAI (sohbetle aynı model) |
 
-**Model yapılandırması:**
-- Modeller ortam değişkeninden okunur: `AI_CHAT_MODEL`, `AI_VISION_MODEL`.
-- Varsayılan, Anthropic'in güncel varsayılan modeli **Claude Opus 5.5**'tir.
-- Maliyet ve gecikme ayarı için ilk kaldıraç `output_config.effort`'tur (`low` → `medium` → `high`).
-- Daha ucuz bir modele (ör. `claude-sonnet-5-5`, `claude-haiku-4-5`) geçmek bir **ürün/maliyet kararıdır**. Bu karar, aşağıdaki değerlendirme seti (eval) ile kalite ölçülerek verilmelidir ([14 #6](14-acik-kararlar.md)).
+**Model yapılandırması (güncel):**
+- Sağlayıcı **OpenAI** (`openai` SDK, `src/infra/openai.js`). Anthropic/Claude yolu kaldırıldı (2026-10-08).
+- Modeller ortam değişkeninden: `OPENAI_CHAT_MODEL` (sohbet, varsayılan yok), `OPENAI_VISION_MODEL` (fotoğraf, varsayılan `gpt-4o`); reasoning modellerde `OPENAI_REASONING_EFFORT`.
+- Maliyet `app_config.ai.pricing`'teki model fiyatıyla hesaplanır (`src/modules/ai/ai.cost.js`). Yanıttaki tarihli sürüm adı (ör. `gpt-4o-2024-08-06`) taban modelin fiyatıyla eşleşir.
+- Daha ucuz bir modele geçmek bir **ürün/maliyet kararıdır**; eval setiyle kalite ölçülerek verilir ([14 #6](14-acik-kararlar.md)).
 
-**SDK:** `@anthropic-ai/sdk` (resmî Node SDK; saf JS ile kullanılabilir).
-
-**Opus 5.5'e özgü notlar:**
-- Düşünme (thinking) her zaman açıktır ve kapatılamaz. Derinlik yalnızca `effort` ile ayarlanır. **Varsayılan `medium`**, bu yüzden açıkça belirtilir.
-- Assistant prefill desteklenmez. Yanıt biçimi sistem promptu veya yapılandırılmış çıktı ile kontrol edilir.
-- Zorunlu araç kullanımı (`tool_choice: any|tool`) desteklenmez. JSON gerektiğinde `output_config.format` kullanılır.
-- Ret (refusal) durumunda yanıt HTTP 200 + `stop_reason: "refusal"` olarak gelir. **İçerik okunmadan önce `stop_reason` kontrol edilir.**
-- **Sunucu tarafı yedek model (fallback):** `fallbacks: "default"` + beta header `server-side-fallback-2026-07-01` ile açık tutulur. Güvenlik sınıflandırıcısı bir isteği reddederse Anthropic uygun modele yönlendirir. Tasarımda bu **varsayılan olarak açıktır**; istenirse kapatılabilir.
+> Aşağıdaki bölümlerde geçen Claude'a özgü ayrıntılar (`effort`, `stop_reason`, sunucu tarafı yedek model, Message Batches)
+> ilk tasarımdan kalmadır; akış, kota, saklama ve güvenlik kuralları OpenAI için de aynen geçerlidir.
 
 ## 2. Coach Mochi sohbeti
 
-> **Sağlayıcı (F6 kararı): OpenAI.** Sohbet `openai` Node SDK'sı ile Chat Completions akışı kullanır (`src/infra/openai.js`); fotoğraf analizi Claude'da kalır. Ayarlar: `OPENAI_API_KEY`, `OPENAI_CHAT_MODEL` (zorunlu, varsayılan yok), `OPENAI_REASONING_EFFORT` (yalnızca reasoning modellerde), `AI_CHAT_MAX_OUTPUT_TOKENS=1200`, `AI_CHAT_FIRST_TOKEN_MS=15000`, `AI_CHAT_TOTAL_MS=90000`. Aşağıdaki §2.2 iskeleti Claude için yazılmıştı; uygulanan akış aynıdır, çağrı `client.chat.completions.create({model, messages, stream: true, stream_options: {include_usage: true}, max_completion_tokens}, {signal})` ile yapılır. Rıza, kota, bütçe ve maliyet kaydı fotoğraf analiziyle ortak (`ai.gate`); OpenAI kullanımı ortak biçime çevrilir (`prompt_tokens − cached_tokens` = önbelleksiz girdi). Model fiyatı `app_config.ai.pricing`'e eklenmeli (yoksa maliyet 0 sayılır, log uyarısı).
+> **Sağlayıcı (F6 kararı): OpenAI.** Sohbet `openai` Node SDK'sı ile Chat Completions akışı kullanır (`src/infra/openai.js`); fotoğraf analizi de OpenAI'dedir. Ayarlar: `OPENAI_API_KEY`, `OPENAI_CHAT_MODEL` (zorunlu, varsayılan yok), `OPENAI_REASONING_EFFORT` (yalnızca reasoning modellerde), `AI_CHAT_MAX_OUTPUT_TOKENS=1200`, `AI_CHAT_FIRST_TOKEN_MS=15000`, `AI_CHAT_TOTAL_MS=90000`. Aşağıdaki §2.2 iskeleti Claude için yazılmıştı; uygulanan akış aynıdır, çağrı `client.chat.completions.create({model, messages, stream: true, stream_options: {include_usage: true}, max_completion_tokens}, {signal})` ile yapılır. Rıza, kota, bütçe ve maliyet kaydı fotoğraf analiziyle ortak (`ai.gate`); OpenAI kullanımı ortak biçime çevrilir (`prompt_tokens − cached_tokens` = önbelleksiz girdi). Model fiyatı `app_config.ai.pricing`'e eklenmeli (yoksa maliyet 0 sayılır, log uyarısı).
 
 ### 2.1 Akış
 
@@ -221,7 +215,7 @@ Kota değerleri `app_config` tablosundan okunur; deploy gerekmeden ayarlanabilir
 - **Global maliyet sigortası:**
   - Günlük toplam AI maliyeti `app_config.ai.daily_budget_usd` değerini aşarsa ücretsiz kullanıcılar için AI özellikleri geçici olarak kapanır (503 `UNAVAILABLE`) ve alarm gider.
   - Maliyet şu şekilde hesaplanır: `usage` token sayıları × `app_config.ai.pricing` tablosu. Fiyatlar kodda değil config'de tutulur, çünkü değişebilir.
-  - Varsayılan: `ai.daily_budget_usd = 50`; `ai.pricing` yalnızca `claude-opus-5-5` (USD/MTok: girdi 4, çıktı 20, cache okuma 0.2, cache yazma 5). Yedek modelin fiyatı eklenmezse maliyeti 0 sayılır: yedek model kullanımı izlenip fiyatı eklenmeli.
+  - Varsayılan: `ai.daily_budget_usd = 50`; `ai.pricing` seed'de `gpt-4o` (USD/MTok: girdi 2.5, çıktı 10, cache okuma 1.25). Kullanılan sohbet modelinin fiyatı eklenmezse maliyeti 0 sayılır (log uyarısı): model değişince fiyatı da ekle.
   - Toplam 60 sn önbelleklenir (her istekte tüm kullanıcılar toplanmaz).
 
 ## 5. Güvenlik korkulukları

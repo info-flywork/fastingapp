@@ -1,6 +1,8 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:fastingapp/core/di/injection.dart';
+import 'package:fastingapp/core/snackbar/app_snackbar.dart';
 import 'package:fastingapp/core/theme/app_text_styles.dart';
+import 'package:fastingapp/core/utils/enum/snackbar_type.dart';
 import 'package:fastingapp/core/widgets/app_button.dart';
 import 'package:fastingapp/core/widgets/app_button_decoration.dart';
 import 'package:fastingapp/generated/app_images.g.dart';
@@ -27,7 +29,7 @@ class _LatestChatsViewState extends State<LatestChatsView> {
   @override
   void initState() {
     super.initState();
-    _cubit.ensureSeedHistory();
+    _cubit.loadHistory(force: true);
   }
 
   @override
@@ -46,9 +48,25 @@ class _LatestChatsViewState extends State<LatestChatsView> {
           children: [
             const _LatestChatsHeader(),
             Expanded(
-              child: BlocBuilder<ChatSessionCubit, ChatSessionState>(
+              child: BlocConsumer<ChatSessionCubit, ChatSessionState>(
                 bloc: _cubit,
+                listenWhen: (prev, next) =>
+                    prev.errorMessage != next.errorMessage,
+                listener: (context, state) {
+                  final error = state.errorMessage;
+                  if (error != null && error.isNotEmpty) {
+                    AppSnackbar.show(
+                      context: context,
+                      text: error,
+                      type: SnackBarType.failure,
+                    );
+                    _cubit.clearError();
+                  }
+                },
                 builder: (context, state) {
+                  if (state.isLoadingHistory && state.history.isEmpty) {
+                    return const Center(child: CircularProgressIndicator());
+                  }
                   if (state.history.isEmpty) {
                     return const _LatestChatsEmptyState();
                   }
@@ -59,12 +77,15 @@ class _LatestChatsViewState extends State<LatestChatsView> {
                     itemCount: state.history.length,
                     separatorBuilder: (_, _) => const SizedBox(height: 12),
                     itemBuilder: (context, index) {
+                      final item = state.history[index];
                       return _ChatHistoryCard(
-                        item: state.history[index],
-                        onPin: () =>
-                            _cubit.togglePinHistory(state.history[index].id),
-                        onDelete: () =>
-                            _cubit.deleteHistory(state.history[index].id),
+                        item: item,
+                        onOpen: () async {
+                          await _cubit.openConversation(item.id);
+                          if (context.mounted) context.pop();
+                        },
+                        onPin: () => _cubit.togglePinHistory(item.id),
+                        onDelete: () => _cubit.deleteHistory(item.id),
                       );
                     },
                   );
@@ -109,7 +130,10 @@ final class _LatestChatsEmptyState extends StatelessWidget {
           ),
           AppButton(
             label: 'chat.start_chat'.tr(),
-            onPressed: () => context.pop(),
+            onPressed: () {
+              getIt<ChatSessionCubit>().startNewChat();
+              context.pop();
+            },
             showIcon: false,
             decoration: AppButtonDecoration.primary(),
           ),
@@ -199,11 +223,13 @@ final class _IconButton extends StatelessWidget {
 final class _ChatHistoryCard extends StatelessWidget {
   const _ChatHistoryCard({
     required this.item,
+    required this.onOpen,
     required this.onPin,
     required this.onDelete,
   });
 
   final ChatHistoryItem item;
+  final VoidCallback onOpen;
   final VoidCallback onPin;
   final VoidCallback onDelete;
 
@@ -263,72 +289,87 @@ final class _ChatHistoryCard extends StatelessWidget {
         '${d.month.toString().padLeft(2, '0')}.'
         '${d.year}';
 
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: ColorName.colorChatSurface,
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onOpen,
         borderRadius: BorderRadius.circular(16),
-        border: item.isPinned
-            ? Border.all(
-                color: ColorName.colorChatUserBubble.withValues(alpha: 0.45),
-              )
-            : null,
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
+        child: Container(
+          width: double.infinity,
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: ColorName.colorChatSurface,
+            borderRadius: BorderRadius.circular(16),
+            border: item.isPinned
+                ? Border.all(
+                    color: ColorName.colorChatUserBubble.withValues(
+                      alpha: 0.45,
+                    ),
+                  )
+                : null,
+          ),
+          child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              if (item.isPinned) ...[
-                const Icon(
-                  Icons.push_pin_rounded,
-                  size: 16,
-                  color: ColorName.colorChatUserBubble,
-                ),
-                const SizedBox(width: 6),
-              ],
-              Expanded(
-                child: Text(item.title, style: AppTextStyles.chatBubbleMessage),
-              ),
-              const SizedBox(width: 8),
-              Builder(
-                builder: (menuContext) {
-                  return GestureDetector(
-                    onTap: () => _showMenu(menuContext),
-                    behavior: HitTestBehavior.opaque,
-                    child: Padding(
-                      padding: const EdgeInsets.all(4),
-                      child: Assets.icons.charmMenuKebab.svg(
-                        width: 16,
-                        height: 16,
-                      ),
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  if (item.isPinned) ...[
+                    const Icon(
+                      Icons.push_pin_rounded,
+                      size: 16,
+                      color: ColorName.colorChatUserBubble,
                     ),
-                  );
-                },
+                    const SizedBox(width: 6),
+                  ],
+                  Expanded(
+                    child: Text(
+                      item.title,
+                      style: AppTextStyles.chatBubbleMessage,
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Builder(
+                    builder: (menuContext) {
+                      return GestureDetector(
+                        onTap: () => _showMenu(menuContext),
+                        behavior: HitTestBehavior.opaque,
+                        child: Padding(
+                          padding: const EdgeInsets.all(4),
+                          child: Assets.icons.charmMenuKebab.svg(
+                            width: 16,
+                            height: 16,
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
+              Row(
+                children: [
+                  Assets.icons.solarChatDotsLineDuotone.svg(
+                    width: 18,
+                    height: 18,
+                  ),
+                  const SizedBox(width: 6),
+                  Text(
+                    'chat.messages_count'.tr(args: ['${item.messageCount}']),
+                    style: AppTextStyles.chatHistoryMeta,
+                  ),
+                  const Spacer(),
+                  Assets.icons.solarCalendarDateLineDuotone.svg(
+                    width: 18,
+                    height: 18,
+                  ),
+                  const SizedBox(width: 6),
+                  Text(dateText, style: AppTextStyles.chatHistoryMeta),
+                ],
               ),
             ],
           ),
-          const SizedBox(height: 12),
-          Row(
-            children: [
-              Assets.icons.solarChatDotsLineDuotone.svg(width: 18, height: 18),
-              const SizedBox(width: 6),
-              Text(
-                'chat.messages_count'.tr(args: ['${item.messageCount}']),
-                style: AppTextStyles.chatHistoryMeta,
-              ),
-              const Spacer(),
-              Assets.icons.solarCalendarDateLineDuotone.svg(
-                width: 18,
-                height: 18,
-              ),
-              const SizedBox(width: 6),
-              Text(dateText, style: AppTextStyles.chatHistoryMeta),
-            ],
-          ),
-        ],
+        ),
       ),
     );
   }

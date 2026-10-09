@@ -4,7 +4,7 @@
 
 | Amaç (`media.purpose`) | Kaynak | Görünürlük | Varyantlar |
 |---|---|---|---|
-| `avatar` | Profil düzenleme (image_picker: 1024 px, kalite 85) | private | `md` 512, `thumb` 128 |
+| `avatar` | Profil düzenleme (image_picker: 1024 px, kalite 85) | **public** (ayrı private pull zone yok) | `md` 512, `thumb` 128 |
 | `meal_photo` | Kalori kamerası, öğün kaydı | private | `lg` 1600, `md` 1024, `thumb` 256 |
 | `data_export` | Kullanıcı veri dışa aktarma (zip) | private | – |
 | `insight_cover`, `challenge_image`, `plan_image` | Yönetim paneli | public | `lg`, `md`, `thumb` |
@@ -134,7 +134,7 @@ export function signPrivateUrl(path, ttlSec = 6 * 3600) {
 | Durum | Ne olur |
 |---|---|
 | Kullanıcı öğünü siler | Öğün yumuşak silinir. 30 gün sonra temizlik işi medyayı Bunny'den siler, `media.status = 'deleted'` olur |
-| Avatar değişir | Eski medya hemen silinir (Bunny DELETE + private zone purge) |
+| Avatar değişir | Eski medya hemen silinir (Bunny DELETE + **public** zone purge) |
 | Fotoğraf analiz edildi ama öğün kaydedilmedi | 24 sa sonra silinir (`meal_photo` olup hiçbir öğüne bağlı değilse) |
 | Hesap silme | `u/{ownerKey}/` dizini listelenir → her dosya silinir → pull zone'da `u/{ownerKey}/*` purge edilir → media satırları silinir |
 | `processing` durumunda takılan kayıt (> 1 sa) | `failed` olur, varsa yüklenmiş varyantlar silinir |

@@ -23,7 +23,9 @@ mixin HungerThirdQuestionViewMixin on State<HungerThirdQuestionView> {
     if (selected.isEmpty) return;
     context.pushNamed(
       RoutePaths.hungerFourthQuestion.name,
-      extra: widget.args,
+      extra: widget.args.copyWith(
+        bodyNotices: Set<HungerBodyNotice>.of(selected),
+      ),
     );
   }
 }

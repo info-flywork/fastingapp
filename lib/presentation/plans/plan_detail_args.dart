@@ -58,3 +58,17 @@ final class PlanDetailArgs {
     return 8;
   }
 }
+
+/// Plan detayında "Planı başlat" sonucu. [eatStart]/[eatEnd] ("HH:mm")
+/// yalnızca kullanıcı yemek penceresini değiştirdiyse dolu (zamanlama
+/// `custom` olarak kaydedilir).
+@immutable
+final class PlanSelection {
+  const PlanSelection({required this.plan, this.eatStart, this.eatEnd});
+
+  final PlansCardData plan;
+  final String? eatStart;
+  final String? eatEnd;
+
+  bool get hasCustomWindow => eatStart != null && eatEnd != null;
+}

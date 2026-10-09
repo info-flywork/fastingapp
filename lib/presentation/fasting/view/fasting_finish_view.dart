@@ -1,7 +1,14 @@
+import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:easy_localization/easy_localization.dart';
+import 'package:fastingapp/core/di/injection.dart';
 import 'package:fastingapp/core/dialogs/app_dialogs.dart';
+import 'package:fastingapp/core/snackbar/app_snackbar.dart';
+import 'package:fastingapp/core/utils/enum/snackbar_type.dart'
+    show SnackBarType;
+import 'package:fastingapp/domain/user/user_repository.dart';
+import 'package:fastingapp/presentation/fasting/bloc/fasting_session_cubit.dart';
 import 'package:fastingapp/core/remote_images/app_image.dart';
 import 'package:fastingapp/core/router/route_paths.dart';
 import 'package:fastingapp/core/theme/app_text_styles.dart';
@@ -21,11 +28,13 @@ import 'package:go_router/go_router.dart';
 @immutable
 final class FastingFinishArgs {
   const FastingFinishArgs({
+    required this.fastId,
     required this.planTitle,
     required this.start,
     required this.end,
   });
 
+  final String fastId;
   final String planTitle;
   final DateTime start;
   final DateTime end;
@@ -43,15 +52,17 @@ final class FastingFinishView extends StatefulWidget {
 
 class _FastingFinishViewState extends State<FastingFinishView> {
   static const _cardOverlap = 80.0;
-  static const _currentKg = 102.5;
-  static const _startKg = 112.2;
-  static const _goalKg = 75.2;
 
   late DateTime _start;
   late DateTime _end;
   var _editingStart = true;
   var _editingEnd = false;
   var _feeling = _FinishFeeling.superMood;
+  var _saving = false;
+  double? _currentKg;
+  double? _startKg;
+  double? _goalKg;
+  double? _weightForSave;
   final _notesController = TextEditingController();
 
   @override
@@ -59,6 +70,21 @@ class _FastingFinishViewState extends State<FastingFinishView> {
     super.initState();
     _start = widget.args.start;
     _end = widget.args.end;
+    unawaited(_loadWeight());
+  }
+
+  Future<void> _loadWeight() async {
+    try {
+      final summary = await getIt<UserRepository>().getSummary();
+      if (!mounted) return;
+      setState(() {
+        _currentKg = summary.weightCurrentKg;
+        _startKg = summary.weightStartKg;
+        _goalKg = summary.weightGoalKg;
+      });
+    } on Object {
+      // Kilo kartı olmadan devam.
+    }
   }
 
   @override
@@ -87,10 +113,15 @@ class _FastingFinishViewState extends State<FastingFinishView> {
   }
 
   Future<void> _editWeight() async {
-    await AppDialogs.instance.showEditWeight(
+    final result = await AppDialogs.instance.showEditWeight(
       context,
-      initialWeightKg: _currentKg,
+      initialWeightKg: _currentKg ?? 70,
     );
+    if (result == null || !mounted) return;
+    setState(() {
+      _currentKg = result.weightKg;
+      _weightForSave = result.weightKg;
+    });
   }
 
   String _clockLabel(DateTime value) {
@@ -110,10 +141,16 @@ class _FastingFinishViewState extends State<FastingFinishView> {
     final bottom = MediaQuery.paddingOf(context).bottom;
     final width = MediaQuery.sizeOf(context).width;
     final headerHeight = width * _FinishHeader.imageAspect;
-    final progress = ((_startKg - _currentKg) / (_startKg - _goalKg)).clamp(
-      0.0,
-      1.0,
-    );
+    final startKg = _startKg;
+    final currentKg = _currentKg;
+    final goalKg = _goalKg;
+    final progress =
+        startKg != null &&
+            currentKg != null &&
+            goalKg != null &&
+            startKg > goalKg
+        ? ((startKg - currentKg) / (startKg - goalKg)).clamp(0.0, 1.0)
+        : 0.0;
 
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: SystemUiOverlayStyle.dark,
@@ -159,18 +196,21 @@ class _FastingFinishViewState extends State<FastingFinishView> {
                                 onToggleEnd: _toggleEnd,
                                 onStartChanged: (value) {
                                   setState(() {
-                                    _start = value;
+                                    _start = _notFuture(value);
+                                    // Bitiş başlangıçtan sonra ve şimdiden
+                                    // ileri olmamalı.
                                     if (!_end.isAfter(_start)) {
-                                      _end = _start.add(
-                                        const Duration(hours: 16),
+                                      _end = _notFuture(
+                                        _start.add(const Duration(hours: 16)),
                                       );
                                     }
                                   });
                                 },
                                 onEndChanged: (value) {
                                   setState(() {
-                                    _end = value.isAfter(_start)
-                                        ? value
+                                    final end = _notFuture(value);
+                                    _end = end.isAfter(_start)
+                                        ? end
                                         : _start.add(
                                             const Duration(minutes: 1),
                                           );
@@ -178,13 +218,16 @@ class _FastingFinishViewState extends State<FastingFinishView> {
                                 },
                               ),
                               const SizedBox(height: 16),
-                              _CurrentWeightCard(
-                                currentKg: _currentKg,
-                                startKg: _startKg,
-                                goalKg: _goalKg,
-                                progress: progress,
-                                onEdit: _editWeight,
-                              ),
+                              if (currentKg != null &&
+                                  startKg != null &&
+                                  goalKg != null)
+                                _CurrentWeightCard(
+                                  currentKg: currentKg,
+                                  startKg: startKg,
+                                  goalKg: goalKg,
+                                  progress: progress,
+                                  onEdit: _editWeight,
+                                ),
                               const SizedBox(height: 16),
                               _FeelingCard(
                                 selected: _feeling,
@@ -214,13 +257,51 @@ class _FastingFinishViewState extends State<FastingFinishView> {
     );
   }
 
+  static DateTime _notFuture(DateTime value) {
+    final now = DateTime.now();
+    return value.isAfter(now) ? now : value;
+  }
+
   Future<void> _onSave(BuildContext context) async {
-    final done = await context.pushNamed<bool>(
-      RoutePaths.fastingFirstTime.name,
-      extra: FastingFirstTimeArgs(elapsed: _elapsed),
+    if (_saving) return;
+    setState(() => _saving = true);
+    final feeling = switch (_feeling) {
+      _FinishFeeling.tough => 'tough',
+      _FinishFeeling.meh => 'meh',
+      _FinishFeeling.good => 'good',
+      _FinishFeeling.superMood => 'super',
+    };
+    final result = await getIt<FastingSessionCubit>().finishFast(
+      fastId: widget.args.fastId,
+      startedAt: _start,
+      endedAt: _end,
+      feeling: feeling,
+      notes: _notesController.text.trim(),
+      weightKg: _weightForSave,
     );
     if (!context.mounted) return;
-    if (done ?? false) context.pop(true);
+    setState(() => _saving = false);
+    if (result == null) {
+      final msg = getIt<FastingSessionCubit>().state.errorMessage;
+      if (msg != null) {
+        AppSnackbar.show(
+          context: context,
+          text: msg,
+          type: SnackBarType.failure,
+        );
+      }
+      return;
+    }
+    if (result.isFirstFast) {
+      final done = await context.pushNamed<bool>(
+        RoutePaths.fastingFirstTime.name,
+        extra: FastingFirstTimeArgs(elapsed: _elapsed),
+      );
+      if (!context.mounted) return;
+      if (done ?? false) context.pop(true);
+      return;
+    }
+    context.pop(true);
   }
 }
 
@@ -516,8 +597,9 @@ final class _InlineTimePicker extends StatefulWidget {
 class _InlineTimePickerState extends State<_InlineTimePicker> {
   static const _itemExtent = 40.0;
   static const _visibleCount = 3;
-  static const _pastDays = 30;
-  static const _futureDays = 14;
+  // Sunucu kuralı: başlangıç/bitiş en fazla 7 gün geri, gelecekte değil.
+  static const _pastDays = 7;
+  static const _futureDays = 0;
   static const _hourCount = 24;
   static const _minuteCount = 60;
   static const _loopPasses = 40;

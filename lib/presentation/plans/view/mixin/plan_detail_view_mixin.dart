@@ -10,6 +10,9 @@ mixin PlanDetailViewMixin on State<PlanDetailView> {
   late int fastHours;
   late int ratioEatHours;
 
+  /// Kullanıcı "Değiştir" ile yemek penceresini seçti mi.
+  bool windowChanged = false;
+
   void initPlanDetail(PlanDetailArgs detailArgs) {
     args = detailArgs;
     eatStartHour = detailArgs.eatStartHour;
@@ -43,6 +46,7 @@ mixin PlanDetailViewMixin on State<PlanDetailView> {
     final windowMinutes = endTotal - startTotal;
 
     setState(() {
+      windowChanged = true;
       eatStartHour = result.startHour;
       eatStartMinute = result.startMinute;
       eatEndHour = result.endHour;
@@ -51,7 +55,16 @@ mixin PlanDetailViewMixin on State<PlanDetailView> {
     });
   }
 
+  /// Seçim plan sekmesine döner; kaydı (`PUT /plans/current`) orası yapar.
   void onStartPlanTapped() {
-    context.pop(args.plan);
+    context.pop(
+      PlanSelection(
+        plan: args.plan,
+        eatStart: windowChanged
+            ? formatTime(eatStartHour, eatStartMinute)
+            : null,
+        eatEnd: windowChanged ? formatTime(eatEndHour, eatEndMinute) : null,
+      ),
+    );
   }
 }

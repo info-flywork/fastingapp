@@ -1,12 +1,20 @@
+import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:easy_localization/easy_localization.dart';
+import 'package:fastingapp/core/di/injection.dart';
 import 'package:fastingapp/core/dialogs/app_dialogs.dart';
+import 'package:fastingapp/core/snackbar/app_snackbar.dart';
+import 'package:fastingapp/core/sync/data_sync.dart';
 import 'package:fastingapp/core/theme/app_text_styles.dart';
+import 'package:fastingapp/core/widgets/app_shimmer.dart';
 import 'package:fastingapp/core/widgets/weight_progress_bar.dart';
+import 'package:fastingapp/domain/trackers/trackers_repository.dart';
 import 'package:fastingapp/generated/app_images.g.dart';
 import 'package:fastingapp/generated/assets.gen.dart';
 import 'package:fastingapp/generated/colors.gen.dart';
+import 'package:fastingapp/presentation/home/bloc/home_bloc.dart';
+import 'package:fastingapp/presentation/home/bloc/home_state.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
@@ -18,19 +26,19 @@ const _kBodyHeaderHeight = 56.0;
 /// Kilo kayıtları detay — Latest / Target / BMI / Weight History.
 final class BodyHistoryView extends StatefulWidget {
   const BodyHistoryView({
-    this.currentKg = 102.5,
-    this.startKg = 112.2,
-    this.targetKg = 74.2,
-    this.bmi = 32.4,
-    this.heightCm = 178,
+    this.currentKg,
+    this.startKg,
+    this.targetKg,
+    this.bmi,
+    this.heightCm,
     super.key,
   });
 
-  final double currentKg;
-  final double startKg;
-  final double targetKg;
-  final double bmi;
-  final double heightCm;
+  final double? currentKg;
+  final double? startKg;
+  final double? targetKg;
+  final double? bmi;
+  final double? heightCm;
 
   @override
   State<BodyHistoryView> createState() => _BodyHistoryViewState();
@@ -87,7 +95,10 @@ class _BodyHistoryViewState extends State<BodyHistoryView>
                         onRangeChanged: onRangeChanged,
                         points: chartPoints,
                         selectedIndex: selectedPointIndex,
+                        yMin: chartYMin,
+                        yMax: chartYMax,
                         onPointSelected: onPointSelected,
+                        chartLoading: chartLoading,
                       ),
                     ],
                   ),
@@ -159,7 +170,7 @@ final class _CircleIconButton extends StatelessWidget {
 final class _LatestRecordCard extends StatelessWidget {
   const _LatestRecordCard({required this.currentKg, required this.onUpdate});
 
-  final double currentKg;
+  final double? currentKg;
   final VoidCallback onUpdate;
 
   @override
@@ -189,16 +200,17 @@ final class _LatestRecordCard extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.end,
                       children: [
                         Text(
-                          _formatKg(currentKg),
+                          _formatKgOrDash(currentKg),
                           style: AppTextStyles.bodyWeightValue,
                         ),
-                        Padding(
-                          padding: const EdgeInsets.only(left: 4, bottom: 8),
-                          child: Text(
-                            'body_history.unit'.tr(),
-                            style: AppTextStyles.bodyWeightUnit,
+                        if (currentKg != null)
+                          Padding(
+                            padding: const EdgeInsets.only(left: 4, bottom: 8),
+                            child: Text(
+                              'body_history.unit'.tr(),
+                              style: AppTextStyles.bodyWeightUnit,
+                            ),
                           ),
-                        ),
                       ],
                     ),
                   ],
@@ -263,17 +275,23 @@ final class _TargetCard extends StatelessWidget {
     required this.onEdit,
   });
 
-  final double currentKg;
-  final double startKg;
-  final double targetKg;
+  final double? currentKg;
+  final double? startKg;
+  final double? targetKg;
   final VoidCallback onEdit;
 
   @override
   Widget build(BuildContext context) {
-    final span = (startKg - targetKg).abs();
-    final progress = span <= 0
+    final start = startKg;
+    final target = targetKg;
+    final current = currentKg;
+    final span = (start != null && target != null)
+        ? (start - target).abs()
+        : 0.0;
+    final progress =
+        (start == null || target == null || current == null || span <= 0)
         ? 0.0
-        : ((startKg - currentKg) / span).clamp(0.0, 1.0);
+        : ((start - current) / span).clamp(0.0, 1.0);
     final percent = (progress * 100).round();
 
     return Container(
@@ -308,7 +326,9 @@ final class _TargetCard extends StatelessWidget {
             children: [
               Expanded(
                 child: Text(
-                  '${_formatKg(startKg)}${'body_history.unit'.tr()}',
+                  startKg == null
+                      ? '—'
+                      : '${_formatKg(startKg!)}${'body_history.unit'.tr()}',
                   style: AppTextStyles.bodyBoundValue,
                 ),
               ),
@@ -319,7 +339,9 @@ final class _TargetCard extends StatelessWidget {
               ),
               Expanded(
                 child: Text(
-                  '${_formatKg(targetKg)}${'body_history.unit'.tr()}',
+                  targetKg == null
+                      ? '—'
+                      : '${_formatKg(targetKg!)}${'body_history.unit'.tr()}',
                   style: AppTextStyles.bodyBoundValue,
                   textAlign: TextAlign.end,
                 ),
@@ -408,7 +430,7 @@ final class _DashPainter extends CustomPainter {
 final class _BmiCard extends StatelessWidget {
   const _BmiCard({required this.bmi});
 
-  final double bmi;
+  final double? bmi;
 
   static const _min = 15.0;
   static const _max = 45.0;
@@ -436,9 +458,12 @@ final class _BmiCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final statusKey = bmi < 18.5
+    final value = bmi;
+    final statusKey = value == null
+        ? null
+        : value < 18.5
         ? 'body_history.bmi_low'
-        : bmi < 25
+        : value < 25
         ? 'body_history.bmi_normal'
         : 'body_history.bmi_high';
 
@@ -460,12 +485,17 @@ final class _BmiCard extends StatelessWidget {
           Row(
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
-              Text(_formatKg(bmi), style: AppTextStyles.bodyBmiValue),
-              const SizedBox(width: 8),
-              Padding(
-                padding: const EdgeInsets.only(bottom: 6),
-                child: Text(statusKey.tr(), style: AppTextStyles.bodyBmiStatus),
-              ),
+              Text(_formatKgOrDash(value), style: AppTextStyles.bodyBmiValue),
+              if (statusKey != null) ...[
+                const SizedBox(width: 8),
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 6),
+                  child: Text(
+                    statusKey.tr(),
+                    style: AppTextStyles.bodyBmiStatus,
+                  ),
+                ),
+              ],
             ],
           ),
           const SizedBox(height: 20),
@@ -478,7 +508,7 @@ final class _BmiCard extends StatelessWidget {
                 for (final i in _tickBoundaryIndices)
                   i == 8 ? boundaries[i] : boundaries[i] + _gap / 2,
               ];
-              final markerX = _markerX(bmi, tickXs);
+              final markerX = value == null ? null : _markerX(value, tickXs);
 
               return Column(
                 children: [
@@ -488,15 +518,16 @@ final class _BmiCard extends StatelessWidget {
                     child: Stack(
                       clipBehavior: Clip.none,
                       children: [
-                        Positioned(
-                          left: (markerX - 8).clamp(0.0, barW - 16),
-                          top: 0,
-                          child: AppImages.vector18Bmi.image(
-                            width: 16,
-                            height: 10,
-                            fit: BoxFit.contain,
+                        if (markerX != null)
+                          Positioned(
+                            left: (markerX - 8).clamp(0.0, barW - 16),
+                            top: 0,
+                            child: AppImages.vector18Bmi.image(
+                              width: 16,
+                              height: 10,
+                              fit: BoxFit.contain,
+                            ),
                           ),
-                        ),
                       ],
                     ),
                   ),
@@ -620,14 +651,20 @@ final class _WeightHistoryCard extends StatelessWidget {
     required this.onRangeChanged,
     required this.points,
     required this.selectedIndex,
+    required this.yMin,
+    required this.yMax,
     required this.onPointSelected,
+    this.chartLoading = false,
   });
 
   final _HistoryRange range;
   final ValueChanged<_HistoryRange> onRangeChanged;
   final List<_ChartPoint> points;
   final int selectedIndex;
+  final double yMin;
+  final double yMax;
   final ValueChanged<int> onPointSelected;
+  final bool chartLoading;
 
   @override
   Widget build(BuildContext context) {
@@ -650,29 +687,46 @@ final class _WeightHistoryCard extends StatelessWidget {
           const SizedBox(height: 16),
           SizedBox(
             height: 220,
-            child: AnimatedSwitcher(
-              duration: const Duration(milliseconds: 320),
-              switchInCurve: Curves.easeOutCubic,
-              switchOutCurve: Curves.easeInCubic,
-              transitionBuilder: (child, animation) {
-                return FadeTransition(
-                  opacity: animation,
-                  child: SlideTransition(
-                    position: Tween<Offset>(
-                      begin: const Offset(0.04, 0),
-                      end: Offset.zero,
-                    ).animate(animation),
-                    child: child,
+            child: chartLoading
+                ? const AppShimmer(
+                    child: AppShimmerBone(
+                      height: 220,
+                      borderRadius: BorderRadius.all(Radius.circular(12)),
+                    ),
+                  )
+                : AnimatedSwitcher(
+                    duration: const Duration(milliseconds: 320),
+                    switchInCurve: Curves.easeOutCubic,
+                    switchOutCurve: Curves.easeInCubic,
+                    transitionBuilder: (child, animation) {
+                      return FadeTransition(
+                        opacity: animation,
+                        child: SlideTransition(
+                          position: Tween<Offset>(
+                            begin: const Offset(0.04, 0),
+                            end: Offset.zero,
+                          ).animate(animation),
+                          child: child,
+                        ),
+                      );
+                    },
+                    child: points.isEmpty
+                        ? Center(
+                            key: ValueKey('empty-$range'),
+                            child: Text(
+                              '—',
+                              style: AppTextStyles.bodyCardTitle,
+                            ),
+                          )
+                        : _WeightLineChart(
+                            key: ValueKey(range),
+                            points: points,
+                            selectedIndex: selectedIndex,
+                            yMin: yMin,
+                            yMax: yMax,
+                            onPointSelected: onPointSelected,
+                          ),
                   ),
-                );
-              },
-              child: _WeightLineChart(
-                key: ValueKey(range),
-                points: points,
-                selectedIndex: selectedIndex,
-                onPointSelected: onPointSelected,
-              ),
-            ),
           ),
         ],
       ),
@@ -786,17 +840,26 @@ final class _WeightLineChart extends StatelessWidget {
   const _WeightLineChart({
     required this.points,
     required this.selectedIndex,
+    required this.yMin,
+    required this.yMax,
     required this.onPointSelected,
     super.key,
   });
 
   final List<_ChartPoint> points;
   final int selectedIndex;
+  final double yMin;
+  final double yMax;
   final ValueChanged<int> onPointSelected;
 
-  static const _yLabels = [120.0, 100.0, 80.0, 70.0, 65.0];
-  static const _yMin = 65.0;
-  static const _yMax = 120.0;
+  List<double> get _yLabels {
+    final span = yMax - yMin;
+    if (span <= 0) return [yMax, yMin];
+    return List<double>.generate(5, (i) => yMax - (span / 4) * i);
+  }
+
+  double get _yMin => yMin;
+  double get _yMax => yMax;
   static const _leftPad = 28.0;
   static const _topPad = 10.0;
   static const _bottomPad = 24.0;
@@ -938,7 +1001,8 @@ final class _WeightChartPainter extends CustomPainter {
       ..color = ColorName.colorSubtitle.withValues(alpha: 0.12)
       ..strokeWidth = 1;
 
-    for (final y in [120.0, 100.0, 80.0, 70.0, 65.0]) {
+    for (var i = 0; i < 5; i++) {
+      final y = yMax - ((yMax - yMin) / 4) * i;
       final dy = topPad + ((yMax - y) / (yMax - yMin)) * chartH;
       canvas.drawLine(Offset(leftPad, dy), Offset(size.width, dy), gridPaint);
     }
@@ -995,3 +1059,5 @@ String _formatKg(double kg) {
   if (kg == kg.roundToDouble()) return '${kg.toInt()}';
   return kg.toStringAsFixed(1);
 }
+
+String _formatKgOrDash(double? kg) => kg == null ? '—' : _formatKg(kg);
