@@ -5,6 +5,8 @@ import 'package:fastingapp/core/di/injection.dart';
 import 'package:fastingapp/core/dialogs/app_dialogs.dart';
 import 'package:fastingapp/core/dialogs/widgets/water_edit_dialog.dart';
 import 'package:fastingapp/core/remote_images/app_image.dart';
+import 'package:fastingapp/core/snackbar/app_snackbar.dart';
+import 'package:fastingapp/core/utils/enum/snackbar_type.dart';
 import 'package:fastingapp/core/theme/app_text_styles.dart';
 import 'package:fastingapp/core/widgets/app_button.dart';
 import 'package:fastingapp/core/widgets/app_button_decoration.dart';
@@ -31,6 +33,9 @@ final class WaterReminderView extends StatefulWidget {
 
 class _WaterReminderViewState extends State<WaterReminderView> {
   static const _presetSizes = <int>[50, 100, 200, 300, 500];
+  static const _minGlassMl = 50;
+  static const _maxGlassMl = 2000;
+  static const _maxCustomSizes = 5;
 
   late bool _notificationsEnabled;
   late int _dailyGoalMl;
@@ -60,13 +65,52 @@ class _WaterReminderViewState extends State<WaterReminderView> {
     try {
       final settings = await getIt<TrackersRepository>().getSettings();
       if (!mounted) return;
-      setState(() => _notificationsEnabled = settings.waterNotifications);
+      setState(() {
+        _notificationsEnabled = settings.waterNotifications;
+        _intervalMin = settings.waterReminderIntervalMin;
+      });
     } on Object {
       // Args / yerel değerle kal.
     }
   }
 
   List<int> get _allSizes => [..._presetSizes, ..._customSizes];
+
+  /// Hatırlatma aralığı (dk, 30–480; önceden ayarlanamıyordu). Hemen
+  /// kaydedilir (`PATCH /user/settings`).
+  int _intervalMin = 120;
+
+  static String _intervalLabel(int minutes) {
+    final h = minutes ~/ 60;
+    final m = minutes % 60;
+    if (h == 0) return 'water_reminder.every_minutes'.tr(args: ['$m']);
+    if (m == 0) return 'water_reminder.every_hours'.tr(args: ['$h']);
+    return 'water_reminder.every_hours_minutes'.tr(args: ['$h', '$m']);
+  }
+
+  Future<void> _editInterval() async {
+    final value = await AppDialogs.instance.showGoalStepper(
+      context,
+      title: 'water_reminder.interval'.tr(),
+      initial: _intervalMin,
+      min: 30,
+      max: 480,
+      step: 30,
+      format: _intervalLabel,
+    );
+    if (value == null || value == _intervalMin || !mounted) return;
+    final previous = _intervalMin;
+    setState(() => _intervalMin = value);
+    try {
+      await getIt<TrackersRepository>().updateSettings({
+        'waterReminderIntervalMin': value,
+      });
+    } on Object catch (e) {
+      if (!mounted) return;
+      setState(() => _intervalMin = previous);
+      AppSnackbar.showError(context, e);
+    }
+  }
 
   String get _unitLabel => _unit == WaterVolumeUnit.ml ? 'ml' : 'oz';
 
@@ -118,8 +162,28 @@ class _WaterReminderViewState extends State<WaterReminderView> {
       headerImage: AppImages.waterSizePlus,
     );
     if (result == null || !mounted) return;
+    // Sunucu kuralı: bardak 50–2000 ml, en fazla 5 özel bardak.
+    if (result.valueMl < _minGlassMl || result.valueMl > _maxGlassMl) {
+      AppSnackbar.show(
+        context: context,
+        text: 'water_reminder.glass_range_error'.tr(
+          args: ['$_minGlassMl', '$_maxGlassMl'],
+        ),
+        type: SnackBarType.failure,
+      );
+      return;
+    }
+    final isNew = !_allSizes.contains(result.valueMl);
+    if (isNew && _customSizes.length >= _maxCustomSizes) {
+      AppSnackbar.show(
+        context: context,
+        text: 'water_reminder.custom_size_limit'.tr(args: ['$_maxCustomSizes']),
+        type: SnackBarType.failure,
+      );
+      return;
+    }
     setState(() {
-      if (!_allSizes.contains(result.valueMl)) {
+      if (isNew) {
         _customSizes = [..._customSizes, result.valueMl];
       }
       _glassSizeMl = result.valueMl;
@@ -172,6 +236,23 @@ class _WaterReminderViewState extends State<WaterReminderView> {
                       onChanged: (v) =>
                           setState(() => _notificationsEnabled = v),
                     ),
+                    if (_notificationsEnabled) ...[
+                      const SizedBox(height: 16),
+                      DecoratedBox(
+                        decoration: BoxDecoration(
+                          color: ColorName.colorWhite,
+                          borderRadius: BorderRadius.circular(24),
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.all(20),
+                          child: _SettingRow(
+                            label: 'water_reminder.interval'.tr(),
+                            value: _intervalLabel(_intervalMin),
+                            onEdit: () => unawaited(_editInterval()),
+                          ),
+                        ),
+                      ),
+                    ],
                     const SizedBox(height: 16),
                     _SettingsCard(
                       dailyGoalLabel: _dailyGoalLabel,

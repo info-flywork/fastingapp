@@ -43,6 +43,10 @@ class _PlansViewState extends State<PlansView> {
     required PlansCardData data,
     required String detailTitleKey,
   }) async {
+    if (data.isWeekly) {
+      await openWeeklyPlan(context: context, session: _session, plan: data);
+      return;
+    }
     if (data.isLocked) {
       // Premium plan: paywall; satın alınmazsa açılmaz.
       final revenueCat = getIt<RevenueCatService>();
@@ -89,7 +93,7 @@ class _PlansViewState extends State<PlansView> {
                 color: ColorName.colorWhite,
                 child: BlocBuilder<FastingSessionCubit, FastingSessionState>(
                   bloc: _session,
-                  buildWhen: (a, b) => a.plan != b.plan,
+                  buildWhen: (a, b) => a.plan?.signature != b.plan?.signature,
                   builder: (context, session) => ListView(
                     physics: const ClampingScrollPhysics(),
                     padding: EdgeInsets.only(bottom: bottom + 100),
@@ -112,6 +116,17 @@ class _PlansViewState extends State<PlansView> {
                         detailTitleKey: 'plans.detail_advanced_title',
                         row1: PlansCatalog.advancedRow1,
                         row2: PlansCatalog.advancedRow2,
+                        selected: _selectedFor(session),
+                        onOpenPlan: _openPlanDetail,
+                      ),
+                      const SizedBox(height: 32),
+                      _PlansSection(
+                        titleKey: 'plans.weekly_title',
+                        emphasisKey: 'plans.weekly_emphasis',
+                        restKey: 'plans.weekly_rest',
+                        detailTitleKey: 'plans.weekly_title',
+                        row1: PlansCatalog.weeklyRow,
+                        row2: const [],
                         selected: _selectedFor(session),
                         onOpenPlan: _openPlanDetail,
                       ),
@@ -206,13 +221,15 @@ final class _PlansSection extends StatelessWidget {
           selected: selected,
           onOpenPlan: onOpenPlan,
         ),
-        const SizedBox(height: _kCardGap),
-        _PlansHorizontalRow(
-          cards: row2,
-          detailTitleKey: detailTitleKey,
-          selected: selected,
-          onOpenPlan: onOpenPlan,
-        ),
+        if (row2.isNotEmpty) ...[
+          const SizedBox(height: _kCardGap),
+          _PlansHorizontalRow(
+            cards: row2,
+            detailTitleKey: detailTitleKey,
+            selected: selected,
+            onOpenPlan: onOpenPlan,
+          ),
+        ],
       ],
     );
   }
@@ -344,7 +361,7 @@ final class _PlanCard extends StatelessWidget {
               Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Text(data.title, style: AppTextStyles.planOptionTitle),
+                  Text(data.displayTitle, style: AppTextStyles.planOptionTitle),
                   const SizedBox(width: 8),
                   _IntensityBolts(filled: data.intensity),
                 ],

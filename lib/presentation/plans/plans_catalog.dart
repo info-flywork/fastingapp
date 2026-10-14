@@ -1,3 +1,6 @@
+import 'package:easy_localization/easy_localization.dart';
+import 'package:fastingapp/domain/fasting/plan_catalog_repository.dart';
+import 'package:fastingapp/domain/fasting/weekly_schedule.dart';
 import 'package:fastingapp/generated/colors.gen.dart';
 import 'package:flutter/material.dart';
 
@@ -13,16 +16,33 @@ final class PlansCardData {
     required this.tone,
     required this.intensity,
     required this.watermark,
-    this.isLocked = false,
-  });
+    bool isLocked = false,
+    this.code,
+    this.titleKey,
+  }) : _lockedFallback = isLocked;
 
   final String title;
+
+  /// Başlıktan türetilemeyen plan kodu (ör. `alternate_day`).
+  final String? code;
+
+  /// Çevrilen başlık (ör. "Gün aşırı"); yoksa [title] gösterilir.
+  final String? titleKey;
+
+  String get displayTitle => titleKey?.tr() ?? title;
   final String subtitleKey;
   final String chipKey;
   final PlansChipTone tone;
   final int intensity;
   final String watermark;
-  final bool isLocked;
+
+  /// Katalog yüklenemezse kullanılan yerel varsayılan.
+  final bool _lockedFallback;
+
+  /// Premium plan mı (kilit); kaynak sunucu kataloğu (`/catalog/plans`).
+  bool get isLocked =>
+      PlanCatalogRepository.instance?.entry(planCode)?.isPremium ??
+      _lockedFallback;
 
   Color get accentColor => switch (tone) {
     PlansChipTone.breakfast => ColorName.colorMealPositive,
@@ -45,7 +65,9 @@ final class PlansCardData {
   String get selectionKey => '$title|$chipKey|${tone.name}';
 
   /// Backend plan kodu (`seeds/plans.json`): `16-8` → `16_8`, `OMAD` → `omad`.
-  String get planCode => title.toLowerCase().replaceAll('-', '_');
+  String get planCode => code ?? title.toLowerCase().replaceAll('-', '_');
+
+  bool get isWeekly => WeeklyRules.isWeekly(planCode);
 
   /// `PUT /plans/current` zamanlaması; ileri seviye planlarda sunucu
   /// varsayılanı.
@@ -71,6 +93,62 @@ abstract final class PlansCatalog {
     ...beginnerRow2,
     ...advancedRow1,
     ...advancedRow2,
+    ...weeklyRow,
+  ];
+
+  /// Haftalık planlar (hepsi premium; günleri kullanıcı seçer).
+  static const weeklyRow = <PlansCardData>[
+    PlansCardData(
+      title: '5-2',
+      subtitleKey: 'plans.subtitle_5_2',
+      chipKey: 'plans.chip_weekly',
+      tone: PlansChipTone.breakfast,
+      intensity: 2,
+      watermark: '7',
+      isLocked: true,
+    ),
+    PlansCardData(
+      title: '6-1',
+      subtitleKey: 'plans.subtitle_6_1',
+      chipKey: 'plans.chip_weekly',
+      tone: PlansChipTone.breakfast,
+      intensity: 2,
+      watermark: '7',
+      isLocked: true,
+    ),
+    PlansCardData(
+      title: 'ADF',
+      code: 'alternate_day',
+      titleKey: 'plans.title_alternate_day',
+      subtitleKey: 'plans.subtitle_alternate_day',
+      chipKey: 'plans.chip_weekly',
+      tone: PlansChipTone.dinner,
+      intensity: 3,
+      watermark: '7',
+      isLocked: true,
+    ),
+    PlansCardData(
+      title: 'Crescendo',
+      code: 'crescendo',
+      titleKey: 'plans.title_crescendo',
+      subtitleKey: 'plans.subtitle_crescendo',
+      chipKey: 'plans.chip_weekly',
+      tone: PlansChipTone.breakfast,
+      intensity: 2,
+      watermark: '7',
+      isLocked: true,
+    ),
+    PlansCardData(
+      title: 'Custom',
+      code: 'custom_weekly',
+      titleKey: 'plans.title_custom_weekly',
+      subtitleKey: 'plans.subtitle_custom_weekly',
+      chipKey: 'plans.chip_weekly',
+      tone: PlansChipTone.advanced,
+      intensity: 2,
+      watermark: '7',
+      isLocked: true,
+    ),
   ];
 
   /// Sunucudaki etkin plana karşılık gelen kart (kod + zamanlama; zamanlama

@@ -75,6 +75,7 @@ final class HomeLoadedBody extends StatelessWidget {
         waterGoalMl: summary?.waterGoalMl ?? 2500,
         steps: summary?.steps ?? 0,
         stepsGoal: summary?.stepsGoal ?? 8000,
+        waterUnit: summary?.waterUnit ?? 'ml',
         onWaterTapped: onWaterTapped,
         onStepsTapped: onStepsTapped,
       ),
@@ -82,10 +83,11 @@ final class HomeLoadedBody extends StatelessWidget {
         currentKg: summary?.weightCurrentKg,
         startKg: summary?.weightStartKg,
         goalKg: summary?.weightGoalKg,
+        unit: summary?.weightUnit ?? 'kg',
         onTap: onWeightTapped,
         onEditTap: onWeightEditTapped,
       ),
-      const HomeMetabolicCard(),
+      // Metabolik kart: değerler sabit (backend faz 7); veri gelene kadar gizli.
       HomeMealRecordsCard(
         lastMeal: summary?.lastMeal,
         onTap: onMealRecordsTapped,

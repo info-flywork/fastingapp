@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:fastingapp/core/di/injection.dart';
 import 'package:fastingapp/core/router/go_router_refresh_stream.dart';
 import 'package:fastingapp/core/router/route_paths.dart';
@@ -23,11 +24,10 @@ import 'package:fastingapp/presentation/auth/onboard/food_prefs_nav_args.dart';
 import 'package:fastingapp/presentation/auth/onboard/food_skips/bloc/food_skips_bloc.dart';
 import 'package:fastingapp/presentation/auth/onboard/food_skips/view/food_skips_view.dart';
 import 'package:fastingapp/presentation/auth/onboard/goal/bloc/goal_bloc.dart';
+import 'package:fastingapp/domain/onboarding/onboarding_draft.dart';
 import 'package:fastingapp/presentation/auth/onboard/goal/view/goal_view.dart';
 import 'package:fastingapp/presentation/auth/onboard/goal_highlight/view/goal_highlight_view.dart';
 import 'package:fastingapp/presentation/auth/onboard/good_company/view/good_company_view.dart';
-import 'package:fastingapp/presentation/auth/onboard/language_level/bloc/language_level_bloc.dart';
-import 'package:fastingapp/presentation/auth/onboard/language_level/view/language_level_view.dart';
 import 'package:fastingapp/presentation/auth/onboard/meal_window/bloc/meal_window_bloc.dart';
 import 'package:fastingapp/presentation/auth/onboard/meal_window/view/meal_window_view.dart';
 import 'package:fastingapp/presentation/auth/onboard/noted_highlight/view/noted_highlight_view.dart';
@@ -58,6 +58,7 @@ import 'package:fastingapp/presentation/fasting/view/fasting_body_status_view.da
 import 'package:fastingapp/presentation/fasting/view/fasting_breath_view.dart';
 import 'package:fastingapp/presentation/fasting/view/fasting_finish_view.dart';
 import 'package:fastingapp/presentation/fasting/view/fasting_first_time_view.dart';
+import 'package:fastingapp/presentation/fasting/view/fasting_history_view.dart';
 import 'package:fastingapp/presentation/fasting/view/fasting_quick_walk_view.dart';
 import 'package:fastingapp/presentation/fasting/view/fasting_sip_challenge_view.dart';
 import 'package:fastingapp/presentation/fasting/view/fasting_struggle_advice_view.dart';
@@ -90,8 +91,10 @@ import 'package:fastingapp/presentation/mochi_world/view/mochi_world_view.dart';
 import 'package:fastingapp/presentation/plans/plan_detail_args.dart';
 import 'package:fastingapp/presentation/plans/plans_catalog.dart';
 import 'package:fastingapp/presentation/plans/view/plan_detail_view.dart';
+import 'package:fastingapp/presentation/plans/view/weekly_plan_detail_view.dart';
 import 'package:fastingapp/presentation/plans/view/plans_view.dart';
 import 'package:fastingapp/presentation/profile/bloc/profile_bloc.dart';
+import 'package:fastingapp/presentation/profile/notification_settings/notification_settings_view.dart';
 import 'package:fastingapp/presentation/profile/edit_profile/view/edit_diet_type_view.dart';
 import 'package:fastingapp/presentation/profile/edit_profile/view/edit_fasting_plan_view.dart';
 import 'package:fastingapp/presentation/profile/edit_profile/view/edit_fasting_target_view.dart';
@@ -145,7 +148,6 @@ final _publicPaths = <String>{
     RoutePaths.buildingPlan,
     RoutePaths.weightProjection,
     RoutePaths.goodCompany,
-    RoutePaths.languageLevel,
   ])
     route.path,
 };
@@ -173,6 +175,12 @@ final GoRouter appRouter = GoRouter(
     }
     if (authState is AuthUnauthenticated && _isProtectedRoute(location)) {
       return RoutePaths.login.path;
+    }
+    // Onboarding'i bitmemiş oturum (misafir) korumalı ekrana giremez.
+    if (authState is AuthAuthenticated &&
+        !authState.user.isAnsweredQuestions &&
+        _isProtectedRoute(location)) {
+      return RoutePaths.onboarding.path;
     }
     return null;
   },
@@ -229,7 +237,10 @@ final GoRouter appRouter = GoRouter(
       path: RoutePaths.startingPoint.path,
       name: RoutePaths.startingPoint.name,
       builder: (context, state) => BlocProvider(
-        create: (_) => getIt<StartingPointBloc>(),
+        create: (_) => StartingPointBloc(
+          allowGoalAboveCurrent:
+              getIt<OnboardingDraft>().goal != OnboardingGoal.loseWeight,
+        ),
         child: const StartingPointView(),
       ),
     ),
@@ -364,6 +375,7 @@ final GoRouter appRouter = GoRouter(
           currentWeightKg: p.currentWeightKg ?? 74,
           goalWeightKg: p.goalWeightKg ?? 68,
           weeklyLossKg: p.weeklyLossKg ?? 0.4,
+          targetDate: p.targetDate,
         );
       },
     ),
@@ -371,14 +383,6 @@ final GoRouter appRouter = GoRouter(
       path: RoutePaths.goodCompany.path,
       name: RoutePaths.goodCompany.name,
       builder: (context, state) => const GoodCompanyView(),
-    ),
-    GoRoute(
-      path: RoutePaths.languageLevel.path,
-      name: RoutePaths.languageLevel.name,
-      builder: (context, state) => BlocProvider(
-        create: (_) => getIt<LanguageLevelBloc>(),
-        child: const LanguageLevelView(),
-      ),
     ),
     GoRoute(
       path: RoutePaths.water.path,
@@ -420,7 +424,15 @@ final GoRouter appRouter = GoRouter(
       path: RoutePaths.steps.path,
       name: RoutePaths.steps.name,
       parentNavigatorKey: rootNavigatorKey,
-      builder: (context, state) => const StepsView(),
+      // Ana sayfa özetinden tohumla: ekran 0/8000 ile açılıp zıplamasın.
+      builder: (context, state) {
+        final home = getIt<HomeBloc>().state;
+        final summary = home is HomeLoaded ? home.summary : null;
+        return StepsView(
+          initialSteps: summary?.steps ?? 0,
+          dailyGoalSteps: summary?.stepsGoal ?? 8000,
+        );
+      },
     ),
     GoRoute(
       path: RoutePaths.bodyHistory.path,
@@ -487,8 +499,8 @@ final GoRouter appRouter = GoRouter(
         final extra = state.extra;
         final args = extra is FastingStruggleAdviceArgs
             ? extra
-            : const FastingStruggleAdviceArgs(
-                bodyKey: 'fasting_struggle.hungry_body',
+            : FastingStruggleAdviceArgs(
+                bodyText: 'fasting_struggle.hungry_body'.tr(),
                 reason: FastingStruggleReason.hungry,
               );
         return FastingStruggleAdviceView(args: args);
@@ -499,9 +511,9 @@ final GoRouter appRouter = GoRouter(
       name: RoutePaths.fastingSipChallenge.name,
       parentNavigatorKey: rootNavigatorKey,
       builder: (context, state) {
-        final bodyKey = state.extra as String?;
+        final body = state.extra as String?;
         return FastingSipChallengeView(
-          bodyKey: bodyKey ?? 'fasting_struggle.hungry_body',
+          bodyText: body ?? 'fasting_struggle.hungry_body'.tr(),
         );
       },
     ),
@@ -510,9 +522,9 @@ final GoRouter appRouter = GoRouter(
       name: RoutePaths.fastingQuickWalk.name,
       parentNavigatorKey: rootNavigatorKey,
       builder: (context, state) {
-        final bodyKey = state.extra as String?;
+        final body = state.extra as String?;
         return FastingQuickWalkView(
-          bodyKey: bodyKey ?? 'fasting_struggle.energy_body',
+          bodyText: body ?? 'fasting_struggle.energy_body'.tr(),
         );
       },
     ),
@@ -521,9 +533,9 @@ final GoRouter appRouter = GoRouter(
       name: RoutePaths.fastingBreath.name,
       parentNavigatorKey: rootNavigatorKey,
       builder: (context, state) {
-        final bodyKey = state.extra as String?;
+        final body = state.extra as String?;
         return FastingBreathView(
-          bodyKey: bodyKey ?? 'fasting_struggle.craving_body',
+          bodyText: body ?? 'fasting_struggle.craving_body'.tr(),
         );
       },
     ),
@@ -559,6 +571,12 @@ final GoRouter appRouter = GoRouter(
               );
         return FastingFirstTimeView(args: args);
       },
+    ),
+    GoRoute(
+      path: RoutePaths.fastingHistory.path,
+      name: RoutePaths.fastingHistory.name,
+      parentNavigatorKey: rootNavigatorKey,
+      builder: (context, state) => const FastingHistoryView(),
     ),
     GoRoute(
       path: RoutePaths.insights.path,
@@ -711,6 +729,17 @@ final GoRouter appRouter = GoRouter(
       },
     ),
     GoRoute(
+      path: RoutePaths.weeklyPlanDetail.path,
+      name: RoutePaths.weeklyPlanDetail.name,
+      parentNavigatorKey: rootNavigatorKey,
+      builder: (context, state) {
+        final args = state.extra is WeeklyPlanDetailArgs
+            ? state.extra! as WeeklyPlanDetailArgs
+            : WeeklyPlanDetailArgs(plan: PlansCatalog.weeklyRow.first);
+        return WeeklyPlanDetailView(args: args);
+      },
+    ),
+    GoRoute(
       path: RoutePaths.chat.path,
       name: RoutePaths.chat.name,
       parentNavigatorKey: rootNavigatorKey,
@@ -800,6 +829,12 @@ final GoRouter appRouter = GoRouter(
                   name: RoutePaths.faq.name,
                   parentNavigatorKey: rootNavigatorKey,
                   builder: (context, state) => const FaqView(),
+                ),
+                GoRoute(
+                  path: RoutePaths.notificationSettings.path,
+                  name: RoutePaths.notificationSettings.name,
+                  parentNavigatorKey: rootNavigatorKey,
+                  builder: (context, state) => const NotificationSettingsView(),
                 ),
                 GoRoute(
                   path: RoutePaths.editProfile.path,

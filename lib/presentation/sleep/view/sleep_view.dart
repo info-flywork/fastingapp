@@ -2,6 +2,9 @@ import 'dart:async';
 
 import 'package:easy_localization/easy_localization.dart';
 import 'package:fastingapp/core/di/injection.dart';
+import 'package:fastingapp/core/dialogs/app_dialogs.dart';
+import 'package:fastingapp/core/snackbar/app_snackbar.dart';
+import 'package:fastingapp/core/sync/data_sync.dart';
 import 'package:fastingapp/domain/trackers/trackers_repository.dart';
 import 'package:fastingapp/core/remote_images/app_image.dart';
 import 'package:fastingapp/core/theme/app_text_styles.dart';
@@ -44,8 +47,134 @@ final class _SleepViewState extends State<SleepView> {
     try {
       final summary = await getIt<TrackersRepository>().getSleepSummary();
       if (mounted) setState(() => _summary = summary);
-    } on Object {
-      // Boş özet — UI sıfır değerleri gösterir
+    } on Object catch (e) {
+      // Hata boş ekran gibi gösterilmesin.
+      if (mounted) AppSnackbar.showError(context, e);
+    }
+  }
+
+  static (int, int) _hm(String? value, (int, int) fallback) {
+    final parts = value?.split(':');
+    if (parts == null || parts.length < 2) return fallback;
+    final h = int.tryParse(parts[0]);
+    final m = int.tryParse(parts[1]);
+    return h == null || m == null ? fallback : (h, m);
+  }
+
+  /// Dün gecenin uykusu: kalkış saati henüz gelmediyse dünkü kalkış;
+  /// yatış kalkıştan sonra görünüyorsa bir önceki güne düşer. [editing]
+  /// verilirse o kaydın gerçek saatleriyle açılır ve kayıt güncellenir.
+  Future<void> _logSleep({SleepSummary? editing}) async {
+    final start0 = editing?.lastNightStart;
+    final end0 = editing?.lastNightEnd;
+    final (bedH, bedM) = start0 != null
+        ? (start0.hour, start0.minute)
+        : _hm(_summary?.bedtime, (23, 0));
+    final (wakeH, wakeM) = end0 != null
+        ? (end0.hour, end0.minute)
+        : _hm(_summary?.wakeTime, (7, 0));
+    final result = await AppDialogs.instance.showSleepTime(
+      context,
+      bedHour: bedH,
+      bedMinute: bedM,
+      wakeHour: wakeH,
+      wakeMinute: wakeM,
+    );
+    if (result == null || !mounted) return;
+    final now = DateTime.now();
+    final anchor = end0 ?? now;
+    var end = DateTime(
+      anchor.year,
+      anchor.month,
+      anchor.day,
+      result.endHour,
+      result.endMinute,
+    );
+    if (end.isAfter(now)) end = end.subtract(const Duration(days: 1));
+    var start = DateTime(
+      end.year,
+      end.month,
+      end.day,
+      result.startHour,
+      result.startMinute,
+    );
+    if (!start.isBefore(end)) start = start.subtract(const Duration(days: 1));
+    final trackers = getIt<TrackersRepository>();
+    final id = editing?.lastNightId;
+    try {
+      if (id != null) {
+        await trackers.updateSleep(id, sleepStart: start, sleepEnd: end);
+      } else {
+        await trackers.createSleep(sleepStart: start, sleepEnd: end);
+      }
+      DataSync.afterWrite();
+      await _load();
+    } on Object catch (e) {
+      if (mounted) AppSnackbar.showError(context, e);
+    }
+  }
+
+  /// Gece kaydına dokununca düzenle / sil (önceden kayıt değiştirilemiyor,
+  /// aynı geceye yeni kayıt 409 alıyordu).
+  Future<void> _onEntryTapped() async {
+    final summary = _summary;
+    final id = summary?.lastNightId;
+    if (summary == null || id == null || !summary.lastNightEditable) return;
+    final delete = await AppDialogs.instance.showSleepEntryActions(context);
+    if (delete == null || !mounted) return;
+    if (!delete) return _logSleep(editing: summary);
+    try {
+      await getIt<TrackersRepository>().deleteSleep(id);
+      DataSync.afterWrite();
+      await _load();
+    } on Object catch (e) {
+      if (mounted) AppSnackbar.showError(context, e);
+    }
+  }
+
+  static String _hhmm(int h, int m) =>
+      '${h.toString().padLeft(2, '0')}:${m.toString().padLeft(2, '0')}';
+
+  /// Program (yatış / kalkış hedefi): `PATCH /user/goals`.
+  Future<void> _editSchedule() async {
+    final (bedH, bedM) = _hm(_summary?.bedtime, (23, 0));
+    final (wakeH, wakeM) = _hm(_summary?.wakeTime, (7, 0));
+    final result = await AppDialogs.instance.showSleepTime(
+      context,
+      bedHour: bedH,
+      bedMinute: bedM,
+      wakeHour: wakeH,
+      wakeMinute: wakeM,
+    );
+    if (result == null || !mounted) return;
+    await _saveGoals({
+      'bedtime': _hhmm(result.startHour, result.startMinute),
+      'wakeTime': _hhmm(result.endHour, result.endMinute),
+    });
+  }
+
+  /// Uyku hedefi 3–12 saat, yarım saat adımlarla.
+  Future<void> _editGoal() async {
+    final minutes = await AppDialogs.instance.showGoalStepper(
+      context,
+      title: 'sleep_page.goal_title'.tr(),
+      initial: _summary?.goalMin ?? 450,
+      min: 180,
+      max: 720,
+      step: 30,
+      format: (v) => _goalHours(v),
+    );
+    if (minutes == null || !mounted) return;
+    await _saveGoals({'sleepGoalMin': minutes});
+  }
+
+  Future<void> _saveGoals(Map<String, dynamic> fields) async {
+    try {
+      await getIt<TrackersRepository>().updateGoals(fields);
+      DataSync.afterWrite();
+      await _load();
+    } on Object catch (e) {
+      if (mounted) AppSnackbar.showError(context, e);
     }
   }
 
@@ -71,8 +200,25 @@ final class _SleepViewState extends State<SleepView> {
     final weekHours = summary?.weekMinutes.isNotEmpty == true
         ? summary!.weekMinutes.map((m) => m / 60).toList()
         : List<double>.filled(7, 0);
+    // Sunucu haftası son 7 gündür (bugün en sonda): etiket gün tarihinden.
+    final weekLabels = [
+      for (var i = 0; i < weekHours.length; i++)
+        () {
+          final dates = summary?.weekDates ?? const <DateTime?>[];
+          final date = i < dates.length
+              ? dates[i]
+              : DateTime.now().subtract(
+                  Duration(days: weekHours.length - 1 - i),
+                );
+          return _dayKeys[((date ?? DateTime.now()).weekday - 1) % 7];
+        }(),
+    ];
     final bedtime = summary?.bedtime ?? '—';
     final wakeTime = summary?.wakeTime ?? '—';
+    // Yay altındaki satır gecenin gerçek saatleri (önceden program).
+    String clock(DateTime? t) => t == null ? '—' : _hhmm(t.hour, t.minute);
+    final sleptAt = clock(summary?.lastNightStart);
+    final wokeAt = clock(summary?.lastNightEnd);
     final goalText = summary != null ? _goalHours(summary.goalMin) : '—';
 
     return AnnotatedRegion<SystemUiOverlayStyle>(
@@ -84,10 +230,10 @@ final class _SleepViewState extends State<SleepView> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              const SizedBox(
+              SizedBox(
                 height: 56,
                 width: double.infinity,
-                child: _SleepHeader(),
+                child: _SleepHeader(onAdd: () => unawaited(_logSleep())),
               ),
               Expanded(
                 child: ListView(
@@ -99,13 +245,19 @@ final class _SleepViewState extends State<SleepView> {
                       durationText: lastNight,
                     ),
                     const SizedBox(height: 8),
-                    _BoundRow(bedtime: bedtime, wakeTime: wakeTime),
+                    GestureDetector(
+                      behavior: HitTestBehavior.opaque,
+                      onTap: summary?.lastNightEditable == true
+                          ? () => unawaited(_onEntryTapped())
+                          : null,
+                      child: _BoundRow(bedtime: sleptAt, wakeTime: wokeAt),
+                    ),
                     const SizedBox(height: 20),
                     const _HourAxis(),
                     const SizedBox(height: 8),
                     for (var i = 0; i < weekHours.length; i++) ...[
                       _SleepDayBar(
-                        labelKey: _dayKeys[i],
+                        labelKey: weekLabels[i],
                         hours: weekHours[i],
                       ),
                       if (i != weekHours.length - 1) const SizedBox(height: 16),
@@ -120,6 +272,7 @@ final class _SleepViewState extends State<SleepView> {
                       children: [
                         Expanded(
                           child: _ScheduleCard(
+                            onTap: () => unawaited(_editSchedule()),
                             icon: _ScheduleIcon.bedtime,
                             valueText: bedtime,
                             labelKey: 'sleep_page.bedtime',
@@ -128,6 +281,7 @@ final class _SleepViewState extends State<SleepView> {
                         const SizedBox(width: 10),
                         Expanded(
                           child: _ScheduleCard(
+                            onTap: () => unawaited(_editSchedule()),
                             icon: _ScheduleIcon.wake,
                             valueText: wakeTime,
                             labelKey: 'sleep_page.wakeup',
@@ -136,6 +290,7 @@ final class _SleepViewState extends State<SleepView> {
                         const SizedBox(width: 10),
                         Expanded(
                           child: _ScheduleCard(
+                            onTap: () => unawaited(_editGoal()),
                             icon: _ScheduleIcon.goal,
                             valueText: goalText,
                             labelKey: 'sleep_page.goal',
@@ -155,7 +310,10 @@ final class _SleepViewState extends State<SleepView> {
 }
 
 final class _SleepHeader extends StatelessWidget {
-  const _SleepHeader();
+  const _SleepHeader({required this.onAdd});
+
+  /// Uyku kaydı ekle (yatış/kalkış).
+  final VoidCallback onAdd;
 
   @override
   Widget build(BuildContext context) {
@@ -171,7 +329,30 @@ final class _SleepHeader extends StatelessWidget {
               style: AppTextStyles.sleepTitle,
             ),
           ),
-          const SizedBox(width: 44),
+          Material(
+            color: ColorName.colorWhite,
+            shape: const CircleBorder(),
+            elevation: 1,
+            shadowColor: ColorName.colorBlack.withValues(alpha: 0.08),
+            child: InkWell(
+              onTap: onAdd,
+              customBorder: const CircleBorder(),
+              child: SizedBox(
+                width: 44,
+                height: 44,
+                child: Center(
+                  child: Assets.icons.uilPlus.svg(
+                    width: 22,
+                    height: 22,
+                    colorFilter: const ColorFilter.mode(
+                      ColorName.colorTitle,
+                      BlendMode.srcIn,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
         ],
       ),
     );
@@ -389,42 +570,48 @@ final class _ScheduleCard extends StatelessWidget {
     required this.icon,
     required this.valueText,
     required this.labelKey,
+    required this.onTap,
   });
 
+  final VoidCallback onTap;
   final _ScheduleIcon icon;
   final String valueText;
   final String labelKey;
 
   @override
   Widget build(BuildContext context) {
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        color: ColorName.colorWhite,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: ColorName.colorBlack.withValues(alpha: 0.05),
-          width: 2,
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: onTap,
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          color: ColorName.colorWhite,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: ColorName.colorBlack.withValues(alpha: 0.05),
+            width: 2,
+          ),
         ),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(12),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            _asset.image(width: 48, height: 48, fit: BoxFit.contain),
-            const SizedBox(height: 6),
-            Text(
-              valueText,
-              textAlign: TextAlign.center,
-              style: AppTextStyles.sleepCardValue,
-            ),
-            const SizedBox(height: 4),
-            Text(
-              labelKey.tr(),
-              textAlign: TextAlign.center,
-              style: AppTextStyles.sleepCardLabel,
-            ),
-          ],
+        child: Padding(
+          padding: const EdgeInsets.all(12),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              _asset.image(width: 48, height: 48, fit: BoxFit.contain),
+              const SizedBox(height: 6),
+              Text(
+                valueText,
+                textAlign: TextAlign.center,
+                style: AppTextStyles.sleepCardValue,
+              ),
+              const SizedBox(height: 4),
+              Text(
+                labelKey.tr(),
+                textAlign: TextAlign.center,
+                style: AppTextStyles.sleepCardLabel,
+              ),
+            ],
+          ),
         ),
       ),
     );

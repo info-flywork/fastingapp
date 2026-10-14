@@ -17,12 +17,16 @@ final class WeightProjectionView extends StatefulWidget {
     this.currentWeightKg = 74,
     this.goalWeightKg = 68,
     this.weeklyLossKg = 0.4,
+    this.targetDate,
     super.key,
   });
 
   final double currentWeightKg;
   final double goalWeightKg;
   final double weeklyLossKg;
+
+  /// Sunucunun hesapladığı tarih (`projection.targetDate`); yoksa yerelde.
+  final DateTime? targetDate;
 
   @override
   State<WeightProjectionView> createState() => _WeightProjectionViewState();
@@ -58,11 +62,13 @@ class _WeightProjectionViewState extends State<WeightProjectionView>
   @override
   Widget build(BuildContext context) {
     final locale = context.locale.toString();
-    final targetDate = projectedTargetDate(
-      currentKg: widget.currentWeightKg,
-      goalKg: widget.goalWeightKg,
-      weeklyLossKg: widget.weeklyLossKg,
-    );
+    final targetDate =
+        widget.targetDate ??
+        projectedTargetDate(
+          currentKg: widget.currentWeightKg,
+          goalKg: widget.goalWeightKg,
+          weeklyLossKg: widget.weeklyLossKg,
+        );
     final dateLabel = DateFormat.MMMMd(locale).format(targetDate);
     final weekly = widget.weeklyLossKg.toStringAsFixed(1);
     final current = widget.currentWeightKg.toStringAsFixed(1);
@@ -86,104 +92,110 @@ class _WeightProjectionViewState extends State<WeightProjectionView>
             ),
           ),
           child: SafeArea(
-          child: Column(
-            children: [
-              Expanded(
-                child: SingleChildScrollView(
-                  physics: const ClampingScrollPhysics(),
-                  padding: const EdgeInsets.fromLTRB(20, 28, 20, 16),
-                  child: Column(
-                    children: [
-                      Text(
-                        'onboarding.weight_projection_eyebrow'.tr(),
-                        textAlign: TextAlign.center,
-                        style: AppTextStyles.weightProjectionEyebrow,
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        'onboarding.weight_projection_weight'.tr(args: [goalInt]),
-                        textAlign: TextAlign.center,
-                        style: AppTextStyles.weightProjectionHero,
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        'onboarding.weight_projection_by'.tr(args: [dateLabel]),
-                        textAlign: TextAlign.center,
-                        style: AppTextStyles.weightProjectionDate,
-                      ),
-                      const SizedBox(height: 28),
-                      AnimatedBuilder(
-                        animation: _chartProgress,
-                        builder: (context, _) {
-                          return WeightProjectionChart(
-                            progress: _chartProgress.value,
-                          );
-                        },
-                      ),
-                      const SizedBox(height: 16),
-                      Row(
-                        children: [
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  current,
-                                  style:
-                                      AppTextStyles.weightProjectionTodayValue,
-                                ),
-                                const SizedBox(height: 2),
-                                Text(
-                                  'onboarding.weight_projection_today'.tr(),
-                                  style:
-                                      AppTextStyles.weightProjectionAxisLabel,
-                                ),
-                              ],
-                            ),
+            child: Column(
+              children: [
+                Expanded(
+                  child: SingleChildScrollView(
+                    physics: const ClampingScrollPhysics(),
+                    padding: const EdgeInsets.fromLTRB(20, 28, 20, 16),
+                    child: Column(
+                      children: [
+                        Text(
+                          'onboarding.weight_projection_eyebrow'.tr(),
+                          textAlign: TextAlign.center,
+                          style: AppTextStyles.weightProjectionEyebrow,
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          'onboarding.weight_projection_weight'.tr(
+                            args: [goalInt],
                           ),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.end,
-                              children: [
-                                Text(
-                                  goal,
-                                  style:
-                                      AppTextStyles.weightProjectionGoalValue,
-                                ),
-                                const SizedBox(height: 2),
-                                Text(
-                                  'onboarding.weight_projection_goal'.tr(),
-                                  style:
-                                      AppTextStyles.weightProjectionAxisLabel,
-                                ),
-                              ],
-                            ),
+                          textAlign: TextAlign.center,
+                          style: AppTextStyles.weightProjectionHero,
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          'onboarding.weight_projection_by'.tr(
+                            args: [dateLabel],
                           ),
-                        ],
-                      ),
-                      const SizedBox(height: 28),
-                      Text(
-                        'onboarding.weight_projection_body'.tr(args: [weekly]),
-                        textAlign: TextAlign.center,
-                        style: AppTextStyles.weightProjectionBody,
-                      ),
-                    ],
+                          textAlign: TextAlign.center,
+                          style: AppTextStyles.weightProjectionDate,
+                        ),
+                        const SizedBox(height: 28),
+                        AnimatedBuilder(
+                          animation: _chartProgress,
+                          builder: (context, _) {
+                            return WeightProjectionChart(
+                              progress: _chartProgress.value,
+                            );
+                          },
+                        ),
+                        const SizedBox(height: 16),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    current,
+                                    style: AppTextStyles
+                                        .weightProjectionTodayValue,
+                                  ),
+                                  const SizedBox(height: 2),
+                                  Text(
+                                    'onboarding.weight_projection_today'.tr(),
+                                    style:
+                                        AppTextStyles.weightProjectionAxisLabel,
+                                  ),
+                                ],
+                              ),
+                            ),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.end,
+                                children: [
+                                  Text(
+                                    goal,
+                                    style:
+                                        AppTextStyles.weightProjectionGoalValue,
+                                  ),
+                                  const SizedBox(height: 2),
+                                  Text(
+                                    'onboarding.weight_projection_goal'.tr(),
+                                    style:
+                                        AppTextStyles.weightProjectionAxisLabel,
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 28),
+                        Text(
+                          'onboarding.weight_projection_body'.tr(
+                            args: [weekly],
+                          ),
+                          textAlign: TextAlign.center,
+                          style: AppTextStyles.weightProjectionBody,
+                        ),
+                      ],
+                    ),
                   ),
                 ),
-              ),
-              Padding(
-                padding: const EdgeInsets.fromLTRB(20, 8, 20, 16),
-                child: AppButton(
-                  label: 'onboarding.weight_projection_cta'.tr(),
-                  onPressed: onContinue,
-                  showIcon: false,
-                  decoration: AppButtonDecoration.onLight(),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(20, 8, 20, 16),
+                  child: AppButton(
+                    label: 'onboarding.weight_projection_cta'.tr(),
+                    onPressed: onContinue,
+                    showIcon: false,
+                    decoration: AppButtonDecoration.onLight(),
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
-      ),
       ),
     );
   }

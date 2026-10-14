@@ -34,6 +34,33 @@ final class ProfileRepository {
     return result ?? const ProfileAccount();
   }
 
+  /// `GET /user/settings` → bildirim ve sağlık senkronu anahtarları.
+  Future<UserSettings> getSettings() async {
+    final result = await _network.send<UserSettings>(
+      path: '/user/settings',
+      method: RequestType.get,
+      parserModel: UserSettings.fromJson,
+    );
+    return result ?? const UserSettings();
+  }
+
+  /// `PATCH /user/settings` (yalnızca verilen alanlar).
+  Future<UserSettings> updateSettings({
+    bool? pushEnabled,
+    bool? healthSyncEnabled,
+  }) async {
+    final result = await _network.send<UserSettings>(
+      path: '/user/settings',
+      method: RequestType.patch,
+      data: {
+        'pushEnabled': ?pushEnabled,
+        'healthSyncEnabled': ?healthSyncEnabled,
+      },
+      parserModel: UserSettings.fromJson,
+    );
+    return result ?? const UserSettings();
+  }
+
   Future<UserProfile> getProfile() async {
     final result = await _network.send<UserProfile>(
       path: '/user/profile',
@@ -52,6 +79,17 @@ final class ProfileRepository {
       parserModel: UserProfile.fromJson,
     );
     return result ?? const UserProfile();
+  }
+
+  /// `PATCH /user/me {locale}`: push ve bildirim kutusu metinleri bu dilde
+  /// üretilir.
+  Future<void> updateLocale(String languageCode) async {
+    await _network.send<ProfileAccount>(
+      path: '/user/me',
+      method: RequestType.patch,
+      data: {'locale': languageCode},
+      parserModel: ProfileAccount.fromJson,
+    );
   }
 
   /// `PATCH /user/me {name}`; önbellekteki kullanıcı da güncellenir.
@@ -98,25 +136,36 @@ final class ProfileRepository {
     }
   }
 
-  /// Etkin plan; yoksa bekleyen plan (`GET /plans/current`).
-  Future<OnboardingFastingPlan?> getCurrentPlan() async {
+  /// Etkin planın kodu; yoksa bekleyen plan (`GET /plans/current`). Kod
+  /// döner: Planlar sekmesindeki planlar (15:9, 19:5, early_tre…) onboarding
+  /// listesinde yok, profil onları da göstermeli.
+  Future<String?> getCurrentPlanCode() async {
     final result = await _network.send<_PlanEnvelope>(
       path: '/plans/current',
       method: RequestType.get,
       parserModel: _PlanEnvelope.fromJson,
     );
-    return planFromCode(result?.planCode);
+    return result?.planCode;
   }
 
   /// `PUT /plans/current` (bir sonraki oruçtan geçerli). Premium plan
-  /// premium değilken `402 PREMIUM_REQUIRED` fırlatır.
+  /// premium değilken `402 PREMIUM_REQUIRED` fırlatır. Uzun planlar
+  /// [safetyAcknowledged] ister (bkz. `planRequiresSafetyAck`).
   Future<OnboardingFastingPlan?> setCurrentPlan(
-    OnboardingFastingPlan plan,
-  ) async {
+    OnboardingFastingPlan plan, {
+    bool safetyAcknowledged = false,
+    String? timing,
+    String? eatStart,
+  }) async {
     final result = await _network.send<_PlanEnvelope>(
       path: '/plans/current',
       method: RequestType.put,
-      data: {'planCode': OnboardingDraft.planCodes[plan]},
+      data: {
+        'planCode': OnboardingDraft.planCodes[plan],
+        'timing': ?timing,
+        if (eatStart != null) 'eatWindow': {'start': eatStart},
+        if (safetyAcknowledged) 'safetyAcknowledged': true,
+      },
       parserModel: _PlanEnvelope.fromJson,
     );
     return planFromCode(result?.planCode) ?? plan;
@@ -273,4 +322,27 @@ final class _PlanEnvelope implements BaseModel<_PlanEnvelope> {
 
   @override
   Map<String, dynamic> toJson() => {'planCode': planCode};
+}
+
+/// `/user/settings` içinden Profil ekranının kullandıkları.
+final class UserSettings implements BaseModel<UserSettings> {
+  const UserSettings({this.pushEnabled = true, this.healthSyncEnabled = false});
+
+  factory UserSettings.fromJson(Map<String, dynamic> json) => UserSettings(
+    pushEnabled: json['pushEnabled'] as bool? ?? true,
+    healthSyncEnabled: json['healthSyncEnabled'] as bool? ?? false,
+  );
+
+  final bool pushEnabled;
+  final bool healthSyncEnabled;
+
+  @override
+  UserSettings fromJson(Map<String, dynamic> json) =>
+      UserSettings.fromJson(json);
+
+  @override
+  Map<String, dynamic> toJson() => {
+    'pushEnabled': pushEnabled,
+    'healthSyncEnabled': healthSyncEnabled,
+  };
 }

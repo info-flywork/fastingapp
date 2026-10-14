@@ -14,15 +14,26 @@ mixin MealRecordsViewMixin on State<MealRecordsView> {
 
   bool get hasMealsForSelectedDate => !loading && meals.isNotEmpty;
 
+  /// Bu gün daha önce görüldüyse iskelet gösterilmez: önbellek hemen
+  /// çizilir, ağ yanıtı gelince yenilenir. Hata boş liste gibi gösterilmez.
   Future<void> _loadMeals() async {
-    setState(() => loading = true);
+    final date = selectedDate;
+    final cached = _meals.cachedDay(date);
+    setState(() {
+      meals = cached ?? const [];
+      loading = cached == null;
+    });
     try {
-      final items = await _meals.listForDay(selectedDate);
-      if (mounted) setState(() => meals = items);
-    } on Object {
-      if (mounted) setState(() => meals = const []);
+      final items = await _meals.listForDay(date);
+      if (mounted && DateUtils.isSameDay(date, selectedDate)) {
+        setState(() => meals = items);
+      }
+    } on Object catch (e) {
+      if (mounted) AppSnackbar.showError(context, e);
     } finally {
-      if (mounted) setState(() => loading = false);
+      if (mounted && DateUtils.isSameDay(date, selectedDate)) {
+        setState(() => loading = false);
+      }
     }
   }
 

@@ -61,6 +61,10 @@ mixin WaterViewMixin on State<WaterView>, TickerProvider {
     currentMl = widget.initialMl;
     dailyGoalMl = widget.dailyGoalMl;
     selectedDate = DateUtils.dateOnly(DateTime.now());
+    _shownToday = selectedDate;
+    _dayTimer = Timer.periodic(const Duration(minutes: 1), (_) {
+      unawaited(_onClockTick());
+    });
     _seedLocalWater();
 
     fillController = AnimationController(
@@ -133,7 +137,24 @@ mixin WaterViewMixin on State<WaterView>, TickerProvider {
   }
 
   /// Seed yoksa yerel widget verisi, sonra ağ — ilk frame boş kalmasın.
+  /// Birim / hatırlatma / özel bardaklar sunucudan (önceden hiç
+  /// yüklenmiyordu, ekran hep varsayılanla açılıyordu).
+  Future<void> _loadWaterPrefs() async {
+    try {
+      final prefs = await _trackers.getWaterPrefs();
+      if (!mounted) return;
+      setState(() {
+        _waterUnit = prefs.unit;
+        _waterNotifications = prefs.notifications;
+        _customGlassSizes = prefs.customGlassSizes;
+      });
+    } on Object {
+      // Varsayılanlar kalır.
+    }
+  }
+
   Future<void> bootstrapWaterDay() async {
+    unawaited(_loadWaterPrefs());
     if (currentMl <= 0) {
       await bindWaterWidgetLocalOnly();
     }
@@ -191,7 +212,8 @@ mixin WaterViewMixin on State<WaterView>, TickerProvider {
   /// [goalReached] ile celebration UI'sını hizala.
   void _syncCelebrationFromProgress({required bool animate}) {
     if (goalReached) {
-      if (celebrationController.value >= 1 && !celebrationController.isAnimating) {
+      if (celebrationController.value >= 1 &&
+          !celebrationController.isAnimating) {
         return;
       }
       if (animate) {
@@ -201,7 +223,8 @@ mixin WaterViewMixin on State<WaterView>, TickerProvider {
         fillController.duration = const Duration(milliseconds: fillDurationMs);
       }
     } else {
-      if (celebrationController.value <= 0 && !celebrationController.isAnimating) {
+      if (celebrationController.value <= 0 &&
+          !celebrationController.isAnimating) {
         return;
       }
       if (animate) {
@@ -233,7 +256,9 @@ mixin WaterViewMixin on State<WaterView>, TickerProvider {
     await pushWaterWidget();
   }
 
-  Future<void> pushWaterWidget() {
+  Future<void> pushWaterWidget() async {
+    // Geçmiş bir gün geziliyorsa widget (bugün) ezilmesin.
+    if (!DateUtils.isSameDay(selectedDate, _today)) return;
     return WaterWidgetSync.publish(
       currentMl: currentMl,
       goalMl: dailyGoalMl,
@@ -254,6 +279,19 @@ mixin WaterViewMixin on State<WaterView>, TickerProvider {
       addWaterLabel: 'water_page.add_water'.tr(context: context),
       weekdays: 'water_page.weekdays'.tr(context: context),
     );
+  }
+
+  /// Ekran açıkken gece yarısı geçerse "bugün" yeni güne geçer; önceden
+  /// seçili gün dünde kalıyor, + düğmesi gizleniyordu.
+  DateTime _shownToday = DateUtils.dateOnly(DateTime.now());
+  Timer? _dayTimer;
+
+  Future<void> _onClockTick() async {
+    final today = _today;
+    if (!mounted || DateUtils.isSameDay(today, _shownToday)) return;
+    final wasToday = DateUtils.isSameDay(selectedDate, _shownToday);
+    _shownToday = today;
+    if (wasToday) await _selectWaterDate(today);
   }
 
   DateTime get _today => DateUtils.dateOnly(DateTime.now());
@@ -288,9 +326,7 @@ mixin WaterViewMixin on State<WaterView>, TickerProvider {
   }
 
   Future<void> _shiftWaterDate(int dayDelta) {
-    final next = DateUtils.dateOnly(
-      selectedDate.add(Duration(days: dayDelta)),
-    );
+    final next = DateUtils.dateOnly(selectedDate.add(Duration(days: dayDelta)));
     return _selectWaterDate(next);
   }
 
@@ -336,6 +372,7 @@ mixin WaterViewMixin on State<WaterView>, TickerProvider {
   }
 
   void disposeWaterControllers() {
+    _dayTimer?.cancel();
     _waterDebounce?.cancel();
     final ops = List<_PendingWaterOp>.of(_pendingOps);
     _pendingOps.clear();
@@ -459,15 +496,19 @@ mixin WaterViewMixin on State<WaterView>, TickerProvider {
           day = await _trackers.deleteWaterEntry(op.id);
         }
       }
+      // Ekrandan çıkılmış olsa da diğer ekranlar tazelensin.
+      DataSync.afterWrite();
       if (!mounted) return;
       if (_pendingOps.isEmpty && day != null) {
         _applyWaterDay(day);
       }
-      DataSync.afterWrite();
     } on Object catch (e) {
       if (!mounted) return;
       AppSnackbar.showError(context, e);
       _pendingOps.clear();
+      // Bayrak açıkken loadWaterDay sunucu cevabını yok sayar; iyimser
+      // (kaydedilmemiş) değer ekranda kalırdı. Önce kapat, sonra hizala.
+      _waterFlushing = false;
       await loadWaterDay();
     } finally {
       _waterFlushing = false;
@@ -509,11 +550,22 @@ mixin WaterViewMixin on State<WaterView>, TickerProvider {
   }
 
   /// UI anında güncellenir; ağ isteği debounce ile gider.
+  static const _highDailyMl = 6000;
+
   void addWater() {
     if (!isWaterToday) return;
     final wasGoal = goalReached;
     final id = _trackers.newWaterEntryId();
     final amount = addMl;
+    // Sunucu kuralı `HIGH_WATER_INTAKE` (> 6000 ml): eşik geçilince bir kez
+    // uyarı (önceden hiç gösterilmiyordu).
+    if (currentMl <= _highDailyMl && currentMl + amount > _highDailyMl) {
+      AppSnackbar.show(
+        context: context,
+        text: 'water_page.high_intake_warning'.tr(),
+        type: SnackBarType.info,
+      );
+    }
     setState(() {
       currentMl += amount;
       _waterEntryIds.add(id);
@@ -721,9 +773,7 @@ mixin WaterViewMixin on State<WaterView>, TickerProvider {
       titleKey: 'water_reminder.daily_goal',
       subtitleKey: 'water_reminder.goal_dialog_subtitle',
       initialValueMl: dailyGoalMl,
-      initialUnit: _waterUnit == 'oz'
-          ? WaterVolumeUnit.oz
-          : WaterVolumeUnit.ml,
+      initialUnit: _waterUnit == 'oz' ? WaterVolumeUnit.oz : WaterVolumeUnit.ml,
       headerImage: AppImages.waterBottle,
     );
     if (result == null || !mounted) return;

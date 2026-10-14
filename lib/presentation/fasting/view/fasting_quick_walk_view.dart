@@ -13,9 +13,9 @@ import 'package:go_router/go_router.dart';
 
 /// Kısa yürüyüş — 3 dakikalık sayaç.
 final class FastingQuickWalkView extends StatefulWidget {
-  const FastingQuickWalkView({required this.bodyKey, super.key});
+  const FastingQuickWalkView({required this.bodyText, super.key});
 
-  final String bodyKey;
+  final String bodyText;
 
   @override
   State<FastingQuickWalkView> createState() => _FastingQuickWalkViewState();
@@ -98,7 +98,7 @@ class _FastingQuickWalkViewState extends State<FastingQuickWalkView>
             ),
             const SizedBox(height: 12),
             Text(
-              widget.bodyKey.tr(),
+              widget.bodyText,
               textAlign: TextAlign.center,
               style: AppTextStyles.fastingStruggleBody,
             ),

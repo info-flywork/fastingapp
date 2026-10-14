@@ -88,7 +88,8 @@ Widget appImage(
     builder: (context, generation, _) => Image(
       key: ValueKey(generation),
       image: ResizeImage.resizeIfNeeded(
-        cacheWidth,
+        cacheWidth ??
+            _decodeWidth(context, width, fit, hasHeight: cacheHeight != null),
         cacheHeight,
         AppImageProvider(path),
       ),
@@ -113,6 +114,24 @@ Widget appImage(
       excludeFromSemantics: excludeFromSemantics,
     ),
   );
+}
+
+/// Büyük kaynak görseller ekrandaki boyuta yakın çözülsün (bellek + çözme
+/// süresi). Yalnızca genişlik biliniyor ve görsel o genişliği aşmıyorsa
+/// (cover/fill/fitHeight değil). `Transform.scale` ile büyütülen kullanımlar
+/// bulanıklaşmasın diye 2 kat pay bırakılır.
+int? _decodeWidth(
+  BuildContext context,
+  double? width,
+  BoxFit? fit, {
+  required bool hasHeight,
+}) {
+  if (hasHeight || width == null || !width.isFinite || width <= 0) return null;
+  if (fit == BoxFit.cover || fit == BoxFit.fill || fit == BoxFit.fitHeight) {
+    return null;
+  }
+  final dpr = MediaQuery.maybeDevicePixelRatioOf(context) ?? 3;
+  return (width * dpr * 2).round();
 }
 
 /// Üretilen `AppImages` sabitlerinin tipi (`lib/generated/app_images.g.dart`).

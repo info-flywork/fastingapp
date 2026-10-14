@@ -4,7 +4,10 @@
     "failed": "Başarısız",
     "retry": "Tekrar dene",
     "cancel": "İptal",
-    "confirm": "Onayla"
+    "confirm": "Onayla",
+    "save": "Kaydet",
+    "error_generic": "Bir şeyler ters gitti. Lütfen tekrar dene.",
+    "no_connection": "İnternet bağlantısı yok. Bağlantını kontrol edip tekrar dene."
   },
   "auth": {
     "welcome_title": "Hoş geldin",
@@ -211,7 +214,11 @@
     "good_company_rating_label": "uygulama puanı",
     "good_company_reviewer": "Defne K.",
     "good_company_quote": "İlk orucum ceza gibi hissettirmedi. Coach Mochi 11'deki krizleri birlikte atlattı, hatta güldüm.",
-    "good_company_cta": "Hedefimi gör ->"
+    "good_company_cta": "Hedefimi gör ->",
+    "plans_age_note": "18 yaş altında yalnızca yaşına uygun planlar gösteriliyor.",
+    "goal_bmi_low": "Hedef kilo boyuna göre çok düşük. Lütfen daha sağlıklı bir hedef seç.",
+    "meal_window_same_error": "Başlangıç ve bitiş saati aynı olamaz.",
+    "health_consent": "MochiFast'in planımı kişiselleştirmek için sağlık verilerimi (kilo, oruç, öğünler) işlemesine onay veriyorum."
   },
   "home": {
     "nav_home": "Ana sayfa",
@@ -262,7 +269,15 @@
     "hunger_tracker": "Açlık Takibi",
     "hunger_question": "Gerçekten aç mısın?",
     "hunger_subtitle": "“Duygusal açlık” seni yanıltabilir. Farkı öğren, sonra nasıl hissettiğini kaydet.",
-    "log_hunger": "Açlık seviyemi kaydet"
+    "log_hunger": "Açlık seviyemi kaydet",
+    "challenge_progress": "{}/{} tamamlandı",
+    "fasting_goal_reached": "Hedefe ulaştın",
+    "eating_window": "Öğün penceresi",
+    "metric_goal": " /{}",
+    "weight_unit_lb": "lb",
+    "challenge_leave_title": "Meydan okumadan ayrılınsın mı?",
+    "challenge_leave_body": "Bu meydan okumadaki ilerlemen silinecek.",
+    "challenge_leave": "Ayrıl"
   },
   "mochi_world": {
     "title": "Mochi World",
@@ -356,8 +371,22 @@
     "widget_this_week": "Bu Hafta",
     "widget_keep_going": "Devam et!\nHarika gidiyorsun.",
     "share_meal": "Mochi ile öğün vakti.\n\nPlan: {}\nÖğün penceresi açık.\nBaşlangıç: {}\nBitiş: {}\nSeri: {} gün",
-    "start_now_cta": "Orucu şimdi başlat",
-    "plan_changed_next": "Plan güncellendi. Yeni plan bir sonraki orucunda geçerli olacak."
+    "plan_changed_next": "Plan güncellendi. Yeni plan bir sonraki orucunda geçerli olacak.",
+    "overtime": "Hedef +{}",
+    "next_fast_at": "Planına göre orucun {} başlar",
+    "start_next_cta": "Sonraki orucu başlat",
+    "long_overrun_title": "Bu saatte mi bitirdin?",
+    "long_overrun_body": "Bitiş saati, planlanan bitişten 12 saatten fazla sonra. Orucu gerçekten bu saatte bitirdiysen kaydet; değilse bitiş saatini düzelt.",
+    "long_overrun_confirm": "Evet, kaydet",
+    "long_overrun_cancel": "Saati düzelt",
+    "free_day_title": "Bugün serbest gün",
+    "free_day_body": "Planında bugün oruç yok. İstersen yine de oruç başlatabilirsin.",
+    "reduced_day_title": "Bugün {} kcal günü",
+    "reduced_day_body": "Bugün yaklaşık {} kcal al. Gün sonunda işaretle.",
+    "reduced_day_done": "Tamamlandı ✓",
+    "reduced_day_skipped": "Atlandı",
+    "reduced_day_done_cta": "Tamamladım",
+    "reduced_day_skip_cta": "Atladım"
   },
   "fasting_struggle": {
     "back": "Zaman göstergesine dön",
@@ -540,7 +569,9 @@
     "emotional_rec_3": "Hızlı bir nefes egzersizi yap",
     "emotional_rec_4": "Destek istersen Mochi ile konuş",
     "primary": "Log this hunger",
-    "secondary": "Mochi ile konuş"
+    "secondary": "Mochi ile konuş",
+    "safety_note": "Belirttiğin belirtiler dikkat gerektiriyor. Kendini iyi hissetmiyorsan orucu bitir; geçmezse bir sağlık uzmanına danış.",
+    "end_fast_cta": "Orucumu bitir"
   },
   "hunger_log_page": {
     "title_line1": "Takibine",
@@ -605,7 +636,13 @@
     "feeling_good": "İyi",
     "feeling_super": "Süper!",
     "notes_title": "Kendine notlar",
-    "notes_hint": "Notunu yaz..."
+    "notes_hint": "Notunu yaz...",
+    "delete": "Öğünü sil",
+    "delete_title": "Bu öğün silinsin mi?",
+    "delete_body": "Öğün kaydı kaldırılacak. Bu işlem geri alınamaz.",
+    "delete_confirm": "Sil",
+    "delete_cancel": "Vazgeç",
+    "delete_failed": "Öğün silinemedi. Tekrar dene."
   },
   "water_page": {
     "today": "Bugün",
@@ -628,7 +665,8 @@
     "edit_goal_hint": "ml",
     "save": "Kaydet",
     "goal_range_error": "Günlük hedef {}–{} ml arasında olmalı.",
-    "glass_range_error": "Bardak boyutu {}–{} ml arasında olmalı."
+    "glass_range_error": "Bardak boyutu {}–{} ml arasında olmalı.",
+    "high_intake_warning": "Bugün epey su içtin. Günde 6 litreden fazlası zararlı olabilir, yavaş git."
   },
   "steps_page": {
     "today": "Bugün",
@@ -650,7 +688,8 @@
     "day_thu": "Per",
     "day_fri": "Cum",
     "day_sat": "Cmt",
-    "day_sun": "Paz"
+    "day_sun": "Paz",
+    "goal_title": "Günlük adım hedefi"
   },
   "body_history": {
     "title": "Vücut Geçmişi",
@@ -667,7 +706,10 @@
     "week": "Hafta",
     "month": "Ay",
     "unit": "kg",
-    "progress_percent": "{}%"
+    "progress_percent": "{}%",
+    "entries_title": "Kayıtlar",
+    "delete_title": "Bu kilo kaydı silinsin mi?",
+    "delete_body": "Grafiğinden kaldırılacak."
   },
   "water_reminder": {
     "title": "Su Hatırlatıcı",
@@ -684,7 +726,13 @@
     "unit_dialog_subtitle": "Tercih ettiğin birimi seç",
     "custom_size_dialog_subtitle": "Özel bardak boyutu ekle",
     "unit_ml": "ml",
-    "unit_oz": "oz"
+    "unit_oz": "oz",
+    "glass_range_error": "Bardak {}–{} ml arasında olmalı",
+    "custom_size_limit": "En fazla {} özel bardak ekleyebilirsin",
+    "interval": "Hatırlatma aralığı",
+    "every_minutes": "{} dk'da bir",
+    "every_hours": "{} saatte bir",
+    "every_hours_minutes": "{} sa {} dk'da bir"
   },
   "profile": {
     "premium_badge": "Premium",
@@ -749,7 +797,14 @@
     "restore_success": "Premium'un yeniden etkin.",
     "restore_none": "Geri yüklenecek satın alım bulunamadı.",
     "restore_failed": "Satın alımlar geri yüklenemedi. Lütfen tekrar dene.",
-    "guest_name": "Misafir"
+    "guest_name": "Misafir",
+    "weight_range_error": "Kilo {}–{} kg arasında olmalı",
+    "sync_health_connect": "Health Connect ile senkronize et",
+    "health_sync_denied": "Sağlık erişimi reddedildi. Ayarlardan açabilirsin.",
+    "share_app_text": "Orucumu MochiFast ile takip ediyorum. Sen de katıl!",
+    "legal_support": "Yasal ve destek",
+    "contact_support": "Destek ile iletişim",
+    "support_email_copied": "E-posta adresi kopyalandı"
   },
   "notifications": {
     "title": "Bildirimler",
@@ -761,7 +816,11 @@
     "meal_ended_body": "Hazırlan, oruç zamanı yakında başlıyor!",
     "empty_title": "Henüz bildirimin yok",
     "empty_subtitle": "Olduğunda sana haber vereceğiz.",
-    "back": "Geri"
+    "back": "Geri",
+    "yesterday_date": "Dün, {date}",
+    "just_now": "ŞİMDİ",
+    "minutes_ago": "{minutes}DK ÖNCE",
+    "load_failed": "Bildirimlerin yüklenemedi."
   },
   "languages": {
     "title": "Diller",
@@ -814,7 +873,13 @@
     "delete": "Sil",
     "empty_title": "Henüz sohbet yok",
     "empty_subtitle": "Coach Mochi ile konuşmaya başla; sohbetlerin burada görünecek.",
-    "start_chat": "Sohbet başlat"
+    "start_chat": "Sohbet başlat",
+    "safety_urgent": "Kendini tehlikede hissediyorsan lütfen hemen bulunduğun yerin acil yardım numarasını ara (Türkiye'de 112) ya da güvendiğin biriyle konuş. Yalnız değilsin.",
+    "quota_left": {
+      "zero": "Bugün mesaj hakkın kalmadı",
+      "one": "Bugün 1 mesaj hakkın kaldı",
+      "other": "Bugün {} mesaj hakkın kaldı"
+    }
   },
   "plans": {
     "title": "Oruç Planları",
@@ -858,7 +923,42 @@
     "active_fast_body": "Yeni plana geçersen şu anki oruç etkilenecek. Ne yapmak istersin?",
     "active_fast_cancel_existing": "Orucu iptal et",
     "active_fast_reject": "Vazgeç",
-    "active_fast_restart_same": "Aynı süreyle devam et"
+    "active_fast_restart_same": "Aynı süreyle devam et",
+    "safety_ack_title": "Uzun oruç planı",
+    "safety_ack_body": "Bu plan uzun oruç süreleri içerir. Hamileysen, emziriyorsan, diyabet veya yeme bozukluğu geçmişin varsa ya da ilaç kullanıyorsan başlamadan önce doktoruna danış. Kendini kötü hissedersen orucu bitir.",
+    "safety_ack_confirm": "Anladım, devam et",
+    "safety_ack_cancel": "Vazgeç",
+    "weekly_title": "Haftalık Planlar",
+    "weekly_emphasis": "Günlerini seç,",
+    "weekly_rest": " diğerlerinde serbestsin.",
+    "chip_weekly": "Haftalık",
+    "subtitle_5_2": "2 gün 500 kcal",
+    "subtitle_6_1": "1 gün 500 kcal",
+    "subtitle_alternate_day": "gün aşırı 500 kcal",
+    "subtitle_crescendo": "haftada 2–3 gün oruç",
+    "subtitle_custom_weekly": "haftanı kendin tasarla",
+    "title_alternate_day": "Gün Aşırı",
+    "title_crescendo": "Crescendo",
+    "title_custom_weekly": "Özel Hafta",
+    "weekly_desc_5_2": "Haftanın 5 günü normal ye. Ardışık olmayan 2 günde yaklaşık 500 kcal al.",
+    "weekly_desc_6_1": "Haftanın 6 günü normal ye. 1 günde yaklaşık 500 kcal al.",
+    "weekly_desc_alternate_day": "Hafta boyunca 500 kcal günü ile normal günü sırayla uygula.",
+    "weekly_desc_crescendo": "Yumuşak başlangıç: ardışık olmayan 2–3 günde 12–16 saat oruç, diğer günler normal.",
+    "weekly_desc_custom_weekly": "Her günün nasıl geçeceğini seç: oruç, 500 kcal ya da serbest gün.",
+    "weekly_hint_weeklyReduced": "500 kcal günü yapmak için bir güne dokun.",
+    "weekly_hint_alternateDay": "500 kcal ile serbest arasında geçmek için güne dokun.",
+    "weekly_hint_selectedDays": "Oruç günü yapmak için bir güne dokun.",
+    "weekly_hint_customWeekly": "Güne dokun: serbest → oruç → 500 kcal.",
+    "weekly_day_fast": "{} sa oruç",
+    "weekly_day_reduced": "{} kcal günü",
+    "weekly_day_normal": "Serbest gün",
+    "weekly_fast_hours": "Oruç süresi: {} sa",
+    "weekly_error_days": "Bu plan bu tür bir güne izin vermiyor.",
+    "weekly_error_reduced_count": "Gereken sayıda 500 kcal günü seç.",
+    "weekly_error_consecutive": "Özel günler art arda olamaz.",
+    "weekly_error_alternate": "Art arda olmayan 3–4 gün seç.",
+    "weekly_error_fast_count": "2 ya da 3 oruç günü seç.",
+    "weekly_error_hours": "Oruç süresi bu plan için uygun aralıkta değil."
   },
   "calories_page": {
     "eaten": "Yenilen {}",
@@ -874,7 +974,12 @@
     "goal": "Hedef:",
     "add_daily_manual": "Günlük Manuel Ekle",
     "manual_value": "{} kcal",
-    "calculate": "Kalori Hesapla"
+    "calculate": "Kalori Hesapla",
+    "add_manual_cta": "{} kcal ekle",
+    "kcal_left": "kcal kaldı",
+    "kcal_eaten": "kcal yenildi",
+    "goal_fmt": "Hedef {} kcal",
+    "goal_title": "Günlük kalori hedefi"
   },
   "calories_camera": {
     "no_camera": "Bu cihazda kamera bulunamadı.",
@@ -890,7 +995,13 @@
     "protein_value": "27g",
     "carbs_value": "64g",
     "fats_value": "22g",
-    "recalculate": "Yeni kalori hesapla"
+    "recalculate": "Yeni kalori hesapla",
+    "analyzing": "Analiz ediliyor…",
+    "no_result_title": "Sonuç yok",
+    "not_food": "Bu bir yemek fotoğrafı gibi görünmüyor. Tabağını net gösteren yeni bir fotoğraf dene.",
+    "analysis_failed": "Analiz yapılamadı. Yeni bir fotoğrafla tekrar dene.",
+    "still_processing": "Analiz hâlâ sürüyor. Birazdan tekrar kontrol et; yeni hak harcanmaz.",
+    "check_again": "Tekrar kontrol et"
   },
   "sleep_page": {
     "title": "Uyku",
@@ -911,7 +1022,13 @@
     "day_thu": "Per",
     "day_fri": "Cum",
     "day_sat": "Cmt",
-    "day_sun": "Paz"
+    "day_sun": "Paz",
+    "log_title": "Uyku kaydı",
+    "entry_title": "Dün geceki uyku",
+    "entry_body": "Yatış ve kalkış saatini düzenle ya da bu kaydı sil.",
+    "entry_delete": "Sil",
+    "entry_edit": "Düzenle",
+    "goal_title": "Uyku hedefi"
   },
   "protein_page": {
     "title": "Protein Takibi",
@@ -941,7 +1058,8 @@
     "kind_lunch": "Öğle",
     "kind_dinner": "Akşam",
     "kind_snack": "Atıştırmalık",
-    "kind_other": "Öğün"
+    "kind_other": "Öğün",
+    "goal_title": "Günlük protein hedefi"
   },
   "insights_page": {
     "brand_mochi": "Mochi",
@@ -1035,5 +1153,74 @@
     "subtitle": "Mochi bağlantıyı arıyor. Wi‑Fi'ni ya da mobil verini kontrol edip tekrar dene.",
     "retry": "Tekrar dene",
     "checking": "Kontrol ediliyor…"
+  },
+  "ai_consent": {
+    "title": "Mochi ile paylaşım",
+    "body": "Sohbet ve yemek fotoğrafı analizi için mesajların ile fotoğrafların yapay zekâya gönderilir. Sağlık tavsiyesi değildir; istediğin zaman hesabından silebilirsin.",
+    "confirm": "Kabul et",
+    "cancel": "Vazgeç"
+  },
+  "fasting_history_page": {
+    "title": "Oruç Geçmişi",
+    "list_title": "Geçmiş oruçlar",
+    "stats_title": "Tüm zamanlar",
+    "stat_fasts": "Oruç",
+    "stat_completed": "Tamamlanan",
+    "stat_rate": "Başarı",
+    "stat_total": "Toplam süre",
+    "stat_longest": "En uzun",
+    "stat_avg": "Ortalama",
+    "status_completed": "Tamamlandı",
+    "status_ended_early": "Erken bitti",
+    "status_cancelled": "İptal",
+    "status_active": "Aktif",
+    "empty_title": "Henüz oruç yok",
+    "empty_subtitle": "İlk orucunu bitirince burada görünür.",
+    "error": "Geçmiş yüklenemedi",
+    "retry": "Tekrar dene",
+    "entry_edit_title": "Orucu düzenle",
+    "entry_add_title": "Geçmiş oruç ekle",
+    "entry_start": "Başlangıç",
+    "entry_end": "Bitiş",
+    "entry_delete": "Orucu sil",
+    "delete_title": "Bu oruç silinsin mi?",
+    "delete_body": "Geçmişinden ve istatistiklerinden kaldırılacak.",
+    "entry_invalid": "Bitiş, başlangıçtan en az 1 saat sonra olmalı.",
+    "entry_too_long": "Bir oruç en fazla 72 saat olabilir."
+  },
+  "legal_update": {
+    "title": "Koşullarımızı güncelledik",
+    "body": "Kullanım Koşulları ve Gizlilik Politikamız değişti. MochiFast'i kullanmaya devam etmek için güncel sürümleri kabul et.",
+    "accept": "Kabul et",
+    "later": "Sonra"
+  },
+  "fasting_finish": {
+    "reward_title": "Harika iş!",
+    "reward_streak": "{} günlük seri",
+    "reward_xp": "+{} XP",
+    "reward_level": "{}. seviyeye ulaştın!",
+    "reward_world": "Mochi adan büyüdü",
+    "reward_challenge": "Meydan okuma tamamlandı",
+    "reward_continue": "Devam"
+  },
+  "app_update": {
+    "title": "Güncelleme var",
+    "body": "MochiFast'in yeni sürümü iyileştirmeler ve düzeltmelerle hazır.",
+    "required_title": "Güncelleme gerekli",
+    "required_body": "Bu sürüm artık desteklenmiyor. Devam etmek için MochiFast'i güncelle.",
+    "update": "Güncelle",
+    "later": "Sonra"
+  },
+  "notification_settings": {
+    "title": "Bildirim ayarları",
+    "fasting": "Oruç",
+    "streak": "Seri",
+    "weight": "Kilo",
+    "water": "Su",
+    "challenges": "Meydan okumalar",
+    "world": "Mochi Dünyası",
+    "quiet_hours": "Sessiz saatler",
+    "quiet_start": "Başlangıç",
+    "quiet_end": "Bitiş"
   }
 }

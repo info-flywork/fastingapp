@@ -2,6 +2,9 @@ import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:easy_localization/easy_localization.dart';
+import 'package:fastingapp/core/dialogs/app_dialogs.dart';
+import 'package:fastingapp/domain/trackers/trackers_repository.dart';
+import 'package:fastingapp/core/sync/data_sync.dart';
 import 'package:fastingapp/core/di/injection.dart';
 import 'package:fastingapp/core/network/network_exception.dart';
 import 'package:fastingapp/core/router/route_paths.dart';
@@ -34,6 +37,7 @@ class _ProteinTrackerViewState extends State<ProteinTrackerView> {
   /// Cache yoksa ilk frame'de shimmer; cache varken asla full-page loading yok.
   bool _showShimmer = false;
   bool _hasContent = false;
+
   /// İlk içerik sonrası gauge/bar animasyonu bir kez; sessiz refresh'te sıfırlama yok.
   bool _playEntrance = true;
   String? _error;
@@ -113,8 +117,30 @@ class _ProteinTrackerViewState extends State<ProteinTrackerView> {
       if (!mounted) return;
       setState(() {
         _showShimmer = false;
-        _error = e.toString();
+        _error = errorMessageOf(e);
       });
+    }
+  }
+
+  /// Protein hedefi (0–400 g, `PATCH /user/goals {proteinGoalG}`); önceden
+  /// değiştirilemiyordu. Hedef gizliyse (sağlık bayrağı) düzenlenmez.
+  Future<void> _editGoal(int current) async {
+    final value = await AppDialogs.instance.showGoalStepper(
+      context,
+      title: 'protein_page.goal_title'.tr(),
+      initial: current,
+      min: 20,
+      max: 400,
+      step: 5,
+      format: (v) => '$v g',
+    );
+    if (value == null || value == current || !mounted) return;
+    try {
+      await getIt<TrackersRepository>().updateGoals({'proteinGoalG': value});
+      DataSync.afterWrite();
+      if (mounted) await _load(force: true);
+    } on Object catch (e) {
+      if (mounted) AppSnackbar.showError(context, e);
     }
   }
 
@@ -168,11 +194,17 @@ class _ProteinTrackerViewState extends State<ProteinTrackerView> {
                           ),
                           padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
                           children: [
-                            _ProteinArc(
-                              progress: arcProgress,
-                              currentG: currentG,
-                              goalG: goalG,
-                              animate: _playEntrance,
+                            GestureDetector(
+                              behavior: HitTestBehavior.opaque,
+                              onTap: goalG == null
+                                  ? null
+                                  : () => unawaited(_editGoal(goalG)),
+                              child: _ProteinArc(
+                                progress: arcProgress,
+                                currentG: currentG,
+                                goalG: goalG,
+                                animate: _playEntrance,
+                              ),
                             ),
                             const SizedBox(height: 8),
                             Text(
@@ -430,8 +462,9 @@ final class _MealCard extends StatelessWidget {
             return t == kindKey ? 'protein_page.kind_other'.tr() : t;
           }();
     final meta = kindLabel == null ? time : '$time · $kindLabel';
-    final title =
-        meal.title.isEmpty ? 'protein_page.meal_untitled'.tr() : meal.title;
+    final title = meal.title.isEmpty
+        ? 'protein_page.meal_untitled'.tr()
+        : meal.title;
 
     return DecoratedBox(
       decoration: BoxDecoration(

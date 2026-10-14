@@ -2,6 +2,8 @@ import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:easy_localization/easy_localization.dart';
+import 'package:fastingapp/core/utils/weight_progress.dart';
+import 'package:fastingapp/core/utils/weight_units.dart';
 import 'package:fastingapp/core/di/injection.dart';
 import 'package:fastingapp/core/dialogs/app_dialogs.dart';
 import 'package:fastingapp/core/snackbar/app_snackbar.dart';
@@ -100,6 +102,14 @@ class _BodyHistoryViewState extends State<BodyHistoryView>
                         onPointSelected: onPointSelected,
                         chartLoading: chartLoading,
                       ),
+                      if (entries.isNotEmpty) ...[
+                        const SizedBox(height: 12),
+                        _WeightEntriesCard(
+                          entries: entries,
+                          onEdit: (e) => unawaited(onEditEntry(e)),
+                          onDelete: (e) => unawaited(onDeleteEntry(e)),
+                        ),
+                      ],
                     ],
                   ),
                 ),
@@ -207,7 +217,7 @@ final class _LatestRecordCard extends StatelessWidget {
                           Padding(
                             padding: const EdgeInsets.only(left: 4, bottom: 8),
                             child: Text(
-                              'body_history.unit'.tr(),
+                              _unitLabel(),
                               style: AppTextStyles.bodyWeightUnit,
                             ),
                           ),
@@ -285,13 +295,11 @@ final class _TargetCard extends StatelessWidget {
     final start = startKg;
     final target = targetKg;
     final current = currentKg;
-    final span = (start != null && target != null)
-        ? (start - target).abs()
-        : 0.0;
-    final progress =
-        (start == null || target == null || current == null || span <= 0)
-        ? 0.0
-        : ((start - current) / span).clamp(0.0, 1.0);
+    final progress = weightProgressOf(
+      start: start,
+      goal: target,
+      current: current,
+    );
     final percent = (progress * 100).round();
 
     return Container(
@@ -328,7 +336,7 @@ final class _TargetCard extends StatelessWidget {
                 child: Text(
                   startKg == null
                       ? '—'
-                      : '${_formatKg(startKg!)}${'body_history.unit'.tr()}',
+                      : '${_formatKg(startKg!)}${_unitLabel()}',
                   style: AppTextStyles.bodyBoundValue,
                 ),
               ),
@@ -341,7 +349,7 @@ final class _TargetCard extends StatelessWidget {
                 child: Text(
                   targetKg == null
                       ? '—'
-                      : '${_formatKg(targetKg!)}${'body_history.unit'.tr()}',
+                      : '${_formatKg(targetKg!)}${_unitLabel()}',
                   style: AppTextStyles.bodyBoundValue,
                   textAlign: TextAlign.end,
                 ),
@@ -485,7 +493,10 @@ final class _BmiCard extends StatelessWidget {
           Row(
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
-              Text(_formatKgOrDash(value), style: AppTextStyles.bodyBmiValue),
+              Text(
+                value == null ? '—' : value.toStringAsFixed(1),
+                style: AppTextStyles.bodyBmiValue,
+              ),
               if (statusKey != null) ...[
                 const SizedBox(width: 8),
                 Padding(
@@ -623,9 +634,7 @@ final class _BmiTickLabel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final label = tick == tick.roundToDouble()
-        ? '${tick.toInt()}'
-        : tick.toStringAsFixed(1);
+    final label = _formatKg(tick);
     final text = Text(label, style: AppTextStyles.bodyBmiTick);
 
     if (alignEnd) {
@@ -830,10 +839,17 @@ final class _RangeSegment extends StatelessWidget {
 
 @immutable
 final class _ChartPoint {
-  const _ChartPoint({required this.label, required this.kg});
+  const _ChartPoint({
+    required this.label,
+    required this.kg,
+    this.isCurrent = false,
+  });
 
   final String label;
   final double kg;
+
+  /// Bugünü içeren (son) kova.
+  final bool isCurrent;
 }
 
 final class _WeightLineChart extends StatelessWidget {
@@ -952,7 +968,7 @@ final class _WeightLineChart extends StatelessWidget {
                         ),
                         alignment: Alignment.center,
                         child: Text(
-                          '${_formatKg(kg)} ${'body_history.unit'.tr()}',
+                          '${_formatKg(kg)} ${_unitLabel()}',
                           style: AppTextStyles.bodyChartTooltip,
                         ),
                       ),
@@ -1055,9 +1071,89 @@ final class _WeightChartPainter extends CustomPainter {
   }
 }
 
-String _formatKg(double kg) {
-  if (kg == kg.roundToDouble()) return '${kg.toInt()}';
-  return kg.toStringAsFixed(1);
-}
+/// Ekranın kilo birimi (`kg` | `lb`, özetten); değerler hep kg gelir.
+/// Önceden lb seçilse de bu ekran kg gösteriyordu.
+var _weightUnit = 'kg';
+
+String _formatKg(double kg) => WeightUnits.amount(kg, _weightUnit);
+
+String _unitLabel() => WeightUnits.label(_weightUnit);
 
 String _formatKgOrDash(double? kg) => kg == null ? '—' : _formatKg(kg);
+
+/// Son kilo kayıtları: dokun → düzenle, sola kaydır → sil (önceden yanlış
+/// girilen değer grafikte kalıcı kalıyordu).
+final class _WeightEntriesCard extends StatelessWidget {
+  const _WeightEntriesCard({
+    required this.entries,
+    required this.onEdit,
+    required this.onDelete,
+  });
+
+  final List<WeightEntry> entries;
+  final ValueChanged<WeightEntry> onEdit;
+  final ValueChanged<WeightEntry> onDelete;
+
+  @override
+  Widget build(BuildContext context) {
+    final format = DateFormat.MMMd(context.locale.toString()).add_Hm();
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: ColorName.colorWhite,
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Text(
+              'body_history.entries_title'.tr(),
+              style: AppTextStyles.bodyCardTitle,
+            ),
+            const SizedBox(height: 4),
+            for (final e in entries)
+              Dismissible(
+                key: ValueKey(e.id),
+                direction: DismissDirection.endToStart,
+                confirmDismiss: (_) async {
+                  onDelete(e);
+                  // Liste sunucu yanıtıyla yenilenir.
+                  return false;
+                },
+                background: Container(
+                  alignment: Alignment.centerRight,
+                  padding: const EdgeInsets.only(right: 16),
+                  color: ColorName.colorOptionNegative.withValues(alpha: 0.1),
+                  child: Assets.icons.solarTrashBinTrashBoldDuotone.svg(
+                    width: 22,
+                    height: 22,
+                  ),
+                ),
+                child: InkWell(
+                  onTap: () => onEdit(e),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            format.format(e.recordedAt),
+                            style: AppTextStyles.bodyBmiTick,
+                          ),
+                        ),
+                        Text(
+                          '${_formatKg(e.weightKg)} ${_unitLabel()}',
+                          style: AppTextStyles.bodyCardTitle,
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+}

@@ -4,7 +4,10 @@
     "failed": "Failed",
     "retry": "Retry",
     "cancel": "Cancel",
-    "confirm": "Confirm"
+    "confirm": "Confirm",
+    "save": "Enregistrer",
+    "error_generic": "Un problème est survenu. Réessaie.",
+    "no_connection": "Pas de connexion internet. Vérifie ta connexion et réessaie."
   },
   "auth": {
     "welcome_title": "Welcome",
@@ -211,7 +214,11 @@
     "good_company_rating_label": "évaluation de l'application",
     "good_company_reviewer": "Defné K.",
     "good_company_quote": "Le premier jeûne ne ressemblait pas à une punition. L'entraîneur Mochi m'a parlé des fringales de 11 heures du matin et j'ai vraiment ri.",
-    "good_company_cta": "Voir mon objectif ->"
+    "good_company_cta": "Voir mon objectif ->",
+    "plans_age_note": "Avant 18 ans, seuls les plans adaptés à ton âge sont affichés.",
+    "goal_bmi_low": "Le poids cible est trop bas pour ta taille. Choisis un objectif plus sain.",
+    "meal_window_same_error": "L'heure de début et de fin ne peuvent pas être identiques.",
+    "health_consent": "J'accepte que MochiFast traite mes données de santé (poids, jeûne, repas) pour personnaliser mon plan."
   },
   "home": {
     "nav_home": "Maison",
@@ -262,7 +269,15 @@
     "hunger_tracker": "Suivi de la faim",
     "hunger_question": "Avez-vous réellement faim ?",
     "hunger_subtitle": "La  faim émotionnelle  peut vous induire en erreur. Apprenez la différence, puis enregistrez ce que vous ressentez.",
-    "log_hunger": "Enregistrer mon niveau de faim"
+    "log_hunger": "Enregistrer mon niveau de faim",
+    "challenge_progress": "{}/{} terminé",
+    "fasting_goal_reached": "Objectif atteint",
+    "eating_window": "Fenêtre alimentaire",
+    "metric_goal": " /{}",
+    "weight_unit_lb": "lb",
+    "challenge_leave_title": "Quitter le défi ?",
+    "challenge_leave_body": "Ta progression dans ce défi sera perdue.",
+    "challenge_leave": "Quitter"
   },
   "mochi_world": {
     "title": "Monde Mochi",
@@ -356,8 +371,22 @@
     "widget_lets_do_this": "Faisons ça !",
     "widget_this_week": "Cette semaine",
     "widget_keep_going": "Continue!\nVous êtes sur une lancée.",
-    "start_now_cta": "Commencer le jeûne maintenant",
-    "plan_changed_next": "Plan mis à jour. Le nouveau plan s'appliquera à ton prochain jeûne."
+    "plan_changed_next": "Plan mis à jour. Le nouveau plan s'appliquera à ton prochain jeûne.",
+    "overtime": "Objectif +{}",
+    "next_fast_at": "Selon ton plan, ton prochain jeûne commence à {}",
+    "start_next_cta": "Lancer le prochain jeûne",
+    "long_overrun_title": "As-tu fini à cette heure-ci ?",
+    "long_overrun_body": "L'heure de fin est plus de 12 heures après la fin prévue. Enregistre si tu as vraiment fini à ce moment-là ; sinon corrige l'heure.",
+    "long_overrun_confirm": "Oui, enregistrer",
+    "long_overrun_cancel": "Corriger l'heure",
+    "free_day_title": "Jour libre aujourd'hui",
+    "free_day_body": "Ton plan ne prévoit pas de jeûne aujourd'hui. Tu peux quand même en commencer un.",
+    "reduced_day_title": "Jour à {} kcal aujourd'hui",
+    "reduced_day_body": "Limite-toi aujourd'hui à environ {} kcal. Marque-le en fin de journée.",
+    "reduced_day_done": "Marqué comme fait ✓",
+    "reduced_day_skipped": "Marqué comme sauté",
+    "reduced_day_done_cta": "C'est fait",
+    "reduced_day_skip_cta": "Je l'ai sauté"
   },
   "fasting_struggle": {
     "back": "Retour au minuteur",
@@ -540,7 +569,9 @@
     "emotional_rec_3": "Do a quick breathing exercise",
     "emotional_rec_4": "Talk to Mochi if you want support",
     "primary": "Log this hunger",
-    "secondary": "Talk to Mochi"
+    "secondary": "Talk to Mochi",
+    "safety_note": "Tes symptômes méritent de l'attention. Si tu ne te sens pas bien, arrête ton jeûne et consulte un professionnel de santé si cela ne passe pas.",
+    "end_fast_cta": "Terminer mon jeûne"
   },
   "hunger_log_page": {
     "title_line1": "Save to your",
@@ -605,7 +636,13 @@
     "feeling_good": "Bien",
     "feeling_super": "Super!",
     "notes_title": "Notes pour vous-même",
-    "notes_hint": "Écrivez votre note..."
+    "notes_hint": "Écrivez votre note...",
+    "delete": "Supprimer le repas",
+    "delete_title": "Supprimer ce repas ?",
+    "delete_body": "Cet enregistrement sera supprimé. Cette action est irréversible.",
+    "delete_confirm": "Supprimer",
+    "delete_cancel": "Annuler",
+    "delete_failed": "Impossible de supprimer le repas. Réessaie."
   },
   "water_page": {
     "today": "Aujourd'hui",
@@ -628,7 +665,8 @@
     "edit_goal_hint": "ml",
     "save": "Sauvegarder",
     "goal_range_error": "L'objectif quotidien doit être entre {}–{} ml.",
-    "glass_range_error": "La taille du verre doit être entre {}–{} ml."
+    "glass_range_error": "La taille du verre doit être entre {}–{} ml.",
+    "high_intake_warning": "Ça fait beaucoup d'eau aujourd'hui. Plus de 6 litres par jour peut être nocif, vas-y doucement."
   },
   "steps_page": {
     "today": "Aujourd'hui",
@@ -650,7 +688,8 @@
     "day_thu": "Thu",
     "day_fri": "Fri",
     "day_sat": "Sat",
-    "day_sun": "Sun"
+    "day_sun": "Sun",
+    "goal_title": "Objectif de pas quotidien"
   },
   "body_history": {
     "title": "Body History",
@@ -667,7 +706,10 @@
     "week": "Week",
     "month": "Month",
     "unit": "kg",
-    "progress_percent": "{}%"
+    "progress_percent": "{}%",
+    "entries_title": "Entrées",
+    "delete_title": "Supprimer cette pesée ?",
+    "delete_body": "Elle sera retirée de ton graphique."
   },
   "water_reminder": {
     "title": "Water Reminder",
@@ -684,7 +726,13 @@
     "unit_dialog_subtitle": "Choose your preferred unit",
     "custom_size_dialog_subtitle": "Add a custom glass size",
     "unit_ml": "ml",
-    "unit_oz": "oz"
+    "unit_oz": "oz",
+    "glass_range_error": "Le verre doit faire entre {} et {} ml",
+    "custom_size_limit": "Tu peux ajouter jusqu'à {} verres personnalisés",
+    "interval": "Fréquence des rappels",
+    "every_minutes": "Toutes les {} min",
+    "every_hours": "Toutes les {} h",
+    "every_hours_minutes": "Toutes les {} h {} min"
   },
   "profile": {
     "premium_badge": "Premium",
@@ -749,19 +797,30 @@
     "restore_success": "Ton Premium est de nouveau actif.",
     "restore_none": "Aucun achat à restaurer.",
     "restore_failed": "Impossible de restaurer les achats. Réessaie.",
-    "guest_name": "Invité"
+    "guest_name": "Invité",
+    "weight_range_error": "Le poids doit être compris entre {} et {} kg",
+    "sync_health_connect": "Synchroniser avec Health Connect",
+    "health_sync_denied": "Accès santé refusé. Tu peux l'activer dans Réglages.",
+    "share_app_text": "Je suis mon jeûne avec MochiFast. Rejoins-moi !",
+    "legal_support": "Mentions légales et support",
+    "contact_support": "Contacter le support",
+    "support_email_copied": "Adresse e-mail copiée"
   },
   "notifications": {
     "title": "Notifications",
     "today_date": "Aujourd'hui, {date}",
-    "hours_ago": "{hours}H IL Y A",
+    "hours_ago": "IL Y A {hours} H",
     "weight_updates": "Mises à jour de poids",
     "weight_body_prefix": "Votre nouveau poids enregistré est",
     "meal_ended": "L'heure du repas est terminée",
     "meal_ended_body": "Préparez-vous, le temps du jeûne commence bientôt !",
     "empty_title": "Vous n'avez pas encore de notifications",
     "empty_subtitle": "Nous vous préviendrons lorsque vous en aurez.",
-    "back": "Dos"
+    "back": "Dos",
+    "yesterday_date": "Hier, {date}",
+    "just_now": "À L'INSTANT",
+    "minutes_ago": "IL Y A {minutes} MIN",
+    "load_failed": "Impossible de charger tes notifications."
   },
   "languages": {
     "title": "Langues",
@@ -814,7 +873,13 @@
     "delete": "Supprimer",
     "empty_title": "Pas encore de chat",
     "empty_subtitle": "Démarrez une conversation avec Coach Mochi et vos discussions apparaîtront ici.",
-    "start_chat": "Démarrer une discussion"
+    "start_chat": "Démarrer une discussion",
+    "safety_urgent": "Si tu te sens en danger, appelle immédiatement le numéro d'urgence local (112 en Europe) ou parle à une personne de confiance. Tu n'es pas seul.",
+    "quota_left": {
+      "zero": "Plus de messages aujourd'hui",
+      "one": "Encore 1 message aujourd'hui",
+      "other": "Encore {} messages aujourd'hui"
+    }
   },
   "plans": {
     "title": "Plans de jeûne",
@@ -858,10 +923,45 @@
     "active_fast_body": "Changer de plan affectera ton jeûne en cours. Que veux-tu faire ?",
     "active_fast_cancel_existing": "Arrêter le jeûne",
     "active_fast_reject": "Continuer",
-    "active_fast_restart_same": "Garder le même horaire"
+    "active_fast_restart_same": "Garder le même horaire",
+    "safety_ack_title": "Plan de jeûne prolongé",
+    "safety_ack_body": "Ce plan comprend de longues périodes de jeûne. Si tu es enceinte, allaites, as du diabète ou des antécédents de troubles alimentaires, ou prends des médicaments, consulte ton médecin avant de commencer. Arrête le jeûne si tu ne te sens pas bien.",
+    "safety_ack_confirm": "J'ai compris, continuer",
+    "safety_ack_cancel": "Annuler",
+    "weekly_title": "Plans hebdomadaires",
+    "weekly_emphasis": "Choisis tes jours,",
+    "weekly_rest": " les autres sont libres.",
+    "chip_weekly": "Hebdo",
+    "subtitle_5_2": "2 jours à 500 kcal",
+    "subtitle_6_1": "1 jour à 500 kcal",
+    "subtitle_alternate_day": "500 kcal un jour sur deux",
+    "subtitle_crescendo": "jeûne 2–3 jours par semaine",
+    "subtitle_custom_weekly": "crée ta semaine",
+    "title_alternate_day": "Jour alterné",
+    "title_crescendo": "Crescendo",
+    "title_custom_weekly": "Semaine perso",
+    "weekly_desc_5_2": "Mange normalement 5 jours. Sur 2 jours non consécutifs, limite-toi à environ 500 kcal.",
+    "weekly_desc_6_1": "Mange normalement 6 jours. Sur 1 jour, limite-toi à environ 500 kcal.",
+    "weekly_desc_alternate_day": "Alterne dans la semaine un jour à 500 kcal et un jour normal.",
+    "weekly_desc_crescendo": "Un début en douceur : jeûne 12–16 h sur 2–3 jours non consécutifs, mange normalement le reste.",
+    "weekly_desc_custom_weekly": "Choisis chaque jour : jeûne, jour à 500 kcal ou jour libre.",
+    "weekly_hint_weeklyReduced": "Touche un jour pour en faire un jour à 500 kcal.",
+    "weekly_hint_alternateDay": "Touche un jour pour basculer entre 500 kcal et libre.",
+    "weekly_hint_selectedDays": "Touche un jour pour en faire un jour de jeûne.",
+    "weekly_hint_customWeekly": "Touche pour changer : libre → jeûne → 500 kcal.",
+    "weekly_day_fast": "Jeûne {} h",
+    "weekly_day_reduced": "Jour à {} kcal",
+    "weekly_day_normal": "Jour libre",
+    "weekly_fast_hours": "Durée du jeûne : {} h",
+    "weekly_error_days": "Ce plan n'autorise pas ce type de jour.",
+    "weekly_error_reduced_count": "Choisis exactement le nombre de jours à 500 kcal requis.",
+    "weekly_error_consecutive": "Les jours spéciaux ne peuvent pas se suivre.",
+    "weekly_error_alternate": "Choisis 3–4 jours qui ne se suivent pas.",
+    "weekly_error_fast_count": "Choisis 2 ou 3 jours de jeûne.",
+    "weekly_error_hours": "La durée du jeûne est hors de la plage du plan."
   },
   "calories_page": {
-    "eaten": "A mangé {}",
+    "eaten": "Mangé {}",
     "kcal_over": "kcal plus",
     "calorie_tracking": "Suivi des calories",
     "carbs": "Crabes",
@@ -874,7 +974,12 @@
     "goal": "But:",
     "add_daily_manual": "Ajouter un manuel quotidien",
     "manual_value": "{} kcal",
-    "calculate": "Calculer les calories"
+    "calculate": "Calculer les calories",
+    "add_manual_cta": "Ajouter {} kcal",
+    "kcal_left": "kcal restantes",
+    "kcal_eaten": "kcal consommées",
+    "goal_fmt": "Objectif {} kcal",
+    "goal_title": "Objectif calorique quotidien"
   },
   "calories_camera": {
     "no_camera": "Aucune caméra trouvée sur cet appareil.",
@@ -890,7 +995,13 @@
     "protein_value": "27g",
     "carbs_value": "64g",
     "fats_value": "22g",
-    "recalculate": "Calculez à nouveau les calories"
+    "recalculate": "Calculez à nouveau les calories",
+    "analyzing": "Analyse en cours…",
+    "no_result_title": "Aucun résultat",
+    "not_food": "Ça ne ressemble pas à une photo de repas. Essaie une nouvelle photo où ton assiette est bien visible.",
+    "analysis_failed": "L'analyse a échoué. Réessaie avec une nouvelle photo.",
+    "still_processing": "L'analyse est toujours en cours. Vérifie à nouveau dans un instant ; cela ne consommera pas d'autre crédit.",
+    "check_again": "Vérifier à nouveau"
   },
   "sleep_page": {
     "title": "Dormir",
@@ -911,7 +1022,13 @@
     "day_thu": "Thu",
     "day_fri": "Fri",
     "day_sat": "Sat",
-    "day_sun": "Sun"
+    "day_sun": "Sun",
+    "log_title": "Enregistrer le sommeil",
+    "entry_title": "Sommeil de la nuit dernière",
+    "entry_body": "Modifie l'heure du coucher et du réveil ou supprime cette entrée.",
+    "entry_delete": "Supprimer",
+    "entry_edit": "Modifier",
+    "goal_title": "Objectif de sommeil"
   },
   "protein_page": {
     "title": "Suivi des protéines",
@@ -941,7 +1058,8 @@
     "kind_lunch": "Déjeuner",
     "kind_dinner": "Dîner",
     "kind_snack": "Collation",
-    "kind_other": "Repas"
+    "kind_other": "Repas",
+    "goal_title": "Objectif quotidien de protéines"
   },
   "insights_page": {
     "brand_mochi": "Mochi",
@@ -1035,5 +1153,74 @@
     "subtitle": "Mochi cherche une connexion. Vérifie ton Wi‑Fi ou tes données mobiles, puis réessaie.",
     "retry": "Réessayer",
     "checking": "Vérification…"
+  },
+  "ai_consent": {
+    "title": "Partager avec Mochi",
+    "body": "Pour le chat et l’analyse photo, vos messages et photos sont envoyés à l’IA. Ce n’est pas un avis médical ; vous pouvez supprimer votre compte à tout moment.",
+    "confirm": "Accepter",
+    "cancel": "Pas maintenant"
+  },
+  "fasting_history_page": {
+    "title": "Historique du jeûne",
+    "list_title": "Jeûnes passés",
+    "stats_title": "Tout le temps",
+    "stat_fasts": "Jeûnes",
+    "stat_completed": "Terminés",
+    "stat_rate": "Réussite",
+    "stat_total": "Temps total",
+    "stat_longest": "Plus long",
+    "stat_avg": "Moyenne",
+    "status_completed": "Terminé",
+    "status_ended_early": "Arrêté tôt",
+    "status_cancelled": "Annulé",
+    "status_active": "Actif",
+    "empty_title": "Pas encore de jeûne",
+    "empty_subtitle": "Termine ton premier jeûne pour le voir ici.",
+    "error": "Impossible de charger l'historique",
+    "retry": "Réessayer",
+    "entry_edit_title": "Modifier le jeûne",
+    "entry_add_title": "Ajouter un jeûne passé",
+    "entry_start": "Début",
+    "entry_end": "Fin",
+    "entry_delete": "Supprimer le jeûne",
+    "delete_title": "Supprimer ce jeûne ?",
+    "delete_body": "Il sera retiré de ton historique et de tes statistiques.",
+    "entry_invalid": "La fin doit être au moins 1 heure après le début.",
+    "entry_too_long": "Un jeûne peut durer au maximum 72 heures."
+  },
+  "legal_update": {
+    "title": "Nous avons mis à jour nos conditions",
+    "body": "Nos Conditions d'utilisation et notre Politique de confidentialité ont changé. Accepte les nouvelles versions pour continuer à utiliser MochiFast.",
+    "accept": "Accepter",
+    "later": "Plus tard"
+  },
+  "fasting_finish": {
+    "reward_title": "Bravo !",
+    "reward_streak": "Série de {} jours",
+    "reward_xp": "+{} XP",
+    "reward_level": "Tu as atteint le niveau {} !",
+    "reward_world": "Ton île Mochi a grandi",
+    "reward_challenge": "Défi terminé",
+    "reward_continue": "Continuer"
+  },
+  "app_update": {
+    "title": "Mise à jour disponible",
+    "body": "Une nouvelle version de MochiFast est prête, avec des améliorations.",
+    "required_title": "Mise à jour requise",
+    "required_body": "Cette version n'est plus prise en charge. Mets à jour MochiFast pour continuer.",
+    "update": "Mettre à jour",
+    "later": "Plus tard"
+  },
+  "notification_settings": {
+    "title": "Paramètres des notifications",
+    "fasting": "Jeûne",
+    "streak": "Série",
+    "weight": "Poids",
+    "water": "Eau",
+    "challenges": "Défis",
+    "world": "Monde Mochi",
+    "quiet_hours": "Heures calmes",
+    "quiet_start": "Début",
+    "quiet_end": "Fin"
   }
 }

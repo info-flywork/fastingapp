@@ -27,6 +27,10 @@ final class MealWindowState extends Equatable {
     );
   }
 
+  /// Başlangıç = bitiş geçersiz (sunucu `mealWindow` ile en sonda
+  /// reddediyordu).
+  bool get isValid => startHour != endHour || startMinute != endMinute;
+
   @override
   List<Object?> get props => [startHour, startMinute, endHour, endMinute];
 }

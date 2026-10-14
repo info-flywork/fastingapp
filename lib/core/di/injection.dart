@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:fastingapp/domain/app/app_links_repository.dart';
 import 'package:fastingapp/core/managers/auth_cache_manager.dart';
 import 'package:fastingapp/core/managers/device_manager.dart';
 import 'package:fastingapp/core/managers/localization_manager.dart';
@@ -11,8 +12,12 @@ import 'package:fastingapp/core/network/network_manager.dart';
 import 'package:fastingapp/domain/auth/auth_repository.dart';
 import 'package:fastingapp/domain/auth/social_auth_service.dart';
 import 'package:fastingapp/domain/chat/chat_repository.dart';
+import 'package:fastingapp/domain/content/content_repository.dart';
 import 'package:fastingapp/domain/fasting/fasting_repository.dart';
 import 'package:fastingapp/domain/fasting/forecast_repository.dart';
+import 'package:fastingapp/domain/fasting/plan_catalog_repository.dart';
+import 'package:fastingapp/domain/gamification/challenges_repository.dart';
+import 'package:fastingapp/domain/gamification/world_repository.dart';
 import 'package:fastingapp/domain/hunger/hunger_repository.dart';
 import 'package:fastingapp/domain/notification/notifications_repository.dart';
 import 'package:fastingapp/domain/notification/push_service.dart';
@@ -24,6 +29,7 @@ import 'package:fastingapp/domain/product/product_repository.dart';
 import 'package:fastingapp/domain/profile/profile_repository.dart';
 import 'package:fastingapp/domain/progress/progress_repository.dart';
 import 'package:fastingapp/domain/revenue_cat/revenue_cat_service.dart';
+import 'package:fastingapp/domain/trackers/health_sync_service.dart';
 import 'package:fastingapp/domain/trackers/trackers_repository.dart';
 import 'package:fastingapp/domain/user/user_repository.dart';
 import 'package:fastingapp/presentation/auth/bloc/auth_bloc.dart';
@@ -35,7 +41,6 @@ import 'package:fastingapp/presentation/auth/onboard/fasting_reason/bloc/fasting
 import 'package:fastingapp/presentation/auth/onboard/food_loves/bloc/food_loves_bloc.dart';
 import 'package:fastingapp/presentation/auth/onboard/food_skips/bloc/food_skips_bloc.dart';
 import 'package:fastingapp/presentation/auth/onboard/goal/bloc/goal_bloc.dart';
-import 'package:fastingapp/presentation/auth/onboard/language_level/bloc/language_level_bloc.dart';
 import 'package:fastingapp/presentation/auth/onboard/meal_window/bloc/meal_window_bloc.dart';
 import 'package:fastingapp/presentation/auth/onboard/obstacles/bloc/obstacles_bloc.dart';
 import 'package:fastingapp/presentation/auth/onboard/starting_point/bloc/starting_point_bloc.dart';
@@ -67,6 +72,9 @@ Future<void> configureDependencies() async {
     ..registerLazySingleton<NotificationManager>(NotificationManager.new)
     ..registerLazySingleton<PermissionManager>(PermissionManager.new)
     ..registerLazySingleton<UrlLauncherManager>(UrlLauncherManager.new)
+    ..registerLazySingleton<AppLinksRepository>(
+      () => AppLinksRepository(getIt()),
+    )
     ..registerLazySingleton<DeviceManager>(() => DeviceManager(getIt()))
     // ── Network ──
     ..registerLazySingleton<Dio>(
@@ -117,12 +125,23 @@ Future<void> configureDependencies() async {
       () => NutritionRepository(getIt()),
     )
     ..registerLazySingleton<MealsRepository>(
-      () => MealsRepository(getIt(), getIt(), getIt()),
+      () => MealsRepository(getIt(), getIt()),
     )
     ..registerLazySingleton<TrackersRepository>(
       () => TrackersRepository(getIt()),
     )
+    ..registerLazySingleton<HealthSyncService>(
+      () => HealthSyncService(getIt(), getIt()),
+    )
     ..registerLazySingleton<HungerRepository>(() => HungerRepository(getIt()))
+    ..registerLazySingleton<PlanCatalogRepository>(
+      () => PlanCatalogRepository(getIt()),
+    )
+    ..registerLazySingleton<ContentRepository>(() => ContentRepository(getIt()))
+    ..registerLazySingleton<WorldRepository>(() => WorldRepository(getIt()))
+    ..registerLazySingleton<ChallengesRepository>(
+      () => ChallengesRepository(getIt()),
+    )
     ..registerLazySingleton<ProgressRepository>(
       () => ProgressRepository(getIt()),
     )
@@ -154,6 +173,5 @@ Future<void> configureDependencies() async {
     ..registerFactory<ObstaclesBloc>(ObstaclesBloc.new)
     ..registerFactory<FastingReasonBloc>(FastingReasonBloc.new)
     ..registerFactory<FastingPlanBloc>(FastingPlanBloc.new)
-    ..registerFactory<MealWindowBloc>(MealWindowBloc.new)
-    ..registerFactory<LanguageLevelBloc>(() => LanguageLevelBloc(getIt()));
+    ..registerFactory<MealWindowBloc>(MealWindowBloc.new);
 }

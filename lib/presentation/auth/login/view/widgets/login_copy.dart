@@ -7,32 +7,47 @@ final class LoginCopy extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Text.rich(
-          TextSpan(
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 24),
+          child: Column(
             children: [
-              TextSpan(text: 'Mochi', style: AppTextStyles.loginBrand),
-              TextSpan(
-                text: 'Fast',
-                style: AppTextStyles.loginBrand.copyWith(
-                  color: ColorName.colorCtaGradientBottom,
+              Text.rich(
+                TextSpan(
+                  children: [
+                    TextSpan(text: 'Mochi', style: AppTextStyles.loginBrand),
+                    TextSpan(
+                      text: 'Fast',
+                      style: AppTextStyles.loginBrand.copyWith(
+                        color: ColorName.colorCtaGradientBottom,
+                      ),
+                    ),
+                  ],
                 ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'auth.login_welcome'.tr(),
+                textAlign: TextAlign.center,
+                style: AppTextStyles.loginWelcome,
               ),
             ],
           ),
-          textAlign: TextAlign.center,
         ),
         const SizedBox(height: 8),
-        Text(
-          'auth.login_welcome'.tr(),
-          textAlign: TextAlign.center,
-          style: AppTextStyles.loginWelcome,
-        ),
-        const SizedBox(height: 8),
-        Text(
-          'auth.login_slogan'.tr(),
-          textAlign: TextAlign.center,
-          style: AppTextStyles.loginSlogan,
+        // Yalnızca sloganın arkası — hero GIF üstüyle aynı renk, tam genişlik.
+        ColoredBox(
+          color: ColorName.colorLoginSloganBg,
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(24, 2, 24, 0),
+            child: Text(
+              'auth.login_slogan'.tr(),
+              textAlign: TextAlign.center,
+              style: AppTextStyles.loginSlogan,
+            ),
+          ),
         ),
       ],
     );

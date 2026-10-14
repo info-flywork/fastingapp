@@ -2,12 +2,17 @@ part of '../meal_detail_view.dart';
 
 mixin MealDetailViewMixin on State<MealDetailView> {
   late DateTime mealAt;
+
+  /// Sunucudaki saat: düzenlemede yalnızca değiştiyse gönderilir (30 günden
+  /// eski öğünün notu da düzenlenebilsin; sunucu eski `eatenAt`'i reddeder).
+  DateTime? _loadedMealAt;
   MealKind? mealKind;
   MealDietChoice? dietChoice;
   late MealFeeling feeling;
   late final TextEditingController notesController;
   bool loading = false;
   bool saving = false;
+  bool deleting = false;
   String? loadError;
 
   MealsRepository get _meals => getIt<MealsRepository>();
@@ -33,6 +38,7 @@ mixin MealDetailViewMixin on State<MealDetailView> {
       if (!mounted || meal == null) return;
       setState(() {
         mealAt = meal.eatenAt;
+        _loadedMealAt = meal.eatenAt;
         mealKind = _kindFromApi(meal.kind);
         dietChoice = _dietFromApi(meal.dietType);
         feeling = _feelingFromApi(meal.feeling) ?? MealFeeling.superFeeling;
@@ -74,6 +80,7 @@ mixin MealDetailViewMixin on State<MealDetailView> {
       context,
       initialDate: mealAt,
       includeTime: true,
+      maxDaysBack: 30,
     );
     if (result == null || !mounted) return;
     setState(() => mealAt = result.date);
@@ -91,8 +98,39 @@ mixin MealDetailViewMixin on State<MealDetailView> {
     setState(() => feeling = value);
   }
 
+  Future<void> onDeleteTapped() async {
+    if (!isEditing || saving || deleting) return;
+    final confirmed = await AppDialogs.instance.showDeleteMeal(context);
+    if (confirmed != true || !mounted) return;
+    setState(() => deleting = true);
+    try {
+      await _meals.deleteMeal(widget.mealId!);
+      DataSync.afterWrite();
+      if (!mounted) return;
+      context.pop();
+    } on NetworkException catch (e) {
+      if (mounted) {
+        AppSnackbar.show(
+          context: context,
+          text: e.message,
+          type: SnackBarType.failure,
+        );
+      }
+    } on Object {
+      if (mounted) {
+        AppSnackbar.show(
+          context: context,
+          text: 'meal_detail.delete_failed'.tr(),
+          type: SnackBarType.failure,
+        );
+      }
+    } finally {
+      if (mounted) setState(() => deleting = false);
+    }
+  }
+
   Future<void> onSaveTapped() async {
-    if (saving) return;
+    if (saving || deleting) return;
     setState(() => saving = true);
     var endFast = false;
     try {
@@ -100,7 +138,7 @@ mixin MealDetailViewMixin on State<MealDetailView> {
       if (isEditing) {
         await _meals.updateMeal(
           widget.mealId!,
-          eatenAt: mealAt,
+          eatenAt: mealAt == _loadedMealAt ? null : mealAt,
           kind: mealKind?.apiValue,
           dietType: dietChoice?.apiValue,
           feeling: feeling.apiValue,
@@ -119,8 +157,8 @@ mixin MealDetailViewMixin on State<MealDetailView> {
           endFast = await AppDialogs.instance.showEndFast(context) ?? false;
         }
       }
-      if (!mounted) return;
       DataSync.afterWrite();
+      if (!mounted) return;
       context.pop();
       // Öğün oruç sırasında kaydedildi ve kullanıcı bitirmek istedi.
       if (endFast) await FastingFinishFlow.open();

@@ -57,7 +57,7 @@ mixin EditProfileViewMixin on State<EditProfileView> {
       if (!mounted) return;
       AppSnackbar.show(
         context: context,
-        text: e.toString(),
+        text: errorMessageOf(e),
         type: SnackBarType.failure,
       );
     }
@@ -104,7 +104,7 @@ mixin EditProfileViewMixin on State<EditProfileView> {
     );
     if (result == null) return;
     final kg = (result.weightKg * 10).round() / 10;
-    if (kg == _profile.currentWeightKg) return;
+    // Aynı kilo da bir tartı kaydıdır (bugün tartıldı): sunucuya gider.
     // Sunucu yeni bir kilo kaydı açar (profilde tek değer tutulmaz).
     _save({'weightKg': kg}, _profile.copyWith(currentWeightKg: kg));
   }
@@ -185,8 +185,13 @@ mixin EditProfileViewMixin on State<EditProfileView> {
       RoutePaths.editFastingPlan.name,
       extra: current,
     );
-    if (result == null || result == current) return;
-    _bloc.add(ProfilePlanChanged(result));
+    if (result == null || result == current || !mounted) return;
+    final needsAck = planRequiresSafetyAck(OnboardingDraft.planCodes[result]);
+    if (needsAck) {
+      final ok = await AppDialogs.instance.showPlanSafetyAck(context);
+      if (ok != true) return;
+    }
+    _bloc.add(ProfilePlanChanged(result, safetyAcknowledged: needsAck));
   }
 
   void _save(Map<String, dynamic> fields, UserProfile optimistic) =>

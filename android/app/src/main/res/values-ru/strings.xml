@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="water_widget_name">Вода</string>
+    <string name="water_widget_description">Дневная цель по воде</string>
+    <string name="water_widget_medium_name">Журнал воды</string>
+    <string name="water_widget_medium_description">Вода за день и хронология</string>
+    <string name="water_widget_large_name">Сводка по воде</string>
+    <string name="water_widget_large_description">Недельная сводка по воде</string>
+    <string name="fasting_widget_name">Голодание</string>
+    <string name="fasting_widget_description">Оставшееся время голодания</string>
+    <string name="fasting_widget_medium_name">Карточка голодания</string>
+    <string name="fasting_widget_medium_description">План и оставшееся время</string>
+    <string name="fasting_widget_detail_name">Сводка голодания</string>
+    <string name="fasting_widget_detail_description">Начало, конец и цель</string>
+    <string name="fasting_widget_plan_name">План на сегодня</string>
+    <string name="fasting_widget_plan_description">Ваш план и начало голодания</string>
+    <string name="fasting_widget_omh_name">Сегодня</string>
+    <string name="fasting_widget_omh_description">План и мотивация</string>
+    <string name="fasting_widget_week_name">Эта неделя</string>
+    <string name="fasting_widget_week_description">Недельная сводка голодания</string>
+    <string name="notification_channel_default">Уведомления</string>
+    <string name="notification_channel_quiet">Тихие уведомления</string>
+</resources>

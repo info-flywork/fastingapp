@@ -1199,13 +1199,13 @@ abstract final class AppTextStyles {
   );
 
   /// Login WELCOME — 28 / Semibold
-  static TextStyle get loginWelcome => const TextStyle(
+  static TextStyle get loginWelcome => TextStyle(
     fontFamily: FontFamily.sFProDisplay,
     fontWeight: FontWeight.w700,
-    fontSize: 28,
-    height: 34 / 28,
-    letterSpacing: 28 * -0.02,
-    color: ColorName.colorTitle,
+    fontSize: 20,
+    height: 34 / 20,
+    letterSpacing: 20 * -0.01,
+    color: ColorName.colorTitle.withValues(alpha: 0.65),
   );
 
   /// Login slogan — 16 / Medium / 35%

@@ -11,16 +11,24 @@ enum WeightUnit { lb, kg }
 /// Kilo düzenleme dialog sonucu — her zaman kg cinsinden.
 @immutable
 final class WeightEditResult {
-  const WeightEditResult({required this.weightKg});
+  const WeightEditResult({required this.weightKg, this.unit = WeightUnit.kg});
 
   final double weightKg;
+
+  /// Kullanıcının dialogda seçtiği birim (tercih olarak saklanır).
+  final WeightUnit unit;
 }
 
 /// Profil kilo düzenleme dialog'u (Figma Weight modal).
 final class WeightEditDialog extends StatefulWidget {
-  const WeightEditDialog({required this.initialWeightKg, super.key});
+  const WeightEditDialog({
+    required this.initialWeightKg,
+    this.initialUnit = WeightUnit.kg,
+    super.key,
+  });
 
   final double initialWeightKg;
+  final WeightUnit initialUnit;
 
   static const double _kgToLb = 2.2046226218;
 
@@ -34,12 +42,24 @@ class _WeightEditDialogState extends State<WeightEditDialog>
   late final AnimationController _valueAnim;
   late final Animation<double> _valueScale;
   late final Animation<double> _valueOpacity;
-  WeightUnit _unit = WeightUnit.kg;
+  late WeightUnit _unit = widget.initialUnit;
+
+  /// Sunucu aralığı (profil 30–300, tartı kaydı 25–350): ortak güvenli aralık.
+  static const _minKg = 30.0;
+  static const _maxKg = 300.0;
+  bool _outOfRange = false;
 
   @override
   void initState() {
     super.initState();
-    _controller = TextEditingController(text: _format(widget.initialWeightKg));
+    final initial = widget.initialUnit == WeightUnit.kg
+        ? widget.initialWeightKg
+        : widget.initialWeightKg * WeightEditDialog._kgToLb;
+    _controller = TextEditingController(text: _format(initial));
+    // Değer düzeltilince aralık uyarısı kalksın.
+    _controller.addListener(() {
+      if (_outOfRange) setState(() => _outOfRange = false);
+    });
     _valueAnim = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 280),
@@ -98,7 +118,11 @@ class _WeightEditDialogState extends State<WeightEditDialog>
   void _onSave() {
     final kg = _weightInKg();
     if (kg == null || kg <= 0) return;
-    Navigator.of(context).pop(WeightEditResult(weightKg: kg));
+    if (kg < _minKg || kg > _maxKg) {
+      setState(() => _outOfRange = true);
+      return;
+    }
+    Navigator.of(context).pop(WeightEditResult(weightKg: kg, unit: _unit));
   }
 
   @override
@@ -147,6 +171,18 @@ class _WeightEditDialogState extends State<WeightEditDialog>
                         ),
                       ),
                     ),
+                    if (_outOfRange) ...[
+                      const SizedBox(height: 8),
+                      Text(
+                        'profile.weight_range_error'.tr(
+                          args: ['${_minKg.toInt()}', '${_maxKg.toInt()}'],
+                        ),
+                        textAlign: TextAlign.center,
+                        style: AppTextStyles.weightDialogSubtitle.copyWith(
+                          color: Colors.red.shade700,
+                        ),
+                      ),
+                    ],
                     const SizedBox(height: 24),
                     AppButton(
                       label: 'profile.save'.tr(),

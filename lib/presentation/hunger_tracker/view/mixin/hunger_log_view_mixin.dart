@@ -39,11 +39,11 @@ mixin HungerLogViewMixin on State<HungerLogView> {
     try {
       await _hunger.saveCheckin(
         flow: session.flow,
-        mode: 'quick',
+        mode: session.flow.mode,
         notes: notesController.text.trim(),
       );
-      if (!mounted) return;
       DataSync.afterWrite();
+      if (!mounted) return;
       context.pushNamed(RoutePaths.hungerSuccess.name);
     } on Object catch (e) {
       // Kaydedilmediyse başarı ekranı gösterilmez.

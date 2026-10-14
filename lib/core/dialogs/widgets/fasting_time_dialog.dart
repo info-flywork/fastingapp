@@ -30,8 +30,16 @@ final class FastingTimeDialog extends StatefulWidget {
     required this.initialStartMinute,
     required this.initialEndHour,
     required this.initialEndMinute,
+    this.titleKey = 'plans.fasting_time_title',
+    this.startLabelKey = 'plans.fasting_time_start',
+    this.endLabelKey = 'plans.fasting_time_finish',
     super.key,
   });
+
+  /// Aynı iki saatli seçici başka ekranlarda da kullanılır (ör. uyku).
+  final String titleKey;
+  final String startLabelKey;
+  final String endLabelKey;
 
   final int initialStartHour;
   final int initialStartMinute;
@@ -82,13 +90,13 @@ class _FastingTimeDialogState extends State<FastingTimeDialog> {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Text(
-                      'plans.fasting_time_title'.tr(),
+                      widget.titleKey.tr(),
                       textAlign: TextAlign.center,
                       style: AppTextStyles.weightDialogTitle,
                     ),
                     const SizedBox(height: 20),
                     OnboardingTimePicker(
-                      label: 'plans.fasting_time_start'.tr(),
+                      label: widget.startLabelKey.tr(),
                       hour: _startHour,
                       minute: _startMinute,
                       onHourChanged: (h) => setState(() => _startHour = h),
@@ -96,7 +104,7 @@ class _FastingTimeDialogState extends State<FastingTimeDialog> {
                     ),
                     const SizedBox(height: 16),
                     OnboardingTimePicker(
-                      label: 'plans.fasting_time_finish'.tr(),
+                      label: widget.endLabelKey.tr(),
                       hour: _endHour,
                       minute: _endMinute,
                       onHourChanged: (h) => setState(() => _endHour = h),

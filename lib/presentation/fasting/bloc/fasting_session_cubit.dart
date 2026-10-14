@@ -1,7 +1,10 @@
+import 'dart:async';
+
 import 'package:bloc/bloc.dart';
 import 'package:fastingapp/core/network/network_exception.dart';
 import 'package:fastingapp/core/sync/data_sync.dart';
 import 'package:fastingapp/domain/fasting/fasting_repository.dart';
+import 'package:fastingapp/domain/fasting/weekly_schedule.dart';
 import 'package:fastingapp/domain/revenue_cat/revenue_cat_service.dart';
 import 'package:fastingapp/presentation/fasting/bloc/fasting_session_state.dart';
 
@@ -13,6 +16,9 @@ final class FastingSessionCubit extends Cubit<FastingSessionState> {
 
   final FastingRepository _repository;
   final RevenueCatService _revenueCat;
+
+  /// Çıkış / hesap değişimi: önceki kullanıcının orucu ekranda kalmasın.
+  void reset() => emit(const FastingSessionState());
 
   Future<void> refresh({bool showLoading = true}) async {
     if (showLoading) emit(state.copyWith(isLoading: true, clearError: true));
@@ -40,7 +46,7 @@ final class FastingSessionCubit extends Cubit<FastingSessionState> {
     } on NetworkException catch (e) {
       emit(state.copyWith(isLoading: false, errorMessage: e.message));
     } on Object catch (e) {
-      emit(state.copyWith(isLoading: false, errorMessage: e.toString()));
+      emit(state.copyWith(isLoading: false, errorMessage: errorMessageOf(e)));
     }
   }
 
@@ -57,8 +63,19 @@ final class FastingSessionCubit extends Cubit<FastingSessionState> {
   Future<void> startFast({DateTime? startedAt}) async {
     emit(state.copyWith(isLoading: true, clearError: true));
     try {
-      await _repository.startFast(startedAt: startedAt);
-      await refresh(showLoading: false);
+      // POST yanıtı oruç DTO'sunu taşır: ayrıca /fasts/active + /plans/current
+      // istenmez; seri/hafta için özet (afterWrite) yenilenir.
+      final fast = await _repository.startFast(startedAt: startedAt);
+      final fetchedAt = DateTime.now();
+      emit(
+        state.copyWith(
+          isLoading: false,
+          fast: fast,
+          fetchedAt: fetchedAt,
+          clockOffset: clockOffsetFromServer(fast.serverTime, fetchedAt),
+          clearEating: true,
+        ),
+      );
       DataSync.afterWrite();
     } on NetworkException catch (e) {
       if (e.code == 'ACTIVE_FAST_EXISTS') {
@@ -67,7 +84,7 @@ final class FastingSessionCubit extends Cubit<FastingSessionState> {
       }
       emit(state.copyWith(isLoading: false, errorMessage: e.message));
     } on Object catch (e) {
-      emit(state.copyWith(isLoading: false, errorMessage: e.toString()));
+      emit(state.copyWith(isLoading: false, errorMessage: errorMessageOf(e)));
     }
   }
 
@@ -100,24 +117,49 @@ final class FastingSessionCubit extends Cubit<FastingSessionState> {
       emit(state.copyWith(isLoading: false, errorMessage: e.message));
       return null;
     } on Object catch (e) {
-      emit(state.copyWith(isLoading: false, errorMessage: e.toString()));
+      emit(state.copyWith(isLoading: false, errorMessage: errorMessageOf(e)));
       return null;
     }
   }
 
   /// Planı sunucuda değiştirir (bir sonraki oruçtan geçerli). Premium plan
   /// için paywall; vazgeçilirse false (hata yok). Hata mesajı state'te.
+  /// Uzun planlarda [safetyAcknowledged] kullanıcı onayından gelmeli.
   Future<bool> changePlan({
     required String planCode,
     String? timing,
     String? eatStart,
     String? eatEnd,
+    List<WeeklyDay>? weeklySchedule,
+    bool safetyAcknowledged = false,
+  }) async {
+    final changed = await _putPlan(
+      planCode: planCode,
+      timing: timing,
+      eatStart: eatStart,
+      eatEnd: eatEnd,
+      weeklySchedule: weeklySchedule,
+      safetyAcknowledged: safetyAcknowledged,
+    );
+    if (changed) DataSync.afterWrite(profile: true);
+    return changed;
+  }
+
+  Future<bool> _putPlan({
+    required String planCode,
+    String? timing,
+    String? eatStart,
+    String? eatEnd,
+    List<WeeklyDay>? weeklySchedule,
+    required bool safetyAcknowledged,
   }) async {
     Future<CurrentPlanEnvelope> put() => _repository.setCurrentPlan(
       planCode: planCode,
       timing: timing,
       eatStart: eatStart,
       eatEnd: eatEnd,
+      weeklySchedule: weeklySchedule,
+      safetyAcknowledged: safetyAcknowledged,
     );
     // Önceki hata bu çağrının sonucu sanılmasın.
     if (state.errorMessage != null) emit(state.copyWith(clearError: true));
@@ -128,16 +170,15 @@ final class FastingSessionCubit extends Cubit<FastingSessionState> {
       } on NetworkException catch (e) {
         if (!RevenueCatService.needsUpgrade(e)) rethrow;
         if (!await _revenueCat.presentPaywall()) return false;
-        env = await put();
+        env = await _revenueCat.retryAfterUpgrade(put);
       }
       emit(state.copyWith(plan: env.plan, clearError: true));
-      DataSync.afterWrite(profile: true);
       return true;
     } on NetworkException catch (e) {
       emit(state.copyWith(errorMessage: e.message));
       return false;
     } on Object catch (e) {
-      emit(state.copyWith(errorMessage: e.toString()));
+      emit(state.copyWith(errorMessage: errorMessageOf(e)));
       return false;
     }
   }
@@ -156,42 +197,53 @@ final class FastingSessionCubit extends Cubit<FastingSessionState> {
       emit(state.copyWith(errorMessage: e.message));
       return false;
     } on Object catch (e) {
-      emit(state.copyWith(errorMessage: e.toString()));
+      emit(state.copyWith(errorMessage: errorMessageOf(e)));
       return false;
     }
   }
 
-  /// Aktif orucu iptal + plan kaydı; [restartWithSameData] ise aynı
-  /// [startedAt] ile yeni oruç başlatır.
+  /// Aktif oruçta plan değişikliği: önce plan kaydedilir (paywall / ret
+  /// olursa oruç bozulmaz), sonra aktif oruç iptal edilir;
+  /// [restartWithSameData] ise aynı [startedAt] ile yeni planda yeniden başlar.
   Future<bool> changePlanWhileFasting({
     required String planCode,
     String? timing,
     String? eatStart,
     String? eatEnd,
+    List<WeeklyDay>? weeklySchedule,
+    bool safetyAcknowledged = false,
     required bool restartWithSameData,
   }) async {
+    final fastId = state.fast?.id;
     final startedAt = state.fast?.startedAt;
-    final cancelled = await cancelActiveFast();
-    if (!cancelled) return false;
-    final changed = await changePlan(
+    final changed = await _putPlan(
       planCode: planCode,
       timing: timing,
       eatStart: eatStart,
       eatEnd: eatEnd,
+      weeklySchedule: weeklySchedule,
+      safetyAcknowledged: safetyAcknowledged,
     );
     if (!changed) return false;
-    if (!restartWithSameData) return true;
     try {
-      await _repository.startFast(startedAt: startedAt);
-      await refresh(showLoading: false);
-      DataSync.afterWrite();
+      if (fastId != null && fastId.isNotEmpty) {
+        await _repository.cancelFast(fastId);
+      }
+      if (restartWithSameData) {
+        await _repository.startFast(startedAt: startedAt);
+      }
       return true;
     } on NetworkException catch (e) {
       emit(state.copyWith(errorMessage: e.message));
       return false;
     } on Object catch (e) {
-      emit(state.copyWith(errorMessage: e.toString()));
+      emit(state.copyWith(errorMessage: errorMessageOf(e)));
       return false;
+    } finally {
+      // Başarılı ya da yarım kalmış olsun, ekran sunucudaki gerçek durumu
+      // göstersin; loading dialog'u bunu beklemez.
+      unawaited(refresh(showLoading: false));
+      DataSync.afterWrite(profile: true);
     }
   }
 

@@ -16,14 +16,21 @@ final class AppInit {
     WidgetsFlutterBinding.ensureInitialized();
     // Yapılandırma native dosyalardan: GoogleService-Info.plist /
     // google-services.json.
-    await Firebase.initializeApp();
-    await EasyLocalization.ensureInitialized();
-    await SharedPrefManager.instance.init();
+    // Birbirinden bağımsız: sırayla değil birlikte (açılış süresi).
     // Uzak görseller: manifest şimdi (küçük, gömülü); eksik dosyalar ilk kare
     // çizildikten sonra arka planda iner (cihaz başına bir kez).
-    await RemoteImageStore.instance.ensureInitialized();
+    await Future.wait([
+      Firebase.initializeApp(),
+      EasyLocalization.ensureInitialized(),
+      SharedPrefManager.instance.init(),
+      RemoteImageStore.instance.ensureInitialized(),
+    ]);
+    // İlk açılışın ağ ve CPU'sunu (giriş, özet) paylaşmasın diye biraz sonra;
+    // o arada ekrana gelen görsel zaten anında indirilir.
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      unawaited(RemoteImageStore.instance.syncInBackground());
+      Timer(const Duration(seconds: 3), () {
+        unawaited(RemoteImageStore.instance.syncInBackground());
+      });
     });
     // İnternet yok sayfası (OfflineGate) + bağlantı gelince yarım kalan
     // görsel indirmeleri sürdürülür.

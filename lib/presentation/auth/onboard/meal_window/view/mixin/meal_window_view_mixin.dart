@@ -23,6 +23,7 @@ mixin MealWindowViewMixin on State<MealWindowView> {
 
   void onContinue() {
     final w = context.read<MealWindowBloc>().state;
+    if (!w.isValid) return;
     String hhmm(int h, int m) =>
         '${h.toString().padLeft(2, '0')}:${m.toString().padLeft(2, '0')}';
     getIt<OnboardingDraft>()

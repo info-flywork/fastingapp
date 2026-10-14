@@ -2,7 +2,10 @@ import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:easy_localization/easy_localization.dart';
+import 'package:fastingapp/core/di/injection.dart';
 import 'package:fastingapp/core/remote_images/app_image.dart';
+import 'package:fastingapp/domain/content/content_repository.dart';
+import 'package:fastingapp/domain/revenue_cat/revenue_cat_service.dart';
 import 'package:fastingapp/core/router/route_paths.dart';
 import 'package:fastingapp/core/theme/app_text_styles.dart';
 import 'package:fastingapp/generated/app_images.g.dart';
@@ -65,6 +68,31 @@ class _InsightsViewState extends State<InsightsView> {
   String _query = '';
   Timer? _searchTimer;
 
+  /// Sunucu kategorileri (`/insights/categories`): başlık/açıklama; görsel ve
+  /// renk yerel tasarımdan.
+  Map<String, InsightCategory> _categories = const {};
+
+  @override
+  void initState() {
+    super.initState();
+    unawaited(_loadCategories());
+  }
+
+  Future<void> _loadCategories() async {
+    try {
+      final c = await getIt<ContentRepository>().insightCategories();
+      if (mounted) setState(() => _categories = Map.of(c));
+    } on Object {
+      // Yerel metinler kalır.
+    }
+  }
+
+  String _titleOf(_Topic t) =>
+      _categories[t.kind.name]?.title ?? t.titleKey.tr();
+
+  String _bodyOf(_Topic t) =>
+      _categories[t.kind.name]?.description ?? t.bodyKey.tr();
+
   @override
   void dispose() {
     _searchTimer?.cancel();
@@ -82,8 +110,8 @@ class _InsightsViewState extends State<InsightsView> {
   bool _matches(_Topic topic) {
     final needle = _query.trim().toLowerCase();
     if (needle.isEmpty) return true;
-    return topic.titleKey.tr().toLowerCase().contains(needle) ||
-        topic.bodyKey.tr().toLowerCase().contains(needle);
+    return _titleOf(topic).toLowerCase().contains(needle) ||
+        _bodyOf(topic).toLowerCase().contains(needle);
   }
 
   @override
@@ -109,7 +137,13 @@ class _InsightsViewState extends State<InsightsView> {
                     padding: EdgeInsets.only(
                       bottom: i == _topics.length - 1 ? 0 : 10,
                     ),
-                    child: _TopicCard(topic: _topics[i]),
+                    child: _TopicCard(
+                      topic: _topics[i],
+                      title: _titleOf(_topics[i]),
+                      body: _bodyOf(_topics[i]),
+                      locked:
+                          _categories[_topics[i].kind.name]?.isLocked ?? false,
+                    ),
                   ),
                 ),
               const SizedBox(height: 12),
@@ -305,9 +339,31 @@ final class _TopicReveal extends StatelessWidget {
 }
 
 final class _TopicCard extends StatelessWidget {
-  const _TopicCard({required this.topic});
+  const _TopicCard({
+    required this.topic,
+    required this.title,
+    required this.body,
+    required this.locked,
+  });
 
   final _Topic topic;
+  final String title;
+  final String body;
+
+  /// Sunucu `isLocked` (premium kategori). Önceden okunmuyordu: dokununca
+  /// makale 402 ile açılmıyordu.
+  final bool locked;
+
+  Future<void> _open(BuildContext context) async {
+    final revenueCat = getIt<RevenueCatService>();
+    if (locked && !revenueCat.isPremium.value) {
+      if (!await revenueCat.presentPaywall() || !context.mounted) return;
+    }
+    await context.pushNamed(
+      RoutePaths.insightDetail.name,
+      pathParameters: {'topic': topic.kind.name},
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -315,10 +371,7 @@ final class _TopicCard extends StatelessWidget {
       color: topic.color,
       borderRadius: BorderRadius.circular(16),
       child: InkWell(
-        onTap: () => context.pushNamed(
-          RoutePaths.insightDetail.name,
-          pathParameters: {'topic': topic.kind.name},
-        ),
+        onTap: () => unawaited(_open(context)),
         borderRadius: BorderRadius.circular(16),
         child: Padding(
           padding: const EdgeInsets.all(12),
@@ -343,18 +396,21 @@ final class _TopicCard extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      topic.titleKey.tr(),
-                      style: AppTextStyles.proteinMealTitle,
-                    ),
-                    Text(
-                      topic.bodyKey.tr(),
-                      style: AppTextStyles.proteinMealMeta,
-                    ),
+                    Text(title, style: AppTextStyles.proteinMealTitle),
+                    Text(body, style: AppTextStyles.proteinMealMeta),
                   ],
                 ),
               ),
               const SizedBox(width: 10),
+              ValueListenableBuilder<bool>(
+                valueListenable: getIt<RevenueCatService>().isPremium,
+                builder: (context, premium, _) => locked && !premium
+                    ? Padding(
+                        padding: const EdgeInsets.only(right: 6),
+                        child: AppImages.kingSl.image(width: 22, height: 22),
+                      )
+                    : const SizedBox.shrink(),
+              ),
               Assets.icons.solarAltArrowLeftLinear.svg(
                 width: 20,
                 height: 20,

@@ -68,6 +68,15 @@ final class FastingPlanSheet extends StatelessWidget {
                     row2: PlansCatalog.advancedRow2,
                     selected: selected,
                   ),
+                  const SizedBox(height: 32),
+                  _Section(
+                    titleKey: 'plans.weekly_title',
+                    emphasisKey: 'plans.weekly_emphasis',
+                    restKey: 'plans.weekly_rest',
+                    row1: PlansCatalog.weeklyRow,
+                    row2: const [],
+                    selected: selected,
+                  ),
                 ],
               ),
             ),
@@ -127,7 +136,7 @@ final class _Section extends StatelessWidget {
         const SizedBox(height: 16),
         _CardRow(plans: row1, selected: selected),
         const SizedBox(height: _kCardGap),
-        _CardRow(plans: row2, selected: selected),
+        if (row2.isNotEmpty) _CardRow(plans: row2, selected: selected),
       ],
     );
   }
@@ -257,7 +266,7 @@ final class _CardBody extends StatelessWidget {
               Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Text(plan.title, style: AppTextStyles.planOptionTitle),
+                  Text(plan.displayTitle, style: AppTextStyles.planOptionTitle),
                   const SizedBox(width: 8),
                   _IntensityBolts(filled: plan.intensity),
                 ],

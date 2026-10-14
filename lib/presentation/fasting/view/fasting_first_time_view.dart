@@ -1,8 +1,8 @@
+import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:easy_localization/easy_localization.dart';
 import 'package:fastingapp/core/theme/app_text_styles.dart';
-import 'package:fastingapp/core/utils/extensions/future_extensions.dart';
 import 'package:fastingapp/core/widgets/app_button.dart';
 import 'package:fastingapp/core/widgets/app_button_decoration.dart';
 import 'package:fastingapp/core/widgets/flip_clock_unit.dart';
@@ -131,7 +131,8 @@ final class FastingFirstTimeView extends StatelessWidget {
                 children: [
                   AppButton(
                     label: 'fasting_page.first_time_share'.tr(),
-                    onPressed: () => _share(context).withLoading(context),
+                    // Yalnızca metin: sistem paylaşım sayfası hemen açılır, loading gereksiz.
+                    onPressed: () => unawaited(_share(context)),
                     decoration: AppButtonDecoration.hungerResult(),
                     iconPosition: AppButtonIconPosition.leading,
                     icon: Assets.icons.solarSquareShareLineLineDuotone.svg(

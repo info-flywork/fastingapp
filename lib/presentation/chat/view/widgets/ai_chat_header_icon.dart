@@ -77,7 +77,9 @@ class _TypingBadgeState extends State<_TypingBadge>
   late final AnimationController _controller = AnimationController(
     vsync: this,
     duration: const Duration(milliseconds: 1000),
-  )..repeat();
+    // Birkaç nabız yeter; sonsuz döngü ana sayfa ve oruç sekmesini her
+    // karede yeniden çizdiriyordu.
+  )..repeat(count: 4);
 
   @override
   void dispose() {

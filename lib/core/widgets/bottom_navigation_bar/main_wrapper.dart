@@ -1,3 +1,7 @@
+import 'dart:async';
+
+import 'package:fastingapp/core/app_update/app_update_gate.dart';
+import 'package:fastingapp/core/legal/legal_consent_prompt.dart';
 import 'package:fastingapp/core/widgets/bottom_navigation_bar/app_bottom_nav.dart';
 import 'package:fastingapp/generated/colors.gen.dart';
 import 'package:flutter/material.dart';
@@ -6,10 +10,28 @@ import 'package:go_router/go_router.dart';
 
 /// Shell route sarmalayıcı: bottom navigation ve aktif tab içeriği.
 /// (Doküman 11)
-final class MainWrapper extends StatelessWidget {
+final class MainWrapper extends StatefulWidget {
   const MainWrapper({required this.navigationShell, super.key});
 
   final StatefulNavigationShell navigationShell;
+
+  @override
+  State<MainWrapper> createState() => _MainWrapperState();
+}
+
+class _MainWrapperState extends State<MainWrapper> {
+  StatefulNavigationShell get navigationShell => widget.navigationShell;
+
+  @override
+  void initState() {
+    super.initState();
+    // Oturum açık ve onboarding bitmiş: güncel yasal metin onayı.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      unawaited(AppUpdateGate.check());
+      unawaited(LegalConsentPrompt.maybeShow(context));
+    });
+  }
 
   @override
   Widget build(BuildContext context) {

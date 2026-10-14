@@ -13,7 +13,10 @@ mixin CaloriesTrackerViewMixin on State<CaloriesTrackerView> {
   String? errorMessage;
 
   int eatenKcal = 0;
-  int? overKcal;
+
+  /// Günlük hedef; yeme bozukluğu geçmişinde sunucu null döner (hedef ve
+  /// "fazla" hiç gösterilmez).
+  int? kcalGoal;
   int burnedKcal = 0;
   int manualKcal = 0;
 
@@ -52,10 +55,11 @@ mixin CaloriesTrackerViewMixin on State<CaloriesTrackerView> {
     final start = s?.weightStartKg;
     final goal = s?.weightGoalKg;
     final current = s?.weightCurrentKg;
-    var wProgress = 0.0;
-    if (start != null && goal != null && start != goal && current != null) {
-      wProgress = ((start - current) / (start - goal)).clamp(0.0, 1.0);
-    }
+    final wProgress = weightProgressOf(
+      start: start,
+      goal: goal,
+      current: current,
+    );
     startKg = start ?? startKg;
     goalKg = goal ?? goalKg;
     weightProgress = wProgress;
@@ -63,7 +67,7 @@ mixin CaloriesTrackerViewMixin on State<CaloriesTrackerView> {
 
   void _applyDay(NutritionDay day) {
     eatenKcal = day.kcal;
-    overKcal = day.overKcal;
+    kcalGoal = day.kcalGoal;
     burnedKcal = day.burnedKcal;
     carbsG = day.macros.carbs.g;
     proteinG = day.macros.protein.g;
@@ -105,7 +109,7 @@ mixin CaloriesTrackerViewMixin on State<CaloriesTrackerView> {
       if (!mounted) return;
       setState(() {
         showShimmer = false;
-        errorMessage = e.toString();
+        errorMessage = errorMessageOf(e);
       });
     }
   }
@@ -124,8 +128,60 @@ mixin CaloriesTrackerViewMixin on State<CaloriesTrackerView> {
     });
   }
 
-  void onProteinTracker() {
-    context.pushNamed(RoutePaths.proteinTracker.name);
+  bool savingManual = false;
+
+  /// Elle kalori → `POST /meals` (`quickKcal`); önceden yalnızca ekranda
+  /// kalıyordu.
+  Future<void> onManualAdd() async {
+    if (manualKcal <= 0 || savingManual) return;
+    setState(() => savingManual = true);
+    try {
+      final result = await getIt<MealsRepository>().createQuickKcal(
+        kcal: manualKcal,
+      );
+      DataSync.afterWrite();
+      if (!mounted) return;
+      setState(() => manualKcal = 0);
+      // Oruç sürerken yenen kalori: "orucu bitir?" (elle öğün kaydıyla aynı).
+      if (result.suggestEndFast) {
+        final endFast = await AppDialogs.instance.showEndFast(context);
+        if ((endFast ?? false) && mounted) await FastingFinishFlow.open();
+      }
+      if (mounted) await loadDay(force: true);
+    } on Object catch (e) {
+      if (mounted) AppSnackbar.showError(context, e);
+    } finally {
+      if (mounted) setState(() => savingManual = false);
+    }
+  }
+
+  /// Günlük kalori hedefi (800–5000, `PATCH /user/goals {kcalGoal}`).
+  Future<void> onEditKcalGoal() async {
+    final current = kcalGoal;
+    if (current == null) return;
+    final value = await AppDialogs.instance.showGoalStepper(
+      context,
+      title: 'calories_page.goal_title'.tr(),
+      initial: current,
+      min: 800,
+      max: 5000,
+      step: 50,
+      format: (v) => '$v kcal',
+    );
+    if (value == null || value == current || !mounted) return;
+    try {
+      await getIt<TrackersRepository>().updateGoals({'kcalGoal': value});
+      DataSync.afterWrite();
+      if (mounted) await loadDay(force: true);
+    } on Object catch (e) {
+      if (mounted) AppSnackbar.showError(context, e);
+    }
+  }
+
+  /// Protein ekranından öğün eklenebilir: dönünce tazele.
+  Future<void> onProteinTracker() async {
+    await context.pushNamed(RoutePaths.proteinTracker.name);
+    if (mounted) await loadDay(force: true);
   }
 
   /// Kamera → analiz → kayıt; dönünce sessiz taze (spinner yok).

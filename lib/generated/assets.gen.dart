@@ -104,6 +104,34 @@ class $AssetsGifsGen {
   AssetGenImage get mascotLogin =>
       const AssetGenImage('assets/gifs/mascot_login.gif');
 
+  /// File path: assets/gifs/mascot_login_de.gif
+  AssetGenImage get mascotLoginDe =>
+      const AssetGenImage('assets/gifs/mascot_login_de.gif');
+
+  /// File path: assets/gifs/mascot_login_en.gif
+  AssetGenImage get mascotLoginEn =>
+      const AssetGenImage('assets/gifs/mascot_login_en.gif');
+
+  /// File path: assets/gifs/mascot_login_es.gif
+  AssetGenImage get mascotLoginEs =>
+      const AssetGenImage('assets/gifs/mascot_login_es.gif');
+
+  /// File path: assets/gifs/mascot_login_fr.gif
+  AssetGenImage get mascotLoginFr =>
+      const AssetGenImage('assets/gifs/mascot_login_fr.gif');
+
+  /// File path: assets/gifs/mascot_login_it.gif
+  AssetGenImage get mascotLoginIt =>
+      const AssetGenImage('assets/gifs/mascot_login_it.gif');
+
+  /// File path: assets/gifs/mascot_login_ru.gif
+  AssetGenImage get mascotLoginRu =>
+      const AssetGenImage('assets/gifs/mascot_login_ru.gif');
+
+  /// File path: assets/gifs/mascot_login_tr.gif
+  AssetGenImage get mascotLoginTr =>
+      const AssetGenImage('assets/gifs/mascot_login_tr.gif');
+
   /// File path: assets/gifs/mascot_ring.gif
   AssetGenImage get mascotRing =>
       const AssetGenImage('assets/gifs/mascot_ring.gif');
@@ -124,6 +152,13 @@ class $AssetsGifsGen {
     mascotGiggle,
     mascotHearts,
     mascotLogin,
+    mascotLoginDe,
+    mascotLoginEn,
+    mascotLoginEs,
+    mascotLoginFr,
+    mascotLoginIt,
+    mascotLoginRu,
+    mascotLoginTr,
     mascotRing,
     mascotWav,
     mascotWriting,

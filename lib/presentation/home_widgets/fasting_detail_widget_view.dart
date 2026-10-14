@@ -19,8 +19,29 @@ final class FastingDetailWidgetView extends StatelessWidget {
     required this.endValue,
     required this.goalValue,
     required this.praise,
+    this.live = false,
     super.key,
   });
+
+  /// Canlı geri sayım: süre ve yay boş, yerel kod çizer ([liveSpec]).
+  final bool live;
+
+  /// Yerel katman konumları (görsel 658×310). Halka: sol sütun (x 26, 214
+  /// geniş), üst 48 + 8, 242'lik alanın ortasında 188'lik kare.
+  static Map<String, Object> liveSpec() => {
+    'w': 658,
+    'h': 310,
+    'tx': 133,
+    'ty': 167,
+    'ta': 'c',
+    'ts': 48,
+    'tc': _hex(ColorName.colorTitle),
+    'rx': 133,
+    'ry': 177,
+    'rr': 83,
+    'rs': 22,
+    'rc': _hex(ColorName.colorCtaGradientBottom),
+  };
 
   final String timeLabel;
   final String leftLabel;
@@ -54,6 +75,7 @@ final class FastingDetailWidgetView extends StatelessWidget {
               Padding(
                 padding: const EdgeInsets.fromLTRB(26, 48, 26, 12),
                 child: _Body(
+                  live: live,
                   timeLabel: timeLabel,
                   leftLabel: leftLabel,
                   progress: progress,
@@ -94,8 +116,10 @@ final class _Body extends StatelessWidget {
     required this.endValue,
     required this.goalValue,
     required this.praise,
+    required this.live,
   });
 
+  final bool live;
   final String timeLabel;
   final String leftLabel;
   final double progress;
@@ -124,11 +148,16 @@ final class _Body extends StatelessWidget {
                     width: 188,
                     height: 188,
                     child: CustomPaint(
-                      painter: _RingPainter(progress: progress),
+                      painter: _RingPainter(progress: live ? 0 : progress),
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Text(timeLabel, style: _time),
+                          Text(
+                            timeLabel,
+                            style: live
+                                ? _time.copyWith(color: Colors.transparent)
+                                : _time,
+                          ),
                           Text(leftLabel, style: _left),
                         ],
                       ),
@@ -342,3 +371,6 @@ const _praise = TextStyle(
   height: 1,
   color: ColorName.colorSubtitle,
 );
+
+String _hex(Color c) =>
+    '#${(c.toARGB32() & 0xFFFFFF).toRadixString(16).padLeft(6, '0')}';

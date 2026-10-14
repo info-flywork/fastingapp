@@ -26,6 +26,7 @@ final class ProfileState extends Equatable {
     this.localPhotoPath,
     this.profile = const UserProfile(),
     this.plan,
+    this.planCode,
     this.loadError,
     this.saveError,
   });
@@ -40,6 +41,10 @@ final class ProfileState extends Equatable {
 
   /// Etkin plan; yoksa bekleyen premium plan.
   final OnboardingFastingPlan? plan;
+
+  /// Sunucudaki plan kodu ([plan] onboarding listesinde olmayan planlarda
+  /// null kalır; başlık bundan gösterilir).
+  final String? planCode;
 
   /// İlk yükleme hatası (null: genel mesaj gösterilir).
   final String? loadError;
@@ -64,6 +69,7 @@ final class ProfileState extends Equatable {
     ValueGetter<String?>? localPhotoPath,
     UserProfile? profile,
     ValueGetter<OnboardingFastingPlan?>? plan,
+    ValueGetter<String?>? planCode,
     ValueGetter<String?>? loadError,
     ProfileSaveError? saveError,
   }) => ProfileState(
@@ -75,6 +81,7 @@ final class ProfileState extends Equatable {
         : this.localPhotoPath,
     profile: profile ?? this.profile,
     plan: plan != null ? plan() : this.plan,
+    planCode: planCode != null ? planCode() : this.planCode,
     loadError: loadError != null ? loadError() : this.loadError,
     saveError: saveError ?? this.saveError,
   );
@@ -87,6 +94,7 @@ final class ProfileState extends Equatable {
     localPhotoPath,
     profile,
     plan,
+    planCode,
     loadError,
     saveError,
   ];

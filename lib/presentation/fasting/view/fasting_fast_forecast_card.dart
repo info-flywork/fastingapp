@@ -7,6 +7,8 @@ import 'package:fastingapp/core/di/injection.dart';
 import 'package:fastingapp/core/remote_images/app_image.dart';
 import 'package:fastingapp/core/theme/app_text_styles.dart';
 import 'package:fastingapp/domain/fasting/forecast_repository.dart';
+import 'package:fastingapp/presentation/fasting/bloc/fasting_session_cubit.dart';
+import 'package:fastingapp/presentation/fasting/bloc/fasting_session_state.dart';
 import 'package:fastingapp/generated/app_images.g.dart';
 import 'package:fastingapp/generated/colors.gen.dart';
 import 'package:flutter/material.dart';
@@ -29,13 +31,37 @@ class _FastingFastForecastCardState extends State<FastingFastForecastCard> {
   var _day = _ForecastDay.easy;
   FastForecast? _forecast;
 
+  StreamSubscription<String>? _fastChanges;
+
   @override
   void initState() {
     super.initState();
     unawaited(_load());
+    // Oruç başlayınca / bitince, plan (saat, süre, haftalık gün) değişince
+    // ve gün dönünce yeniden yüklenir; önceden yalnızca oruç değişiminde.
+    final session = getIt<FastingSessionCubit>();
+    _fastChanges = session.stream
+        .map(_keyOf)
+        .distinct()
+        .where((key) => key != _loadedFor)
+        .listen((_) => unawaited(_load()));
+  }
+
+  String? _loadedFor;
+
+  static String _keyOf(FastingSessionState s) {
+    final now = DateTime.now();
+    return '${s.fast?.id}|${s.plan?.signature}|${now.year}-${now.month}-${now.day}';
+  }
+
+  @override
+  void dispose() {
+    _fastChanges?.cancel();
+    super.dispose();
   }
 
   Future<void> _load() async {
+    _loadedFor = _keyOf(getIt<FastingSessionCubit>().state);
     try {
       final forecast = await getIt<ForecastRepository>().getForecast();
       if (!mounted) return;
@@ -83,7 +109,10 @@ class _FastingFastForecastCardState extends State<FastingFastForecastCard> {
           const SizedBox(height: 16),
           _MetricsRow(forecast: forecast),
           const SizedBox(height: 16),
-          SizedBox(height: 180, child: _ForecastChart(day: _day)),
+          SizedBox(
+            height: 180,
+            child: _ForecastChart(day: _day, toughestAt: _forecast?.toughestAt),
+          ),
         ],
       ),
     );
@@ -357,9 +386,12 @@ final class _MetricCell extends StatelessWidget {
 
 /// High/Low + multi-color line + PEAK — body_history chart kalıbı.
 final class _ForecastChart extends StatelessWidget {
-  const _ForecastChart({required this.day});
+  const _ForecastChart({required this.day, this.toughestAt});
 
   final _ForecastDay day;
+
+  /// Sunucudaki en zor an (geçmiş zorlanma kayıtları); tepe buraya oturur.
+  final DateTime? toughestAt;
 
   static const _xLabels = ['8:00', '16:00', '24:00'];
   static const _leftPad = 36.0;
@@ -382,9 +414,27 @@ final class _ForecastChart extends StatelessWidget {
     ),
   };
 
+  /// Eğrinin şekli zorluk şablonundan; tepe noktası en zor saate kaydırılır
+  /// (x ekseni 08:00–24:00, 7 nokta). Saatlik risk verisi sunucuda yok.
+  static _DaySeries _placePeak(_DaySeries base, DateTime? at) {
+    if (at == null) return base;
+    final local = at.toLocal();
+    var hour = local.hour + local.minute / 60;
+    if (hour < 8) hour += 24;
+    final last = base.values.length - 1;
+    final peak = (((hour - 8) / 16) * last).round().clamp(0, last);
+    final shift = peak - base.peakIndex;
+    return _DaySeries(
+      values: [
+        for (var i = 0; i <= last; i++) base.values[(i - shift).clamp(0, last)],
+      ],
+      peakIndex: peak,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    final target = _seriesFor(day);
+    final target = _placePeak(_seriesFor(day), toughestAt);
 
     return TweenAnimationBuilder<_DaySeries>(
       tween: _DaySeriesTween(end: target),

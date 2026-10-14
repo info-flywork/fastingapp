@@ -6,6 +6,7 @@ final class HomeWeightCard extends StatelessWidget {
     this.currentKg,
     this.startKg,
     this.goalKg,
+    this.unit = 'kg',
     this.onTap,
     this.onEditTap,
     super.key,
@@ -15,6 +16,9 @@ final class HomeWeightCard extends StatelessWidget {
   final double? currentKg;
   final double? startKg;
   final double? goalKg;
+
+  /// `kg` | `lb` (önceden lb seçilse de kg gösteriliyordu).
+  final String unit;
   final VoidCallback? onTap;
   final VoidCallback? onEditTap;
 
@@ -23,13 +27,15 @@ final class HomeWeightCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final current = currentKg ?? startKg ?? fallbackKg;
+    // Kayıt yoksa sahte değer yerine "–" (önceden 70 kg gösteriliyordu).
+    final current = currentKg ?? startKg;
     final start = startKg ?? current;
-    final target = goalKg ?? current;
-    final span = start - target;
-    final progress = span == 0
-        ? 0.0
-        : ((start - current) / span).clamp(0.0, 1.0);
+    final target = goalKg;
+    final progress = weightProgressOf(
+      start: start,
+      goal: target,
+      current: current,
+    );
 
     return GestureDetector(
       onTap: onTap,
@@ -65,11 +71,14 @@ final class HomeWeightCard extends StatelessWidget {
             Row(
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
-                Text(_formatKg(current), style: AppTextStyles.homeWeightValue),
+                Text(
+                  current == null ? '–' : WeightUnits.amount(current, unit),
+                  style: AppTextStyles.homeWeightValue,
+                ),
                 Padding(
                   padding: const EdgeInsets.only(left: 4, bottom: 4),
                   child: Text(
-                    'home.weight_unit'.tr(),
+                    WeightUnits.label(unit),
                     style: AppTextStyles.homeWeightUnit,
                   ),
                 ),
@@ -96,11 +105,13 @@ final class HomeWeightCard extends StatelessWidget {
                   child: _WeightBoundLabel(
                     labelKey: 'home.weight_start',
                     kg: start,
+                    unit: unit,
                   ),
                 ),
                 _WeightBoundLabel(
                   labelKey: 'home.weight_target',
                   kg: target,
+                  unit: unit,
                   alignEnd: true,
                 ),
               ],
@@ -110,22 +121,19 @@ final class HomeWeightCard extends StatelessWidget {
       ),
     );
   }
-
-  static String _formatKg(double kg) {
-    if (kg == kg.roundToDouble()) return '${kg.toInt()}';
-    return kg.toStringAsFixed(1);
-  }
 }
 
 final class _WeightBoundLabel extends StatelessWidget {
   const _WeightBoundLabel({
     required this.labelKey,
     required this.kg,
+    required this.unit,
     this.alignEnd = false,
   });
 
   final String labelKey;
-  final double kg;
+  final double? kg;
+  final String unit;
   final bool alignEnd;
 
   @override
@@ -138,7 +146,9 @@ final class _WeightBoundLabel extends StatelessWidget {
             style: AppTextStyles.homeWeightBoundLabel,
           ),
           TextSpan(
-            text: '${HomeWeightCard._formatKg(kg)}${'home.weight_unit'.tr()}',
+            text: kg == null
+                ? '–'
+                : '${WeightUnits.amount(kg!, unit)}${WeightUnits.label(unit)}',
             style: AppTextStyles.homeWeightBoundValue,
           ),
         ],

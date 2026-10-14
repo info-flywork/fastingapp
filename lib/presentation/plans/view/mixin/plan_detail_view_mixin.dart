@@ -40,18 +40,19 @@ mixin PlanDetailViewMixin on State<PlanDetailView> {
     );
     if (!mounted || result == null) return;
 
-    final startTotal = result.startHour * 60 + result.startMinute;
-    var endTotal = result.endHour * 60 + result.endMinute;
-    if (endTotal <= startTotal) endTotal += 24 * 60;
-    final windowMinutes = endTotal - startTotal;
-
+    // Hazır planda pencere süresi sabittir (sunucu kuralı): yalnızca başlangıç
+    // seçilir, bitiş başlangıç + yeme süresinden hesaplanır.
+    final endTotal =
+        (result.startHour * 60 + result.startMinute + eatHours * 60) %
+        (24 * 60);
     setState(() {
-      windowChanged = true;
       eatStartHour = result.startHour;
       eatStartMinute = result.startMinute;
-      eatEndHour = result.endHour;
-      eatEndMinute = result.endMinute;
-      eatHours = (windowMinutes / 60).round().clamp(1, 23);
+      eatEndHour = endTotal ~/ 60;
+      eatEndMinute = endTotal % 60;
+      // Varsayılandan farklıysa özel pencere olarak kaydedilir.
+      windowChanged =
+          result.startHour != args.eatStartHour || result.startMinute != 0;
     });
   }
 

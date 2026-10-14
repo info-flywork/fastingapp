@@ -1,6 +1,8 @@
+import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:easy_localization/easy_localization.dart';
+import 'package:fastingapp/core/di/injection.dart';
 import 'package:fastingapp/core/router/route_paths.dart';
 import 'package:fastingapp/core/theme/app_text_styles.dart';
 import 'package:fastingapp/core/widgets/app_button.dart';
@@ -8,6 +10,8 @@ import 'package:fastingapp/core/widgets/app_button_decoration.dart';
 import 'package:fastingapp/generated/app_images.g.dart';
 import 'package:fastingapp/generated/assets.gen.dart';
 import 'package:fastingapp/generated/colors.gen.dart';
+import 'package:fastingapp/presentation/fasting/bloc/fasting_session_cubit.dart';
+import 'package:fastingapp/presentation/fasting/fasting_finish_flow.dart';
 import 'package:fastingapp/presentation/hunger_tracker/hunger_result_type.dart';
 import 'package:fastingapp/presentation/hunger_tracker/hunger_session_args.dart';
 import 'package:fastingapp/presentation/hunger_tracker/hunger_symptom.dart';
@@ -31,6 +35,25 @@ final class HungerResultView extends StatefulWidget {
 class _HungerResultViewState extends State<HungerResultView>
     with HungerResultViewMixin {
   bool get _isPhysical => widget.type == HungerResultType.physical;
+
+  /// Sunucu önerileri (varsa), yoksa yerel metinler.
+  List<String> get _recommendations {
+    final server = widget.session?.recommendations ?? const <String>[];
+    if (server.isNotEmpty) return server;
+    final keys = _isPhysical
+        ? const [
+            'hunger_result_page.physical_rec_1',
+            'hunger_result_page.physical_rec_2',
+            'hunger_result_page.physical_rec_3',
+          ]
+        : const [
+            'hunger_result_page.emotional_rec_1',
+            'hunger_result_page.emotional_rec_2',
+            'hunger_result_page.emotional_rec_3',
+            'hunger_result_page.emotional_rec_4',
+          ];
+    return [for (final k in keys) k.tr()];
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -106,19 +129,27 @@ class _HungerResultViewState extends State<HungerResultView>
                       titleColor: _isPhysical
                           ? ColorName.colorPhysicalHungerRecTitle
                           : ColorName.colorEmotionalHungerRecTitle,
-                      itemKeys: _isPhysical
-                          ? const [
-                              'hunger_result_page.physical_rec_1',
-                              'hunger_result_page.physical_rec_2',
-                              'hunger_result_page.physical_rec_3',
-                            ]
-                          : const [
-                              'hunger_result_page.emotional_rec_1',
-                              'hunger_result_page.emotional_rec_2',
-                              'hunger_result_page.emotional_rec_3',
-                              'hunger_result_page.emotional_rec_4',
-                            ],
+                      items: _recommendations,
                     ),
+                    if (widget.session?.safetyFlag ?? false) ...[
+                      const SizedBox(height: 12),
+                      Text(
+                        'hunger_result_page.safety_note'.tr(),
+                        style: AppTextStyles.hungerResultBody.copyWith(
+                          color: ColorName.colorEmotionalHungerRecTitle,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                      if (_isFasting) ...[
+                        const SizedBox(height: 12),
+                        AppButton(
+                          label: 'hunger_result_page.end_fast_cta'.tr(),
+                          showIcon: false,
+                          decoration: AppButtonDecoration.endFastCancel(),
+                          onPressed: () => unawaited(onEndFastTapped()),
+                        ),
+                      ],
+                    ],
                   ],
                 ),
               ),
@@ -254,23 +285,25 @@ final class _RecommendationsCard extends StatelessWidget {
     required this.isPhysical,
     required this.titleKey,
     required this.titleColor,
-    required this.itemKeys,
+    required this.items,
   });
 
   final bool isPhysical;
   final String titleKey;
   final Color titleColor;
-  final List<String> itemKeys;
+
+  /// Çevrilmiş öneri metinleri.
+  final List<String> items;
 
   @override
   Widget build(BuildContext context) {
     final rows = <Widget>[
       _RecRow(
-        labelKey: titleKey,
+        label: titleKey.tr(),
         style: AppTextStyles.hungerResultRecTitle.copyWith(color: titleColor),
       ),
-      for (final key in itemKeys)
-        _RecRow(labelKey: key, style: AppTextStyles.hungerResultRecItem),
+      for (final item in items)
+        _RecRow(label: item, style: AppTextStyles.hungerResultRecItem),
     ];
 
     return ClipRRect(
@@ -314,9 +347,9 @@ final class _RecommendationsCard extends StatelessWidget {
 }
 
 final class _RecRow extends StatelessWidget {
-  const _RecRow({required this.labelKey, required this.style});
+  const _RecRow({required this.label, required this.style});
 
-  final String labelKey;
+  final String label;
   final TextStyle style;
 
   @override
@@ -330,7 +363,7 @@ final class _RecRow extends StatelessWidget {
           fit: BoxFit.contain,
         ),
         const SizedBox(width: 10),
-        Expanded(child: Text(labelKey.tr(), style: style)),
+        Expanded(child: Text(label, style: style)),
       ],
     );
   }

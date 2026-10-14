@@ -110,9 +110,25 @@ class _StartingPointViewState extends State<StartingPointView>
             ),
             Padding(
               padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
-              child: AppButton(
-                label: 'onboarding.get_started'.tr(),
-                onPressed: onContinue,
+              child: BlocBuilder<StartingPointBloc, StartingPointState>(
+                builder: (context, state) => Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    if (!state.isGoalSafe) ...[
+                      Text(
+                        'onboarding.goal_bmi_low'.tr(),
+                        textAlign: TextAlign.center,
+                        style: AppTextStyles.footerHint,
+                      ),
+                      const SizedBox(height: 8),
+                    ],
+                    AppButton(
+                      label: 'onboarding.get_started'.tr(),
+                      isEnabled: state.isGoalSafe,
+                      onPressed: onContinue,
+                    ),
+                  ],
+                ),
               ),
             ),
           ],

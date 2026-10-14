@@ -1,8 +1,26 @@
 part of '../home_view.dart';
 
-/// Aktif challenge kartı.
+/// Öne çıkan challenge (`/user/summary.featuredChallenge`); yoksa gizli.
 final class HomeChallengeCard extends StatelessWidget {
   const HomeChallengeCard({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocSelector<HomeBloc, HomeState, Challenge?>(
+      bloc: getIt<HomeBloc>(),
+      selector: (state) =>
+          state is HomeLoaded ? state.summary?.featuredChallenge : null,
+      builder: (context, challenge) => challenge == null
+          ? const SizedBox.shrink()
+          : _ChallengeCardBody(challenge: challenge),
+    );
+  }
+}
+
+final class _ChallengeCardBody extends StatelessWidget {
+  const _ChallengeCardBody({required this.challenge});
+
+  final Challenge challenge;
 
   @override
   Widget build(BuildContext context) {
@@ -42,25 +60,30 @@ final class HomeChallengeCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'home.challenge_title'.tr(),
+                      challenge.title,
                       style: AppTextStyles.homeChallengeTitle,
                     ),
-                    const SizedBox(height: 8),
-                    Text(
-                      'home.challenge_subtitle'.tr(),
-                      style: AppTextStyles.homeChallengeSubtitle,
-                    ),
+                    if (challenge.subtitle.isNotEmpty) ...[
+                      const SizedBox(height: 8),
+                      Text(
+                        challenge.subtitle,
+                        style: AppTextStyles.homeChallengeSubtitle,
+                      ),
+                    ],
                   ],
                 ),
               ),
             ],
           ),
           const SizedBox(height: 16),
-          const Row(
+          Row(
             children: [
-              _ParticipantsCluster(),
-              SizedBox(width: 12),
-              Expanded(child: _JoinNowButton()),
+              _ParticipantsCluster(
+                count: challenge.participantsCount,
+                avatars: challenge.participantAvatars,
+              ),
+              const SizedBox(width: 12),
+              Expanded(child: _JoinNowButton(challenge: challenge)),
             ],
           ),
         ],
@@ -71,9 +94,12 @@ final class HomeChallengeCard extends StatelessWidget {
 
 /// Avatarlar + "kişi katıldı" pill — son avatar pill'in üstüne biner.
 final class _ParticipantsCluster extends StatelessWidget {
-  const _ParticipantsCluster();
+  const _ParticipantsCluster({required this.count, required this.avatars});
 
-  static const _count = '8954';
+  final int count;
+
+  /// Sunucudaki katılımcı avatar URL'leri (en fazla 3 gösterilir).
+  final List<String> avatars;
   static const _avatarSize = 40.0;
   static const _avatarOverlap = 12.0;
   static const _chipHeight = 28.0;
@@ -81,17 +107,18 @@ final class _ParticipantsCluster extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final avatars = [
-      AppImages.fastingChallengeUser1,
-      AppImages.fastingChallengeUser2,
-      AppImages.fastingChallengeUser3,
-    ];
+    final shown = avatars.take(3).toList();
     const step = _avatarSize - _avatarOverlap;
-    final lastAvatarLeft = (avatars.length - 1) * step;
-    final chipLeft = lastAvatarLeft + _avatarSize - _chipOverlap;
+    final lastAvatarLeft = (shown.length - 1) * step;
+    final chipLeft = shown.isEmpty
+        ? 0.0
+        : lastAvatarLeft + _avatarSize - _chipOverlap;
+    final countText = NumberFormat.decimalPattern(
+      context.locale.toString(),
+    ).format(count);
 
-    final full = 'home.already_in'.tr(args: [_count]);
-    final index = full.indexOf(_count);
+    final full = 'home.already_in'.tr(args: [countText]);
+    final index = full.indexOf(countText);
 
     final label = index < 0
         ? Text(
@@ -105,8 +132,11 @@ final class _ParticipantsCluster extends StatelessWidget {
               style: AppTextStyles.homeAlreadyIn,
               children: [
                 if (index > 0) TextSpan(text: full.substring(0, index)),
-                TextSpan(text: _count, style: AppTextStyles.homeAlreadyInCount),
-                TextSpan(text: full.substring(index + _count.length)),
+                TextSpan(
+                  text: countText,
+                  style: AppTextStyles.homeAlreadyInCount,
+                ),
+                TextSpan(text: full.substring(index + countText.length)),
               ],
             ),
             maxLines: 1,
@@ -123,7 +153,7 @@ final class _ParticipantsCluster extends StatelessWidget {
             padding: EdgeInsets.only(left: chipLeft),
             child: Container(
               height: _chipHeight,
-              padding: const EdgeInsets.fromLTRB(20, 4, 12, 4),
+              padding: EdgeInsets.fromLTRB(shown.isEmpty ? 12 : 20, 4, 12, 4),
               alignment: Alignment.center,
               decoration: BoxDecoration(
                 color: ColorName.colorHomeChipBg,
@@ -132,7 +162,7 @@ final class _ParticipantsCluster extends StatelessWidget {
               child: label,
             ),
           ),
-          for (var i = 0; i < avatars.length; i++)
+          for (var i = 0; i < shown.length; i++)
             Positioned(
               left: i * step,
               top: 0,
@@ -143,7 +173,15 @@ final class _ParticipantsCluster extends StatelessWidget {
                   shape: BoxShape.circle,
                   border: Border.all(color: ColorName.colorWhite, width: 2),
                 ),
-                child: ClipOval(child: avatars[i].image(fit: BoxFit.cover)),
+                child: ClipOval(
+                  child: Image.network(
+                    shown[i],
+                    fit: BoxFit.cover,
+                    cacheWidth: 120,
+                    errorBuilder: (_, _, _) =>
+                        const ColoredBox(color: ColorName.colorHomeChipBg),
+                  ),
+                ),
               ),
             ),
         ],
@@ -152,14 +190,73 @@ final class _ParticipantsCluster extends StatelessWidget {
   }
 }
 
-final class _JoinNowButton extends StatelessWidget {
-  const _JoinNowButton();
+final class _JoinNowButton extends StatefulWidget {
+  const _JoinNowButton({required this.challenge});
+
+  final Challenge challenge;
+
+  @override
+  State<_JoinNowButton> createState() => _JoinNowButtonState();
+}
+
+class _JoinNowButtonState extends State<_JoinNowButton> {
+  bool _joining = false;
+
+  /// Katıl → `POST /challenges/:code/join`; premium challenge'da 402 →
+  /// paywall → tekrar. Sonra özet yenilenir (kart "x/y" gösterir).
+  Future<void> _join() async {
+    if (_joining) return;
+    setState(() => _joining = true);
+    final code = widget.challenge.code;
+    final repo = getIt<ChallengesRepository>();
+    try {
+      try {
+        await repo.join(code);
+      } on NetworkException catch (e) {
+        if (!RevenueCatService.needsUpgrade(e)) rethrow;
+        final revenueCat = getIt<RevenueCatService>();
+        if (!await revenueCat.presentPaywall()) return;
+        await revenueCat.retryAfterUpgrade(() => repo.join(code));
+      }
+      getIt<HomeBloc>().add(const HomeRefreshRequested());
+    } on Object catch (e) {
+      if (mounted) AppSnackbar.showError(context, e);
+    } finally {
+      if (mounted) setState(() => _joining = false);
+    }
+  }
+
+  Future<void> _leave() async {
+    final ok = await AppDialogs.instance.showLeaveChallenge(context);
+    if (ok != true || !mounted) return;
+    setState(() => _joining = true);
+    try {
+      await getIt<ChallengesRepository>().leave(widget.challenge.code);
+      getIt<HomeBloc>().add(const HomeRefreshRequested());
+    } on Object catch (e) {
+      if (mounted) AppSnackbar.showError(context, e);
+    } finally {
+      if (mounted) setState(() => _joining = false);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
+    final my = widget.challenge.my;
+    if (widget.challenge.joined && my != null) {
+      return AppButton(
+        label: 'home.challenge_progress'.tr(
+          args: ['${my.progress}', '${my.target}'],
+        ),
+        // Dokununca ayrılma onayı (önceden ayrılmanın yolu yoktu).
+        onPressed: _joining ? null : () => unawaited(_leave()),
+        decoration: AppButtonDecoration.homeJoin(),
+        showIcon: false,
+      );
+    }
     return AppButton(
       label: 'home.join_now'.tr(),
-      onPressed: () {},
+      onPressed: _joining ? null : () => unawaited(_join()),
       decoration: AppButtonDecoration.homeJoin(),
       showIcon: false,
     );

@@ -1,5 +1,6 @@
 import 'package:fastingapp/core/base/model/base_model.dart';
 import 'package:fastingapp/core/network/network_manager.dart';
+import 'package:fastingapp/core/sync/data_sync.dart';
 import 'package:fastingapp/core/utils/enum/request_type.dart';
 import 'package:fastingapp/data/model/auth/no_content.dart';
 import 'package:uuid/uuid.dart';
@@ -39,6 +40,12 @@ final class TrackersRepository {
     _waterDayCacheKey = null;
   }
 
+  /// Çıkış / hesap değişimi: kullanıcıya özel önbellekler.
+  void clearSession() {
+    invalidateWaterDay();
+    _weightUnit = null;
+  }
+
   /// `PATCH /user/goals` — su (`waterGoalMl` 500–6000, `glassSizeMl`
   /// 50–2000, `customGlassSizes`), adım (`stepsGoal`), uyku (`sleepGoalMin`,
   /// `bedtime`, `wakeTime`), beslenme (`kcalGoal`, `proteinGoalG`…).
@@ -49,6 +56,11 @@ final class TrackersRepository {
       data: fields,
       parserModel: NoContent.fromJson,
     );
+    // Su hedefi / bardak değişti: önbellekteki gün eski hedefle açılmasın.
+    if (fields.containsKey('waterGoalMl') ||
+        fields.containsKey('glassSizeMl')) {
+      invalidateWaterDay();
+    }
   }
 
   Future<UserTrackerSettings> getSettings() async {
@@ -70,6 +82,92 @@ final class TrackersRepository {
     );
   }
 
+  /// Su ekranı tercihleri: birim (`/user/me.units.water`), hatırlatma
+  /// (`/user/settings.notifications.water`), özel bardaklar (`/user/goals`).
+  Future<({String unit, bool notifications, List<int> customGlassSizes})>
+  getWaterPrefs() async {
+    final results = await Future.wait([
+      _network.send<_RawMap>(
+        path: '/user/me',
+        method: RequestType.get,
+        parserModel: _RawMap.new,
+      ),
+      getSettings(),
+      _network.send<_RawMap>(
+        path: '/user/goals',
+        method: RequestType.get,
+        parserModel: _RawMap.new,
+      ),
+    ]);
+    final me = (results[0] as _RawMap?)?.json ?? const {};
+    final settings = results[1] as UserTrackerSettings;
+    final goals = (results[2] as _RawMap?)?.json ?? const {};
+    final units = me['units'];
+    final sizes = goals['customGlassSizes'];
+    return (
+      unit: (units is Map ? units['water'] as String? : null) ?? 'ml',
+      notifications: settings.waterNotifications,
+      customGlassSizes: sizes is List
+          ? sizes.whereType<num>().map((e) => e.toInt()).toList()
+          : <int>[],
+    );
+  }
+
+  /// Kilo birimi (`kg` | `lb`, `GET /user/me` → `units.weight`); oturum
+  /// içinde önbellekte. Önceden seçilen birim yok sayılıyor, hep kg açılıyordu.
+  String? _weightUnit;
+
+  Future<String> weightUnit() async {
+    final cached = _weightUnit;
+    if (cached != null) return cached;
+    final me = await _network.send<_RawMap>(
+      path: '/user/me',
+      method: RequestType.get,
+      parserModel: _RawMap.new,
+    );
+    final units = me?.json['units'];
+    return _weightUnit =
+        (units is Map ? units['weight'] as String? : null) ?? 'kg';
+  }
+
+  /// `GET /water/week` → `yyyy-MM-dd` → toplam ml (Pzt–Paz).
+  Future<Map<String, int>> getWaterWeek() async {
+    final result = await _network.send<_RawMap>(
+      path: '/water/week',
+      method: RequestType.get,
+      parserModel: _RawMap.new,
+    );
+    final days = result?.json['days'];
+    return {
+      if (days is List)
+        for (final d in days.whereType<Map<String, dynamic>>())
+          if (d['isFuture'] != true && d['date'] is String)
+            d['date'] as String: (d['totalMl'] as num?)?.toInt() ?? 0,
+    };
+  }
+
+  /// `PATCH /user/me` — kilo birimi (`kg` | `lb`).
+  Future<void> updateWeightUnit(String unit) async {
+    final previous = _weightUnit;
+    _weightUnit = unit;
+    try {
+      await _network.send<NoContent>(
+        path: '/user/me',
+        method: RequestType.patch,
+        data: {
+          'units': {'weight': unit},
+        },
+        parserModel: NoContent.fromJson,
+      );
+    } on Object {
+      // Kaydedilmediyse uygulama da eski birimde kalsın.
+      _weightUnit = previous;
+      rethrow;
+    }
+    // Ana sayfa / oruç kartları birimi özetten okur.
+    DataSync.afterWrite(profile: true);
+  }
+
   /// `PATCH /user/me` — su birimi (`ml` | `oz`).
   Future<void> updateWaterUnit(String unit) async {
     await _network.send<NoContent>(
@@ -80,6 +178,7 @@ final class TrackersRepository {
       },
       parserModel: NoContent.fromJson,
     );
+    DataSync.afterWrite();
   }
 
   Future<WaterDay> getWaterDay({DateTime? date, bool force = true}) async {
@@ -173,6 +272,41 @@ final class TrackersRepository {
     );
   }
 
+  /// `GET /weights` — son kayıtlar (yeniden eskiye).
+  Future<List<WeightEntry>> listWeights({int limit = 30}) async {
+    final result = await _network.send<_RawMap>(
+      path: '/weights',
+      method: RequestType.get,
+      queryParameters: {'limit': limit},
+      parserModel: _RawMap.new,
+    );
+    final items = result?.json['items'];
+    return [
+      if (items is List)
+        for (final e in items.whereType<Map<String, dynamic>>())
+          WeightEntry.fromJson(e),
+    ];
+  }
+
+  /// `PATCH /weights/:id` (yanlış girilen değeri düzelt).
+  Future<void> updateWeight(String id, double weightKg) async {
+    await _network.send<_WeightEntryEnvelope>(
+      path: '/weights/$id',
+      method: RequestType.patch,
+      data: {'weightKg': weightKg},
+      parserModel: _WeightEntryEnvelope.fromJson,
+    );
+  }
+
+  /// `DELETE /weights/:id`.
+  Future<void> deleteWeight(String id) async {
+    await _network.send<NoContent>(
+      path: '/weights/$id',
+      method: RequestType.delete,
+      parserModel: NoContent.fromJson,
+    );
+  }
+
   Future<WeightSummary> setWeightGoal(double goalWeightKg) async {
     final result = await _network.send<WeightSummary>(
       path: '/weights/goal',
@@ -210,7 +344,71 @@ final class TrackersRepository {
     return result;
   }
 
+  /// `POST /steps/sync` — `source`: `appleHealth` | `googleFit`.
+  Future<({int updated, int skipped})> syncSteps({
+    required String source,
+    required List<({String date, int steps})> days,
+  }) async {
+    if (days.isEmpty) return (updated: 0, skipped: 0);
+    final result = await _network.send<_StepsSyncResult>(
+      path: '/steps/sync',
+      method: RequestType.post,
+      data: {
+        'source': source,
+        'days': [
+          for (final d in days) {'date': d.date, 'steps': d.steps},
+        ],
+      },
+      parserModel: _StepsSyncResult.fromJson,
+    );
+    return (updated: result?.updated ?? 0, skipped: result?.skipped ?? 0);
+  }
+
   // ── Uyku ──
+
+  /// `POST /sleep` (elle uyku kaydı; süre ve gün sunucuda hesaplanır).
+  Future<void> createSleep({
+    required DateTime sleepStart,
+    required DateTime sleepEnd,
+  }) async {
+    await _network.send<SleepSummary>(
+      path: '/sleep',
+      method: RequestType.post,
+      data: {
+        'id': _uuid.v7(),
+        'sleepStart': sleepStart.toUtc().toIso8601String(),
+        'sleepEnd': sleepEnd.toUtc().toIso8601String(),
+      },
+      // Yanıt (kayıt) kullanılmıyor; ekran özeti yeniden okur.
+      parserModel: (_) => SleepSummary.empty(sleepEnd),
+    );
+  }
+
+  /// `PATCH /sleep/:id` (elle girilmiş kaydın saatleri).
+  Future<void> updateSleep(
+    String id, {
+    required DateTime sleepStart,
+    required DateTime sleepEnd,
+  }) async {
+    await _network.send<NoContent>(
+      path: '/sleep/$id',
+      method: RequestType.patch,
+      data: {
+        'sleepStart': sleepStart.toUtc().toIso8601String(),
+        'sleepEnd': sleepEnd.toUtc().toIso8601String(),
+      },
+      parserModel: NoContent.fromJson,
+    );
+  }
+
+  /// `DELETE /sleep/:id`.
+  Future<void> deleteSleep(String id) async {
+    await _network.send<NoContent>(
+      path: '/sleep/$id',
+      method: RequestType.delete,
+      parserModel: NoContent.fromJson,
+    );
+  }
 
   Future<SleepSummary> getSleepSummary({DateTime? date}) async {
     final result = await _network.send<SleepSummary>(
@@ -477,6 +675,7 @@ final class StepsDay {
     this.kcal = 0,
     this.durationMin = 0,
     this.isFuture = false,
+    this.source,
   });
 
   factory StepsDay.fromJson(Map<String, dynamic> json) => StepsDay(
@@ -486,6 +685,7 @@ final class StepsDay {
     kcal: (json['kcal'] as num?)?.toInt() ?? 0,
     durationMin: (json['durationMin'] as num?)?.toInt() ?? 0,
     isFuture: json['isFuture'] as bool? ?? false,
+    source: json['source'] as String?,
   );
 
   final DateTime date;
@@ -494,17 +694,28 @@ final class StepsDay {
   final int kcal;
   final int durationMin;
   final bool isFuture;
+
+  /// `manual` | `appleHealth` | `googleFit`; kayıt yoksa null.
+  final String? source;
+
+  /// Sağlık uygulamasından gelen gün: elle değiştirilemez (sunucu 409).
+  bool get isHealthSynced => source != null && source != 'manual';
 }
 
 final class SleepSummary implements BaseModel<SleepSummary> {
   const SleepSummary({
     required this.date,
     this.lastNightMinutes,
+    this.lastNightId,
+    this.lastNightStart,
+    this.lastNightEnd,
+    this.lastNightSource,
     this.goalMin = 450,
     this.progress = 0,
     this.bedtime,
     this.wakeTime,
     this.weekMinutes = const [],
+    this.weekDates = const [],
   });
 
   factory SleepSummary.empty(DateTime date) => SleepSummary(date: date);
@@ -518,6 +729,14 @@ final class SleepSummary implements BaseModel<SleepSummary> {
     return SleepSummary(
       date: DateTime.tryParse(json['date'] as String? ?? '') ?? DateTime.now(),
       lastNightMinutes: (lastMap?['totalMinutes'] as num?)?.toInt(),
+      lastNightId: lastMap?['id'] as String?,
+      lastNightStart: DateTime.tryParse(
+        lastMap?['sleepStart'] as String? ?? '',
+      )?.toLocal(),
+      lastNightEnd: DateTime.tryParse(
+        lastMap?['sleepEnd'] as String? ?? '',
+      )?.toLocal(),
+      lastNightSource: lastMap?['source'] as String?,
       goalMin: (json['goalMin'] as num?)?.toInt() ?? 450,
       progress: (json['progress'] as num?)?.toDouble() ?? 0,
       bedtime: scheduleMap?['bedtime'] as String?,
@@ -528,16 +747,38 @@ final class SleepSummary implements BaseModel<SleepSummary> {
                 .map((d) => (d['minutes'] as num?)?.toInt() ?? 0)
                 .toList()
           : const [],
+      weekDates: weekRaw is List
+          ? weekRaw
+                .whereType<Map<String, dynamic>>()
+                .map((d) => DateTime.tryParse(d['date'] as String? ?? ''))
+                .toList()
+          : const [],
     );
   }
 
   final DateTime date;
   final int? lastNightMinutes;
+
+  /// Gecenin ana (en uzun) kaydı: gerçek yatış / kalkış.
+  final String? lastNightId;
+  final DateTime? lastNightStart;
+  final DateTime? lastNightEnd;
+
+  /// `manual` | `appleHealth` | `googleFit`.
+  final String? lastNightSource;
+
+  /// Elle girilmiş: düzenlenebilir / silinebilir.
+  bool get lastNightEditable =>
+      lastNightId != null && (lastNightSource ?? 'manual') == 'manual';
+
   final int goalMin;
   final double progress;
   final String? bedtime;
   final String? wakeTime;
   final List<int> weekMinutes;
+
+  /// [weekMinutes] ile aynı sırada günler (son 7 gün, bugün en sonda).
+  final List<DateTime?> weekDates;
 
   bool get hasLastNight => lastNightMinutes != null && lastNightMinutes! > 0;
 
@@ -547,4 +788,63 @@ final class SleepSummary implements BaseModel<SleepSummary> {
 
   @override
   Map<String, dynamic> toJson() => {'date': date.toIso8601String()};
+}
+
+/// Ham `data` nesnesi (yalnızca birkaç alan okunan yanıtlar için).
+/// `/weights` kaydı.
+final class WeightEntry {
+  const WeightEntry({
+    required this.id,
+    required this.weightKg,
+    required this.recordedAt,
+    this.source,
+  });
+
+  factory WeightEntry.fromJson(Map<String, dynamic> json) => WeightEntry(
+    id: json['id'] as String? ?? '',
+    weightKg: (json['weightKg'] as num?)?.toDouble() ?? 0,
+    recordedAt:
+        DateTime.tryParse(json['recordedAt'] as String? ?? '')?.toLocal() ??
+        DateTime.now(),
+    source: json['source'] as String?,
+  );
+
+  final String id;
+  final double weightKg;
+  final DateTime recordedAt;
+
+  /// `manual` | `onboarding` | sağlık…
+  final String? source;
+}
+
+final class _RawMap implements BaseModel<_RawMap> {
+  const _RawMap(this.json);
+
+  final Map<String, dynamic> json;
+
+  @override
+  _RawMap fromJson(Map<String, dynamic> json) => _RawMap(json);
+
+  @override
+  Map<String, dynamic> toJson() => json;
+}
+
+final class _StepsSyncResult implements BaseModel<_StepsSyncResult> {
+  const _StepsSyncResult({this.updated = 0, this.skipped = 0});
+
+  factory _StepsSyncResult.fromJson(Map<String, dynamic> json) =>
+      _StepsSyncResult(
+        updated: (json['updated'] as num?)?.toInt() ?? 0,
+        skipped: (json['skipped'] as num?)?.toInt() ?? 0,
+      );
+
+  final int updated;
+  final int skipped;
+
+  @override
+  _StepsSyncResult fromJson(Map<String, dynamic> json) =>
+      _StepsSyncResult.fromJson(json);
+
+  @override
+  Map<String, dynamic> toJson() => {'updated': updated, 'skipped': skipped};
 }

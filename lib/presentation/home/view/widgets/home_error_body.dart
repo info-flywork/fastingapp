@@ -19,7 +19,7 @@ final class HomeErrorBody extends StatelessWidget {
         children: [
           Text(message),
           const SizedBox(height: 12),
-          ElevatedButton(onPressed: onRetry, child: const Text('Retry')),
+          ElevatedButton(onPressed: onRetry, child: Text('common.retry'.tr())),
         ],
       ),
     );

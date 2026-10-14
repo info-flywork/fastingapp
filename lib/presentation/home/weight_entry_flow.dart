@@ -6,6 +6,8 @@ import 'package:fastingapp/core/snackbar/app_snackbar.dart';
 import 'package:fastingapp/core/sync/data_sync.dart';
 import 'package:fastingapp/core/utils/enum/snackbar_type.dart';
 import 'package:fastingapp/domain/trackers/trackers_repository.dart';
+import 'package:fastingapp/presentation/home/bloc/home_bloc.dart';
+import 'package:fastingapp/presentation/home/bloc/home_event.dart';
 import 'package:fastingapp/presentation/home/view/home_view.dart';
 import 'package:flutter/widgets.dart';
 
@@ -19,11 +21,14 @@ abstract final class WeightEntryFlow {
     );
     if (result == null) return;
     final kg = (result.weightKg * 10).round() / 10;
-    if (kg == currentKg) return;
+    // Aynı kilo da yeni bir tartıdır (bugünün kaydı); yalnızca değer
+    // değiştiyse kart iyimser güncellenir.
+    if (kg != currentKg) getIt<HomeBloc>().add(HomeWeightOptimistic(kg));
     try {
       await getIt<TrackersRepository>().createWeight(weightKg: kg);
       DataSync.afterWrite(profile: true);
     } on Object catch (e) {
+      getIt<HomeBloc>().add(const HomeRefreshRequested());
       if (!context.mounted) return;
       AppSnackbar.show(
         context: context,

@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:easy_localization/easy_localization.dart';
+import 'package:fastingapp/core/snackbar/app_snackbar.dart';
 import 'package:fastingapp/core/di/injection.dart';
 import 'package:fastingapp/core/router/route_paths.dart';
 import 'package:fastingapp/core/theme/app_text_styles.dart';
@@ -10,7 +11,6 @@ import 'package:fastingapp/generated/app_images.g.dart';
 import 'package:fastingapp/generated/assets.gen.dart';
 import 'package:fastingapp/generated/colors.gen.dart';
 import 'package:fastingapp/presentation/hunger_tracker/hunger_result_type.dart';
-import 'package:fastingapp/presentation/hunger_tracker/hunger_session_args.dart';
 import 'package:fastingapp/presentation/hunger_tracker/hunger_symptom.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -92,6 +92,7 @@ class _HungerHistoryLogViewState extends State<HungerHistoryLogView>
                     ),
                     const SizedBox(height: 12),
                     _WeekSummaryCard(
+                      week: week,
                       filter: filter,
                       onFilterChanged: setFilter,
                     ),
@@ -161,20 +162,51 @@ final class _CircleBackButton extends StatelessWidget {
 }
 
 final class _WeekSummaryCard extends StatelessWidget {
-  const _WeekSummaryCard({required this.filter, required this.onFilterChanged});
+  const _WeekSummaryCard({
+    required this.week,
+    required this.filter,
+    required this.onFilterChanged,
+  });
 
+  final List<HungerWeekDay> week;
   final HungerHistoryFilter filter;
   final ValueChanged<HungerHistoryFilter> onFilterChanged;
 
-  static const _days = <(String, String, String?)>[
-    ('MON', '22', '10h'),
-    ('TUE', '23', null),
-    ('WED', '24', null),
-    ('THU', '25', null),
-    ('FRI', '26', null),
-    ('SAT', '27', null),
-    ('SUN', '28', null),
+  static const _dayKeys = [
+    'home.week_mon',
+    'home.week_tue',
+    'home.week_wed',
+    'home.week_thu',
+    'home.week_fri',
+    'home.week_sat',
+    'home.week_sun',
   ];
+
+  /// Bu hafta (Pzt → Paz); oruç saati sunucudaki son 7 günden (gelecek gün "-").
+  List<(String, String, String?)> get _days {
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final monday = today.subtract(Duration(days: today.weekday - 1));
+    final byDate = {for (final d in week) d.date: d};
+    return [
+      for (var i = 0; i < 7; i++)
+        () {
+          final date = monday.add(Duration(days: i));
+          final key =
+              '${date.year.toString().padLeft(4, '0')}-'
+              '${date.month.toString().padLeft(2, '0')}-'
+              '${date.day.toString().padLeft(2, '0')}';
+          final minutes = byDate[key]?.fastedMinutes ?? 0;
+          return (
+            _dayKeys[i].tr(),
+            '${date.day}',
+            minutes >= 60
+                ? 'home.week_hours'.tr(args: ['${minutes ~/ 60}'])
+                : null,
+          );
+        }(),
+    ];
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -189,14 +221,10 @@ final class _WeekSummaryCard extends StatelessWidget {
         children: [
           Row(
             children: [
-              for (var i = 0; i < _days.length; i++) ...[
+              for (final (i, d) in _days.indexed) ...[
                 if (i > 0) const SizedBox(width: 4),
                 Expanded(
-                  child: _DayColumn(
-                    weekday: _days[i].$1,
-                    day: _days[i].$2,
-                    hours: _days[i].$3,
-                  ),
+                  child: _DayColumn(weekday: d.$1, day: d.$2, hours: d.$3),
                 ),
               ],
             ],
@@ -428,6 +456,8 @@ final class _EntryCard extends StatelessWidget {
               ],
             ),
           ),
+          // Kaydın saati (önceden hesaplanıp gösterilmiyordu).
+          Text(time, style: AppTextStyles.hungerLogCardLabel),
         ],
       ),
     );

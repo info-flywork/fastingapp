@@ -39,11 +39,15 @@ mixin ObstaclesViewMixin on State<ObstaclesView> {
     context.pop();
   }
 
-  Future<void> onObstacleSelected(OnboardingObstacle obstacle) async {
-    context.read<ObstaclesBloc>().add(ObstacleSelected(obstacle));
-    getIt<OnboardingDraft>().obstacles = {obstacle};
-    await Future<void>.delayed(const Duration(milliseconds: 350));
-    if (!mounted) return;
+  void onObstacleToggled(OnboardingObstacle obstacle) {
+    context.read<ObstaclesBloc>().add(ObstacleToggled(obstacle));
+  }
+
+  /// Birden çok engel seçilebilir ("uyanların hepsini seç").
+  Future<void> onContinue() async {
+    final selected = context.read<ObstaclesBloc>().state.selected;
+    if (selected.isEmpty) return;
+    getIt<OnboardingDraft>().obstacles = {...selected};
     await context.push(RoutePaths.obstacleHighlight.path);
   }
 }

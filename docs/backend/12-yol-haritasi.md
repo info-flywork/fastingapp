@@ -363,21 +363,20 @@ Mobil ekip, her fazın "İstemci işleri" bölümünü aynı sprintte yürütür
 
 **Hafta 1 — Fotoğraf analizi:**
 - [x] Migration `0012_ai.sql` (`food_photo_analyses`, `ai_quota_daily`, `ai_usage_daily`; sohbet tabloları 2. haftada).
-- [x] `infra/anthropic.js`:
-  - istemci (`@anthropic-ai/sdk`, `maxRetries: 2`)
+- [x] `infra/openai.js` (vision):
+  - istemci (`openai` SDK, `maxRetries: 2`, `createVisionClient`)
   - timeout'lar
-  - devre kesici (5 geçici hata → 30 sn)
-  - fiyat tablosu `app_config.ai.pricing`'ten
-  - `fallbacks: "default"` (beta `server-side-fallback-2026-07-01`, kapatılabilir)
-- [x] `prompts/meal_analysis.v1.md` + JSON şeması (`output_config.format`) + dil talimatı. Zod yerine saf JSON Schema + `normalizeAnalysis` (proje saf JS).
+  - ortak devre kesici (5 geçici hata → 30 sn, `infra/breaker.js`)
+  - fiyat tablosu `app_config.ai.pricing`'ten (`ai.cost.js`)
+  - görüntü `image_url.detail: high` + JSON Schema çıktı
+- [x] `prompts/meal_analysis.v1.md` + JSON şeması + dil talimatı. Zod yerine saf JSON Schema + `normalizeAnalysis` (proje saf JS).
 - [x] `POST /v1/meals/photo-analyses` (202) + `GET /:id`. `photoAnalysis` worker işi (`ai` kuyruğu): retry, refusal, doğrulama. Öğün kaydı `analysisId` ile.
 - [x] Kota servisi (`ai.gate`):
   - MySQL `ai_quota_daily` (atomik artırma, eski satırları silen periyodik iş)
   - yerel gün, `resetAt`
   - başarısız istekte iade
-  - global maliyet sigortası (`ai.daily_budget_usd`)
-  - `GET /v1/chat/quota`
-- [ ] **Eval seti:** `scripts/eval-meal-analysis.js` hazır (MAPE, MAE, `isFood` doğruluğu, p50/p95, maliyet). **Veri seti (100 öğün + 20 yemek dışı fotoğraf, bilinen kalori) ve `ANTHROPIC_API_KEY` bekleniyor.**
+  - `GET /v1/chat/quota` (`AI_CHAT_QUOTA_ENABLED`; üretimde `false` yasak)
+- [ ] **Eval seti:** `scripts/eval-meal-analysis.js` hazır (MAPE, MAE, `isFood` doğruluğu, p50/p95, maliyet). **Veri seti (100 öğün + 20 yemek dışı fotoğraf, bilinen kalori) ve `OPENAI_API_KEY` bekleniyor.**
 - [x] AI rıza kontrolü: `ai_processing` yoksa 403 `CONSENT_REQUIRED`.
 
 **Hafta 2 — Coach Mochi** (sağlayıcı: **OpenAI**, kullanıcı kararı):
@@ -395,7 +394,7 @@ Mobil ekip, her fazın "İstemci işleri" bölümünü aynı sprintte yürütür
 
 ### Kabul kriterleri
 - Eval: kcal MAPE ≤ %25, `isFood` ≥ %98, p95 uçtan uca < 12 sn.
-- Sohbette ilk token p95 < 2.5 sn. Akış ortasında bağlantı kopunca Anthropic çağrısı iptal edilir (log/metrikle doğrulanır).
+- Sohbette ilk token p95 < 2.5 sn. Akış ortasında bağlantı kopunca OpenAI çağrısı iptal edilir (log/metrikle doğrulanır).
 - Ücretsiz kullanıcı 4. mesajda 429 `QUOTA_EXCEEDED` alır, `resetAt` doğru olur.
 - Red-team setindeki tüm "tehlikeli istek" vakalarında güvenli yanıt verilir.
 
@@ -559,7 +558,7 @@ Mobil ekip, her fazın "İstemci işleri" bölümünü aynı sprintte yürütür
 - [ ] **WAF/CDN önü:** Bunny Shield veya Cloudflare.
 - [ ] **Uyumluluk:**
   - KVKK: aydınlatma metni, açık rıza metinleri, VERBİS, yurt dışı aktarım sözleşmeleri
-  - DPA'lar: Bunny, Anthropic, OpenAI, Google, RevenueCat, Sentry
+  - DPA'lar: Bunny, OpenAI, Google, RevenueCat, Sentry
   - [x] App Store gizlilik etiketi ve Play Veri güvenliği cevapları: [15](15-magaza-gizlilik.md)
 - [x] **Runbook'lar:** olay müdahalesi, anahtar rotasyonu, kötü deploy geri alma, migration geri dönüşü, AI maliyet patlaması (+ AI acil kapatma: `app_config.features`)
 - [x] **DST/saat dilimi:** testler + gün atlayan planlayıcı/gün dönümü düzeltmesi (`zone_day_runs`)

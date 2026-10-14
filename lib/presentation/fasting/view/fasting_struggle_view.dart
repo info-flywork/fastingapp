@@ -1,7 +1,11 @@
+import 'dart:async';
+
 import 'package:easy_localization/easy_localization.dart';
+import 'package:fastingapp/core/di/injection.dart';
 import 'package:fastingapp/core/remote_images/app_image.dart';
 import 'package:fastingapp/core/router/route_paths.dart';
 import 'package:fastingapp/core/theme/app_text_styles.dart';
+import 'package:fastingapp/domain/content/content_repository.dart';
 import 'package:fastingapp/generated/app_images.g.dart';
 import 'package:fastingapp/generated/assets.gen.dart';
 import 'package:fastingapp/generated/colors.gen.dart';
@@ -10,6 +14,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 /// Zorlanıyorum — neden seçimi. İlk açılışta kart seçili gelmez.
+/// Metinler `GET /catalog/struggle`; yüklenemezse yerel çeviri.
 final class FastingStruggleView extends StatefulWidget {
   const FastingStruggleView({super.key});
 
@@ -19,6 +24,7 @@ final class FastingStruggleView extends StatefulWidget {
 
 class _FastingStruggleViewState extends State<FastingStruggleView> {
   int? _selected;
+  StruggleCatalog? _catalog;
 
   static const _options = <_StruggleOption>[
     _StruggleOption(
@@ -54,6 +60,42 @@ class _FastingStruggleViewState extends State<FastingStruggleView> {
   ];
 
   @override
+  void initState() {
+    super.initState();
+    unawaited(_loadCatalog());
+  }
+
+  Future<void> _loadCatalog() async {
+    try {
+      final catalog = await getIt<ContentRepository>().struggle();
+      if (!mounted) return;
+      setState(() => _catalog = catalog);
+    } on Object {
+      // Yerel çeviri kalır.
+    }
+  }
+
+  String get _introTitle {
+    final t = _catalog?.intro.title.trim() ?? '';
+    return t.isNotEmpty ? t : 'fasting_struggle.title'.tr();
+  }
+
+  String get _introBody {
+    final t = _catalog?.intro.body.trim() ?? '';
+    return t.isNotEmpty ? t : 'fasting_struggle.body'.tr();
+  }
+
+  String _titleOf(_StruggleOption option) {
+    final t = _catalog?.reason(option.reason.name)?.title.trim() ?? '';
+    return t.isNotEmpty ? t : option.titleKey.tr();
+  }
+
+  String _bodyOf(_StruggleOption option) {
+    final t = _catalog?.reason(option.reason.name)?.body.trim() ?? '';
+    return t.isNotEmpty ? t : option.bodyKey.tr();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final bottom = MediaQuery.paddingOf(context).bottom;
     return Scaffold(
@@ -80,13 +122,13 @@ class _FastingStruggleViewState extends State<FastingStruggleView> {
             ),
             const SizedBox(height: 12),
             Text(
-              'fasting_struggle.title'.tr(),
+              _introTitle,
               textAlign: TextAlign.center,
               style: AppTextStyles.fastingStruggleTitle,
             ),
             const SizedBox(height: 12),
             Text(
-              'fasting_struggle.body'.tr(),
+              _introBody,
               textAlign: TextAlign.center,
               style: AppTextStyles.fastingStruggleBody,
             ),
@@ -95,13 +137,15 @@ class _FastingStruggleViewState extends State<FastingStruggleView> {
               if (i > 0) const SizedBox(height: 12),
               _OptionCard(
                 option: _options[i],
+                title: _titleOf(_options[i]),
+                body: _bodyOf(_options[i]),
                 selected: _selected == i,
                 onTap: () {
                   setState(() => _selected = i);
                   context.pushNamed(
                     RoutePaths.fastingStruggleAdvice.name,
                     extra: FastingStruggleAdviceArgs(
-                      bodyKey: _options[i].bodyKey,
+                      bodyText: _bodyOf(_options[i]),
                       reason: _options[i].reason,
                     ),
                   );
@@ -176,11 +220,15 @@ final class _BackRow extends StatelessWidget {
 final class _OptionCard extends StatelessWidget {
   const _OptionCard({
     required this.option,
+    required this.title,
+    required this.body,
     required this.selected,
     required this.onTap,
   });
 
   final _StruggleOption option;
+  final String title;
+  final String body;
   final bool selected;
   final VoidCallback onTap;
 
@@ -213,11 +261,11 @@ final class _OptionCard extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        option.titleKey.tr(),
+                        title,
                         style: AppTextStyles.fastingStruggleOptionTitle,
                       ),
                       Text(
-                        option.bodyKey.tr(),
+                        body,
                         style: AppTextStyles.fastingStruggleOptionBody,
                       ),
                     ],

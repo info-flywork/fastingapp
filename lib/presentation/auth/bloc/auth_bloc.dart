@@ -1,8 +1,21 @@
 import 'dart:async';
 
 import 'package:fastingapp/core/di/injection.dart';
+import 'package:fastingapp/domain/content/content_repository.dart';
+import 'package:fastingapp/domain/trackers/health_sync_service.dart';
+import 'package:fastingapp/core/legal/legal_consent_prompt.dart';
+import 'package:fastingapp/presentation/fasting/bloc/fasting_session_cubit.dart';
+import 'package:fastingapp/presentation/chat/bloc/chat_session_cubit.dart';
+import 'package:fastingapp/domain/trackers/trackers_repository.dart';
+import 'package:fastingapp/domain/chat/chat_repository.dart';
+import 'package:fastingapp/core/home_widgets/water_widget_sync.dart';
+import 'package:fastingapp/core/home_widgets/fasting_widget_sync.dart';
 import 'package:fastingapp/data/model/auth/account_deletion.dart';
 import 'package:fastingapp/domain/auth/auth_repository.dart';
+import 'package:fastingapp/domain/gamification/world_repository.dart';
+import 'package:fastingapp/domain/notification/notifications_repository.dart';
+import 'package:fastingapp/domain/nutrition/meals_repository.dart';
+import 'package:fastingapp/domain/nutrition/nutrition_repository.dart';
 import 'package:fastingapp/presentation/auth/bloc/auth_event.dart';
 import 'package:fastingapp/presentation/auth/bloc/auth_state.dart';
 import 'package:fastingapp/presentation/home/bloc/home_bloc.dart';
@@ -73,6 +86,7 @@ final class AuthBloc extends Bloc<AuthEvent, AuthState> {
     AuthLoggedOut event,
     Emitter<AuthState> emit,
   ) async {
+    // Yalnızca yerel temizlik beklenir; sunucu çağrısı arka planda.
     await _authRepository.logout();
     _clearHomeCache();
     emit(const AuthUnauthenticated());
@@ -96,5 +110,39 @@ final class AuthBloc extends Bloc<AuthEvent, AuthState> {
     if (getIt.isRegistered<ProfileBloc>()) {
       getIt<ProfileBloc>().add(const ProfileCleared());
     }
+    if (getIt.isRegistered<NutritionRepository>()) {
+      getIt<NutritionRepository>().clear();
+    }
+    if (getIt.isRegistered<MealsRepository>()) {
+      getIt<MealsRepository>().clearCache();
+    }
+    if (getIt.isRegistered<WorldRepository>()) {
+      getIt<WorldRepository>().clear();
+      LegalConsentPrompt.reset();
+    }
+    if (getIt.isRegistered<NotificationsRepository>()) {
+      getIt<NotificationsRepository>().clearCache();
+    }
+    if (getIt.isRegistered<ChatSessionCubit>()) {
+      getIt<ChatSessionCubit>().reset();
+    }
+    if (getIt.isRegistered<ChatRepository>()) {
+      getIt<ChatRepository>().clearSuggestions();
+    }
+    if (getIt.isRegistered<FastingSessionCubit>()) {
+      getIt<FastingSessionCubit>().reset();
+    }
+    if (getIt.isRegistered<TrackersRepository>()) {
+      getIt<TrackersRepository>().clearSession();
+    }
+    if (getIt.isRegistered<ContentRepository>()) {
+      getIt<ContentRepository>().clearInsights();
+    }
+    if (getIt.isRegistered<HealthSyncService>()) {
+      getIt<HealthSyncService>().reset();
+    }
+    // Ana ekran widget'ları önceki kullanıcının verisini göstermesin.
+    unawaited(FastingWidgetSync.clear());
+    unawaited(WaterWidgetSync.clear());
   }
 }

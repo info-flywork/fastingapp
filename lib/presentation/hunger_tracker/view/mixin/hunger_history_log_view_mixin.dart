@@ -5,6 +5,9 @@ mixin HungerHistoryLogViewMixin on State<HungerHistoryLogView> {
   List<HungerCheckinItem> entries = const [];
   bool loading = true;
 
+  /// Hafta şeridi (`/hunger-checkins/summary.week`).
+  List<HungerWeekDay> week = const [];
+
   HungerRepository get _hunger => getIt<HungerRepository>();
 
   @override
@@ -13,39 +16,47 @@ mixin HungerHistoryLogViewMixin on State<HungerHistoryLogView> {
     unawaited(_load());
   }
 
-  Future<void> _load([HungerHistoryFilter? activeFilter]) async {
-    final type = _apiType(activeFilter ?? filter);
-    setState(() => loading = true);
+  /// Tümü bir kez yüklenir; filtre sekmeleri istemcide süzer (sekme başına
+  /// spinner ve istek yok). Hata boş liste gibi gösterilmez.
+  Future<void> _load() async {
+    setState(() => loading = entries.isEmpty);
+    // Şerit ayrı yüklenir: liste onu beklemez.
+    unawaited(
+      _hunger
+          .getSummary()
+          .then((s) {
+            if (mounted) setState(() => week = s.week);
+          })
+          .catchError((Object _) {}),
+    );
     try {
-      final items = await _hunger.listCheckins(type: type);
+      final items = await _hunger.listCheckins();
       if (mounted) setState(() => entries = items);
-    } on Object {
-      if (mounted) setState(() => entries = const []);
+    } on Object catch (e) {
+      if (mounted) AppSnackbar.showError(context, e);
     } finally {
       if (mounted) setState(() => loading = false);
     }
   }
 
-  static String _apiType(HungerHistoryFilter f) => switch (f) {
-    HungerHistoryFilter.all => 'all',
-    HungerHistoryFilter.physical => 'physical',
-    HungerHistoryFilter.emotional => 'emotional',
+  List<HungerCheckinItem> get filteredEntries => switch (filter) {
+    HungerHistoryFilter.all => entries,
+    HungerHistoryFilter.physical =>
+      entries.where((e) => e.typeEnum == HungerResultType.physical).toList(),
+    HungerHistoryFilter.emotional =>
+      entries.where((e) => e.typeEnum == HungerResultType.emotional).toList(),
   };
-
-  List<HungerCheckinItem> get filteredEntries => entries;
 
   void setFilter(HungerHistoryFilter value) {
     setState(() => filter = value);
-    unawaited(_load(value));
   }
 
+  /// Soru akışıyla kayıt: önceden cevapsız kayıt ekranı açılıyor, sonuç hep
+  /// "Fiziksel" görünüyordu.
   void onLogMyHungerTapped() {
     context.pushNamed(
-      RoutePaths.hungerLog.name,
-      extra: HungerSessionArgs(
-        flow: const HungerFlowArgs(),
-        resultType: HungerResultType.physical,
-      ),
+      RoutePaths.hungerCheck.name,
+      extra: const HungerFlowArgs(),
     );
   }
 }

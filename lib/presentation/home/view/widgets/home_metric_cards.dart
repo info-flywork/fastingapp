@@ -7,6 +7,7 @@ final class HomeMetricCards extends StatelessWidget {
     this.waterGoalMl = 2500,
     this.steps = 0,
     this.stepsGoal = 8000,
+    this.waterUnit = 'ml',
     required this.onWaterTapped,
     required this.onStepsTapped,
     super.key,
@@ -16,6 +17,9 @@ final class HomeMetricCards extends StatelessWidget {
   final int waterGoalMl;
   final int steps;
   final int stepsGoal;
+
+  /// `ml` | `oz` (önceden hep ml yazıyordu).
+  final String waterUnit;
   final VoidCallback onWaterTapped;
   final VoidCallback onStepsTapped;
 
@@ -32,7 +36,9 @@ final class HomeMetricCards extends StatelessWidget {
               value: waterMl,
               goal: waterGoalMl,
               valueKey: 'home.water_value',
-              goalKey: 'home.water_goal',
+              goalKey: 'home.metric_goal',
+              format: (ml) => WaterUnits.amount(ml, waterUnit),
+              formatGoal: (ml) => WaterUnits.withUnit(ml, waterUnit),
               trackColor: ColorName.colorWaterTrack,
               fillColor: ColorName.colorWaterFill,
               progress: _ratio(waterMl, waterGoalMl),
@@ -72,6 +78,8 @@ final class _MetricCard extends StatelessWidget {
     required this.goal,
     required this.valueKey,
     required this.goalKey,
+    this.format,
+    this.formatGoal,
     required this.trackColor,
     required this.fillColor,
     required this.progress,
@@ -85,6 +93,8 @@ final class _MetricCard extends StatelessWidget {
   final int goal;
   final String valueKey;
   final String goalKey;
+  final String Function(int value)? format;
+  final String Function(int goal)? formatGoal;
   final Color trackColor;
   final Color fillColor;
   final double progress;
@@ -134,13 +144,17 @@ final class _MetricCard extends StatelessWidget {
                 TextSpan(
                   children: [
                     TextSpan(
-                      text: valueKey.tr(args: ['$value']),
+                      text: valueKey.tr(
+                        args: [format?.call(value) ?? '$value'],
+                      ),
                       style: AppTextStyles.homeMetricValue.copyWith(
                         color: const Color(0xFF1C1C21),
                       ),
                     ),
                     TextSpan(
-                      text: goalKey.tr(args: ['$goal']),
+                      text: goalKey.tr(
+                        args: [formatGoal?.call(goal) ?? '$goal'],
+                      ),
                       style: AppTextStyles.homeMetricGoal,
                     ),
                   ],
@@ -239,10 +253,24 @@ class _AnimatedLiquidBarState extends State<_AnimatedLiquidBar>
   @override
   void initState() {
     super.initState();
+    // Sonsuz döngü yerine birkaç tur: ana sayfa boştayken her kare
+    // yeniden çizilmesin. Değer değişince dalga yeniden oynar.
     _wave = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 2400),
-    )..repeat();
+    )..repeat(count: _waveCycles);
+  }
+
+  static const _waveCycles = 2;
+
+  @override
+  void didUpdateWidget(covariant _AnimatedLiquidBar oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.progress != widget.progress && !_wave.isAnimating) {
+      _wave
+        ..reset()
+        ..repeat(count: _waveCycles);
+    }
   }
 
   @override
@@ -258,22 +286,24 @@ class _AnimatedLiquidBarState extends State<_AnimatedLiquidBar>
       duration: const Duration(milliseconds: 1100),
       curve: Curves.easeOutCubic,
       builder: (context, animatedProgress, _) {
-        return AnimatedBuilder(
-          animation: _wave,
-          builder: (context, _) {
-            return SizedBox(
-              height: height,
-              width: double.infinity,
-              child: CustomPaint(
-                painter: _LiquidBarPainter(
-                  progress: animatedProgress,
-                  phase: _wave.value * math.pi * 2,
-                  trackColor: widget.trackColor,
-                  fillColor: widget.fillColor,
+        return RepaintBoundary(
+          child: AnimatedBuilder(
+            animation: _wave,
+            builder: (context, _) {
+              return SizedBox(
+                height: height,
+                width: double.infinity,
+                child: CustomPaint(
+                  painter: _LiquidBarPainter(
+                    progress: animatedProgress,
+                    phase: _wave.value * math.pi * 2,
+                    trackColor: widget.trackColor,
+                    fillColor: widget.fillColor,
+                  ),
                 ),
-              ),
-            );
-          },
+              );
+            },
+          ),
         );
       },
     );

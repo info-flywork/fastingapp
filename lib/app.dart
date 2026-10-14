@@ -4,6 +4,7 @@ import 'package:fastingapp/core/di/injection.dart';
 import 'package:fastingapp/core/home_widgets/water_widget_sync.dart';
 import 'package:fastingapp/core/managers/localization_manager.dart';
 import 'package:fastingapp/core/router/app_router.dart';
+import 'package:fastingapp/core/sync/app_sync_scope.dart';
 import 'package:fastingapp/core/theme/app_theme.dart';
 import 'package:fastingapp/presentation/auth/bloc/auth_bloc.dart';
 import 'package:fastingapp/presentation/auth/bloc/auth_event.dart';
@@ -11,17 +12,28 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 /// Uygulama kökü: global BLoC'lar + MaterialApp.router. (Doküman 12)
-final class MyApp extends StatelessWidget {
+final class MyApp extends StatefulWidget {
   const MyApp({super.key});
+
+  @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+  @override
+  void initState() {
+    super.initState();
+    // Bir kez: `build` her dil değişiminde çalışır, oturum kontrolü (ve cihaz
+    // kaydı) tekrar etmesin.
+    getIt<AuthBloc>().add(const AuthCheckRequested());
+  }
 
   @override
   Widget build(BuildContext context) {
     LocalizationManager.current = context.locale;
     return MultiBlocProvider(
       providers: [
-        BlocProvider<AuthBloc>.value(
-          value: getIt<AuthBloc>()..add(const AuthCheckRequested()),
-        ),
+        BlocProvider<AuthBloc>.value(value: getIt<AuthBloc>()),
         // Diğer global BLoC'lar buraya eklenir.
       ],
       child: MaterialApp.router(
@@ -36,7 +48,7 @@ final class MyApp extends StatelessWidget {
           return OfflineGate(
             child: WaterWidgetTapHandler(
               child: WaterWidgetLocaleSync(
-                child: child ?? const SizedBox.shrink(),
+                child: AppSyncScope(child: child ?? const SizedBox.shrink()),
               ),
             ),
           );

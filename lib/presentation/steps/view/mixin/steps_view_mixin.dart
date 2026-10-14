@@ -43,6 +43,12 @@ mixin StepsViewMixin on State<StepsView>, TickerProvider {
 
   bool get isStepsToday => DateUtils.isSameDay(selectedDate, _today);
 
+  /// Seçili gün sağlık uygulamasından: +/− gizlenir (sunucu elle yazmayı
+  /// 409 ile reddediyordu).
+  bool selectedDayHealthSynced = false;
+
+  bool get canEditSteps => isStepsToday && !selectedDayHealthSynced;
+
   void initStepsControllers() {
     currentSteps = widget.initialSteps;
     dailyGoalSteps = widget.dailyGoalSteps;
@@ -56,7 +62,12 @@ mixin StepsViewMixin on State<StepsView>, TickerProvider {
       duration: const Duration(milliseconds: progressDurationMs),
     );
     animateProgressTo(0, from: 0);
-    unawaited(loadStepsWeek());
+    unawaited(_syncThenLoad());
+  }
+
+  Future<void> _syncThenLoad() async {
+    await getIt<HealthSyncService>().sync();
+    await loadStepsWeek();
   }
 
   String stepsDateLabel(BuildContext context) {
@@ -75,10 +86,7 @@ mixin StepsViewMixin on State<StepsView>, TickerProvider {
     final gen = ++_stepsLoadGen;
     final date = selectedDate;
     try {
-      final range = await _trackers.getSteps(
-        range: 'week',
-        date: date,
-      );
+      final range = await _trackers.getSteps(range: 'week', date: date);
       if (!mounted || gen != _stepsLoadGen) return;
       if (!DateUtils.isSameDay(date, selectedDate)) return;
       _applyStepsRange(range);
@@ -93,6 +101,7 @@ mixin StepsViewMixin on State<StepsView>, TickerProvider {
       dailyGoalSteps = range.goal;
       weeklySteps = List<int>.filled(7, 0);
       currentSteps = 0;
+      selectedDayHealthSynced = false;
       caloriesKcal = 0;
       distanceKm = '0.0';
       durationMin = 0;
@@ -104,6 +113,7 @@ mixin StepsViewMixin on State<StepsView>, TickerProvider {
         if (DateUtils.isSameDay(d, focus)) {
           todayWeekIndex = idx;
           currentSteps = day.steps;
+          selectedDayHealthSynced = day.isHealthSynced;
           caloriesKcal = day.kcal;
           distanceKm = day.distanceKm.toStringAsFixed(1);
           durationMin = day.durationMin;
@@ -134,9 +144,7 @@ mixin StepsViewMixin on State<StepsView>, TickerProvider {
   }
 
   Future<void> _shiftStepsDate(int dayDelta) {
-    final next = DateUtils.dateOnly(
-      selectedDate.add(Duration(days: dayDelta)),
-    );
+    final next = DateUtils.dateOnly(selectedDate.add(Duration(days: dayDelta)));
     return _selectStepsDate(next);
   }
 
@@ -145,6 +153,8 @@ mixin StepsViewMixin on State<StepsView>, TickerProvider {
     var clamped = next.isAfter(_today) ? _today : next;
     if (clamped.isBefore(_earliestStepsDay)) clamped = _earliestStepsDay;
     if (DateUtils.isSameDay(clamped, selectedDate)) return;
+    // Bekleyen kayıt önce gönderilir (değer kendi gününe yazılır, kaybolmaz).
+    _flushPendingSteps();
 
     final direction = clamped.isAfter(selectedDate) ? 1 : -1;
     setState(() {
@@ -155,17 +165,68 @@ mixin StepsViewMixin on State<StepsView>, TickerProvider {
     await loadStepsWeek();
   }
 
-  Future<void> _persistSelectedDaySteps() async {
-    final range = await _trackers.putSteps(
-      date: selectedDate,
-      steps: currentSteps,
+  Timer? _persistTimer;
+  ({DateTime date, int steps})? _pending;
+
+  /// Art arda +/- dokunuşları tek PUT'a katlanır (yarışan istekler son
+  /// değeri ezmesin). Tarih ve değer dokunuş anında yakalanır.
+  void _schedulePersist() {
+    _pending = (date: selectedDate, steps: currentSteps);
+    _persistTimer?.cancel();
+    _persistTimer = Timer(
+      const Duration(milliseconds: 600),
+      () => unawaited(_persistPending()),
     );
-    if (!mounted) return;
-    _applyStepsRange(range);
-    DataSync.afterWrite();
+  }
+
+  void _flushPendingSteps() {
+    if (!(_persistTimer?.isActive ?? false)) return;
+    _persistTimer!.cancel();
+    unawaited(_persistPending());
+  }
+
+  /// `PUT /steps/:date` yalnızca o günü döner: haftalık grafik ezilmez; o
+  /// günün kcal / km / dakika değerleri yanıttan güncellenir. Hata olursa
+  /// sunucudan yeniden yüklenir.
+  Future<void> _persistPending() async {
+    final pending = _pending;
+    _pending = null;
+    _persistTimer = null;
+    if (pending == null) return;
+    try {
+      final range = await _trackers.putSteps(
+        date: pending.date,
+        steps: pending.steps,
+      );
+      DataSync.afterWrite();
+      if (!mounted || !DateUtils.isSameDay(pending.date, selectedDate)) return;
+      for (final day in range.days) {
+        if (!DateUtils.isSameDay(day.date, pending.date)) continue;
+        setState(() {
+          caloriesKcal = day.kcal;
+          distanceKm = day.distanceKm.toStringAsFixed(1);
+          durationMin = day.durationMin;
+        });
+      }
+    } on Object catch (e) {
+      if (!mounted) return;
+      AppSnackbar.showError(context, e);
+      await loadStepsWeek();
+    }
   }
 
   void disposeStepsControllers() {
+    // Bekleyen kayıt kaybolmasın (ekran kapanırken sessizce gönderilir).
+    final pending = _pending;
+    if ((_persistTimer?.isActive ?? false) && pending != null) {
+      _persistTimer!.cancel();
+      unawaited(
+        _trackers
+            .putSteps(date: pending.date, steps: pending.steps)
+            .then((_) => DataSync.afterWrite())
+            .catchError((Object _) {}),
+      );
+    }
     progressController.dispose();
   }
 
@@ -187,31 +248,49 @@ mixin StepsViewMixin on State<StepsView>, TickerProvider {
   }
 
   Future<void> addSteps() async {
-    if (!isStepsToday) return;
+    if (!canEditSteps) return;
     setState(() {
       currentSteps = (currentSteps + addStepAmount).clamp(0, 99999);
       _syncSelectedBar();
     });
     unawaited(runProgressAnimation(progress));
-    try {
-      await _persistSelectedDaySteps();
-    } on Object {
-      // Yerel sayaç korunur
-    }
+    _schedulePersist();
   }
 
   Future<void> removeSteps() async {
-    if (!isStepsToday) return;
+    if (!canEditSteps) return;
     if (currentSteps <= 0) return;
     setState(() {
       currentSteps = (currentSteps - addStepAmount).clamp(0, 99999);
       _syncSelectedBar();
     });
     unawaited(runProgressAnimation(progress));
+    _schedulePersist();
+  }
+
+  /// Günlük adım hedefi (1.000–50.000): `PATCH /user/goals {stepsGoal}`.
+  /// Önceden hedef değiştirilemiyordu.
+  Future<void> editStepsGoal() async {
+    final goal = await AppDialogs.instance.showGoalStepper(
+      context,
+      title: 'steps_page.goal_title'.tr(),
+      initial: dailyGoalSteps,
+      min: 1000,
+      max: 50000,
+      step: 500,
+      format: (v) => '$v',
+    );
+    if (goal == null || goal == dailyGoalSteps || !mounted) return;
+    final previous = dailyGoalSteps;
+    setState(() => dailyGoalSteps = goal);
+    unawaited(runProgressAnimation(progress));
     try {
-      await _persistSelectedDaySteps();
-    } on Object {
-      // Yerel sayaç korunur
+      await _trackers.updateGoals({'stepsGoal': goal});
+      DataSync.afterWrite();
+    } on Object catch (e) {
+      if (!mounted) return;
+      setState(() => dailyGoalSteps = previous);
+      AppSnackbar.showError(context, e);
     }
   }
 }

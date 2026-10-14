@@ -11,6 +11,8 @@ final class LocalizationManager {
     Locale('de'),
     Locale('fr'),
     Locale('es'),
+    Locale('it'),
+    Locale('ru'),
   ];
 
   static const fallbackLocale = Locale('en');

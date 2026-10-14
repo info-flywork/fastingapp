@@ -21,11 +21,7 @@ final class LoginActions extends StatelessWidget {
           label: 'auth.continue_with_apple'.tr(),
           onPressed: onApple,
           iconPosition: AppButtonIconPosition.leading,
-          icon: const Icon(
-            Icons.apple,
-            size: 22,
-            color: ColorName.colorWhite,
-          ),
+          icon: const Icon(Icons.apple, size: 22, color: ColorName.colorWhite),
         ),
         const SizedBox(height: 12),
         DecoratedBox(
@@ -99,8 +95,40 @@ final class _LoginOrDivider extends StatelessWidget {
   }
 }
 
-final class _LoginLegalText extends StatelessWidget {
+/// Kullanım koşulları / gizlilik politikası bağlantıları (`/app/config`
+/// adresleri; önceden link gibi görünüp açılmıyordu).
+final class _LoginLegalText extends StatefulWidget {
   const _LoginLegalText();
+
+  @override
+  State<_LoginLegalText> createState() => _LoginLegalTextState();
+}
+
+class _LoginLegalTextState extends State<_LoginLegalText> {
+  late final _terms = TapGestureRecognizer()
+    ..onTap = () => _open((l) => l.termsUrl);
+  late final _privacy = TapGestureRecognizer()
+    ..onTap = () => _open((l) => l.privacyUrl);
+
+  @override
+  void initState() {
+    super.initState();
+    // Dokunmadan önce adresler hazır olsun.
+    getIt<AppLinksRepository>().get().ignore();
+  }
+
+  @override
+  void dispose() {
+    _terms.dispose();
+    _privacy.dispose();
+    super.dispose();
+  }
+
+  Future<void> _open(String? Function(AppLinks links) pick) async {
+    final url = pick(await getIt<AppLinksRepository>().get());
+    if (url == null) return;
+    await getIt<UrlLauncherManager>().openUrl(url);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -114,11 +142,13 @@ final class _LoginLegalText extends StatelessWidget {
             TextSpan(
               text: 'auth.terms_of_service'.tr(),
               style: AppTextStyles.loginLegalLink,
+              recognizer: _terms,
             ),
             TextSpan(text: 'auth.legal_middle'.tr()),
             TextSpan(
               text: 'auth.privacy_policy'.tr(),
               style: AppTextStyles.loginLegalLink,
+              recognizer: _privacy,
             ),
             TextSpan(text: 'auth.legal_suffix'.tr()),
           ],

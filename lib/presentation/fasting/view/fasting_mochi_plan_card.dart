@@ -1,10 +1,16 @@
+import 'dart:async';
+
 import 'package:easy_localization/easy_localization.dart';
+import 'package:fastingapp/core/di/injection.dart';
 import 'package:fastingapp/core/theme/app_text_styles.dart';
 import 'package:fastingapp/core/widgets/app_button.dart';
 import 'package:fastingapp/core/widgets/app_button_decoration.dart';
 import 'package:fastingapp/core/widgets/horseshoe_arc.dart';
+import 'package:fastingapp/domain/fasting/fasting_repository.dart';
 import 'package:fastingapp/generated/app_images.g.dart';
 import 'package:fastingapp/generated/colors.gen.dart';
+import 'package:fastingapp/presentation/fasting/bloc/fasting_session_cubit.dart';
+import 'package:fastingapp/presentation/fasting/bloc/fasting_session_state.dart';
 import 'package:flutter/material.dart';
 
 /// Fasting sayfası altı — Mochi'nin bugünkü plan kartı.
@@ -256,9 +262,57 @@ final class _TimeRow extends StatelessWidget {
   }
 }
 
-/// Figma Frame 1597878705 — pad 12, radius 16.
-final class _InsightBox extends StatelessWidget {
+/// Günün ipucu (`GET /fasts/daily-tip`); yüklenemezse yerel çeviri.
+final class _InsightBox extends StatefulWidget {
   const _InsightBox();
+
+  @override
+  State<_InsightBox> createState() => _InsightBoxState();
+}
+
+class _InsightBoxState extends State<_InsightBox> {
+  String? _tipText;
+  StreamSubscription<String>? _fastChanges;
+  String? _loadedFor;
+
+  @override
+  void initState() {
+    super.initState();
+    unawaited(_load());
+    // Oruç başlayınca / bitince, plan (saat, süre, haftalık gün) değişince
+    // ve gün dönünce yeniden yüklenir; önceden yalnızca oruç değişiminde.
+    final session = getIt<FastingSessionCubit>();
+    _fastChanges = session.stream
+        .map(_keyOf)
+        .distinct()
+        .where((key) => key != _loadedFor)
+        .listen((_) => unawaited(_load()));
+  }
+
+  static String _keyOf(FastingSessionState s) {
+    final now = DateTime.now();
+    return '${s.fast?.id}|${s.plan?.signature}|${now.year}-${now.month}-${now.day}';
+  }
+
+  @override
+  void dispose() {
+    _fastChanges?.cancel();
+    super.dispose();
+  }
+
+  Future<void> _load() async {
+    _loadedFor = _keyOf(getIt<FastingSessionCubit>().state);
+    try {
+      final tip = await getIt<FastingRepository>().getDailyTip();
+      if (!mounted) return;
+      final text = tip?.text.trim();
+      setState(
+        () => _tipText = (text != null && text.isNotEmpty) ? text : null,
+      );
+    } on Object {
+      if (mounted) setState(() => _tipText = null);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -271,7 +325,7 @@ final class _InsightBox extends StatelessWidget {
       child: Padding(
         padding: const EdgeInsets.all(12),
         child: Text(
-          'fasting_page.mochi_plan_insight'.tr(),
+          _tipText ?? 'fasting_page.mochi_plan_insight'.tr(),
           style: AppTextStyles.fastingMochiPlanInsight,
         ),
       ),

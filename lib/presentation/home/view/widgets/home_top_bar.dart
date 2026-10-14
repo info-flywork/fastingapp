@@ -21,7 +21,13 @@ final class HomeTopBar extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
       child: Row(
         children: [
-          if (!isPremium) _PremiumPill(onTap: onPremiumTapped),
+          // Satın alınca özet yenilenmeden de kaybolsun.
+          ValueListenableBuilder<bool>(
+            valueListenable: getIt<RevenueCatService>().isPremium,
+            builder: (context, premiumNow, _) => isPremium || premiumNow
+                ? const SizedBox.shrink()
+                : _PremiumPill(onTap: onPremiumTapped),
+          ),
           const Spacer(),
           _StreakPill(streakDays: streakDays),
           const SizedBox(width: 10),

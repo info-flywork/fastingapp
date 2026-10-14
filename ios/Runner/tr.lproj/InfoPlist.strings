@@ -1,0 +1,4 @@
+/* İzin metinleri (tr). */
+"NSCameraUsageDescription" = "Kamera, profil fotoğrafı ve yemek fotoğrafından kalori hesaplama için kullanılır.";
+"NSHealthShareUsageDescription" = "Aktivite hedeflerinin doğru olması için adım sayın Apple Sağlık'tan alınır.";
+"NSPhotoLibraryUsageDescription" = "Profil fotoğrafını fotoğraf arşivinden seçebilirsin.";

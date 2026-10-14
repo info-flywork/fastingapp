@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Canlı geri sayımlı oruç widget'ı: Flutter görseli (süre ve yay boş) +
+     yerel Chronometer. Konum / boyut FastingLive.kt'de widget boyutuna göre. -->
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/fasting_live_root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@android:color/transparent">
+
+    <ImageView
+        android:id="@+id/fasting_live_image"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:contentDescription="@string/fasting_widget_description"
+        android:scaleType="fitCenter" />
+
+    <LinearLayout
+        android:id="@+id/fasting_live_timer_box"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="top|center_horizontal"
+        android:orientation="horizontal">
+
+        <Chronometer
+            android:id="@+id/fasting_live_timer"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:fontFamily="sans-serif-medium"
+            android:includeFontPadding="false"
+            android:maxLines="1" />
+
+        <TextView
+            android:id="@+id/fasting_live_suffix"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:fontFamily="sans-serif-medium"
+            android:includeFontPadding="false"
+            android:maxLines="1"
+            android:visibility="gone" />
+    </LinearLayout>
+</FrameLayout>

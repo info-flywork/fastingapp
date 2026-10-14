@@ -1,6 +1,8 @@
 import 'package:easy_localization/easy_localization.dart';
+import 'package:fastingapp/core/di/injection.dart';
 import 'package:fastingapp/core/theme/app_text_styles.dart';
 import 'package:fastingapp/core/widgets/onboarding/onboarding_plan_option_card.dart';
+import 'package:fastingapp/domain/revenue_cat/revenue_cat_service.dart';
 import 'package:fastingapp/presentation/auth/onboard/fasting_plan/bloc/fasting_plan_bloc.dart';
 import 'package:fastingapp/presentation/auth/onboard/fasting_plan/fasting_plan_options_catalog.dart';
 import 'package:flutter/material.dart';
@@ -11,6 +13,7 @@ final class FastingPlanOptionsList extends StatelessWidget {
     required this.selected,
     required this.onSelected,
     this.showFooter = true,
+    this.age,
     super.key,
   });
 
@@ -18,34 +21,56 @@ final class FastingPlanOptionsList extends StatelessWidget {
   final ValueChanged<OnboardingFastingPlan> onSelected;
   final bool showFooter;
 
+  /// Verilirse yaşa uygun olmayan planlar gösterilmez (18 yaş altı).
+  final int? age;
+
   @override
   Widget build(BuildContext context) {
-    final items = FastingPlanOptionsCatalog.items;
+    final all = FastingPlanOptionsCatalog.items;
+    final items = [
+      for (final item in all)
+        if (FastingPlanOptionsCatalog.allowedFor(item.plan, age)) item,
+    ];
+    final filtered = items.length < all.length;
 
     return Column(
       children: [
-        GridView.builder(
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          itemCount: items.length,
-          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 2,
-            mainAxisSpacing: 12,
-            crossAxisSpacing: 12,
-            childAspectRatio: 189 / 125,
+        ValueListenableBuilder<bool>(
+          valueListenable: getIt<RevenueCatService>().isPremium,
+          builder: (context, isPremium, _) => GridView.builder(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            itemCount: items.length,
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 2,
+              mainAxisSpacing: 12,
+              crossAxisSpacing: 12,
+              childAspectRatio: 189 / 125,
+            ),
+            itemBuilder: (context, index) {
+              final item = items[index];
+              return OnboardingPlanOptionCard(
+                title: item.titleKey.tr(),
+                subtitle: item.subtitleKey.tr(),
+                badgeLabel: item.badgeKey.tr(),
+                badgeColor: item.badgeColor,
+                isSelected: selected == item.plan,
+                isLocked:
+                    !isPremium &&
+                    FastingPlanOptionsCatalog.isPremiumPlan(item.plan),
+                onTap: () => onSelected(item.plan),
+              );
+            },
           ),
-          itemBuilder: (context, index) {
-            final item = items[index];
-            return OnboardingPlanOptionCard(
-              title: item.titleKey.tr(),
-              subtitle: item.subtitleKey.tr(),
-              badgeLabel: item.badgeKey.tr(),
-              badgeColor: item.badgeColor,
-              isSelected: selected == item.plan,
-              onTap: () => onSelected(item.plan),
-            );
-          },
         ),
+        if (filtered) ...[
+          const SizedBox(height: 12),
+          Text(
+            'onboarding.plans_age_note'.tr(),
+            textAlign: TextAlign.center,
+            style: AppTextStyles.footerHint,
+          ),
+        ],
         if (showFooter) ...[
           const SizedBox(height: 12),
           Text(

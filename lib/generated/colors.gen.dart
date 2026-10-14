@@ -174,6 +174,9 @@ abstract final class ColorName {
   /// Color: #F6F6F6
   static const Color colorLoginBg = Color(0xFFF6F6F6);
 
+  /// Color: #FDFCF8
+  static const Color colorLoginSloganBg = Color(0xFFFDFCF8);
+
   /// Color: #C8DBC5
   static const Color colorMatGreen = Color(0xFFC8DBC5);
 

@@ -6,14 +6,14 @@ part 'meal_window_state.dart';
 
 final class MealWindowBloc extends Bloc<MealWindowEvent, MealWindowState> {
   MealWindowBloc()
-      : super(
-          const MealWindowState(
-            startHour: 7,
-            startMinute: 0,
-            endHour: 19,
-            endMinute: 0,
-          ),
-        ) {
+    : super(
+        const MealWindowState(
+          startHour: 7,
+          startMinute: 0,
+          endHour: 19,
+          endMinute: 0,
+        ),
+      ) {
     on<MealWindowStartHourChanged>(_onStartHour);
     on<MealWindowStartMinuteChanged>(_onStartMinute);
     on<MealWindowEndHourChanged>(_onEndHour);

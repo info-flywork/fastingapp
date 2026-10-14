@@ -12,6 +12,10 @@ final class AuthInterceptor extends Interceptor {
     RequestOptions options,
     RequestInterceptorHandler handler,
   ) async {
+    // Açıkça verilmiş token (ör. çıkışta eski oturumun) ezilmez.
+    if (options.headers.containsKey('Authorization')) {
+      return handler.next(options);
+    }
     final token = await _authCacheManager.getAccessToken();
     if (token != null && token.isNotEmpty) {
       options.headers['Authorization'] = 'Bearer $token';

@@ -4,6 +4,7 @@ import 'dart:ui' as ui;
 import 'package:easy_localization/easy_localization.dart';
 import 'package:fastingapp/core/home_widgets/fasting_widget_sync.dart';
 import 'package:fastingapp/core/router/app_router.dart';
+import 'package:fastingapp/core/router/deep_link_gate.dart';
 import 'package:fastingapp/core/router/route_paths.dart';
 import 'package:fastingapp/generated/assets.gen.dart';
 import 'package:fastingapp/presentation/home_widgets/water_home_widget_view.dart';
@@ -33,7 +34,11 @@ abstract final class WaterWidgetSync {
   static const addKey = 'water_add_ml';
   static const timelineKey = 'water_timeline';
   static const weekKey = 'water_week';
-  static const defaultCurrentMl = 100;
+
+  /// [currentKey]/[timelineKey]'in ait olduğu yerel gün (`yyyy-MM-dd`);
+  /// gün dönünce eski toplam bugünün değeri sanılmaz.
+  static const dateKey = 'water_date';
+  static const defaultCurrentMl = 0;
   static const defaultGoalMl = 2500;
   static const defaultAddMl = 300;
 
@@ -48,15 +53,35 @@ abstract final class WaterWidgetSync {
       if (current == null && goal == null) return null;
       final add = await _readInt(addKey);
       final rawTimeline = await HomeWidget.getWidgetData<dynamic>(timelineKey);
+      final savedDay = await HomeWidget.getWidgetData<dynamic>(dateKey);
+      final isToday = savedDay == _dayKey(DateTime.now());
       return (
-        currentMl: current ?? defaultCurrentMl,
+        currentMl: isToday ? (current ?? defaultCurrentMl) : defaultCurrentMl,
         goalMl: goal ?? defaultGoalMl,
         addMl: add ?? defaultAddMl,
-        sips: _decodeSips(rawTimeline),
+        sips: isToday ? _decodeSips(rawTimeline) : const <WaterWidgetSip>[],
       );
     } on Object {
       return null;
     }
+  }
+
+  /// Kullanıcının su birimi (`ml` | `oz`). Değerler hep ml saklanır,
+  /// görselde birime çevrilir (önceden oz seçilse de widget ml yazıyordu).
+  static String _unit = 'ml';
+  static String _ozLabel = 'oz';
+
+  static const _mlPerOz = 29.5735295625;
+
+  static int _shown(int ml) => _unit == 'oz' ? (ml / _mlPerOz).round() : ml;
+
+  /// Birim değişince widget yeniden çizilir. [ozLabel] çevrili "oz".
+  static Future<void> setUnit(String unit, {String? ozLabel}) async {
+    if (ozLabel != null) _ozLabel = ozLabel;
+    if (unit == _unit) return;
+    _unit = unit;
+    final republish = _republish;
+    if (republish != null) await republish();
   }
 
   static Future<void> publish({
@@ -78,7 +103,30 @@ abstract final class WaterWidgetSync {
     int? goalMl,
     int? addMl,
     List<WaterWidgetSip>? sips,
+    bool render = true,
   }) async {
+    // Etiketler saklanır: uygulama kökü özet geldikçe [updateToday] ile
+    // aynı dilde yeniden çizebilir.
+    _republish = ({int? currentMl, int? goalMl}) => publish(
+      goalLabel: goalLabel,
+      unitLabel: unitLabel,
+      timelineLabel: timelineLabel,
+      addTemplate: addTemplate,
+      localeName: localeName,
+      largeTitle: largeTitle,
+      largeSubtitle: largeSubtitle,
+      intakeLabel: intakeLabel,
+      percentTemplate: percentTemplate,
+      weeklyLabel: weeklyLabel,
+      historyLabel: historyLabel,
+      reminderLabel: reminderLabel,
+      addWaterLabel: addWaterLabel,
+      weekdays: weekdays,
+      currentMl: currentMl,
+      goalMl: goalMl,
+    );
+    // Yalnızca etiketleri hatırla (açılışta resim üretme; widget zaten çizili).
+    if (!render) return;
     try {
       await HomeWidget.setAppGroupId(groupId);
       final saved = await read();
@@ -87,6 +135,7 @@ abstract final class WaterWidgetSync {
       final add = addMl ?? saved?.addMl ?? defaultAddMl;
       final timeline = sips ?? saved?.sips ?? const <WaterWidgetSip>[];
       await HomeWidget.saveWidgetData<int>(currentKey, current);
+      await HomeWidget.saveWidgetData<String>(dateKey, _dayKey(DateTime.now()));
       await HomeWidget.saveWidgetData<int>(goalKey, goal);
       await HomeWidget.saveWidgetData<int>(addKey, add);
       await HomeWidget.saveWidgetData<String>(
@@ -98,15 +147,18 @@ abstract final class WaterWidgetSync {
       await HomeWidget.saveWidgetData<String>(weekKey, _encodeWeek(week));
       final shown = [
         for (final sip in timeline)
-          (ml: sip.ml, timeLabel: _formatTime(sip.at, localeName)),
+          (ml: _shown(sip.ml), timeLabel: _formatTime(sip.at, localeName)),
       ];
-      final addLabel = addTemplate.replaceFirst('{}', '$add');
+      final addLabel = addTemplate
+          .replaceFirst('{}', '${_shown(add)}')
+          .replaceAll(unitLabel, _unit == 'oz' ? _ozLabel : unitLabel);
+      final unitText = _unit == 'oz' ? _ozLabel : unitLabel;
       await HomeWidget.renderFlutterWidget(
         WaterHomeWidgetView(
-          currentMl: current,
-          goalMl: goal,
+          currentMl: _shown(current),
+          goalMl: _shown(goal),
           goalLabel: goalLabel,
-          unitLabel: unitLabel,
+          unitLabel: unitText,
         ),
         key: imageKey,
         logicalSize: WaterHomeWidgetView.logicalSize,
@@ -114,10 +166,10 @@ abstract final class WaterWidgetSync {
       );
       await HomeWidget.renderFlutterWidget(
         WaterMediumWidgetView(
-          currentMl: current,
-          goalMl: goal,
+          currentMl: _shown(current),
+          goalMl: _shown(goal),
           goalLabel: goalLabel,
-          unitLabel: unitLabel,
+          unitLabel: unitText,
           timelineLabel: timelineLabel,
           addLabel: addLabel,
           sips: shown,
@@ -129,7 +181,7 @@ abstract final class WaterWidgetSync {
       await _renderLarge(
         current: current,
         goal: goal,
-        unitLabel: unitLabel,
+        unitLabel: unitText,
         largeTitle: largeTitle,
         largeSubtitle: largeSubtitle,
         intakeLabel: intakeLabel,
@@ -155,6 +207,38 @@ abstract final class WaterWidgetSync {
     } on Object {
       // Widget imzası hazır değilse uygulama akışı sürer.
     }
+  }
+
+  static Future<void> Function({int? currentMl, int? goalMl})? _republish;
+  static int? _lastTodayMl;
+  static int? _lastGoalMl;
+
+  /// Bugünün toplamı (ör. `/user/summary.today.water`) değiştiyse widget'ı
+  /// yeniden çizer. Etiketler henüz yoksa (ilk açılış) bir şey yapmaz.
+  static Future<void> updateToday({required int currentMl, int? goalMl}) async {
+    final republish = _republish;
+    if (republish == null) return;
+    if (currentMl == _lastTodayMl && goalMl == _lastGoalMl) return;
+    _lastTodayMl = currentMl;
+    _lastGoalMl = goalMl;
+    await republish(currentMl: currentMl, goalMl: goalMl);
+  }
+
+  /// Çıkış / hesap değişimi: önceki kullanıcının su verisi (bugün, son
+  /// kayıtlar, hafta) silinir; etiketler biliniyorsa 0 ile yeniden çizilir.
+  static Future<void> clear() async {
+    _lastTodayMl = null;
+    _lastGoalMl = null;
+    try {
+      await HomeWidget.setAppGroupId(groupId);
+      for (final key in [currentKey, timelineKey, weekKey, dateKey]) {
+        await HomeWidget.saveWidgetData<String>(key, null);
+      }
+    } on Object {
+      return;
+    }
+    final republish = _republish;
+    if (republish != null) await republish(currentMl: 0);
   }
 
   static Future<void> _renderLarge({
@@ -190,8 +274,8 @@ abstract final class WaterWidgetSync {
     try {
       await HomeWidget.renderFlutterWidget(
         WaterLargeWidgetView(
-          currentMl: current,
-          goalMl: goal,
+          currentMl: _shown(current),
+          goalMl: _shown(goal),
           unitLabel: unitLabel,
           title: largeTitle,
           subtitle: largeSubtitle,
@@ -263,6 +347,22 @@ abstract final class WaterWidgetSync {
     return week;
   }
 
+  /// Sunucu haftası (`/water/week`): uygulamanın açılmadığı günler de
+  /// dolsun (önceden yalnızca uygulamanın gördüğü günler vardı).
+  static Future<void> saveServerWeek(Map<String, int> days) async {
+    if (days.isEmpty) return;
+    try {
+      await HomeWidget.setAppGroupId(groupId);
+      final raw = await HomeWidget.getWidgetData<dynamic>(weekKey);
+      final week = {..._decodeWeek(raw), ...days};
+      await HomeWidget.saveWidgetData<String>(weekKey, _encodeWeek(week));
+    } on Object {
+      return;
+    }
+    final republish = _republish;
+    if (republish != null) await republish();
+  }
+
   static Map<String, int> _mergeWeek(Map<String, int> saved, int currentMl) {
     final week = Map<String, int>.of(saved);
     week[_dayKey(DateTime.now())] = currentMl;
@@ -328,7 +428,9 @@ class _WaterWidgetTapHandlerState extends State<WaterWidgetTapHandler> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       unawaited(_openInitial());
     });
-    _clicks = HomeWidget.widgetClicked.listen(_openWater);
+    _clicks = HomeWidget.widgetClicked.listen(
+      (uri) => unawaited(_openWater(uri)),
+    );
   }
 
   @override
@@ -340,11 +442,12 @@ class _WaterWidgetTapHandlerState extends State<WaterWidgetTapHandler> {
   Future<void> _openInitial() async {
     final uri = await HomeWidget.initiallyLaunchedFromHomeWidget();
     if (!mounted) return;
-    _openWater(uri);
+    await _openWater(uri);
   }
 
-  void _openWater(Uri? uri) {
+  Future<void> _openWater(Uri? uri) async {
     if (uri == null) return;
+    if (!await DeepLinkGate.ready() || !mounted) return;
     if (uri.host == 'fasting') {
       if (appRouter.state.uri.path == RoutePaths.fasting.path) return;
       appRouter.go(RoutePaths.fasting.path);
@@ -397,6 +500,12 @@ class _WaterWidgetLocaleSyncState extends State<WaterWidgetLocaleSync> {
     if (_syncedLocale == locale) return;
     final goal = _goalKey.tr(context: context);
     final unit = _unitKey.tr(context: context);
+    unawaited(
+      WaterWidgetSync.setUnit(
+        WaterWidgetSync._unit,
+        ozLabel: 'water_reminder.unit_oz'.tr(context: context),
+      ),
+    );
     final timeline = _timelineKey.tr(context: context);
     final add = _addKey.tr(context: context);
     final title = _titleKey.tr(context: context);
@@ -415,6 +524,10 @@ class _WaterWidgetLocaleSyncState extends State<WaterWidgetLocaleSync> {
         title == _titleKey) {
       return;
     }
+    // İlk açılışta widget'lar zaten çizili: yalnızca etiketler hatırlanır
+    // (açılışta 9 resim üretmek ilk kareleri takıltıyordu). Dil sonradan
+    // değişirse yeniden çizilir.
+    final render = _syncedLocale != null;
     _syncedLocale = locale;
     FastingWidgetSync.rememberLabels(
       fasting: 'fasting_page.widget_fasting'.tr(context: context),
@@ -436,9 +549,10 @@ class _WaterWidgetLocaleSyncState extends State<WaterWidgetLocaleSync> {
       weekCheer: 'fasting_page.widget_keep_going'.tr(context: context),
       weekdays: 'water_page.weekdays'.tr(context: context),
     );
-    unawaited(FastingWidgetSync.refresh());
+    if (render) unawaited(FastingWidgetSync.refresh());
     unawaited(
       WaterWidgetSync.publish(
+        render: render,
         goalLabel: goal,
         unitLabel: unit,
         timelineLabel: timeline,

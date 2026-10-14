@@ -6,30 +6,22 @@ import 'package:fastingapp/core/base/model/base_response.dart';
 import 'package:fastingapp/core/network/network_exception.dart';
 import 'package:fastingapp/core/network/network_manager.dart';
 import 'package:fastingapp/core/utils/enum/request_type.dart';
-import 'package:fastingapp/domain/chat/chat_repository.dart';
 import 'package:uuid/uuid.dart';
 
 /// Fotoğraf analizi ve öğün kaydı (`/v1/meals/*`).
 final class MealsRepository {
-  MealsRepository(this._network, this._dio, this._chat);
+  MealsRepository(this._network, this._dio);
 
   final NetworkManager _network;
   final Dio _dio;
-  final ChatRepository _chat;
   static const _uuid = Uuid();
 
-  /// 202 + poll; [onConsentRetry] rıza sonrası tekrar dener.
-  Future<PhotoAnalysisResult> analyzePhoto(
-    String filePath, {
-    bool consentRetried = false,
-  }) async {
+  /// 202 + poll. Rıza UI'da (`AiConsent.ensure`); burada sessiz grant yok.
+  Future<PhotoAnalysisResult> analyzePhoto(String filePath) async {
     try {
       final file = File(filePath);
       final form = FormData.fromMap({
-        'file': await MultipartFile.fromFile(
-          file.path,
-          filename: 'meal.jpg',
-        ),
+        'file': await MultipartFile.fromFile(file.path, filename: 'meal.jpg'),
       });
       final response = await _dio.post<Map<String, dynamic>>(
         '/meals/photo-analyses',
@@ -49,27 +41,35 @@ final class MealsRepository {
       if (queued == null) throw StateError('Analiz kuyruğa alınamadı');
       return pollAnalysis(queued.analysisId, queued.pollAfterMs);
     } on DioException catch (e) {
-      final ex = NetworkException.fromDio(e);
-      if (!consentRetried && ex.code == 'CONSENT_REQUIRED') {
-        await _chat.grantAiProcessingConsent();
-        return analyzePhoto(filePath, consentRetried: true);
-      }
-      throw ex;
+      throw NetworkException.fromDio(e);
     }
   }
+
+  /// Sunucu tek analizi 45 sn'ye kadar ve 3 kez dener (+ geri çekilme);
+  /// istemci ondan önce vazgeçerse hak boşa gider. Süre dolarsa
+  /// [PhotoAnalysisPending] (aynı analiz sonra tekrar yoklanabilir).
+  static const _pollDeadline = Duration(seconds: 150);
 
   Future<PhotoAnalysisResult> pollAnalysis(
     String analysisId,
     int pollAfterMs,
   ) async {
-    final deadline = DateTime.now().add(const Duration(seconds: 30));
+    final deadline = DateTime.now().add(_pollDeadline);
     while (DateTime.now().isBefore(deadline)) {
       await Future<void>.delayed(Duration(milliseconds: pollAfterMs));
-      final envelope = await _network.send<_PhotoAnalysisEnvelope>(
-        path: '/meals/photo-analyses/$analysisId',
-        method: RequestType.get,
-        parserModel: _PhotoAnalysisEnvelope.fromJson,
-      );
+      final _PhotoAnalysisEnvelope? envelope;
+      try {
+        envelope = await _network.send<_PhotoAnalysisEnvelope>(
+          path: '/meals/photo-analyses/$analysisId',
+          method: RequestType.get,
+          parserModel: _PhotoAnalysisEnvelope.fromJson,
+        );
+      } on NetworkException catch (e) {
+        // Geçici ağ hatası yoklamayı bitirmez; analiz sunucuda sürüyor.
+        if (e.statusCode != null && e.statusCode! < 500) rethrow;
+        pollAfterMs = 3000;
+        continue;
+      }
       final analysis = envelope?.analysis;
       if (analysis == null) continue;
       switch (analysis.status) {
@@ -81,10 +81,11 @@ final class MealsRepository {
           pollAfterMs = 1500;
       }
     }
-    throw StateError('Analiz zaman aşımı');
+    throw PhotoAnalysisPending(analysisId);
   }
 
-  Future<void> createMealFromAnalysis({
+  /// Analizden öğün; `suggestEndFast` aktif oruçta "orucu bitir?" içindir.
+  Future<MealWriteResult> createMealFromAnalysis({
     required String analysisId,
     String? title,
     int? kcal,
@@ -92,7 +93,7 @@ final class MealsRepository {
     double? carbsG,
     double? fatG,
   }) async {
-    await _network.send<_MealCreateEnvelope>(
+    final result = await _network.send<MealWriteResult>(
       path: '/meals',
       method: RequestType.post,
       data: {
@@ -105,9 +106,21 @@ final class MealsRepository {
         if (carbsG != null) 'carbsG': carbsG,
         if (fatG != null) 'fatG': fatG,
       },
-      parserModel: _MealCreateEnvelope.fromJson,
+      parserModel: MealWriteResult.fromJson,
     );
+    // Öğün kayıtları önbelleği eski listeyi göstermesin.
+    _dayCache.clear();
+    return result ?? const MealWriteResult();
   }
+
+  /// Son görülen günler (bellekte): ekran tekrar açılınca iskelet yerine
+  /// hemen gösterilir, ağ yanıtıyla sessizce yenilenir.
+  final Map<String, List<MealRecord>> _dayCache = {};
+
+  List<MealRecord>? cachedDay(DateTime date) => _dayCache[_ymd(date)];
+
+  /// Çıkış / hesap değişimi.
+  void clearCache() => _dayCache.clear();
 
   Future<List<MealRecord>> listForDay(DateTime date) async {
     final page = await _network.send<_MealsPage>(
@@ -116,7 +129,10 @@ final class MealsRepository {
       queryParameters: {'date': _ymd(date)},
       parserModel: _MealsPage.fromJson,
     );
-    return page?.items ?? const [];
+    final items = page?.items ?? const <MealRecord>[];
+    if (_dayCache.length > 14) _dayCache.clear();
+    _dayCache[_ymd(date)] = items;
+    return items;
   }
 
   Future<MealRecord?> getById(String id) async {
@@ -150,6 +166,28 @@ final class MealsRepository {
       parserModel: MealWriteResult.fromJson,
     );
     if (result == null) throw StateError('Öğün kaydedilemedi');
+    _dayCache.clear();
+    return result;
+  }
+
+  /// Hızlı kalori: yalnızca kcal (`source: quickKcal`).
+  Future<MealWriteResult> createQuickKcal({
+    required int kcal,
+    DateTime? eatenAt,
+  }) async {
+    final result = await _network.send<MealWriteResult>(
+      path: '/meals',
+      method: RequestType.post,
+      data: {
+        'id': _uuid.v7(),
+        'source': 'quickKcal',
+        'eatenAt': (eatenAt ?? DateTime.now()).toUtc().toIso8601String(),
+        'kcal': kcal,
+      },
+      parserModel: MealWriteResult.fromJson,
+    );
+    if (result == null) throw StateError('Kalori kaydedilemedi');
+    _dayCache.clear();
     return result;
   }
 
@@ -176,6 +214,8 @@ final class MealsRepository {
     );
     final meal = envelope?.meal;
     if (meal == null) throw StateError('Öğün güncellenemedi');
+    // Saat değişince öğün başka güne de geçebilir.
+    _dayCache.clear();
     return meal;
   }
 
@@ -185,6 +225,14 @@ final class MealsRepository {
       method: RequestType.delete,
       parserModel: _MealDeleteEnvelope.fromJson,
     );
+    for (final key in _dayCache.keys.toList()) {
+      final list = _dayCache[key];
+      if (list == null) continue;
+      _dayCache[key] = [
+        for (final m in list)
+          if (m.id != id) m,
+      ];
+    }
   }
 
   static String _ymd(DateTime d) =>
@@ -334,15 +382,14 @@ final class _PhotoAnalysisQueued implements BaseModel<_PhotoAnalysisQueued> {
   Map<String, dynamic> toJson() => const {};
 }
 
-final class _PhotoAnalysisEnvelope implements BaseModel<_PhotoAnalysisEnvelope> {
+final class _PhotoAnalysisEnvelope
+    implements BaseModel<_PhotoAnalysisEnvelope> {
   const _PhotoAnalysisEnvelope(this.analysis);
 
   factory _PhotoAnalysisEnvelope.fromJson(Map<String, dynamic> json) {
     final raw = json['analysis'];
     return _PhotoAnalysisEnvelope(
-      raw is Map<String, dynamic>
-          ? PhotoAnalysisResult.fromJson(raw)
-          : null,
+      raw is Map<String, dynamic> ? PhotoAnalysisResult.fromJson(raw) : null,
     );
   }
 
@@ -351,20 +398,6 @@ final class _PhotoAnalysisEnvelope implements BaseModel<_PhotoAnalysisEnvelope> 
   @override
   _PhotoAnalysisEnvelope fromJson(Map<String, dynamic> json) =>
       _PhotoAnalysisEnvelope.fromJson(json);
-
-  @override
-  Map<String, dynamic> toJson() => const {};
-}
-
-final class _MealCreateEnvelope implements BaseModel<_MealCreateEnvelope> {
-  const _MealCreateEnvelope();
-
-  factory _MealCreateEnvelope.fromJson(Map<String, dynamic> json) =>
-      const _MealCreateEnvelope();
-
-  @override
-  _MealCreateEnvelope fromJson(Map<String, dynamic> json) =>
-      _MealCreateEnvelope.fromJson(json);
 
   @override
   Map<String, dynamic> toJson() => const {};
@@ -426,4 +459,13 @@ final class _MealDeleteEnvelope implements BaseModel<_MealDeleteEnvelope> {
 
   @override
   Map<String, dynamic> toJson() => const {};
+}
+
+/// Analiz istemci bekleme süresinde bitmedi; sunucuda sürüyor olabilir.
+/// Aynı [analysisId] [MealsRepository.pollAnalysis] ile tekrar yoklanır
+/// (yeni hak harcanmaz).
+final class PhotoAnalysisPending implements Exception {
+  const PhotoAnalysisPending(this.analysisId);
+
+  final String analysisId;
 }

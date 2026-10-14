@@ -1,23 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="water_widget_name">Su</string>
-    <string name="water_widget_description">Günlük su hedefi</string>
-    <string name="water_widget_medium_name">Su kaydı</string>
-    <string name="water_widget_medium_description">Günlük su ve zaman çizelgesi</string>
-    <string name="water_widget_large_name">Su özeti</string>
-    <string name="water_widget_large_description">Haftalık su özeti</string>
-    <string name="fasting_widget_name">Oruç</string>
-    <string name="fasting_widget_description">Kalan oruç süresi</string>
-    <string name="fasting_widget_medium_name">Oruç kartı</string>
-    <string name="fasting_widget_medium_description">Plan ve kalan süre</string>
-    <string name="fasting_widget_detail_name">Oruç özeti</string>
-    <string name="fasting_widget_detail_description">Başlangıç, bitiş ve hedef</string>
-    <string name="fasting_widget_plan_name">Bugünün planı</string>
-    <string name="fasting_widget_plan_description">Plan ve oruca başla</string>
-    <string name="fasting_widget_omh_name">Bugün</string>
-    <string name="fasting_widget_omh_description">Plan ve motivasyon</string>
-    <string name="fasting_widget_week_name">Bu hafta</string>
-    <string name="fasting_widget_week_description">Haftalık oruç özeti</string>
-    <string name="notification_channel_default">Bildirimler</string>
-    <string name="notification_channel_quiet">Sessiz bildirimler</string>
+    <!-- Varsayılan (İngilizce); diğer diller values-xx klasörlerinde. -->
+    <string name="water_widget_name">Water</string>
+    <string name="water_widget_description">Daily water goal</string>
+    <string name="water_widget_medium_name">Water log</string>
+    <string name="water_widget_medium_description">Daily water and timeline</string>
+    <string name="water_widget_large_name">Water summary</string>
+    <string name="water_widget_large_description">Weekly water summary</string>
+    <string name="fasting_widget_name">Fasting</string>
+    <string name="fasting_widget_description">Time left in your fast</string>
+    <string name="fasting_widget_medium_name">Fasting card</string>
+    <string name="fasting_widget_medium_description">Plan and time left</string>
+    <string name="fasting_widget_detail_name">Fasting summary</string>
+    <string name="fasting_widget_detail_description">Start, end and goal</string>
+    <string name="fasting_widget_plan_name">Today\'s plan</string>
+    <string name="fasting_widget_plan_description">Your plan and start fasting</string>
+    <string name="fasting_widget_omh_name">Today</string>
+    <string name="fasting_widget_omh_description">Plan and motivation</string>
+    <string name="fasting_widget_week_name">This week</string>
+    <string name="fasting_widget_week_description">Weekly fasting summary</string>
+    <string name="notification_channel_default">Notifications</string>
+    <string name="notification_channel_quiet">Silent notifications</string>
 </resources>

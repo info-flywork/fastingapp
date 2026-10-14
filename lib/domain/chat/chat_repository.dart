@@ -2,6 +2,8 @@ import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:dio/dio.dart';
+import 'package:easy_localization/easy_localization.dart';
+import 'package:fastingapp/core/managers/localization_manager.dart';
 import 'package:fastingapp/core/base/model/base_model.dart';
 import 'package:fastingapp/core/base/model/base_response.dart';
 import 'package:fastingapp/core/network/network_exception.dart';
@@ -18,6 +20,38 @@ final class ChatRepository {
   final Dio _dio;
   static const _uuid = Uuid();
 
+  List<String>? _suggestions;
+  String? _suggestionsLang;
+
+  /// `GET /chat/suggestions` (dile göre metinler); dil değişene kadar önbellekte.
+  Future<List<String>> suggestions() async {
+    final lang = LocalizationManager.current.languageCode;
+    final cached = _suggestions;
+    if (cached != null && _suggestionsLang == lang) return cached;
+    _suggestionsLang = lang;
+    final result = await _network.send<_SuggestionList>(
+      path: '/chat/suggestions',
+      method: RequestType.get,
+      parserModel: _SuggestionList.fromJson,
+    );
+    return _suggestions = result?.items ?? const [];
+  }
+
+  /// `GET /chat/quota` → bugün kalan sohbet mesajı; premium ya da sınırsızsa
+  /// null.
+  Future<int?> remainingMessages() async {
+    final result = await _network.send<_ChatQuota>(
+      path: '/chat/quota',
+      method: RequestType.get,
+      parserModel: _ChatQuota.fromJson,
+    );
+    if (result == null || result.isPremium) return null;
+    return result.remaining;
+  }
+
+  /// Dil değişince / çıkışta önerileri yeniden çekmek için.
+  void clearSuggestions() => _suggestions = null;
+
   Future<ChatConversation> createConversation({
     String contextSource = 'direct',
   }) async {
@@ -29,7 +63,7 @@ final class ChatRepository {
     );
     final conversation = result?.conversation;
     if (conversation == null) {
-      throw const NetworkException('Sohbet oluşturulamadı.');
+      throw NetworkException('common.error_generic'.tr());
     }
     return conversation;
   }
@@ -74,7 +108,7 @@ final class ChatRepository {
     );
     final conversation = result?.conversation;
     if (conversation == null) {
-      throw const NetworkException('Sohbet güncellenemedi.');
+      throw NetworkException('common.error_generic'.tr());
     }
     return conversation;
   }
@@ -84,6 +118,19 @@ final class ChatRepository {
     method: RequestType.delete,
     parserModel: NoContent.fromJson,
   );
+
+  /// `GET /user/consents` — `aiProcessing` en son kayıtta granted mi?
+  Future<bool> hasAiProcessingConsent() async {
+    final result = await _network.send<_ConsentList>(
+      path: '/user/consents',
+      method: RequestType.get,
+      parserModel: _ConsentList.fromJson,
+    );
+    for (final item in result?.items ?? const <_ConsentItem>[]) {
+      if (item.type == 'aiProcessing') return item.granted;
+    }
+    return false;
+  }
 
   /// AI işleme rızası (sohbet / fotoğraf analizi önkoşulu).
   Future<void> grantAiProcessingConsent({String version = '2026-10'}) =>
@@ -119,7 +166,7 @@ final class ChatRepository {
       );
       final body = response.data;
       if (body == null) {
-        throw const NetworkException('Boş sohbet yanıtı.');
+        throw NetworkException('common.error_generic'.tr());
       }
 
       final contentType =
@@ -169,7 +216,7 @@ final class ChatRepository {
   ChatSendResult _parseJsonSendResult(List<int> raw) {
     final decoded = jsonDecode(utf8.decode(raw));
     if (decoded is! Map<String, dynamic>) {
-      throw const NetworkException('Sohbet yanıtı okunamadı.');
+      throw NetworkException('common.error_generic'.tr());
     }
     final parsed = BaseResponse<_SendEnvelope>.fromJson(
       decoded,
@@ -177,7 +224,7 @@ final class ChatRepository {
     );
     final data = parsed.data;
     if (data == null) {
-      throw const NetworkException('Sohbet yanıtı okunamadı.');
+      throw NetworkException('common.error_generic'.tr());
     }
     return ChatSendResult(
       userMessageId: data.userMessageId,
@@ -195,10 +242,15 @@ final class ChatRepository {
     String? assistantMessageId;
     var assistantText = '';
     int? remainingToday;
+    // `urgent`: kullanıcının mesajı kriz işareti taşıyor (sunucu sınıflandırır).
+    var safety = 'none';
 
-    // Dio `Stream<Uint8List>` verir; `utf8.decoder` List<int> bekler → tip hatası.
-    await for (final bytes in byteStream) {
-      final chunk = utf8.decode(bytes, allowMalformed: true);
+    // Akış durumlu çözülür: parça sınırında bölünen çok baytlı harfler
+    // (ş, ğ, Kiril) bozulmaz. Dio `Stream<Uint8List>` verir → `cast`.
+    final chunks = byteStream.cast<List<int>>().transform(
+      const Utf8Decoder(allowMalformed: true),
+    );
+    await for (final chunk in chunks) {
       buffer += chunk;
       while (true) {
         final sep = buffer.indexOf('\n\n');
@@ -213,6 +265,7 @@ final class ChatRepository {
             final data = event.data;
             userMessageId = data['userMessageId'] as String?;
             assistantMessageId = data['assistantMessageId'] as String?;
+            safety = data['safety'] as String? ?? safety;
             onStreamUpdate?.call(
               ChatStreamUpdate.created(
                 userMessageId: userMessageId,
@@ -238,6 +291,7 @@ final class ChatRepository {
             assistantMessageId =
                 event.data['assistantMessageId'] as String? ??
                 assistantMessageId;
+            safety = event.data['safety'] as String? ?? safety;
           case 'error':
             final code = event.data['code'] as String? ?? 'UNAVAILABLE';
             throw NetworkException(
@@ -249,7 +303,7 @@ final class ChatRepository {
     }
 
     if (assistantMessageId == null || assistantText.isEmpty) {
-      throw const NetworkException('Sohbet yanıtı tamamlanamadı.');
+      throw NetworkException('common.error_generic'.tr());
     }
 
     return ChatSendResult(
@@ -259,7 +313,7 @@ final class ChatRepository {
         role: 'assistant',
         text: assistantText,
         status: 'complete',
-        safety: 'none',
+        safety: safety,
         createdAt: DateTime.now(),
       ),
       remainingToday: remainingToday,
@@ -402,6 +456,29 @@ final class ChatSendResult {
   final int? remainingToday;
 }
 
+final class _SuggestionList implements BaseModel<_SuggestionList> {
+  const _SuggestionList(this.items);
+
+  factory _SuggestionList.fromJson(Map<String, dynamic> json) {
+    final raw = json['items'];
+    return _SuggestionList([
+      if (raw is List)
+        for (final item in raw.whereType<Map<String, dynamic>>())
+          if ((item['text'] as String? ?? '').isNotEmpty)
+            item['text'] as String,
+    ]);
+  }
+
+  final List<String> items;
+
+  @override
+  _SuggestionList fromJson(Map<String, dynamic> json) =>
+      _SuggestionList.fromJson(json);
+
+  @override
+  Map<String, dynamic> toJson() => const {};
+}
+
 final class _ConversationEnvelope implements BaseModel<_ConversationEnvelope> {
   const _ConversationEnvelope(this.conversation);
 
@@ -505,4 +582,63 @@ final class _SendEnvelope implements BaseModel<_SendEnvelope> {
     'userMessageId': userMessageId,
     'remainingToday': remainingToday,
   };
+}
+
+final class _ConsentList implements BaseModel<_ConsentList> {
+  const _ConsentList(this.items);
+
+  factory _ConsentList.fromJson(Map<String, dynamic> json) {
+    final raw = json['items'];
+    final items = raw is List
+        ? raw
+              .whereType<Map<String, dynamic>>()
+              .map(_ConsentItem.fromJson)
+              .toList()
+        : const <_ConsentItem>[];
+    return _ConsentList(items);
+  }
+
+  final List<_ConsentItem> items;
+
+  @override
+  _ConsentList fromJson(Map<String, dynamic> json) =>
+      _ConsentList.fromJson(json);
+
+  @override
+  Map<String, dynamic> toJson() => {'items': items.length};
+}
+
+final class _ConsentItem {
+  const _ConsentItem({required this.type, required this.granted});
+
+  factory _ConsentItem.fromJson(Map<String, dynamic> json) => _ConsentItem(
+    type: json['type'] as String? ?? '',
+    granted: json['granted'] as bool? ?? false,
+  );
+
+  final String type;
+  final bool granted;
+}
+
+final class _ChatQuota implements BaseModel<_ChatQuota> {
+  const _ChatQuota({this.remaining, this.isPremium = false});
+
+  factory _ChatQuota.fromJson(Map<String, dynamic> json) {
+    final chat = json['chat'];
+    return _ChatQuota(
+      remaining: chat is Map<String, dynamic>
+          ? (chat['remaining'] as num?)?.toInt()
+          : null,
+      isPremium: json['isPremium'] as bool? ?? false,
+    );
+  }
+
+  final int? remaining;
+  final bool isPremium;
+
+  @override
+  _ChatQuota fromJson(Map<String, dynamic> json) => _ChatQuota.fromJson(json);
+
+  @override
+  Map<String, dynamic> toJson() => const {};
 }

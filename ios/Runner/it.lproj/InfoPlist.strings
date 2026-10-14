@@ -1,0 +1,4 @@
+/* İzin metinleri (it). */
+"NSCameraUsageDescription" = "La fotocamera serve per la foto profilo e per calcolare le calorie dei pasti.";
+"NSHealthShareUsageDescription" = "Sincronizziamo i tuoi passi da Apple Salute per mantenere precisi i tuoi obiettivi di attività.";
+"NSPhotoLibraryUsageDescription" = "Puoi scegliere la foto profilo dalla tua libreria foto.";

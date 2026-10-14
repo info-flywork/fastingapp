@@ -14,6 +14,16 @@
 	<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
+	<key>CFBundleLocalizations</key>
+	<array>
+		<string>en</string>
+		<string>tr</string>
+		<string>de</string>
+		<string>fr</string>
+		<string>es</string>
+		<string>it</string>
+		<string>ru</string>
+	</array>
 	<key>CFBundleName</key>
 	<string>Mochi Fast</string>
 	<key>CFBundlePackageType</key>
@@ -54,6 +64,8 @@
 	</dict>
 	<key>NSCameraUsageDescription</key>
 	<string>Camera is used for profile photos and calorie food scanning.</string>
+	<key>NSHealthShareUsageDescription</key>
+	<string>We sync your step count from Apple Health to keep your activity goals accurate.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>Profile photo can be chosen from your photo library.</string>
 	<key>UIApplicationSceneManifest</key>

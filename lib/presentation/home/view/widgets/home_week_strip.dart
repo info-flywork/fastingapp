@@ -47,7 +47,7 @@ final class HomeWeekStrip extends StatelessWidget {
                 dayKey: _dayKeys[i],
                 date: monday.add(Duration(days: i)),
                 selected: i == selectedIndex,
-                hours: _hoursForDay(i),
+                label: _labelForDay(i),
                 textOpacity: _fadeForDistance(i - selectedIndex),
               ),
             ),
@@ -57,12 +57,16 @@ final class HomeWeekStrip extends StatelessWidget {
     );
   }
 
-  int? _hoursForDay(int index) {
+  /// Oruç saati; haftalık planda işaretlenmiş azaltılmış gün "✓".
+  String? _labelForDay(int index) {
     if (days.length != 7 || index >= days.length) return null;
     final day = days[index];
     if (day.isFuture) return null;
-    if (day.fastedHours <= 0) return null;
-    return day.fastedHours;
+    if (day.fastedHours > 0) {
+      return 'home.week_hours'.tr(args: ['${day.fastedHours}']);
+    }
+    if (day.dayType == 'reduced' && day.checkin == 'done') return '✓';
+    return null;
   }
 }
 
@@ -72,14 +76,14 @@ final class _DayCell extends StatelessWidget {
     required this.date,
     required this.selected,
     required this.textOpacity,
-    this.hours,
+    this.label,
   });
 
   final String dayKey;
   final DateTime date;
   final bool selected;
   final double textOpacity;
-  final int? hours;
+  final String? label;
 
   @override
   Widget build(BuildContext context) {
@@ -135,14 +139,14 @@ final class _DayCell extends StatelessWidget {
           alignment: Alignment.center,
           padding: const EdgeInsets.symmetric(horizontal: 5),
           decoration: BoxDecoration(
-            color: hours != null
+            color: label != null
                 ? ColorName.colorPremiumGradientStart
                 : ColorName.colorWeekPill,
             borderRadius: BorderRadius.circular(6),
           ),
           child: Text(
-            hours != null ? 'home.week_hours'.tr(args: ['$hours']) : '-',
-            style: hours != null
+            label ?? '-',
+            style: label != null
                 ? AppTextStyles.homeWeekHours
                 : AppTextStyles.homeWeekHours.copyWith(
                     color: ColorName.colorSubtitle.withValues(alpha: 0.4),

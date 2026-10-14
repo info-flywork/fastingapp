@@ -22,13 +22,15 @@ enum HungerBodyNotice {
 
 extension HungerSymptomBodyNoticeX on HungerSymptom {
   HungerBodyNotice? toBodyNotice() => switch (this) {
-        HungerSymptom.dizziness => HungerBodyNotice.dizziness,
-        HungerSymptom.nausea => HungerBodyNotice.nausea,
-        HungerSymptom.fatigue => HungerBodyNotice.fatigue,
-        HungerSymptom.headache => HungerBodyNotice.lowEnergy,
-        HungerSymptom.weakness => HungerBodyNotice.nothingPhysical,
-        HungerSymptom.sleeplessness => null,
-      };
+    HungerSymptom.dizziness => HungerBodyNotice.dizziness,
+    HungerSymptom.nausea => HungerBodyNotice.nausea,
+    HungerSymptom.fatigue => HungerBodyNotice.fatigue,
+    // Halsizlik bedensel bir belirti (önceden "hiçbir şey" sayılıp
+    // duygusal puan veriyordu); baş ağrısı / uykusuzluk karşılıksız.
+    HungerSymptom.weakness => HungerBodyNotice.lowEnergy,
+    HungerSymptom.headache => null,
+    HungerSymptom.sleeplessness => null,
+  };
 }
 
 /// Hızlı kontrol akışında ekranlar arası taşınan seçimler.
@@ -40,9 +42,13 @@ final class HungerFlowArgs {
     this.q2,
     this.bodyNotices = const {},
     this.q4,
+    this.mode = 'quick',
   });
 
   final Set<HungerSymptom> symptoms;
+
+  /// `quick` | `full` (sunucu `mode`; önceden hep `quick` gidiyordu).
+  final String mode;
   final String? q1;
   final String? q2;
   final Set<HungerBodyNotice> bodyNotices;
@@ -62,8 +68,10 @@ final class HungerFlowArgs {
     String? q2,
     Set<HungerBodyNotice>? bodyNotices,
     String? q4,
+    String? mode,
   }) {
     return HungerFlowArgs(
+      mode: mode ?? this.mode,
       symptoms: symptoms ?? this.symptoms,
       q1: q1 ?? this.q1,
       q2: q2 ?? this.q2,

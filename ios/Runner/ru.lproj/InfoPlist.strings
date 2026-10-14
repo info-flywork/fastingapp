@@ -1,0 +1,4 @@
+/* İzin metinleri (ru). */
+"NSCameraUsageDescription" = "Камера используется для фото профиля и подсчёта калорий по фото еды.";
+"NSHealthShareUsageDescription" = "Мы синхронизируем шаги из приложения «Здоровье», чтобы цели активности были точными.";
+"NSPhotoLibraryUsageDescription" = "Фото профиля можно выбрать из медиатеки.";

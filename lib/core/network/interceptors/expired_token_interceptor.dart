@@ -9,29 +9,39 @@ import 'package:fastingapp/data/model/token/token.dart';
 ///   token'la tekrar denenir (ikinci kez refresh yapılmaz).
 /// - Refresh reddedilirse (`REFRESH_REUSED`, `UNAUTHENTICATED`) ya da oturum
 ///   sunucuda kapanmışsa (`401 UNAUTHENTICATED`, `410 GONE`) [onSessionEnded].
+///   Refresh ağ hatasıyla düşerse oturum korunur; özgün istek hatayla döner.
 ///
-/// Refresh ve tekrar deneme interceptor'sız ayrı bir Dio ile yapılır (döngü ve
-/// kuyruk kilitlenmesi olmaz); başlıklar özgün istekte zaten ekli.
+/// Ana Dio'nun interceptor kuyruğuna girmemek için iki ayrı istemci:
+/// - [_refreshDio]: yalnızca `POST /auth/refresh`
+/// - [_retryDio]: yenileme sonrası başarısız isteğin tekrar denemesi
+/// Böylece uzun retry (SSE / upload) refresh bağlantı havuzunu bloke etmez.
 final class ExpiredTokenInterceptor extends QueuedInterceptor {
   ExpiredTokenInterceptor(
     this._authCacheManager, {
     required String baseUrl,
-    required void Function() onSessionEnded,
-  }) : _onSessionEnded = onSessionEnded,
-       _plain = Dio(
-         BaseOptions(
-           baseUrl: baseUrl,
-           connectTimeout: const Duration(seconds: 15),
-           receiveTimeout: const Duration(seconds: 15),
-           headers: {'Content-Type': 'application/json'},
-         ),
-       );
+    required this._onSessionEnded,
+  }) : _refreshDio = _plainDio(baseUrl),
+       _retryDio = _plainDio(baseUrl);
 
   final AuthCacheManager _authCacheManager;
   final void Function() _onSessionEnded;
-  final Dio _plain;
+
+  /// Yalnızca token yenileme.
+  final Dio _refreshDio;
+
+  /// Yalnızca 401 sonrası tekrar deneme.
+  final Dio _retryDio;
 
   static const _retriedKey = 'tokenRetried';
+
+  static Dio _plainDio(String baseUrl) => Dio(
+    BaseOptions(
+      baseUrl: baseUrl,
+      connectTimeout: const Duration(seconds: 15),
+      receiveTimeout: const Duration(seconds: 15),
+      headers: {'Content-Type': 'application/json'},
+    ),
+  );
 
   @override
   Future<void> onError(
@@ -47,16 +57,20 @@ final class ExpiredTokenInterceptor extends QueuedInterceptor {
         code == 'TOKEN_EXPIRED' &&
         options.extra[_retriedKey] != true &&
         !isAuthCall) {
-      final token = await _freshAccessToken(_bearerOf(options));
+      final String? token;
+      try {
+        token = await _freshAccessToken(_bearerOf(options));
+      } on DioException catch (refreshError) {
+        // Ağ/sunucu hatası: oturum kapatılmaz, istek hatayla düşer (sonra tekrar denenir).
+        return handler.next(refreshError);
+      }
       if (token == null) {
         await _endSession();
         return handler.next(err);
       }
-      options
-        ..headers['Authorization'] = 'Bearer $token'
-        ..extra[_retriedKey] = true;
       try {
-        return handler.resolve(await _plain.fetch<dynamic>(options));
+        final retry = await _retryOptions(options, token);
+        return handler.resolve(await _retryDio.fetch<dynamic>(retry));
       } on DioException catch (retryError) {
         return handler.next(retryError);
       }
@@ -71,13 +85,16 @@ final class ExpiredTokenInterceptor extends QueuedInterceptor {
   }
 
   /// Başka bir istek zaten yenilediyse saklanan token; değilse refresh.
+  ///
+  /// `null`: refresh sunucu tarafından reddedildi (oturum biter). Geçici hatalar
+  /// (bağlantı yok, zaman aşımı, 5xx, 429) [DioException] olarak fırlatılır.
   Future<String?> _freshAccessToken(String? sent) async {
     final stored = await _authCacheManager.getAccessToken();
     if (stored != null && stored.isNotEmpty && stored != sent) return stored;
     final refreshToken = await _authCacheManager.getRefreshToken();
     if (refreshToken == null || refreshToken.isEmpty) return null;
     try {
-      final response = await _plain.post<Map<String, dynamic>>(
+      final response = await _refreshDio.post<Map<String, dynamic>>(
         '/auth/refresh',
         data: {'refreshToken': refreshToken},
       );
@@ -87,10 +104,33 @@ final class ExpiredTokenInterceptor extends QueuedInterceptor {
       final pair = Token.fromJson(token);
       await _authCacheManager.saveToken(pair);
       return pair.accessToken;
-    } on DioException {
-      return null;
+    } on DioException catch (e) {
+      if (_isRefreshRejected(e.response?.statusCode)) return null;
+      rethrow;
     }
   }
+
+  /// Tekrar deneme seçenekleri: yeni Bearer + FormData klonu (akış bir kez okunur).
+  static Future<RequestOptions> _retryOptions(
+    RequestOptions options,
+    String token,
+  ) async {
+    Object? data = options.data;
+    if (data is FormData) {
+      data = data.clone();
+    }
+    return options.copyWith(
+      data: data,
+      headers: Map<String, dynamic>.from(options.headers)
+        ..['Authorization'] = 'Bearer $token',
+      extra: Map<String, dynamic>.from(options.extra)..[_retriedKey] = true,
+    );
+  }
+
+  /// Yalnızca sunucunun açık reddi oturumu bitirir (`REFRESH_REUSED`,
+  /// `UNAUTHENTICATED`, hesap silinmiş vb.).
+  static bool _isRefreshRejected(int? status) =>
+      status == 400 || status == 401 || status == 403 || status == 410;
 
   Future<void> _endSession() async {
     await _authCacheManager.clearAll();

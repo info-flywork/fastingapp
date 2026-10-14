@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="water_widget_name">Acqua</string>
+    <string name="water_widget_description">Obiettivo giornaliero di acqua</string>
+    <string name="water_widget_medium_name">Registro acqua</string>
+    <string name="water_widget_medium_description">Acqua del giorno e cronologia</string>
+    <string name="water_widget_large_name">Riepilogo acqua</string>
+    <string name="water_widget_large_description">Riepilogo settimanale acqua</string>
+    <string name="fasting_widget_name">Digiuno</string>
+    <string name="fasting_widget_description">Tempo di digiuno rimanente</string>
+    <string name="fasting_widget_medium_name">Scheda digiuno</string>
+    <string name="fasting_widget_medium_description">Piano e tempo rimanente</string>
+    <string name="fasting_widget_detail_name">Riepilogo digiuno</string>
+    <string name="fasting_widget_detail_description">Inizio, fine e obiettivo</string>
+    <string name="fasting_widget_plan_name">Piano di oggi</string>
+    <string name="fasting_widget_plan_description">Il tuo piano e inizia il digiuno</string>
+    <string name="fasting_widget_omh_name">Oggi</string>
+    <string name="fasting_widget_omh_description">Piano e motivazione</string>
+    <string name="fasting_widget_week_name">Questa settimana</string>
+    <string name="fasting_widget_week_description">Riepilogo settimanale digiuno</string>
+    <string name="notification_channel_default">Notifiche</string>
+    <string name="notification_channel_quiet">Notifiche silenziose</string>
+</resources>

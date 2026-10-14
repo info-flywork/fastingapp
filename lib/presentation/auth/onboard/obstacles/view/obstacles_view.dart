@@ -4,6 +4,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:fastingapp/core/remote_images/app_image.dart';
 import 'package:fastingapp/core/router/route_paths.dart';
 import 'package:fastingapp/core/theme/app_text_styles.dart';
+import 'package:fastingapp/core/widgets/app_button.dart';
 import 'package:fastingapp/core/widgets/onboarding/onboarding_option_card.dart';
 import 'package:fastingapp/core/widgets/onboarding/onboarding_progress_header.dart';
 import 'package:fastingapp/generated/app_images.g.dart';
@@ -60,13 +61,25 @@ class _ObstaclesViewState extends State<ObstaclesView> with ObstaclesViewMixin {
                         return ObstaclesOptions(
                           items: obstacleOptions,
                           selected: state.selected,
-                          onSelected: onObstacleSelected,
+                          onToggle: onObstacleToggled,
                         );
                       },
                     ),
                     const SizedBox(height: 16),
                   ],
                 ),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
+              child: BlocBuilder<ObstaclesBloc, ObstaclesState>(
+                builder: (context, state) {
+                  return AppButton(
+                    label: 'onboarding.continue'.tr(),
+                    isEnabled: state.hasSelection,
+                    onPressed: onContinue,
+                  );
+                },
               ),
             ),
           ],

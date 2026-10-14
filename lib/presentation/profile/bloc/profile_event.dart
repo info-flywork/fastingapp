@@ -56,10 +56,13 @@ final class ProfileFieldsChanged extends ProfileEvent {
 }
 
 final class ProfilePlanChanged extends ProfileEvent {
-  const ProfilePlanChanged(this.plan);
+  const ProfilePlanChanged(this.plan, {this.safetyAcknowledged = false});
 
   final OnboardingFastingPlan plan;
 
+  /// Uzun plan güvenlik uyarısı kullanıcıya gösterilip onaylandı.
+  final bool safetyAcknowledged;
+
   @override
-  List<Object?> get props => [plan];
+  List<Object?> get props => [plan, safetyAcknowledged];
 }

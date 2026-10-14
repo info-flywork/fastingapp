@@ -4,18 +4,19 @@ import 'dart:math' as math;
 import 'package:easy_localization/easy_localization.dart';
 import 'package:fastingapp/core/di/injection.dart';
 import 'package:fastingapp/core/dialogs/app_dialogs.dart';
-import 'package:fastingapp/core/home_widgets/fasting_widget_sync.dart';
+import 'package:fastingapp/core/home_widgets/fasting_widget_publisher.dart';
 import 'package:fastingapp/core/snackbar/app_snackbar.dart';
 import 'package:fastingapp/core/utils/enum/snackbar_type.dart'
     show SnackBarType;
+import 'package:fastingapp/core/sync/data_sync.dart';
 import 'package:fastingapp/domain/fasting/fasting_repository.dart';
+import 'package:fastingapp/domain/fasting/weekly_schedule.dart';
 import 'package:fastingapp/domain/revenue_cat/revenue_cat_service.dart';
 import 'package:fastingapp/presentation/fasting/bloc/fasting_session_cubit.dart';
 import 'package:fastingapp/presentation/fasting/bloc/fasting_session_state.dart';
 import 'package:fastingapp/core/remote_images/app_image.dart';
 import 'package:fastingapp/core/router/route_paths.dart';
 import 'package:fastingapp/core/theme/app_text_styles.dart';
-import 'package:fastingapp/core/utils/extensions/future_extensions.dart';
 import 'package:fastingapp/core/widgets/app_button.dart';
 import 'package:fastingapp/core/widgets/app_button_decoration.dart';
 import 'package:fastingapp/core/widgets/bottom_navigation_bar/'
@@ -24,9 +25,11 @@ import 'package:fastingapp/core/widgets/horseshoe_arc.dart';
 import 'package:fastingapp/generated/app_images.g.dart';
 import 'package:fastingapp/generated/assets.gen.dart';
 import 'package:fastingapp/generated/colors.gen.dart';
+import 'package:fastingapp/presentation/fasting/fasting_arc_stages.dart';
 import 'package:fastingapp/presentation/fasting/fasting_finish_flow.dart';
 import 'package:fastingapp/presentation/fasting/view/fasting_fast_forecast_card.dart';
 import 'package:fastingapp/presentation/fasting/view/fasting_mochi_plan_card.dart';
+import 'package:fastingapp/presentation/fasting/view/fasting_plan_day_card.dart';
 import 'package:fastingapp/presentation/fasting/view/fasting_plan_sheet.dart';
 import 'package:fastingapp/presentation/fasting/view/fasting_start_sheet.dart';
 import 'package:fastingapp/presentation/home/bloc/home_bloc.dart';
@@ -50,37 +53,45 @@ final class FastingView extends StatefulWidget {
 
 class _FastingViewState extends State<FastingView> {
   final _cubit = getIt<FastingSessionCubit>();
-  var _mealSelected = true;
-  var _finishReady = false;
+
+  /// Seçili sekme kullanıcınındır: oruç başlayınca / bitince kendiliğinden
+  /// değişmez. Uygulama açıkken son seçim hatırlanır (ilk açılış: vücut).
+  static var _lastMealTab = false;
+  var _mealSelected = _lastMealTab;
   Timer? _tick;
+
+  /// Her saniye artar; yalnızca sayaç/yay bölümü dinler.
+  final _clock = ValueNotifier<int>(0);
 
   @override
   void initState() {
     super.initState();
-    _syncTabFromSession(_cubit.state);
-    unawaited(_cubit.refresh());
+    // Ana sayfa özeti oruç durumunu zaten getirdiyse tekrar istenmez;
+    // yoksa ya da bayatsa (1 dk) sessizce tazelenir.
+    final fetchedAt = _cubit.state.fetchedAt;
+    if (fetchedAt == null) {
+      unawaited(_cubit.refresh());
+    } else if (DateTime.now().difference(fetchedAt) >
+        const Duration(minutes: 1)) {
+      unawaited(_cubit.refresh(showLoading: false));
+    }
     _tick = Timer.periodic(const Duration(seconds: 1), (_) {
       if (mounted && (_cubit.state.isFasting || _cubit.state.isEating)) {
-        setState(() {});
+        _clock.value++;
       }
     });
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _publishFastingWidget(_cubit.state);
-    });
+    // Widget yayını uygulama kökünde (`AppSyncScope`), cubit değiştikçe.
   }
 
   @override
   void dispose() {
     _tick?.cancel();
+    _clock.dispose();
     super.dispose();
   }
 
-  void _syncTabFromSession(FastingSessionState session) {
-    if (session.isFasting) {
-      _mealSelected = false;
-    } else if (session.isEating) {
-      _mealSelected = true;
-    }
+  void _selectTab({required bool meal}) {
+    setState(() => _mealSelected = _lastMealTab = meal);
   }
 
   String _planTitle(FastingSessionState session) => session.planTitle;
@@ -91,27 +102,22 @@ class _FastingViewState extends State<FastingView> {
     _ => 0,
   };
 
-  void _endFastLocal() {
-    if (!mounted) return;
-    setState(() {
-      _mealSelected = true;
-      _finishReady = false;
-    });
-    _publishFastingWidget(_cubit.state);
+  /// Hedefe ulaşılmadıysa "erken bitir" onayı; ulaşıldıysa doğrudan bitirme
+  /// ekranı (onay metni "hedefine henüz ulaşmadın" diyor).
+  Future<void> _finishFast(FastingSessionState session) async {
+    if (session.fast == null) return;
+    if (!_goalReached(session)) {
+      final confirmed = await AppDialogs.instance.showEndFast(context);
+      if (confirmed != true || !mounted) return;
+    }
+    await FastingFinishFlow.open();
   }
 
-  Future<void> _confirmEndFast(FastingSessionState session) async {
+  static bool _goalReached(FastingSessionState session) {
     final fast = session.fast;
-    if (fast == null) return;
-    final confirmed = await AppDialogs.instance.showEndFast(context);
-    if (confirmed != true || !mounted) return;
-    final saved = await FastingFinishFlow.open();
-    if (!mounted || !saved) return;
-    _endFastLocal();
-  }
-
-  void _onHourglassTap() {
-    setState(() => _finishReady = true);
+    final elapsed = session.liveMetrics?.elapsed;
+    if (fast == null || elapsed == null) return false;
+    return elapsed.inMinutes >= fast.targetMinutes;
   }
 
   /// Oruç sekmesindeki plan listesi → [applyPlanChange] (dialog + loading).
@@ -127,7 +133,18 @@ class _FastingViewState extends State<FastingView> {
       backgroundColor: Colors.transparent,
       builder: (context) => FastingPlanSheet(selected: current),
     );
-    if (!mounted || picked == null || picked == current) return;
+    if (!mounted || picked == null) return;
+    // Haftalık plan: aynı plan da seçilebilir (günleri düzenlemek için).
+    if (picked.isWeekly) {
+      final ok = await openWeeklyPlan(
+        context: context,
+        session: _cubit,
+        plan: picked,
+      );
+      if (mounted && ok) _publishFastingWidget(_cubit.state);
+      return;
+    }
+    if (picked == current) return;
     final ok = await applyPlanChange(
       context: context,
       session: _cubit,
@@ -189,78 +206,135 @@ class _FastingViewState extends State<FastingView> {
         type: SnackBarType.failure,
       );
     }
-    setState(() {
-      _mealSelected = false;
-      _finishReady = false;
-    });
-    _publishFastingWidget(_cubit.state);
   }
 
-  Future<void> _startFastNow() async {
-    await _cubit.startFast();
-    if (!mounted) return;
-    if (_cubit.state.errorMessage != null) {
-      AppSnackbar.show(
-        context: context,
-        text: _cubit.state.errorMessage!,
-        type: SnackBarType.failure,
-      );
-      return;
+  void _publishFastingWidget(FastingSessionState session) =>
+      publishFastingWidget(context, session);
+
+  /// Haftalık planda bugünün program günü; günlük planda null.
+  WeeklyDay? _todayPlanDay(FastingSessionState session) =>
+      session.plan?.dayFor(DateTime.now());
+
+  static String? _todayCheckin(HomeState state) {
+    if (state is! HomeLoaded) return null;
+    for (final d in state.summary?.week ?? const <SummaryWeekDay>[]) {
+      if (d.isToday) return d.checkin;
     }
-    setState(() {
-      _mealSelected = false;
-      _finishReady = false;
-    });
-    _publishFastingWidget(_cubit.state);
+    return null;
   }
 
-  void _publishFastingWidget(FastingSessionState session) {
-    final planTitle = _planTitle(session);
-    final total = Duration(
-      minutes:
-          session.plan?.fastMinutes ??
-          session.fast?.targetMinutes ??
-          _planHours(planTitle) * 60,
-    );
-    final fasting = session.isFasting;
-    final start = session.fast?.startedAt;
-    final end = session.fast?.plannedEndAt ?? start?.add(total);
-    FastingWidgetSync.rememberLabels(
-      fasting: 'fasting_page.widget_fasting'.tr(context: context),
-      eating: 'fasting_page.widget_eating'.tr(context: context),
-      left: 'fasting_page.widget_left'.tr(context: context),
-      headlineFasting: 'fasting_page.widget_you_fasting'.tr(context: context),
-      headlineEating: 'fasting_page.widget_you_eating'.tr(context: context),
-      startCaption: 'fasting_page.widget_start'.tr(context: context),
-      endCaption: 'fasting_page.widget_end'.tr(context: context),
-      goalCaption: 'fasting_page.widget_goal'.tr(context: context),
-      hoursTemplate: 'fasting_page.widget_hours'.tr(context: context),
-      praise: 'fasting_page.widget_great'.tr(context: context),
-      localeName: context.locale.languageCode,
-      todaysPlanTitle: 'fasting_page.widget_todays_plan'.tr(context: context),
-      startFastingCta: 'fasting_page.widget_start_fasting'.tr(context: context),
-      todayLabel: 'fasting_page.widget_today'.tr(context: context),
-      cheerLabel: 'fasting_page.widget_lets_do_this'.tr(context: context),
-      thisWeekTitle: 'fasting_page.widget_this_week'.tr(context: context),
-      weekCheer: 'fasting_page.widget_keep_going'.tr(context: context),
-      weekdays: 'water_page.weekdays'.tr(context: context),
-    );
-    unawaited(
-      FastingWidgetSync.publish(
-        isFasting: fasting,
-        start: start,
-        end: end,
-        statusLabel: fasting
-            ? 'fasting_page.widget_fasting'.tr(context: context)
-            : 'fasting_page.widget_eating'.tr(context: context),
-        leftLabel: 'fasting_page.widget_left'.tr(context: context),
-        statusFasting: 'fasting_page.widget_fasting'.tr(context: context),
-        statusEating: 'fasting_page.widget_eating'.tr(context: context),
-        headlineFasting: 'fasting_page.widget_you_fasting'.tr(context: context),
-        headlineEating: 'fasting_page.widget_you_eating'.tr(context: context),
-        planLabel: planTitle.replaceAll('-', ':'),
+  /// İşaret sunucuya yazılana kadar ekranda hemen görünsün (yalnızca o gün).
+  ({DateTime day, String status})? _localCheckin;
+
+  String? get _checkinOverride {
+    final local = _localCheckin;
+    if (local == null || !DateUtils.isSameDay(local.day, DateTime.now())) {
+      return null;
+    }
+    return local.status;
+  }
+
+  /// Azaltılmış gün: "Tamamladım / Atladım" (`PUT /plans/days/:date`).
+  Future<void> _checkinToday(bool done) async {
+    final previous = _localCheckin;
+    setState(
+      () => _localCheckin = (
+        day: DateTime.now(),
+        status: done ? 'done' : 'skipped',
       ),
     );
+    try {
+      await getIt<FastingRepository>().checkinPlanDay(
+        DateTime.now(),
+        done: done,
+      );
+      DataSync.afterWrite();
+    } on Object catch (e) {
+      if (!mounted) return;
+      setState(() => _localCheckin = previous);
+      AppSnackbar.showError(context, e);
+    }
+  }
+
+  /// Seçili sekmenin at nalı + üst kart modeli. Kart yalnızca ilerleme bir
+  /// aşamaya ulaştıysa görünür.
+  _ArcView _arcView(FastingSessionState session) {
+    final metrics = session.liveMetrics;
+    final live = metrics?.elapsed ?? Duration.zero;
+    final planTitle = _planTitle(session);
+    // Haftalık planda bugünün oruç süresi (Crescendo / özel hafta).
+    final fastMinutes =
+        session.fast?.targetMinutes ??
+        _todayPlanDay(session)?.fastMinutes ??
+        session.plan?.fastMinutes ??
+        _planHours(planTitle) * 60;
+
+    if (!_mealSelected) {
+      // Vücut sekmesi: orucun başından hedefe; hedef geçince yay dolu kalır,
+      // sayaç ve aşamalar ilerlemeye devam eder.
+      final fasting = session.isFasting;
+      final elapsed = fasting ? live : Duration.zero;
+      final hours = elapsed.inSeconds / 3600;
+      final over = elapsed - Duration(minutes: fastMinutes);
+      return _ArcView(
+        stages: bodyArcStages(
+          targetHours: fastMinutes / 60,
+          elapsedHours: hours,
+          active: fasting,
+        ),
+        card: fasting ? bodyStage(bodyStageIndex(hours), reached: true) : null,
+        progress: fasting ? (metrics?.progress ?? 0.0) : 0.0,
+        elapsed: elapsed,
+        overtime: fasting && !over.isNegative && over > Duration.zero
+            ? over
+            : null,
+      );
+    }
+
+    // Öğün sekmesi: 24 saatlik döngü (oruç + pencere) tek yayda. Oruçta
+    // "orucunu boz" noktasına doğru dolar; kart pencere açılınca başlar.
+    final windowMinutes = session.eatingWindow?.eatMinutes ?? 0;
+    final eatMinutes = windowMinutes > 0
+        ? windowMinutes
+        : math.max(60, 24 * 60 - fastMinutes);
+    final cycle = mealCycleArc(
+      fastMinutes: fastMinutes,
+      eatMinutes: eatMinutes,
+      fastElapsedMinutes: session.isFasting ? live.inMinutes : null,
+      eatElapsedMinutes: session.isEating ? live.inMinutes : null,
+    );
+    final nextStart = session.plan?.eatWindow?.end;
+    return _ArcView(
+      heading: session.isEating ? 'fasting_page.meal_time' : null,
+      stages: cycle.stages,
+      card: session.isEating
+          ? eatingStage(
+              eatingStageIndex(live.inMinutes, eatMinutes),
+              reached: true,
+            )
+          : null,
+      progress: cycle.progress,
+      elapsed: session.isFasting || session.isEating ? live : Duration.zero,
+      // Ne oruç ne pencere: planın saatine göre bilgi.
+      note: !session.isFasting && !session.isEating && nextStart != null
+          ? 'fasting_page.next_fast_at'.tr(args: [nextStart])
+          : null,
+    );
+  }
+
+  /// Bugünün oruç süresi: haftalık planda günün süresi (Crescendo / özel
+  /// hafta), yoksa planınki.
+  int? _todayFastHours(FastingSessionState session) {
+    final minutes = _todayPlanDay(session)?.fastMinutes;
+    if (minutes != null) return (minutes / 60).round();
+    return session.plan?.fastHours;
+  }
+
+  int? _todayEatHours(FastingSessionState session) {
+    if (_todayPlanDay(session)?.fastMinutes case final m?) {
+      return 24 - (m / 60).round();
+    }
+    return session.plan?.eatHours;
   }
 
   int _planHours(String title) {
@@ -287,7 +361,7 @@ class _FastingViewState extends State<FastingView> {
   String _mochiEndsClock(FastingSessionState session) {
     final planTitle = _planTitle(session);
     final start = session.fast?.startedAt;
-    final fastH = session.plan?.fastHours ?? _planHours(planTitle);
+    final fastH = _todayFastHours(session) ?? _planHours(planTitle);
     if (start != null) {
       return DateFormat(
         'HH:mm',
@@ -321,32 +395,12 @@ class _FastingViewState extends State<FastingView> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocConsumer<FastingSessionCubit, FastingSessionState>(
+    // Hatalar işlemi başlatan yerde gösterilir; widget yayını uygulama
+    // kökünde (`AppSyncScope`). Sekme durum değişince kendiliğinden değişmez.
+    return BlocBuilder<FastingSessionCubit, FastingSessionState>(
       bloc: _cubit,
-      listenWhen: (prev, next) =>
-          prev.errorMessage != next.errorMessage && next.errorMessage != null,
-      listener: (context, state) {
-        final msg = state.errorMessage;
-        if (msg != null) {
-          AppSnackbar.show(
-            context: context,
-            text: msg,
-            type: SnackBarType.failure,
-          );
-        }
-        if (state.isFasting && _mealSelected) {
-          setState(() => _mealSelected = false);
-        }
-        _publishFastingWidget(state);
-      },
       builder: (context, session) {
         final planTitle = _planTitle(session);
-        final metrics = session.liveMetrics;
-        final progress = metrics?.progress ?? 0.0;
-        final elapsedText = metrics == null
-            ? '00:00:00'
-            : formatElapsedHms(metrics.elapsed);
-        final percentInt = (progress * 100).round();
         return Scaffold(
           backgroundColor: ColorName.colorProfileBack,
           body: ListView(
@@ -373,91 +427,102 @@ class _FastingViewState extends State<FastingView> {
               const SizedBox(height: 16),
               _ActionRow(
                 mealSelected: _mealSelected,
-                onBodyTap: () {
-                  setState(() {
-                    _mealSelected = false;
-                    _finishReady = false;
-                  });
-                  _publishFastingWidget(session);
-                },
-                onMealTap: () {
-                  setState(() {
-                    _mealSelected = true;
-                    _finishReady = false;
-                  });
-                  _publishFastingWidget(session);
-                },
+                onBodyTap: () => _selectTab(meal: false),
+                onMealTap: () => _selectTab(meal: true),
                 onShare: _shareStatus,
               ),
               const SizedBox(height: 20),
-              AnimatedSize(
-                duration: const Duration(milliseconds: 480),
-                curve: Curves.easeOutCubic,
-                alignment: Alignment.topCenter,
-                child: AnimatedSwitcher(
-                  duration: const Duration(milliseconds: 480),
-                  layoutBuilder: (current, previous) {
-                    return ClipRect(
-                      child: Stack(
-                        alignment: Alignment.topCenter,
-                        children: [...previous, if (current != null) current],
-                      ),
-                    );
-                  },
-                  transitionBuilder: (child, animation) {
-                    return AnimatedBuilder(
-                      animation: animation,
-                      builder: (context, child) {
-                        final reverse =
-                            animation.status == AnimationStatus.reverse;
-                        final toRight = !_mealSelected;
-                        final dx = reverse
-                            ? (toRight
-                                  ? 1 - animation.value
-                                  : animation.value - 1)
-                            : (toRight
-                                  ? animation.value - 1
-                                  : 1 - animation.value);
-                        return FractionalTranslation(
-                          translation: Offset(dx, 0),
-                          child: Opacity(
-                            opacity: animation.value,
-                            child: child,
+              // Haftalık plan: bugün oruç günü değilse günün kartı (serbest /
+              // 500 kcal); oruç yine de isteğe bağlı başlatılabilir.
+              if (_todayPlanDay(session) case final day?
+                  when day.type != WeeklyDayType.fast &&
+                      !session.isFasting &&
+                      !session.isEating) ...[
+                BlocSelector<HomeBloc, HomeState, String?>(
+                  bloc: getIt<HomeBloc>(),
+                  selector: _todayCheckin,
+                  builder: (context, checkin) => FastingPlanDayCard(
+                    day: day,
+                    checkin: _checkinOverride ?? checkin,
+                    onCheckin: (done) => unawaited(_checkinToday(done)),
+                  ),
+                ),
+                const SizedBox(height: 16),
+              ],
+              // Saniyelik sayaç yalnızca bu bölümü yeniden kurar (sayfanın tamamını değil).
+              ValueListenableBuilder<int>(
+                valueListenable: _clock,
+                builder: (context, _, _) {
+                  final view = _arcView(session);
+                  return AnimatedSize(
+                    duration: const Duration(milliseconds: 480),
+                    curve: Curves.easeOutCubic,
+                    alignment: Alignment.topCenter,
+                    child: AnimatedSwitcher(
+                      duration: const Duration(milliseconds: 480),
+                      layoutBuilder: (current, previous) {
+                        return ClipRect(
+                          child: Stack(
+                            alignment: Alignment.topCenter,
+                            children: [
+                              ...previous,
+                              if (current != null) current,
+                            ],
                           ),
                         );
                       },
-                      child: child,
-                    );
-                  },
-                  child: _mealSelected
-                      ? _MealStage(
-                          key: const ValueKey('meal'),
-                          planTitle: planTitle,
-                          started: _startedLabel(session),
-                          ends: _endsLabel(session),
-                          finishReady: _finishReady,
-                          progress: progress,
-                          elapsedText: elapsedText,
-                          percentInt: percentInt,
-                          onEditPlan: () => _pickPlan(session),
-                          onStart: _finishReady
-                              ? () => unawaited(_startFastNow())
-                              : () => unawaited(_pickStart(session)),
-                          onHourglassTap: _onHourglassTap,
-                        )
-                      : _BodyStage(
-                          key: const ValueKey('body'),
-                          planTitle: planTitle,
-                          started: _startedLabel(session),
-                          ends: _endsLabel(session),
-                          progress: progress,
-                          elapsedText: elapsedText,
-                          percentInt: percentInt,
-                          stageTitle: session.fast?.stage?.title,
-                          onEditPlan: () => _pickPlan(session),
-                          onFinish: () => unawaited(_confirmEndFast(session)),
+                      transitionBuilder: (child, animation) {
+                        return AnimatedBuilder(
+                          animation: animation,
+                          builder: (context, child) {
+                            final reverse =
+                                animation.status == AnimationStatus.reverse;
+                            final toRight = !_mealSelected;
+                            final dx = reverse
+                                ? (toRight
+                                      ? 1 - animation.value
+                                      : animation.value - 1)
+                                : (toRight
+                                      ? animation.value - 1
+                                      : 1 - animation.value);
+                            return FractionalTranslation(
+                              translation: Offset(dx, 0),
+                              child: Opacity(
+                                opacity: animation.value,
+                                child: child,
+                              ),
+                            );
+                          },
+                          child: child,
+                        );
+                      },
+                      child: _StageView(
+                        key: ValueKey(_mealSelected ? 'meal' : 'body'),
+                        view: view,
+                        bodyMode: !_mealSelected,
+                        planTitle: planTitle,
+                        started: _startedLabel(session),
+                        ends: _endsLabel(session),
+                        state: session.isFasting
+                            ? (_goalReached(session)
+                                  ? _FastState.goalReached
+                                  : _FastState.fasting)
+                            : session.isEating
+                            ? _FastState.eating
+                            : _FastState.idle,
+                        onEditPlan: () => _pickPlan(session),
+                        onAction: session.isFasting
+                            ? () => unawaited(_finishFast(session))
+                            : () => unawaited(_pickStart(session)),
+                        onCardTap: () => context.pushNamed(
+                          _mealSelected
+                              ? RoutePaths.eatingWindow.name
+                              : RoutePaths.bodyStatus.name,
                         ),
-                ),
+                      ),
+                    ),
+                  );
+                },
               ),
               // Kartların 12px üst boşluğuyla birlikte aralık 16.
               const SizedBox(height: 4),
@@ -477,6 +542,7 @@ class _FastingViewState extends State<FastingView> {
                         waterGoalMl: summary?.waterGoalMl ?? 2500,
                         steps: summary?.steps ?? 0,
                         stepsGoal: summary?.stepsGoal ?? 8000,
+                        waterUnit: summary?.waterUnit ?? 'ml',
                         onWaterTapped: () =>
                             context.pushNamed(RoutePaths.water.name),
                         onStepsTapped: () =>
@@ -487,6 +553,7 @@ class _FastingViewState extends State<FastingView> {
                         currentKg: summary?.weightCurrentKg,
                         startKg: summary?.weightStartKg,
                         goalKg: summary?.weightGoalKg,
+                        unit: summary?.weightUnit ?? 'kg',
                         onTap: () =>
                             context.pushNamed(RoutePaths.bodyHistory.name),
                         onEditTap: () => unawaited(
@@ -508,8 +575,8 @@ class _FastingViewState extends State<FastingView> {
                 },
               ),
               FastingMochiPlanCard(
-                fastHours: session.plan?.fastHours ?? _planHours(planTitle),
-                eatHours: session.plan?.eatHours ?? _eatHours(planTitle),
+                fastHours: _todayFastHours(session) ?? _planHours(planTitle),
+                eatHours: _todayEatHours(session) ?? _eatHours(planTitle),
                 startedLabel: _mochiStartedClock(session),
                 endsLabel: _mochiEndsClock(session),
                 onStart: () => unawaited(_pickStart(session)),
@@ -545,7 +612,7 @@ final class _ActionRow extends StatelessWidget {
           Builder(
             builder: (anchor) {
               return _CircleButton(
-                onTap: () => onShare(anchor).withLoading(anchor),
+                onTap: () => unawaited(onShare(anchor)),
                 child: Assets.icons.solarSquareShareLineLineDuotone.svg(),
               );
             },
@@ -728,121 +795,125 @@ final class _ModeSegment extends StatelessWidget {
   }
 }
 
-final class _MealStage extends StatelessWidget {
-  const _MealStage({
-    required this.planTitle,
-    required this.started,
-    required this.ends,
-    required this.finishReady,
+/// Bir sekmenin at nalı modeli ([_FastingViewState._arcView]).
+@immutable
+final class _ArcView {
+  const _ArcView({
+    required this.stages,
+    required this.card,
     required this.progress,
-    required this.elapsedText,
-    required this.percentInt,
-    required this.onEditPlan,
-    required this.onStart,
-    required this.onHourglassTap,
-    super.key,
+    required this.elapsed,
+    this.heading,
+    this.overtime,
+    this.note,
   });
 
-  final String planTitle;
-  final String? started;
-  final String? ends;
-  final bool finishReady;
-  final double progress;
-  final String elapsedText;
-  final int percentInt;
-  final VoidCallback onEditPlan;
-  final VoidCallback onStart;
-  final VoidCallback onHourglassTap;
+  final List<ArcStage> stages;
 
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Text(
-          'fasting_page.meal_time'.tr(),
-          textAlign: TextAlign.center,
-          style: AppTextStyles.fastingMealTitle,
-        ),
-        const SizedBox(height: 12),
-        _StageCard(
-          image: AppImages.breakYourFast,
-          titleKey: 'fasting_page.break_title',
-          bodyKey: 'fasting_page.break_body',
-          onTap: () => context.pushNamed(RoutePaths.eatingWindow.name),
-        ),
-        const SizedBox(height: 8),
-        _FastingArc(
-          planTitle: planTitle,
-          onEditPlan: onEditPlan,
-          onHourglassTap: onHourglassTap,
-          progress: progress,
-          elapsedText: elapsedText,
-          percentInt: percentInt,
-        ),
-        const SizedBox(height: 16),
-        _FastingActions(
-          planTitle: planTitle,
-          started: started,
-          ends: ends,
-          onStart: onStart,
-          finishReady: finishReady,
-        ),
-      ],
-    );
-  }
+  /// Ulaşılan son aşama; hiçbir aşamaya ulaşılmadıysa null (kart yok).
+  final ArcStage? card;
+  final double progress;
+  final Duration elapsed;
+  final String? heading;
+
+  /// Hedef aşıldıysa aşım süresi ("Hedef +1:23").
+  final Duration? overtime;
+
+  /// Yay altında bilgi satırı (ör. planına göre sonraki oruç saati).
+  final String? note;
+
+  int get percent => (progress * 100).round();
 }
 
-final class _BodyStage extends StatelessWidget {
-  const _BodyStage({
+/// Oruç ekranının durumu (butonlar buna göre).
+enum _FastState { idle, fasting, goalReached, eating }
+
+final class _StageView extends StatelessWidget {
+  const _StageView({
+    required this.view,
+    required this.bodyMode,
     required this.planTitle,
     required this.started,
     required this.ends,
-    required this.progress,
-    required this.elapsedText,
-    required this.percentInt,
+    required this.state,
     required this.onEditPlan,
-    required this.onFinish,
-    this.stageTitle,
+    required this.onAction,
+    required this.onCardTap,
     super.key,
   });
 
+  final _ArcView view;
+  final bool bodyMode;
   final String planTitle;
   final String? started;
   final String? ends;
-  final double progress;
-  final String elapsedText;
-  final int percentInt;
-  final String? stageTitle;
+  final _FastState state;
   final VoidCallback onEditPlan;
-  final VoidCallback onFinish;
+  final VoidCallback onAction;
+  final VoidCallback onCardTap;
 
   @override
   Widget build(BuildContext context) {
+    final card = view.card;
     return Column(
       children: [
-        _StageCard(
-          image: AppImages.a1Light,
-          titleKey: 'fasting_page.body_title',
-          bodyKey: 'fasting_page.body_body',
-          titleOverride: stageTitle,
-          onTap: () => context.pushNamed(RoutePaths.bodyStatus.name),
+        if (view.heading != null) ...[
+          Text(
+            view.heading!.tr(),
+            textAlign: TextAlign.center,
+            style: AppTextStyles.fastingMealTitle,
+          ),
+          const SizedBox(height: 12),
+        ],
+        // Kart yalnızca bir aşamaya ulaşıldıysa; aşama değişince yumuşak geçiş.
+        AnimatedSwitcher(
+          duration: const Duration(milliseconds: 350),
+          child: card == null
+              ? const SizedBox(key: ValueKey('no-card'), width: double.infinity)
+              : Padding(
+                  key: ValueKey(card.titleKey),
+                  padding: const EdgeInsets.only(bottom: 8),
+                  child: _StageCard(
+                    image: card.image,
+                    title: card.titleKey.tr(),
+                    body: card.bodyKey.tr(),
+                    onTap: onCardTap,
+                  ),
+                ),
         ),
-        const SizedBox(height: 8),
         _FastingArc(
           planTitle: planTitle,
           onEditPlan: onEditPlan,
-          bodyMode: true,
-          progress: progress,
-          elapsedText: elapsedText,
-          percentInt: percentInt,
+          stages: view.stages,
+          progressColor: bodyMode
+              ? ColorName.colorMealPositive
+              : ColorName.colorPlanFasting,
+          progress: view.progress,
+          elapsedText: formatElapsedHms(view.elapsed),
+          caption: view.overtime != null
+              ? 'fasting_page.overtime'.tr(
+                  args: [formatElapsedHms(view.overtime!)],
+                )
+              : 'fasting_page.time_passed'.tr(args: ['${view.percent}']),
         ),
+        if (view.note != null) ...[
+          const SizedBox(height: 8),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 24),
+            child: Text(
+              view.note!,
+              textAlign: TextAlign.center,
+              style: AppTextStyles.fastingBreakBody,
+            ),
+          ),
+        ],
         const SizedBox(height: 16),
         _FastingActions(
           planTitle: planTitle,
           started: started,
           ends: ends,
-          onStart: onFinish,
-          fasting: true,
+          state: state,
+          onAction: onAction,
         ),
       ],
     );
@@ -852,20 +923,19 @@ final class _BodyStage extends StatelessWidget {
 final class _StageCard extends StatelessWidget {
   const _StageCard({
     required this.image,
-    required this.titleKey,
-    required this.bodyKey,
-    this.titleOverride,
+    required this.title,
+    required this.body,
     this.onTap,
   });
 
   final AppImageAsset image;
-  final String titleKey;
-  final String bodyKey;
-  final String? titleOverride;
+  final String title;
+  final String body;
   final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
+    final picture = image.image(width: 48, height: 48, fit: BoxFit.contain);
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16),
       child: Material(
@@ -878,18 +948,15 @@ final class _StageCard extends StatelessWidget {
             padding: const EdgeInsets.all(12),
             child: Row(
               children: [
-                image.image(width: 48, height: 48, fit: BoxFit.contain),
+                picture,
                 const SizedBox(width: 16),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
+                      Text(title, style: AppTextStyles.fastingBreakTitle),
                       Text(
-                        titleOverride ?? titleKey.tr(),
-                        style: AppTextStyles.fastingBreakTitle,
-                      ),
-                      Text(
-                        bodyKey.tr(),
+                        body,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: AppTextStyles.fastingBreakBody,
@@ -915,20 +982,25 @@ final class _FastingArc extends StatelessWidget {
   const _FastingArc({
     required this.planTitle,
     required this.onEditPlan,
+    required this.stages,
+    required this.progressColor,
     required this.progress,
     required this.elapsedText,
-    required this.percentInt,
-    this.bodyMode = false,
-    this.onHourglassTap,
+    required this.caption,
   });
+
+  final Color progressColor;
 
   final String planTitle;
   final VoidCallback onEditPlan;
+
+  /// Aşama işaretleri; konumları sabit, ilerleme ulaşınca renklenir.
+  final List<ArcStage> stages;
   final double progress;
   final String elapsedText;
-  final int percentInt;
-  final bool bodyMode;
-  final VoidCallback? onHourglassTap;
+
+  /// Sayaç üstü satır ("Geçen süre %75" ya da "Hedef +1:23").
+  final String caption;
 
   static const _arcTop = 18.0;
   static const _marker = 54.0;
@@ -947,9 +1019,6 @@ final class _FastingArc extends StatelessWidget {
               HorseshoeArc.diameterDefault + 5,
             );
             final arcStart = _pointOnArc(arcSize, 0);
-            final breakFast = _pointOnArc(arcSize, progress);
-            final nourish = _pointOnArc(arcSize, 0.5);
-            final nextFast = _pointOnArc(arcSize, 1);
             final height = _arcTop + arcStart.dy + _marker / 2 + 6;
 
             return SizedBox(
@@ -969,49 +1038,18 @@ final class _FastingArc extends StatelessWidget {
                         HorseshoeArc(
                           progress: progress,
                           minProgress: 0,
-                          progressColor: bodyMode
-                              ? ColorName.colorMealPositive
-                              : ColorName.colorPlanFasting,
+                          progressColor: progressColor,
                           trackColor: ColorName.colorUnitToggleBg,
                         ),
                         child!,
-                        if (bodyMode) ...[
+                        for (final stage in stages)
                           _ArcMarker(
-                            center: breakFast,
-                            image: AppImages.a1Light,
+                            key: ValueKey(stage.index),
+                            center: _pointOnArc(arcSize, stage.t),
+                            image: stage.image,
+                            reached: stage.isReached,
+                            current: stage.isCurrent,
                           ),
-                          _ArcMarker(
-                            center: _pointOnArc(arcSize, 0.44),
-                            image: AppImages.a3,
-                            dimmed: true,
-                          ),
-                          _ArcMarker(
-                            center: _pointOnArc(arcSize, 0.66),
-                            image: AppImages.a4,
-                            dimmed: true,
-                          ),
-                          _ArcMarker(
-                            center: _pointOnArc(arcSize, 0.92),
-                            image: AppImages.a6,
-                            dimmed: true,
-                          ),
-                        ] else ...[
-                          _ArcMarker(
-                            center: breakFast,
-                            image: AppImages.breakYourFast,
-                          ),
-                          _ArcMarker(
-                            center: nourish,
-                            image: AppImages.darkNorusih,
-                            scale: 1.35,
-                          ),
-                          _ArcMarker(
-                            center: nextFast,
-                            image: AppImages.darkFast,
-                            scale: 1.25,
-                            onTap: onHourglassTap,
-                          ),
-                        ],
                       ],
                     ),
                   ),
@@ -1025,7 +1063,7 @@ final class _FastingArc extends StatelessWidget {
         planTitle: planTitle,
         onEditPlan: onEditPlan,
         elapsedText: elapsedText,
-        percentInt: percentInt,
+        caption: caption,
       ),
     );
   }
@@ -1046,23 +1084,20 @@ final class _ArcCaption extends StatelessWidget {
     required this.planTitle,
     required this.onEditPlan,
     required this.elapsedText,
-    required this.percentInt,
+    required this.caption,
   });
 
   final String planTitle;
   final VoidCallback onEditPlan;
   final String elapsedText;
-  final int percentInt;
+  final String caption;
 
   @override
   Widget build(BuildContext context) {
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Text(
-          'fasting_page.time_passed'.tr(args: ['$percentInt']),
-          style: AppTextStyles.fastingTimePassed,
-        ),
+        Text(caption, style: AppTextStyles.fastingTimePassed),
         Text(elapsedText, style: AppTextStyles.fastingTimer),
         const SizedBox(height: 8),
         _PlanChip(title: planTitle, onEditPlan: onEditPlan),
@@ -1119,84 +1154,84 @@ final class _PenIcon extends StatelessWidget {
   }
 }
 
+const _grayFilter = ColorFilter.matrix(<double>[
+  0.2126,
+  0.7152,
+  0.0722,
+  0,
+  48,
+  0.2126,
+  0.7152,
+  0.0722,
+  0,
+  48,
+  0.2126,
+  0.7152,
+  0.0722,
+  0,
+  48,
+  0,
+  0,
+  0,
+  0.9,
+  0,
+]);
+
 final class _ArcMarker extends StatelessWidget {
   const _ArcMarker({
     required this.center,
     required this.image,
-    this.scale = 1,
-    this.dimmed = false,
-    this.onTap,
+    required this.reached,
+    required this.current,
+    super.key,
   });
 
   final Offset center;
   final AppImageAsset image;
-  final double scale;
-  final bool dimmed;
-  final VoidCallback? onTap;
 
-  static const _gray = ColorFilter.matrix(<double>[
-    0.2126,
-    0.7152,
-    0.0722,
-    0,
-    48,
-    0.2126,
-    0.7152,
-    0.0722,
-    0,
-    48,
-    0.2126,
-    0.7152,
-    0.0722,
-    0,
-    48,
-    0,
-    0,
-    0,
-    0.9,
-    0,
-  ]);
+  /// İlerleme bu işarete ulaştı: renkli; ulaşmadıysa gri.
+  final bool reached;
+
+  /// İçinde bulunulan aşama: hafif büyük.
+  final bool current;
 
   @override
   Widget build(BuildContext context) {
     const size = _FastingArc._marker;
+    final picture = image.image(fit: BoxFit.contain);
     return Positioned(
       left: center.dx - size / 2,
       top: center.dy - size / 2,
-      child: GestureDetector(
-        onTap: onTap,
-        behavior: HitTestBehavior.opaque,
-        child: DecoratedBox(
-          decoration: BoxDecoration(
-            color: ColorName.colorWhite,
-            shape: BoxShape.circle,
-            boxShadow: [
-              BoxShadow(
-                color: ColorName.colorBlack.withValues(alpha: 0.05),
-                offset: const Offset(0, 1.3),
-                blurRadius: 5.4,
-              ),
-              BoxShadow(
-                color: ColorName.colorBlack.withValues(alpha: 0.1),
-                offset: const Offset(0, 1.3),
-                blurRadius: 5.4,
-              ),
-            ],
-          ),
-          child: ClipOval(
-            child: SizedBox(
-              width: size,
-              height: size,
-              child: Padding(
-                padding: const EdgeInsets.all(6),
-                child: Transform.scale(
-                  scale: scale,
-                  child: dimmed
-                      ? ColorFiltered(
-                          colorFilter: _gray,
-                          child: image.image(fit: BoxFit.contain),
-                        )
-                      : image.image(fit: BoxFit.contain),
+      child: IgnorePointer(
+        child: AnimatedScale(
+          scale: current ? 1.12 : 1,
+          duration: const Duration(milliseconds: 300),
+          child: DecoratedBox(
+            decoration: BoxDecoration(
+              color: ColorName.colorWhite,
+              shape: BoxShape.circle,
+              boxShadow: [
+                BoxShadow(
+                  color: ColorName.colorBlack.withValues(alpha: 0.05),
+                  offset: const Offset(0, 1.3),
+                  blurRadius: 5.4,
+                ),
+                BoxShadow(
+                  color: ColorName.colorBlack.withValues(alpha: 0.1),
+                  offset: const Offset(0, 1.3),
+                  blurRadius: 5.4,
+                ),
+              ],
+            ),
+            child: ClipOval(
+              child: SizedBox(
+                width: size,
+                height: size,
+                child: Padding(
+                  padding: const EdgeInsets.all(6),
+                  child: reached
+                      ? picture
+                      : ColorFiltered(colorFilter: _grayFilter, child: picture),
                 ),
               ),
             ),
@@ -1212,25 +1247,26 @@ final class _FastingActions extends StatelessWidget {
     required this.planTitle,
     required this.started,
     required this.ends,
-    required this.onStart,
-    this.fasting = false,
-    this.finishReady = false,
+    required this.state,
+    required this.onAction,
   });
 
   final String planTitle;
   final String? started;
   final String? ends;
-  final VoidCallback onStart;
-  final bool fasting;
-  final bool finishReady;
+  final _FastState state;
+  final VoidCallback onAction;
 
   @override
   Widget build(BuildContext context) {
-    final label = finishReady
-        ? 'fasting_page.start_now_cta'.tr()
-        : fasting
-        ? 'fasting_page.finish_early'.tr()
-        : 'fasting_page.start_cta'.tr(args: [planTitle]);
+    final fasting =
+        state == _FastState.fasting || state == _FastState.goalReached;
+    final label = switch (state) {
+      _FastState.fasting => 'fasting_page.finish_early'.tr(),
+      _FastState.goalReached => 'fasting_page.finish_cta'.tr(),
+      _FastState.eating => 'fasting_page.start_next_cta'.tr(),
+      _FastState.idle => 'fasting_page.start_cta'.tr(args: [planTitle]),
+    };
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16),
       child: Column(
@@ -1239,15 +1275,14 @@ final class _FastingActions extends StatelessWidget {
           const SizedBox(height: 20),
           AppButton(
             label: label,
-            onPressed: onStart,
+            onPressed: onAction,
             showIcon: false,
-            decoration: finishReady
-                ? AppButtonDecoration.fastingStart()
-                : fasting
+            decoration: state == _FastState.fasting
                 ? AppButtonDecoration.dark()
                 : AppButtonDecoration.fastingStart(),
           ),
-          if (fasting) ...[
+          // Zorlanma yalnızca hedefe ulaşmadan önce anlamlı.
+          if (fasting && state != _FastState.goalReached) ...[
             const SizedBox(height: 10),
             AppButton(
               label: 'fasting_page.struggling'.tr(),

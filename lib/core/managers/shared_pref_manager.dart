@@ -28,4 +28,25 @@ final class SharedPrefManager {
 
   Future<void> setFirstLaunchDone() =>
       _preferences.setBool(_firstLaunchKey, false);
+
+  static const _summaryKey = 'home_summary_cache';
+  static const _summaryDayKey = 'home_summary_day';
+
+  /// Son ana sayfa özeti (ham JSON) ve alındığı yerel gün `yyyy-MM-dd`.
+  ({String json, String day})? get homeSummary {
+    final json = _prefs?.getString(_summaryKey);
+    final day = _prefs?.getString(_summaryDayKey);
+    if (json == null || day == null) return null;
+    return (json: json, day: day);
+  }
+
+  Future<void> setHomeSummary(String json, String day) async {
+    await _preferences.setString(_summaryKey, json);
+    await _preferences.setString(_summaryDayKey, day);
+  }
+
+  Future<void> clearHomeSummary() async {
+    await _prefs?.remove(_summaryKey);
+    await _prefs?.remove(_summaryDayKey);
+  }
 }

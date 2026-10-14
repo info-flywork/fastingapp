@@ -2,7 +2,9 @@ import 'dart:async';
 
 import 'package:fastingapp/core/di/injection.dart';
 import 'package:fastingapp/core/router/route_paths.dart';
+import 'package:fastingapp/domain/fasting/plan_catalog_repository.dart';
 import 'package:fastingapp/domain/nutrition/nutrition_repository.dart';
+import 'package:fastingapp/domain/trackers/health_sync_service.dart';
 import 'package:fastingapp/domain/trackers/trackers_repository.dart';
 import 'package:fastingapp/presentation/auth/bloc/auth_bloc.dart';
 import 'package:fastingapp/presentation/auth/bloc/auth_state.dart';
@@ -28,8 +30,12 @@ final class SplashBloc extends Bloc<SplashEvent, SplashState> {
   final HomeBloc _homeBloc;
   final ProfileBloc _profileBloc;
 
-  static const _minVisible = Duration(milliseconds: 1400);
-  static const _homeWarmupTimeout = Duration(seconds: 8);
+  /// Logo animasyonu (`splash_view.dart`, 900 ms) bitsin yeter.
+  static const _minVisible = Duration(milliseconds: 900);
+
+  /// Saklı özet yoksa (ilk giriş, yeni gün) ana sayfa en fazla bu kadar
+  /// beklenir; sonra kendi iskeletiyle açılır.
+  static const _homeWarmupTimeout = Duration(seconds: 2);
 
   Future<void> _onStarted(
     SplashStarted event,
@@ -47,6 +53,10 @@ final class SplashBloc extends Bloc<SplashEvent, SplashState> {
       _profileBloc.add(const ProfileStarted());
       unawaited(_warmupNutrition());
       unawaited(_warmupWater());
+      // Plan kilitleri / güvenlik onayı sunucu kataloğundan.
+      unawaited(getIt<PlanCatalogRepository>().ensureLoaded());
+      // Soğuk açılışta da sağlık adımları (önceden yalnızca ön plana dönüşte).
+      unawaited(getIt<HealthSyncService>().sync());
     }
     await minDelay;
     if (homeWarmup != null) await homeWarmup;
@@ -94,11 +104,8 @@ final class SplashBloc extends Bloc<SplashEvent, SplashState> {
   Future<AuthState> _waitForAuthResolved() async {
     final current = _authBloc.state;
     if (current is! AuthInitial) return current;
-    return _authBloc.stream
-        .firstWhere((state) => state is! AuthInitial)
-        .timeout(
-          const Duration(seconds: 6),
-          onTimeout: () => const AuthUnauthenticated(),
-        );
+    // Zaman aşımı yok: `AuthBloc` kontrolü her durumda sonuçlanır. Önceki
+    // 6 sn yedeği yavaş açılışta girişli kullanıcıyı giriş ekranına atıyordu.
+    return _authBloc.stream.firstWhere((state) => state is! AuthInitial);
   }
 }

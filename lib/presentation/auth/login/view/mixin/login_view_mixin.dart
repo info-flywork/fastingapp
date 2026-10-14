@@ -27,7 +27,7 @@ mixin LoginViewMixin on State<LoginView> {
         text: switch (e) {
           NetworkException(:final message) => message,
           AuthException(:final message) => message,
-          _ => e.toString(),
+          _ => errorMessageOf(e),
         },
         type: SnackBarType.failure,
       );

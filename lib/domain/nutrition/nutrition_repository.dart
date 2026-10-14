@@ -13,6 +13,11 @@ final class NutritionRepository {
   String? _dayCacheKey;
   final Map<String, NutritionWeek> _weekCache = {};
 
+  /// Bir yazma oldu: cache gösterilmeye devam eder (iskelet yok) ama
+  /// `force: false` istekler de ağa gider.
+  bool _dayStale = false;
+  bool _weekStale = false;
+
   static String _ymd(DateTime d) =>
       '${d.year.toString().padLeft(4, '0')}-'
       '${d.month.toString().padLeft(2, '0')}-'
@@ -33,28 +38,33 @@ final class NutritionRepository {
   NutritionWeek? cachedWeek({String metric = 'protein', DateTime? date}) =>
       _weekCache['$metric:${_dayKey(date)}'];
 
-  void invalidate() {
+  /// Yazma sonrası: veriyi silmez, bayat işaretler (ekranlar eski değeri
+  /// gösterip sessizce tazeler).
+  void invalidate() => _dayStale = _weekStale = true;
+
+  /// Çıkış / hesap değişimi: önbellek tamamen boşalır.
+  void clear() {
     _dayCache = null;
     _dayCacheKey = null;
     _weekCache.clear();
+    _dayStale = _weekStale = false;
   }
 
   Future<NutritionDay> getDay({DateTime? date, bool force = false}) async {
     final key = _dayKey(date);
-    if (!force && _dayCache != null && _dayCacheKey == key) {
+    if (!force && !_dayStale && _dayCache != null && _dayCacheKey == key) {
       return _dayCache!;
     }
     final result = await _network.send<NutritionDay>(
       path: '/nutrition/day',
       method: RequestType.get,
-      queryParameters: {
-        if (date != null) 'date': _ymd(date),
-      },
+      queryParameters: {if (date != null) 'date': _ymd(date)},
       parserModel: NutritionDay.fromJson,
     );
     final day = result ?? NutritionDay.empty();
     _dayCache = day;
     _dayCacheKey = key;
+    _dayStale = false;
     return day;
   }
 
@@ -64,20 +74,19 @@ final class NutritionRepository {
     bool force = false,
   }) async {
     final key = '$metric:${_dayKey(date)}';
-    if (!force) {
+    if (!force && !_weekStale) {
       final hit = _weekCache[key];
       if (hit != null) return hit;
     }
     final result = await _network.send<NutritionWeek>(
       path: '/nutrition/week',
       method: RequestType.get,
-      queryParameters: {
-        'metric': metric,
-        if (date != null) 'date': _ymd(date),
-      },
+      queryParameters: {'metric': metric, if (date != null) 'date': _ymd(date)},
       parserModel: NutritionWeek.fromJson,
     );
     final week = result ?? NutritionWeek.empty(metric: metric);
+    if (_weekStale) _weekCache.clear();
+    _weekStale = false;
     _weekCache[key] = week;
     return week;
   }
@@ -141,7 +150,10 @@ final class NutritionDay implements BaseModel<NutritionDay> {
       NutritionDay.fromJson(json);
 
   @override
-  Map<String, dynamic> toJson() => {'date': date.toIso8601String(), 'kcal': kcal};
+  Map<String, dynamic> toJson() => {
+    'date': date.toIso8601String(),
+    'kcal': kcal,
+  };
 }
 
 final class NutritionMacros {
@@ -157,17 +169,18 @@ final class NutritionMacros {
     fat: NutritionMacro(g: 0),
   );
 
-  factory NutritionMacros.fromJson(Map<String, dynamic> json) => NutritionMacros(
-    protein: NutritionMacro.fromJson(
-      json['protein'] as Map<String, dynamic>? ?? const {},
-    ),
-    carbs: NutritionMacro.fromJson(
-      json['carbs'] as Map<String, dynamic>? ?? const {},
-    ),
-    fat: NutritionMacro.fromJson(
-      json['fat'] as Map<String, dynamic>? ?? const {},
-    ),
-  );
+  factory NutritionMacros.fromJson(Map<String, dynamic> json) =>
+      NutritionMacros(
+        protein: NutritionMacro.fromJson(
+          json['protein'] as Map<String, dynamic>? ?? const {},
+        ),
+        carbs: NutritionMacro.fromJson(
+          json['carbs'] as Map<String, dynamic>? ?? const {},
+        ),
+        fat: NutritionMacro.fromJson(
+          json['fat'] as Map<String, dynamic>? ?? const {},
+        ),
+      );
 
   final NutritionMacro protein;
   final NutritionMacro carbs;
@@ -237,18 +250,16 @@ final class NutritionWeek implements BaseModel<NutritionWeek> {
     this.goal,
   });
 
-  factory NutritionWeek.empty({String metric = 'protein'}) => NutritionWeek(
-    metric: metric,
-    weekStart: DateTime.now(),
-    days: const [],
-  );
+  factory NutritionWeek.empty({String metric = 'protein'}) =>
+      NutritionWeek(metric: metric, weekStart: DateTime.now(), days: const []);
 
   factory NutritionWeek.fromJson(Map<String, dynamic> json) {
     final daysRaw = json['days'];
     return NutritionWeek(
       metric: json['metric'] as String? ?? 'protein',
       weekStart:
-          DateTime.tryParse(json['weekStart'] as String? ?? '') ?? DateTime.now(),
+          DateTime.tryParse(json['weekStart'] as String? ?? '') ??
+          DateTime.now(),
       goal: (json['goal'] as num?)?.toDouble(),
       days: daysRaw is List
           ? daysRaw
@@ -286,7 +297,8 @@ final class NutritionWeekDay {
 
   factory NutritionWeekDay.fromJson(Map<String, dynamic> json) =>
       NutritionWeekDay(
-        date: DateTime.tryParse(json['date'] as String? ?? '') ?? DateTime.now(),
+        date:
+            DateTime.tryParse(json['date'] as String? ?? '') ?? DateTime.now(),
         value: (json['value'] as num?)?.toDouble() ?? 0,
         progress: (json['progress'] as num?)?.toDouble(),
         isToday: json['isToday'] as bool? ?? false,

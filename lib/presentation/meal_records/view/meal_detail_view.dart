@@ -110,13 +110,29 @@ class _MealDetailViewState extends State<MealDetailView>
                             ),
                             const SizedBox(height: 12),
                             _NotesCard(controller: notesController),
+                            if (isEditing) ...[
+                              const SizedBox(height: 16),
+                              TextButton(
+                                onPressed: deleting || saving
+                                    ? null
+                                    : () => unawaited(onDeleteTapped()),
+                                child: Text(
+                                  'meal_detail.delete'.tr(),
+                                  style: AppTextStyles
+                                      .notificationsEmptySubtitle
+                                      .copyWith(
+                                        color: ColorName.colorErrorRed,
+                                      ),
+                                ),
+                              ),
+                            ],
                           ],
                         ),
                       ),
               ),
               _SaveBar(
                 bottomInset: bottom,
-                saving: saving,
+                saving: saving || deleting,
                 onSave: loading || loadError != null ? null : onSaveTapped,
               ),
             ],

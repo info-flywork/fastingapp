@@ -10,6 +10,9 @@ mixin BodyHistoryViewMixin on State<BodyHistoryView> {
   double? heightCm;
 
   _HistoryRange selectedRange = _HistoryRange.day;
+
+  /// Son kilo kayıtları (`GET /weights`).
+  List<WeightEntry> entries = const [];
   int selectedPointIndex = 0;
   List<_ChartPoint> chartPoints = const [];
   double chartYMin = 65;
@@ -17,6 +20,28 @@ mixin BodyHistoryViewMixin on State<BodyHistoryView> {
 
   /// Yalnızca grafik alanı; sayfa iskeleti anında açılır.
   bool chartLoading = true;
+
+  /// Aralık başına grafik: sekme değişiminde iskelet yok, diğer aralıklar
+  /// arka planda önceden yüklenir. Kilo yazılınca boşaltılır.
+  final Map<_HistoryRange, WeightChart> _charts = {};
+
+  /// Kilo yazılınca artar: yazmadan önce başlamış ön yüklemeler eski
+  /// grafiği önbelleğe koymasın.
+  int _chartGeneration = 0;
+
+  Future<WeightChart> _chartFor(_HistoryRange range) async {
+    final generation = _chartGeneration;
+    final chart = await _fetchChart(range);
+    if (generation == _chartGeneration) _charts[range] = chart;
+    return chart;
+  }
+
+  void _prefetchOtherRanges() {
+    for (final range in _HistoryRange.values) {
+      if (range == selectedRange || _charts.containsKey(range)) continue;
+      unawaited(_chartFor(range).then((_) {}, onError: (Object _) {}));
+    }
+  }
 
   void initBodyHistory() {
     currentKg = widget.currentKg;
@@ -33,6 +58,7 @@ mixin BodyHistoryViewMixin on State<BodyHistoryView> {
     final home = getIt<HomeBloc>().state;
     if (home is! HomeLoaded) return;
     final s = home.summary;
+    _weightUnit = s?.weightUnit ?? 'kg';
     currentKg ??= s?.weightCurrentKg;
     startKg ??= s?.weightStartKg;
     targetKg ??= s?.weightGoalKg;
@@ -49,11 +75,47 @@ mixin BodyHistoryViewMixin on State<BodyHistoryView> {
     bmi = _bmiFor(currentKg) ?? bmi;
   }
 
+  Future<void> _loadEntries() async {
+    try {
+      final list = await _trackers.listWeights();
+      if (mounted) setState(() => entries = list);
+    } on Object {
+      // Liste ikincil; grafik ve özet yine görünür.
+    }
+  }
+
+  Future<void> onEditEntry(WeightEntry entry) async {
+    final result = await AppDialogs.instance.showEditWeight(
+      context,
+      initialWeightKg: entry.weightKg,
+    );
+    if (result == null || !mounted) return;
+    await _writeEntry(() => _trackers.updateWeight(entry.id, result.weightKg));
+  }
+
+  Future<void> onDeleteEntry(WeightEntry entry) async {
+    final ok = await AppDialogs.instance.showDeleteWeight(context);
+    if (ok != true || !mounted) return;
+    await _writeEntry(() => _trackers.deleteWeight(entry.id));
+  }
+
+  Future<void> _writeEntry(Future<void> Function() call) async {
+    try {
+      await call();
+      DataSync.afterWrite(profile: true);
+      if (!mounted) return;
+      await Future.wait([_loadEntries(), _refreshAfterWrite()]);
+    } on Object catch (e) {
+      if (mounted) AppSnackbar.showError(context, e);
+    }
+  }
+
   Future<void> _loadSummaryAndChart() async {
+    unawaited(_loadEntries());
     setState(() => chartLoading = true);
     // Özet (BMI) ile grafik paralel — BMI kartı grafik bitmeden dolar.
     final summaryFuture = _trackers.getWeightSummary();
-    final chartFuture = _fetchChart(selectedRange);
+    final chartFuture = _chartFor(selectedRange);
 
     try {
       final summary = await summaryFuture;
@@ -73,8 +135,11 @@ mixin BodyHistoryViewMixin on State<BodyHistoryView> {
       final chart = await chartFuture;
       if (!mounted) return;
       _applyChart(chart);
-    } on Object {
-      if (mounted) setState(() => chartPoints = const []);
+      _prefetchOtherRanges();
+    } on Object catch (e) {
+      if (!mounted) return;
+      setState(() => chartPoints = const []);
+      AppSnackbar.showError(context, e);
     } finally {
       if (mounted) setState(() => chartLoading = false);
     }
@@ -90,9 +155,15 @@ mixin BodyHistoryViewMixin on State<BodyHistoryView> {
   }
 
   void _applyChart(WeightChart chart) {
+    _currentBucketLabel = chart.buckets.lastOrNull?.label;
     final points = <_ChartPoint>[
-      for (final b in chart.buckets)
-        if (b.weightKg != null) _ChartPoint(label: b.label, kg: b.weightKg!),
+      for (var i = 0; i < chart.buckets.length; i++)
+        if (chart.buckets[i].weightKg case final kg?)
+          _ChartPoint(
+            label: chart.buckets[i].label,
+            kg: kg,
+            isCurrent: i == chart.buckets.length - 1,
+          ),
     ];
     setState(() {
       chartYMin = chart.yMin ?? chartYMin;
@@ -104,18 +175,23 @@ mixin BodyHistoryViewMixin on State<BodyHistoryView> {
     });
   }
 
+  /// Bugünün kovasının etiketi (iyimser nokta için).
+  String? _currentBucketLabel;
+
+  /// Bugünün kovası doluysa değeri güncellenir, yoksa yeni nokta eklenir.
+  /// Önceden son dolu kova (ör. geçen haftaki) eziliyordu.
   void _upsertTodayChartPoint(double kg) {
-    if (chartPoints.isEmpty) {
-      chartPoints = [_ChartPoint(label: '—', kg: kg)];
-      selectedPointIndex = 0;
-      return;
-    }
-    final last = chartPoints.length - 1;
+    final today = _ChartPoint(
+      label: _currentBucketLabel ?? '—',
+      kg: kg,
+      isCurrent: true,
+    );
     chartPoints = [
-      for (var i = 0; i < chartPoints.length; i++)
-        i == last ? _ChartPoint(label: chartPoints[i].label, kg: kg) : chartPoints[i],
+      for (final p in chartPoints)
+        if (!p.isCurrent) p,
+      today,
     ];
-    selectedPointIndex = last;
+    selectedPointIndex = chartPoints.length - 1;
     final lo = chartPoints.map((p) => p.kg).reduce(math.min);
     final hi = chartPoints.map((p) => p.kg).reduce(math.max);
     chartYMin = math.min(chartYMin, lo - 2);
@@ -123,15 +199,20 @@ mixin BodyHistoryViewMixin on State<BodyHistoryView> {
   }
 
   void onRangeChanged(_HistoryRange range) {
+    final cached = _charts[range];
     setState(() {
       selectedRange = range;
       selectedPointIndex = 0;
-      chartLoading = true;
+      chartLoading = cached == null;
     });
+    if (cached != null) {
+      _applyChart(cached);
+      return;
+    }
     unawaited(() async {
       try {
-        final chart = await _fetchChart(range);
-        if (!mounted) return;
+        final chart = await _chartFor(range);
+        if (!mounted || range != selectedRange) return;
         _applyChart(chart);
       } on Object {
         if (mounted) setState(() => chartPoints = const []);
@@ -173,10 +254,11 @@ mixin BodyHistoryViewMixin on State<BodyHistoryView> {
 
     try {
       await _trackers.createWeight(weightKg: kg);
-      if (!mounted) return;
       DataSync.afterWrite(profile: true);
+      if (!mounted) return;
       // Sunucu özeti / grafik arka planda; ekran zaten güncel.
       unawaited(_refreshAfterWrite());
+      unawaited(_loadEntries());
     } on Object catch (e) {
       if (!mounted) return;
       setState(() {
@@ -202,8 +284,13 @@ mixin BodyHistoryViewMixin on State<BodyHistoryView> {
         heightCm = summary.heightCm ?? heightCm;
         bmi = summary.bmi ?? _bmiFor(currentKg) ?? bmi;
       });
-      final chart = await _fetchChart(selectedRange);
-      if (!mounted) return;
+      _chartGeneration++;
+      _charts.clear();
+      // Yanıt gelene kadar sekme değişmiş olabilir: yanlış aralığın grafiği
+      // gösterilmesin.
+      final range = selectedRange;
+      final chart = await _chartFor(range);
+      if (!mounted || range != selectedRange) return;
       _applyChart(chart);
     } on Object {
       // Optimistic UI yeterli.
@@ -222,11 +309,11 @@ mixin BodyHistoryViewMixin on State<BodyHistoryView> {
 
     try {
       final summary = await _trackers.setWeightGoal(result.weightKg);
+      DataSync.afterWrite(profile: true);
       if (!mounted) return;
       setState(() {
         if (summary.goalKg != null) targetKg = summary.goalKg!;
       });
-      DataSync.afterWrite(profile: true);
     } on Object catch (e) {
       if (!mounted) return;
       setState(() => targetKg = prev);

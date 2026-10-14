@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:bloc/bloc.dart';
 import 'package:fastingapp/core/network/network_exception.dart';
+import 'package:fastingapp/domain/chat/ai_consent.dart';
 import 'package:fastingapp/domain/chat/chat_repository.dart';
 import 'package:fastingapp/domain/revenue_cat/revenue_cat_service.dart';
 import 'package:fastingapp/presentation/chat/bloc/chat_session_state.dart';
@@ -17,8 +18,16 @@ final class ChatSessionCubit extends Cubit<ChatSessionState> {
   static const _uuid = Uuid();
 
   var _replyToken = 0;
-  var _consentGranted = false;
   var _historyLoaded = false;
+
+  /// Çıkış / hesap değişimi: önceki kullanıcının konuşması ve geçmişi
+  /// bırakılır; uçuştaki yanıt akışı yok sayılır.
+  void reset() {
+    _replyToken++;
+    _streaming = false;
+    _historyLoaded = false;
+    emit(const ChatSessionState());
+  }
 
   Future<void> loadHistory({bool force = false}) async {
     if (_historyLoaded && !force) return;
@@ -35,13 +44,20 @@ final class ChatSessionCubit extends Cubit<ChatSessionState> {
     } on NetworkException catch (e) {
       emit(state.copyWith(isLoadingHistory: false, errorMessage: e.message));
     } on Object catch (e) {
-      emit(state.copyWith(isLoadingHistory: false, errorMessage: e.toString()));
+      emit(
+        state.copyWith(
+          isLoadingHistory: false,
+          errorMessage: errorMessageOf(e),
+        ),
+      );
     }
   }
 
   /// Geçmiş kartından konuşma aç.
   Future<void> openConversation(String conversationId) async {
-    if (state.isAiTyping) return;
+    if (isBusy) return;
+    // Uçuştaki eski yanıt bu konuşmaya akmasın.
+    _replyToken++;
     emit(state.copyWith(isAiTyping: true, clearError: true));
     try {
       final messages = await _repository.listMessages(conversationId);
@@ -54,6 +70,7 @@ final class ChatSessionCubit extends Cubit<ChatSessionState> {
                   id: m.id,
                   text: m.text,
                   sender: m.isUser ? ChatSender.user : ChatSender.ai,
+                  urgent: !m.isUser && m.safety == 'urgent',
                 ),
               )
               .toList(),
@@ -63,12 +80,13 @@ final class ChatSessionCubit extends Cubit<ChatSessionState> {
     } on NetworkException catch (e) {
       emit(state.copyWith(isAiTyping: false, errorMessage: e.message));
     } on Object catch (e) {
-      emit(state.copyWith(isAiTyping: false, errorMessage: e.toString()));
+      emit(state.copyWith(isAiTyping: false, errorMessage: errorMessageOf(e)));
     }
   }
 
   Future<void> startNewChat() async {
     _replyToken++;
+    _streaming = false;
     emit(
       state.copyWith(
         messages: const [],
@@ -79,9 +97,27 @@ final class ChatSessionCubit extends Cubit<ChatSessionState> {
     );
   }
 
-  Future<void> sendMessage(String raw) async {
+  /// Yanıt akışı sürüyor (ilk parça gelince `isAiTyping` düşer ama akış
+  /// biter bitmez değil): bu sırada yeni mesaj / konuşma açılmaz; yoksa
+  /// yanıt yanlış konuşmaya akıyordu.
+  var _streaming = false;
+
+  bool get isBusy => _streaming || state.isAiTyping;
+
+  /// `false`: mesaj sunucuya ulaşmadı (metin giriş alanına geri konmalı).
+  Future<bool> sendMessage(String raw) async {
+    if (raw.trim().isEmpty || isBusy) return true;
+    _streaming = true;
+    final token = _replyToken + 1;
+    try {
+      return await _send(raw);
+    } finally {
+      if (_replyToken == token) _streaming = false;
+    }
+  }
+
+  Future<bool> _send(String raw) async {
     final text = raw.trim();
-    if (text.isEmpty || state.isAiTyping) return;
 
     final token = ++_replyToken;
     final localUserId = 'local_${_uuid.v4()}';
@@ -100,12 +136,16 @@ final class ChatSessionCubit extends Cubit<ChatSessionState> {
       ),
     );
 
+    String? conversationId;
+    // Sunucu kullanıcı mesajını kaydetti mi (akış ortasında hata olursa
+    // mesaj silinmez, konuşma sunucudan yeniden yüklenir).
+    var storedOnServer = false;
     try {
-      await _ensureConsent();
-      final conversationId = await _ensureConversation();
-      if (token != _replyToken || isClosed) return;
+      // Rıza UI katmanında (AiConsent.ensure); burada sessiz grant yok.
+      conversationId = await _ensureConversation();
+      if (token != _replyToken || isClosed) return true;
 
-      final result = await _sendWithConsentRetry(
+      final result = await _repository.sendMessage(
         conversationId: conversationId,
         text: text,
         clientMessageId: clientMessageId,
@@ -114,6 +154,7 @@ final class ChatSessionCubit extends Cubit<ChatSessionState> {
           final nextMessages = [...state.messages];
 
           if (update.fullText == null) {
+            if (update.userMessageId != null) storedOnServer = true;
             final userIdx = nextMessages.indexWhere((m) => m.id == localUserId);
             if (userIdx >= 0 && update.userMessageId != null) {
               nextMessages[userIdx] = ChatMessage(
@@ -150,7 +191,7 @@ final class ChatSessionCubit extends Cubit<ChatSessionState> {
           );
         },
       );
-      if (token != _replyToken || isClosed) return;
+      if (token != _replyToken || isClosed) return true;
 
       final assistant = result.assistant;
       if (assistant == null || assistant.text.isEmpty) {
@@ -178,6 +219,7 @@ final class ChatSessionCubit extends Cubit<ChatSessionState> {
             id: assistant.id,
             text: assistant.text,
             sender: ChatSender.ai,
+            urgent: assistant.safety == 'urgent',
           );
         } else {
           nextMessages.add(
@@ -185,6 +227,7 @@ final class ChatSessionCubit extends Cubit<ChatSessionState> {
               id: assistant.id,
               text: assistant.text,
               sender: ChatSender.ai,
+              urgent: assistant.safety == 'urgent',
             ),
           );
         }
@@ -197,8 +240,10 @@ final class ChatSessionCubit extends Cubit<ChatSessionState> {
         );
       }
       await loadHistory(force: true);
+      return true;
     } on NetworkException catch (e) {
-      if (token != _replyToken || isClosed) return;
+      AiConsent.onError(e);
+      if (token != _replyToken || isClosed) return true;
       // Günlük kota doldu ve premium'da artar → paywall.
       if (RevenueCatService.needsUpgrade(e)) {
         unawaited(_revenueCat.presentPaywall());
@@ -210,54 +255,27 @@ final class ChatSessionCubit extends Cubit<ChatSessionState> {
           messages: state.messages.where((m) => m.id != localUserId).toList(),
         ),
       );
+      _reloadAfterFailure(conversationId, storedOnServer);
+      return storedOnServer;
     } on Object catch (e) {
-      if (token != _replyToken || isClosed) return;
+      if (token != _replyToken || isClosed) return true;
       emit(
         state.copyWith(
           isAiTyping: false,
-          errorMessage: e.toString(),
+          errorMessage: errorMessageOf(e),
           messages: state.messages.where((m) => m.id != localUserId).toList(),
         ),
       );
+      _reloadAfterFailure(conversationId, storedOnServer);
+      return storedOnServer;
     }
   }
 
-  Future<ChatSendResult> _sendWithConsentRetry({
-    required String conversationId,
-    required String text,
-    required String clientMessageId,
-    void Function(ChatStreamUpdate update)? onStreamUpdate,
-  }) async {
-    try {
-      return await _repository.sendMessage(
-        conversationId: conversationId,
-        text: text,
-        clientMessageId: clientMessageId,
-        onStreamUpdate: onStreamUpdate,
-      );
-    } on NetworkException catch (e) {
-      if (e.code == 'CONSENT_REQUIRED') {
-        await _repository.grantAiProcessingConsent();
-        _consentGranted = true;
-        return _repository.sendMessage(
-          conversationId: conversationId,
-          text: text,
-          clientMessageId: clientMessageId,
-          onStreamUpdate: onStreamUpdate,
-        );
-      }
-      rethrow;
-    }
-  }
-
-  Future<void> _ensureConsent() async {
-    if (_consentGranted) return;
-    try {
-      await _repository.grantAiProcessingConsent();
-      _consentGranted = true;
-    } on NetworkException {
-      // Rıza zaten varsa veya uç hata verirse gönderimde tekrar denenecek.
-    }
+  /// Akış yarıda kaldıysa sunucuda kullanıcı mesajı (ve yarım yanıt)
+  /// saklıdır: ekran sunucudaki gerçek konuşmayı göstersin.
+  void _reloadAfterFailure(String? conversationId, bool storedOnServer) {
+    if (conversationId == null || !storedOnServer) return;
+    unawaited(openConversation(conversationId));
   }
 
   Future<String> _ensureConversation() async {

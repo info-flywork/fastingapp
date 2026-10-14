@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="water_widget_name">Wasser</string>
+    <string name="water_widget_description">Tägliches Wasserziel</string>
+    <string name="water_widget_medium_name">Wasserprotokoll</string>
+    <string name="water_widget_medium_description">Wasser und Verlauf des Tages</string>
+    <string name="water_widget_large_name">Wasserübersicht</string>
+    <string name="water_widget_large_description">Wöchentliche Wasserübersicht</string>
+    <string name="fasting_widget_name">Fasten</string>
+    <string name="fasting_widget_description">Verbleibende Fastenzeit</string>
+    <string name="fasting_widget_medium_name">Fastenkarte</string>
+    <string name="fasting_widget_medium_description">Plan und verbleibende Zeit</string>
+    <string name="fasting_widget_detail_name">Fastenübersicht</string>
+    <string name="fasting_widget_detail_description">Start, Ende und Ziel</string>
+    <string name="fasting_widget_plan_name">Plan für heute</string>
+    <string name="fasting_widget_plan_description">Dein Plan und Fasten starten</string>
+    <string name="fasting_widget_omh_name">Heute</string>
+    <string name="fasting_widget_omh_description">Plan und Motivation</string>
+    <string name="fasting_widget_week_name">Diese Woche</string>
+    <string name="fasting_widget_week_description">Wöchentliche Fastenübersicht</string>
+    <string name="notification_channel_default">Benachrichtigungen</string>
+    <string name="notification_channel_quiet">Stille Benachrichtigungen</string>
+</resources>

@@ -1,5 +1,6 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:fastingapp/core/di/injection.dart';
+import 'package:fastingapp/core/dialogs/app_dialogs.dart';
 import 'package:fastingapp/core/network/network_exception.dart';
 import 'package:fastingapp/core/remote_images/app_image.dart';
 import 'package:fastingapp/core/router/route_paths.dart';
@@ -9,7 +10,10 @@ import 'package:fastingapp/core/utils/enum/snackbar_type.dart';
 import 'package:fastingapp/core/utils/extensions/future_extensions.dart';
 import 'package:fastingapp/core/widgets/app_button.dart';
 import 'package:fastingapp/core/widgets/onboarding/building_plan_section.dart';
+import 'package:fastingapp/data/model/auth/auth_response.dart';
 import 'package:fastingapp/data/model/onboarding/onboarding_result.dart';
+import 'package:fastingapp/domain/auth/auth_exception.dart';
+import 'package:fastingapp/domain/auth/auth_repository.dart';
 import 'package:fastingapp/domain/onboarding/onboarding_draft.dart';
 import 'package:fastingapp/domain/onboarding/onboarding_repository.dart';
 import 'package:fastingapp/generated/app_images.g.dart';

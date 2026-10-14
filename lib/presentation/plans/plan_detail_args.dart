@@ -12,51 +12,32 @@ final class PlanDetailArgs {
   final PlansCardData plan;
   final String pageTitleKey;
 
-  /// Figma: kahvaltı atla → 12:00–18:00.
+  /// Varsayılan yeme penceresi başlangıcı (backend `TIMING_EAT_START`):
+  /// kahvaltı atla 12:00, akşam yemeği atla 08:00; zamanlamasız ileri
+  /// planlar sunucu varsayılanı kahvaltı atla → 12:00.
   int get eatStartHour {
     return switch (plan.tone) {
       PlansChipTone.breakfast => 12,
-      PlansChipTone.dinner => 12,
-      PlansChipTone.advanced => 14,
+      PlansChipTone.dinner => 8,
+      PlansChipTone.advanced => 12,
     };
   }
 
-  /// Yemek penceresi süresi (saat). Zamanlar ve barlar buna göre.
-  int get eatHours {
-    // Figma: 12:00–18:00 → 6 saat (title 16-8 olsa bile görsel bu).
-    if (plan.tone == PlansChipTone.breakfast ||
-        plan.tone == PlansChipTone.dinner) {
-      return 6;
-    }
-    final parts = plan.title.split('-');
-    if (parts.length == 2) {
-      final eat = int.tryParse(parts[1]);
-      if (eat != null) return eat;
-    }
-    return 6;
+  /// Planın oruç saati (`16-8` → 16, `OMAD` → 23).
+  int get fastHours {
+    if (plan.planCode == 'omad') return 23;
+    final fast = int.tryParse(plan.title.split('-').first);
+    return fast ?? 16;
   }
+
+  /// Yeme penceresi süresi (saat) = 24 − oruç. Hazır planda sunucu pencere
+  /// süresinin plana eşit olmasını ister.
+  int get eatHours => 24 - fastHours;
 
   int get eatEndHour => (eatStartHour + eatHours) % 24;
 
-  /// Gauge oranı için title'daki oruç saati (16-8 → 16).
-  int get fastHours {
-    final parts = plan.title.split('-');
-    if (parts.length == 2) {
-      final fast = int.tryParse(parts[0]);
-      if (fast != null) return fast;
-    }
-    return 16;
-  }
-
-  /// Gauge yeşil oranı için title'daki yemek saati (16-8 → 8).
-  int get ratioEatHours {
-    final parts = plan.title.split('-');
-    if (parts.length == 2) {
-      final eat = int.tryParse(parts[1]);
-      if (eat != null) return eat;
-    }
-    return 8;
-  }
+  /// Gauge yeşil oranı (16-8 → 8).
+  int get ratioEatHours => eatHours;
 }
 
 /// Plan detayında "Planı başlat" sonucu. [eatStart]/[eatEnd] ("HH:mm")

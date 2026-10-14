@@ -4,11 +4,15 @@ final class NotificationCard extends StatefulWidget {
   const NotificationCard({
     required this.item,
     required this.onDismissed,
+    this.onTap,
     super.key,
   });
 
   final AppNotificationItem item;
   final VoidCallback onDismissed;
+
+  /// Derin bağlantısı olan bildirim (önceden dokunulamıyordu).
+  final VoidCallback? onTap;
 
   @override
   State<NotificationCard> createState() => _NotificationCardState();
@@ -137,6 +141,7 @@ class _NotificationCardState extends State<NotificationCard>
                       );
                     },
                     child: GestureDetector(
+                      onTap: widget.onTap,
                       onHorizontalDragUpdate: _onDragUpdate,
                       onHorizontalDragEnd: _onDragEnd,
                       child: ColoredBox(
@@ -166,11 +171,9 @@ class _NotificationCardState extends State<NotificationCard>
                                         ),
                                         const SizedBox(width: 8),
                                         Text(
-                                          'notifications.hours_ago'.tr(
-                                            namedArgs: {
-                                              'hours':
-                                                  '${widget.item.hoursAgo}',
-                                            },
+                                          _timeLabel(
+                                            context,
+                                            widget.item.createdAt,
                                           ),
                                           style:
                                               AppTextStyles.notificationsTime,
@@ -205,9 +208,13 @@ final class _NotificationIcon extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final asset = kind == NotificationKind.weight
-        ? AppImages.weigher
-        : AppImages.notificatio;
+    final asset = switch (kind) {
+      NotificationKind.weight => AppImages.weigher,
+      NotificationKind.fasting => AppImages.fasting,
+      NotificationKind.water => AppImages.water,
+      NotificationKind.streak => AppImages.streakFlame,
+      NotificationKind.other => AppImages.notificatio,
+    };
 
     return Container(
       width: 56,
@@ -258,4 +265,20 @@ final class _NotificationBody extends StatelessWidget {
       style: AppTextStyles.notificationsBody,
     );
   }
+}
+
+/// Bugün: "5D ÖNCE" / "3S ÖNCE"; daha eski: saat (bölüm başlığı günü verir).
+/// Önceden "72 saat önce" yazıyordu.
+String _timeLabel(BuildContext context, DateTime at) {
+  final diff = DateTime.now().difference(at);
+  if (!DateUtils.isSameDay(at, DateTime.now())) {
+    return DateFormat.Hm(context.locale.toString()).format(at);
+  }
+  if (diff.inMinutes < 1) return 'notifications.just_now'.tr();
+  if (diff.inHours < 1) {
+    return 'notifications.minutes_ago'.tr(
+      namedArgs: {'minutes': '${diff.inMinutes}'},
+    );
+  }
+  return 'notifications.hours_ago'.tr(namedArgs: {'hours': '${diff.inHours}'});
 }

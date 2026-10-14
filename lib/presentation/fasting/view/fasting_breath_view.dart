@@ -11,9 +11,9 @@ import 'package:go_router/go_router.dart';
 
 /// 4-7-8 nefesi — 4 tur.
 final class FastingBreathView extends StatefulWidget {
-  const FastingBreathView({required this.bodyKey, super.key});
+  const FastingBreathView({required this.bodyText, super.key});
 
-  final String bodyKey;
+  final String bodyText;
 
   @override
   State<FastingBreathView> createState() => _FastingBreathViewState();
@@ -128,7 +128,7 @@ class _FastingBreathViewState extends State<FastingBreathView>
             ),
             const SizedBox(height: 12),
             Text(
-              widget.bodyKey.tr(),
+              widget.bodyText,
               textAlign: TextAlign.center,
               style: AppTextStyles.fastingStruggleBody,
             ),

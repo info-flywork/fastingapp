@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:fastingapp/core/managers/auth_cache_manager.dart';
 import 'package:fastingapp/core/managers/device_manager.dart';
+import 'package:fastingapp/core/app_update/app_update_gate.dart';
 import 'package:fastingapp/core/network/interceptors/auth_interceptor.dart';
 import 'package:fastingapp/core/network/interceptors/context_interceptor.dart';
 import 'package:fastingapp/core/network/interceptors/expired_token_interceptor.dart';
@@ -29,6 +30,8 @@ final class DioClient {
     );
 
     dio.interceptors.addAll([
+      // Sürüm eskiyse (426) zorunlu güncelleme ekranı.
+      AppUpdateInterceptor(),
       LanguageInterceptor(),
       ContextInterceptor(deviceManager),
       AuthInterceptor(authCacheManager),
@@ -37,7 +40,16 @@ final class DioClient {
         baseUrl: StringConstants.baseUrl,
         onSessionEnded: onSessionEnded,
       ),
-      if (kDebugMode) LogInterceptor(requestBody: true, responseBody: true),
+      // Yalnızca debug: tek satır istek/yanıt özeti. Gövde ve başlıklar
+      // (Authorization dahil) basılmaz; büyük JSON'u senkron yazdırmak UI'ı
+      // takıltıyordu.
+      if (kDebugMode)
+        LogInterceptor(
+          request: false,
+          requestHeader: false,
+          responseHeader: false,
+          logPrint: (o) => debugPrint(o.toString()),
+        ),
     ]);
 
     return dio;

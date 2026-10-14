@@ -21,6 +21,7 @@ import 'package:fastingapp/presentation/home/bloc/home_bloc.dart';
 import 'package:fastingapp/presentation/home/bloc/home_state.dart';
 import 'package:fastingapp/presentation/water/reminder/water_reminder_result.dart';
 import 'package:fastingapp/presentation/water/water_glass_icons.dart';
+import 'package:fastingapp/presentation/water/water_units.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
@@ -98,14 +99,10 @@ class _WaterViewState extends State<WaterView>
       value: SystemUiOverlayStyle.dark,
       child: Scaffold(
         backgroundColor: ColorName.colorWhite,
+        // Sayfa yalnızca dolum / kutlama animasyonunda yeniden kurulur; sürekli
+        // dönen dalga, balon ve maskot salınımı kendi küçük builder'larında.
         body: AnimatedBuilder(
-          animation: Listenable.merge([
-            fillController,
-            waveController,
-            mascotBobController,
-            bubbleController,
-            celebrationController,
-          ]),
+          animation: Listenable.merge([fillController, celebrationController]),
           builder: (context, _) {
             final fill = fillAnimation.value.clamp(0.0, 1.0);
             final screenH = MediaQuery.sizeOf(context).height;
@@ -140,7 +137,6 @@ class _WaterViewState extends State<WaterView>
             final showHi = waterReachedMascot && !showDiver && entryT > 0.001;
             final showMascot = showHi || showDiver;
 
-            final bob = math.sin(mascotBobController.value * math.pi) * 10;
             final mascotLift = celebrationTValue * (screenH * 0.07);
             final mascotScale = lerpDouble(1.0, 1.32, celebrationTValue) ?? 1.0;
             final pageBgOpacity = 1 - celebrationTValue;
@@ -170,11 +166,19 @@ class _WaterViewState extends State<WaterView>
                   right: 0,
                   bottom: 0,
                   height: waterH,
-                  child: _WaterBody(
-                    wavePhase: waveController.value * math.pi * 2,
-                    bubblePhase: bubbleController.value,
-                    celebrationT: celebrationTValue,
-                    bubbles: _spawnedBubbles,
+                  child: RepaintBoundary(
+                    child: AnimatedBuilder(
+                      animation: Listenable.merge([
+                        waveController,
+                        bubbleController,
+                      ]),
+                      builder: (context, _) => _WaterBody(
+                        wavePhase: waveController.value * math.pi * 2,
+                        bubblePhase: bubbleController.value,
+                        celebrationT: celebrationTValue,
+                        bubbles: _spawnedBubbles,
+                      ),
+                    ),
                   ),
                 ),
                 // Clip yok — kafa kesilmesin; su gelince sağdan yavaş girer.
@@ -183,15 +187,26 @@ class _WaterViewState extends State<WaterView>
                     left: 0,
                     right: 0,
                     bottom: mascotBottomPad,
-                    child: Transform.translate(
-                      offset: Offset(0, -mascotLift + bob),
-                      child: Transform.scale(
-                        scale: mascotScale,
-                        alignment: Alignment.bottomCenter,
-                        child: _WaterMascot(
-                          showDiver: showDiver,
-                          entryT: math.max(entryT, celebrationTValue),
-                          screenWidth: screenW,
+                    child: AnimatedBuilder(
+                      animation: mascotBobController,
+                      builder: (context, child) => Transform.translate(
+                        offset: Offset(
+                          0,
+                          -mascotLift +
+                              math.sin(mascotBobController.value * math.pi) *
+                                  10,
+                        ),
+                        child: child,
+                      ),
+                      child: RepaintBoundary(
+                        child: Transform.scale(
+                          scale: mascotScale,
+                          alignment: Alignment.bottomCenter,
+                          child: _WaterMascot(
+                            showDiver: showDiver,
+                            entryT: math.max(entryT, celebrationTValue),
+                            screenWidth: screenW,
+                          ),
                         ),
                       ),
                     ),
@@ -239,6 +254,7 @@ class _WaterViewState extends State<WaterView>
                               child: _WaterStats(
                                 currentMl: currentMl,
                                 dailyGoalMl: dailyGoalMl,
+                                unit: _waterUnit,
                                 celebrationT: celebrationTValue,
                                 onEditGoal: isWaterToday ? editDailyGoal : null,
                               ),
@@ -260,6 +276,7 @@ class _WaterViewState extends State<WaterView>
                       duration: const Duration(milliseconds: 220),
                       child: _WaterControls(
                         addMl: addMl,
+                        unit: _waterUnit,
                         onAdd: addWater,
                         onRemove: removeWater,
                       ),
@@ -421,10 +438,7 @@ final class _DayChevron extends StatelessWidget {
         child: SizedBox(
           width: 40,
           height: 40,
-          child: Icon(
-            icon,
-            color: enabled ? enabledColor : disabledColor,
-          ),
+          child: Icon(icon, color: enabled ? enabledColor : disabledColor),
         ),
       ),
     );
@@ -435,12 +449,16 @@ final class _WaterStats extends StatelessWidget {
   const _WaterStats({
     required this.currentMl,
     required this.dailyGoalMl,
+    required this.unit,
     required this.celebrationT,
     this.onEditGoal,
   });
 
   final int currentMl;
   final int dailyGoalMl;
+
+  /// `ml` | `oz` (yalnızca gösterim).
+  final String unit;
   final double celebrationT;
   final VoidCallback? onEditGoal;
 
@@ -490,11 +508,11 @@ final class _WaterStats extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.end,
           children: [
-            Text('$currentMl', style: heroStyle),
+            Text(WaterUnits.amount(currentMl, unit), style: heroStyle),
             const SizedBox(width: 6),
             Padding(
               padding: const EdgeInsets.only(bottom: 12),
-              child: Text('ml', style: unitStyle),
+              child: Text(WaterUnits.label(unit), style: unitStyle),
             ),
           ],
         ),
@@ -512,7 +530,10 @@ final class _WaterStats extends StatelessWidget {
                       text: 'water_page.daily_target_prefix'.tr(),
                       style: targetStyle,
                     ),
-                    TextSpan(text: '${dailyGoalMl}ml', style: targetBoldStyle),
+                    TextSpan(
+                      text: WaterUnits.withUnit(dailyGoalMl, unit),
+                      style: targetBoldStyle,
+                    ),
                   ],
                 ),
               ),
@@ -815,7 +836,10 @@ class _PoppingWaterBubbleState extends State<_PoppingWaterBubble>
           child: Transform.scale(scale: 0.35 + 0.65 * _pop.value, child: child),
         );
       },
-      child: _WaterBubble(size: widget.size, kind: widget.kind),
+      // Bulanık katmanlar her karede yeniden çizilmesin (yalnızca konum değişir).
+      child: RepaintBoundary(
+        child: _WaterBubble(size: widget.size, kind: widget.kind),
+      ),
     );
   }
 }
@@ -1064,11 +1088,13 @@ final class _WaterWavePainter extends CustomPainter {
 final class _WaterControls extends StatelessWidget {
   const _WaterControls({
     required this.addMl,
+    required this.unit,
     required this.onAdd,
     required this.onRemove,
   });
 
   final int addMl;
+  final String unit;
   final VoidCallback onAdd;
   final VoidCallback onRemove;
 
@@ -1080,7 +1106,7 @@ final class _WaterControls extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           Center(
-            child: _WaterPlusButton(addMl: addMl, onTap: onAdd),
+            child: _WaterPlusButton(addMl: addMl, unit: unit, onTap: onAdd),
           ),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -1108,9 +1134,14 @@ final class _WaterControls extends StatelessWidget {
 }
 
 final class _WaterPlusButton extends StatelessWidget {
-  const _WaterPlusButton({required this.addMl, required this.onTap});
+  const _WaterPlusButton({
+    required this.addMl,
+    required this.unit,
+    required this.onTap,
+  });
 
   final int addMl;
+  final String unit;
   final VoidCallback onTap;
 
   @override
@@ -1131,7 +1162,7 @@ final class _WaterPlusButton extends StatelessWidget {
           ),
           const SizedBox(height: 2),
           Text(
-            'water_page.add_amount'.tr(args: ['$addMl']),
+            WaterUnits.withUnit(addMl, unit),
             style: AppTextStyles.waterAddLabel,
             textAlign: TextAlign.center,
           ),

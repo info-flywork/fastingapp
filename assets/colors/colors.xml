@@ -60,6 +60,8 @@
   <color name="color_blood_chip">#E85D5D</color>
   <color name="color_home_chip_bg">#F6F6F6</color>
   <color name="color_login_bg">#F6F6F6</color>
+  <!-- mascot_login.gif üst kenarı (~253,252,248); login slogan şeridi -->
+  <color name="color_login_slogan_bg">#FDFCF8</color>
   <color name="color_premium_card">#86B57F</color>
   <color name="color_toggle_on">#33C658</color>
   <color name="color_avatar_bg">#0F0F0F</color>

@@ -3,6 +3,8 @@ import 'dart:io';
 import 'dart:math' as math;
 
 import 'package:easy_localization/easy_localization.dart';
+import 'package:fastingapp/presentation/fasting/fasting_finish_flow.dart';
+import 'package:fastingapp/core/dialogs/app_dialogs.dart';
 import 'package:fastingapp/core/di/injection.dart';
 import 'package:fastingapp/core/network/network_exception.dart';
 import 'package:fastingapp/core/remote_images/app_image.dart';
@@ -10,6 +12,7 @@ import 'package:fastingapp/core/sync/data_sync.dart';
 import 'package:fastingapp/core/theme/app_text_styles.dart';
 import 'package:fastingapp/core/widgets/app_button.dart';
 import 'package:fastingapp/core/widgets/app_button_decoration.dart';
+import 'package:fastingapp/domain/chat/ai_consent.dart';
 import 'package:fastingapp/domain/nutrition/meals_repository.dart';
 import 'package:fastingapp/domain/revenue_cat/revenue_cat_service.dart';
 import 'package:fastingapp/generated/app_images.g.dart';
@@ -64,7 +67,12 @@ class _CaloriesResultViewState extends State<CaloriesResultView>
               child: _ResultSheet(
                 bottomInset: math.max(bottom, 10),
                 loading: a == null && errorMessage == null,
-                title: a?.mealTitle ?? 'calories_result.meal_title'.tr(),
+                // Örnek başlık hiç gösterilmez: sonuç yoksa durum başlığı.
+                title: a?.succeeded == true
+                    ? (a!.mealTitle ?? '')
+                    : errorMessage == null
+                    ? 'calories_result.analyzing'.tr()
+                    : 'calories_result.no_result_title'.tr(),
                 kcalText: a?.kcal != null ? '${a!.kcal} kcal' : '…',
                 proteinG: a?.proteinG,
                 carbsG: a?.carbsG,
@@ -73,7 +81,13 @@ class _CaloriesResultViewState extends State<CaloriesResultView>
                 canSave: a?.succeeded == true,
                 saving: saving,
                 onSave: onSaveMeal,
-                onRetry: () => context.pop(),
+                // Süren analiz: aynı analizi yokla; değilse yeni fotoğraf.
+                onRetry: pendingAnalysisId != null
+                    ? () => unawaited(onCheckAgain())
+                    : () => context.pop(),
+                retryLabel: pendingAnalysisId != null
+                    ? 'calories_result.check_again'.tr()
+                    : null,
               ),
             ),
           ],
@@ -128,6 +142,7 @@ final class _ResultSheet extends StatelessWidget {
     required this.saving,
     required this.onSave,
     required this.onRetry,
+    this.retryLabel,
     this.proteinG,
     this.carbsG,
     this.fatG,
@@ -146,6 +161,9 @@ final class _ResultSheet extends StatelessWidget {
   final bool saving;
   final VoidCallback onSave;
   final VoidCallback onRetry;
+
+  /// Varsayılan "yeni kalori hesapla" yerine (ör. "Tekrar kontrol et").
+  final String? retryLabel;
 
   String _macro(double? g) => g != null ? '${g.round()}g' : '—';
 
@@ -238,7 +256,7 @@ final class _ResultSheet extends StatelessWidget {
                   AppButton(
                     label: canSave
                         ? 'hunger_log_page.save'.tr()
-                        : 'calories_result.recalculate'.tr(),
+                        : retryLabel ?? 'calories_result.recalculate'.tr(),
                     onPressed: saving ? null : (canSave ? onSave : onRetry),
                     decoration: AppButtonDecoration.hungerResult(),
                   ),

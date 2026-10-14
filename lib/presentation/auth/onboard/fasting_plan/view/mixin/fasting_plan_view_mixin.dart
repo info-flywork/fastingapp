@@ -5,12 +5,25 @@ mixin FastingPlanViewMixin on State<FastingPlanView> {
     context.pop();
   }
 
-  void onPlanSelected(OnboardingFastingPlan plan) {
-    context.read<FastingPlanBloc>().add(FastingPlanSelected(plan));
+  Future<void> onPlanSelected(OnboardingFastingPlan plan) async {
+    final bloc = context.read<FastingPlanBloc>();
+    if (!await FastingPlanOptionsCatalog.ensureUnlocked(plan)) return;
+    bloc.add(FastingPlanSelected(plan));
   }
 
   void onContinue() {
-    final plan = context.read<FastingPlanBloc>().state.selected;
+    final selected = context.read<FastingPlanBloc>().state.selected;
+    // Önceden seçilip yaş değişince uygunsuz kalan plan gönderilmez.
+    final plan =
+        selected != null &&
+            FastingPlanOptionsCatalog.allowedFor(
+              selected,
+              getIt<OnboardingDraft>().age,
+            ) &&
+            (!FastingPlanOptionsCatalog.isPremiumPlan(selected) ||
+                getIt<RevenueCatService>().isPremium.value)
+        ? selected
+        : null;
     getIt<OnboardingDraft>().plan = plan;
     if (plan == null) return;
     context.push(RoutePaths.planHighlight.path, extra: plan);

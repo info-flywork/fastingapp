@@ -40,6 +40,10 @@ final class OnboardingDraft {
     OnboardingFastingPlan.fiveTwo: '5_2',
   };
 
+  /// Gizlilik ekranındaki açık sağlık verisi onayı (önceden hep `true`
+  /// gönderiliyordu; KVKK/GDPR açık rıza ister).
+  bool healthDataConsent = false;
+
   /// Eksik zorunlu alanlar (boşsa gönderilebilir).
   List<String> get missing => [
     if (goal == null) 'goal',
@@ -54,6 +58,7 @@ final class OnboardingDraft {
     if (fastingReason == null) 'fastingReason',
     if (plan == null) 'plan',
     if (mealWindowStart == null || mealWindowEnd == null) 'mealWindow',
+    if (!healthDataConsent) 'healthData',
   ];
 
   /// `POST /user/onboarding` gövdesi. [termsVersion]/[privacyVersion]:
@@ -78,16 +83,17 @@ final class OnboardingDraft {
     'planCode': planCodes[plan]!,
     'mealWindow': {'start': mealWindowStart, 'end': mealWindowEnd},
     // Gizlilik ekranı (privacyHighlight) ve giriş ekranındaki şartlar metni.
-    // TODO(team): sağlık verisi ve AI işleme için ayrı açık rıza ekranı.
+    // AI işleme rızası burada verilmez: ilk sohbet / fotoğraf analizinde
+    // kullanıcıya ayrıca sorulur (`AiConsent.ensure`).
     'consents': {
       'terms': termsVersion,
       'privacy': privacyVersion,
-      'healthData': true,
-      'aiProcessing': true,
+      'healthData': healthDataConsent,
     },
   };
 
   void reset() {
+    healthDataConsent = false;
     goal = null;
     gender = null;
     weightKg = null;

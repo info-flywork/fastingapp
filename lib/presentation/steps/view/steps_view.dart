@@ -4,9 +4,11 @@ import 'dart:math' as math;
 import 'package:easy_localization/easy_localization.dart';
 import 'package:fastingapp/core/di/injection.dart';
 import 'package:fastingapp/core/dialogs/app_dialogs.dart';
+import 'package:fastingapp/core/snackbar/app_snackbar.dart';
 import 'package:fastingapp/core/sync/data_sync.dart';
 import 'package:fastingapp/core/theme/app_text_styles.dart';
 import 'package:fastingapp/core/widgets/day_switch_transition.dart';
+import 'package:fastingapp/domain/trackers/health_sync_service.dart';
 import 'package:fastingapp/domain/trackers/trackers_repository.dart';
 import 'package:fastingapp/generated/app_images.g.dart';
 import 'package:fastingapp/generated/assets.gen.dart';
@@ -104,9 +106,13 @@ class _StepsViewState extends State<StepsView>
                                 goalReached: goalReached,
                               ),
                               const SizedBox(height: 12),
-                              _StepsGoalRow(
-                                dailyGoalSteps: dailyGoalSteps,
-                                goalReached: goalReached,
+                              GestureDetector(
+                                behavior: HitTestBehavior.opaque,
+                                onTap: () => unawaited(editStepsGoal()),
+                                child: _StepsGoalRow(
+                                  dailyGoalSteps: dailyGoalSteps,
+                                  goalReached: goalReached,
+                                ),
                               ),
                               const SizedBox(height: 28),
                               _StepsStatsRow(
@@ -120,6 +126,16 @@ class _StepsViewState extends State<StepsView>
                                 goal: dailyGoalSteps,
                                 todayIndex: todayWeekIndex,
                               ),
+                              // Adımlar elle yalnızca bugün ve sağlık
+                              // uygulamasından gelmeyen günde girilir.
+                              if (canEditSteps) ...[
+                                const SizedBox(height: 28),
+                                _StepsControls(
+                                  addSteps: StepsViewMixin.addStepAmount,
+                                  onAdd: () => unawaited(addSteps()),
+                                  onRemove: () => unawaited(removeSteps()),
+                                ),
+                              ],
                             ],
                           ),
                         ),
@@ -245,10 +261,7 @@ final class _DayChevron extends StatelessWidget {
         child: SizedBox(
           width: 40,
           height: 40,
-          child: Icon(
-            icon,
-            color: enabled ? enabledColor : disabledColor,
-          ),
+          child: Icon(icon, color: enabled ? enabledColor : disabledColor),
         ),
       ),
     );

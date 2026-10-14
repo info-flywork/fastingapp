@@ -20,6 +20,16 @@ final class HomeRefreshRequested extends HomeEvent {
   const HomeRefreshRequested();
 }
 
+/// Kilo kaydı sonrası özet gelene kadar kartı anında güncelle.
+final class HomeWeightOptimistic extends HomeEvent {
+  const HomeWeightOptimistic(this.weightKg);
+
+  final double weightKg;
+
+  @override
+  List<Object?> get props => [weightKg];
+}
+
 final class HomePremiumTapped extends HomeEvent {
   const HomePremiumTapped();
 }

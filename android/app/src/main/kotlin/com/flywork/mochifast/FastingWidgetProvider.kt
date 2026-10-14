@@ -3,7 +3,6 @@ package com.flywork.mochifast
 import android.appwidget.AppWidgetManager
 import android.content.Context
 import android.content.SharedPreferences
-import android.widget.RemoteViews
 import es.antonborri.home_widget.HomeWidgetProvider
 
 class FastingWidgetProvider : HomeWidgetProvider() {
@@ -14,17 +13,17 @@ class FastingWidgetProvider : HomeWidgetProvider() {
         widgetData: SharedPreferences,
     ) {
         appWidgetIds.forEach { widgetId ->
-            val views = RemoteViews(context.packageName, R.layout.water_widget).apply {
-                setOnClickPendingIntent(
-                    R.id.water_widget_root,
-                    widgetLaunchIntent(context, "fastingapp://fasting?homeWidget", 14),
-                )
-                val imagePath = widgetData.getString("fasting_widget_image", null)
-                val bitmap = imagePath?.let { decodeWidgetBitmap(it, 700) }
-                if (bitmap != null) {
-                    setImageViewBitmap(R.id.water_widget_image, bitmap)
-                }
-            }
+            val views = FastingLive.views(
+                context,
+                appWidgetManager,
+                widgetId,
+                widgetData,
+                kind = "small",
+                imageKey = "fasting_widget_image",
+                maxWidth = 700,
+                requestCode = 14,
+                provider = FastingWidgetProvider::class.java,
+            )
             appWidgetManager.updateAppWidget(widgetId, views)
         }
     }

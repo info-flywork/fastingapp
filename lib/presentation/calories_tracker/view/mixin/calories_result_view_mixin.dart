@@ -6,6 +6,10 @@ mixin CaloriesResultViewMixin on State<CaloriesResultView> {
   bool saving = false;
   bool _upgradeOffered = false;
 
+  /// Süre dolduğunda sunucuda süren analiz; "Tekrar kontrol et" bunu
+  /// yoklar (yeni fotoğraf / yeni hak gerekmez).
+  String? pendingAnalysisId;
+
   MealsRepository get _meals => getIt<MealsRepository>();
 
   @override
@@ -17,22 +21,49 @@ mixin CaloriesResultViewMixin on State<CaloriesResultView> {
   }
 
   Future<void> _runAnalysis() async {
+    if (!await AiConsent.ensure(context)) {
+      if (mounted) context.pop();
+      return;
+    }
+    if (!mounted) return;
+    await _track(() => _meals.analyzePhoto(widget.photoPath));
+  }
+
+  /// Bekleyen analizi yeniden yokla.
+  Future<void> onCheckAgain() async {
+    final id = pendingAnalysisId;
+    if (id == null) return;
+    setState(() => errorMessage = null);
+    await _track(() => _meals.pollAnalysis(id, 1500));
+  }
+
+  Future<void> _track(Future<PhotoAnalysisResult> Function() run) async {
     try {
-      final result = await _meals.analyzePhoto(widget.photoPath);
+      final result = await run();
       if (!mounted) return;
       setState(() {
+        pendingAnalysisId = null;
         analysis = result;
-        errorMessage = result.succeeded
-            ? null
-            : 'calories_result.recalculate'.tr();
+        errorMessage = switch (result.status) {
+          'succeeded' => null,
+          'notFood' => 'calories_result.not_food'.tr(),
+          _ => 'calories_result.analysis_failed'.tr(),
+        };
+      });
+    } on PhotoAnalysisPending catch (e) {
+      if (!mounted) return;
+      setState(() {
+        pendingAnalysisId = e.analysisId;
+        errorMessage = 'calories_result.still_processing'.tr();
       });
     } on NetworkException catch (e) {
+      AiConsent.onError(e);
       if (!mounted) return;
       setState(() => errorMessage = e.message);
       await _offerUpgrade(e);
     } on Object {
       if (!mounted) return;
-      setState(() => errorMessage = 'calories_camera.capture_failed'.tr());
+      setState(() => errorMessage = 'calories_result.analysis_failed'.tr());
     }
   }
 
@@ -41,10 +72,14 @@ mixin CaloriesResultViewMixin on State<CaloriesResultView> {
   Future<void> _offerUpgrade(NetworkException e) async {
     if (_upgradeOffered || !RevenueCatService.needsUpgrade(e)) return;
     _upgradeOffered = true;
-    final premium = await getIt<RevenueCatService>().presentPaywall();
-    if (!premium || !mounted) return;
+    final revenueCat = getIt<RevenueCatService>();
+    if (!await revenueCat.presentPaywall() || !mounted) return;
     setState(() => errorMessage = null);
-    await _runAnalysis();
+    await _track(
+      () => revenueCat.retryAfterUpgrade(
+        () => _meals.analyzePhoto(widget.photoPath),
+      ),
+    );
   }
 
   Future<void> onSaveMeal() async {
@@ -52,7 +87,7 @@ mixin CaloriesResultViewMixin on State<CaloriesResultView> {
     if (a == null || !a.succeeded || saving) return;
     setState(() => saving = true);
     try {
-      await _meals.createMealFromAnalysis(
+      final result = await _meals.createMealFromAnalysis(
         analysisId: a.id,
         title: a.mealTitle,
         kcal: a.kcal,
@@ -60,9 +95,16 @@ mixin CaloriesResultViewMixin on State<CaloriesResultView> {
         carbsG: a.carbsG,
         fatG: a.fatG,
       );
-      if (!mounted) return;
       DataSync.afterWrite();
+      if (!mounted) return;
+      // Oruç sürerken öğün: "orucu bitir?" (elle öğün kaydıyla aynı).
+      var endFast = false;
+      if (result.suggestEndFast) {
+        endFast = await AppDialogs.instance.showEndFast(context) ?? false;
+        if (!mounted) return;
+      }
       context.pop(true);
+      if (endFast) await FastingFinishFlow.open();
     } on NetworkException catch (e) {
       if (!mounted) return;
       setState(() => errorMessage = e.message);

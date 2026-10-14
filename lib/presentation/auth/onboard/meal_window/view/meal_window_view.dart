@@ -83,9 +83,25 @@ class _MealWindowViewState extends State<MealWindowView>
             ),
             Padding(
               padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
-              child: AppButton(
-                label: 'onboarding.get_started'.tr(),
-                onPressed: onContinue,
+              child: BlocBuilder<MealWindowBloc, MealWindowState>(
+                builder: (context, state) => Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    if (!state.isValid) ...[
+                      Text(
+                        'onboarding.meal_window_same_error'.tr(),
+                        textAlign: TextAlign.center,
+                        style: AppTextStyles.footerHint,
+                      ),
+                      const SizedBox(height: 8),
+                    ],
+                    AppButton(
+                      label: 'onboarding.get_started'.tr(),
+                      isEnabled: state.isValid,
+                      onPressed: onContinue,
+                    ),
+                  ],
+                ),
               ),
             ),
           ],

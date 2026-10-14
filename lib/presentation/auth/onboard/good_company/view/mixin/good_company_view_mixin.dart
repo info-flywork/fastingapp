@@ -2,8 +2,7 @@ part of '../good_company_view.dart';
 
 mixin GoodCompanyViewMixin on State<GoodCompanyView> {
   /// Cevaplar BuildingPlan'da gönderildi; gönderilemediyse burada tekrar
-  /// denenir. Sonra giriş ekranı: Apple/Google misafir hesabı (verileriyle)
-  /// yükseltir, "misafir olarak devam" aynı hesapla sürer.
+  /// denenir. Misafir oturumu + onboarding tamam → ana uygulamaya girilir.
   Future<void> onContinue() async {
     final onboarding = getIt<OnboardingRepository>();
     try {
@@ -15,7 +14,7 @@ mixin GoodCompanyViewMixin on State<GoodCompanyView> {
       if (!mounted) return;
       AppSnackbar.show(
         context: context,
-        text: e is NetworkException ? e.message : e.toString(),
+        text: errorMessageOf(e),
         type: SnackBarType.failure,
       );
       return;
@@ -27,6 +26,6 @@ mixin GoodCompanyViewMixin on State<GoodCompanyView> {
     );
     unawaited(getIt<AuthRepository>().registerDevice());
     if (!mounted) return;
-    context.go(RoutePaths.login.path);
+    context.go(RoutePaths.home.path);
   }
 }

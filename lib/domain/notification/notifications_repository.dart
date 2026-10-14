@@ -1,24 +1,53 @@
+import 'dart:async';
+
 import 'package:fastingapp/core/base/model/base_model.dart';
 import 'package:fastingapp/core/network/network_manager.dart';
 import 'package:fastingapp/core/utils/enum/request_type.dart';
 import 'package:fastingapp/data/model/auth/no_content.dart';
+import 'package:flutter/foundation.dart';
 
 /// Bildirim kutusu (`/v1/notifications`, backend doküman 04 §16). Başlık ve
 /// gövde sunucuda kullanıcının dilinde hazırlanır.
 final class NotificationsRepository {
-  const NotificationsRepository(this._networkManager);
+  NotificationsRepository(this._networkManager);
 
   final NetworkManager _networkManager;
 
-  /// Yeniden eskiye ilk sayfa.
-  Future<List<InboxNotification>> list({int limit = 50}) async {
-    final page = await _networkManager.send<_InboxPage>(
+  /// Profil rozeti vb.; [refreshUnread] ile güncellenir.
+  final ValueNotifier<int> unread = ValueNotifier(0);
+
+  /// Son ilk sayfa (kutu yeniden açılınca boş flaş olmasın).
+  InboxPage? _firstPage;
+
+  /// Bellekteki ilk sayfa; yoksa null.
+  InboxPage? get cachedInbox => _firstPage;
+
+  void clearCache() {
+    _firstPage = null;
+    unread.value = 0;
+  }
+
+  /// Yeniden eskiye sayfa (`cursor` önceki [InboxPage.nextCursor]).
+  Future<InboxPage> list({String? cursor, int limit = 20}) async {
+    final page = await _networkManager.send<_InboxPagePayload>(
       path: '/notifications',
       method: RequestType.get,
-      queryParameters: {'limit': limit},
-      parserModel: _InboxPage.fromJson,
+      queryParameters: {
+        'limit': limit,
+        if (cursor != null && cursor.isNotEmpty) 'cursor': cursor,
+      },
+      parserModel: _InboxPagePayload.fromJson,
     );
-    return page?.items ?? const [];
+    // Null/başarısız parse eski önbelleği ezmesin (boş flaş olmasın).
+    if (page == null) {
+      if (cursor == null || cursor.isEmpty) {
+        return _firstPage ?? const InboxPage();
+      }
+      return const InboxPage();
+    }
+    final result = page.toPage();
+    if (cursor == null || cursor.isEmpty) _firstPage = result;
+    return result;
   }
 
   /// Okunmamış bildirim sayısı (profil rozeti).
@@ -31,25 +60,74 @@ final class NotificationsRepository {
     return result?.count ?? 0;
   }
 
-  Future<void> markRead(String id) => _networkManager.send<NoContent>(
-    path: '/notifications/$id/read',
-    method: RequestType.post,
-    data: const <String, dynamic>{},
-    parserModel: NoContent.fromJson,
-  );
+  /// Sunucudan okuyup [unread] notifier'ını günceller.
+  Future<int> refreshUnread() async {
+    try {
+      final count = await unreadCount();
+      unread.value = count;
+      return count;
+    } on Object {
+      return unread.value;
+    }
+  }
 
-  Future<void> markAllRead() => _networkManager.send<NoContent>(
-    path: '/notifications/read-all',
-    method: RequestType.post,
-    data: const <String, dynamic>{},
-    parserModel: NoContent.fromJson,
-  );
+  void clearUnread() {
+    unread.value = 0;
+    _firstPage = null;
+  }
 
-  Future<void> remove(String id) => _networkManager.send<NoContent>(
-    path: '/notifications/$id',
-    method: RequestType.delete,
-    parserModel: NoContent.fromJson,
-  );
+  Future<void> markRead(String id) async {
+    await _networkManager.send<NoContent>(
+      path: '/notifications/$id/read',
+      method: RequestType.post,
+      data: const <String, dynamic>{},
+      parserModel: NoContent.fromJson,
+    );
+    unawaited(refreshUnread());
+  }
+
+  Future<void> markAllRead() async {
+    await _networkManager.send<NoContent>(
+      path: '/notifications/read-all',
+      method: RequestType.post,
+      data: const <String, dynamic>{},
+      parserModel: NoContent.fromJson,
+    );
+    unread.value = 0;
+  }
+
+  Future<void> remove(String id) async {
+    await _networkManager.send<NoContent>(
+      path: '/notifications/$id',
+      method: RequestType.delete,
+      parserModel: NoContent.fromJson,
+    );
+    final cached = _firstPage;
+    if (cached != null) {
+      _firstPage = InboxPage(
+        items: [
+          for (final n in cached.items)
+            if (n.id != id) n,
+        ],
+        nextCursor: cached.nextCursor,
+        hasMore: cached.hasMore,
+      );
+    }
+    unawaited(refreshUnread());
+  }
+}
+
+/// Bir bildirim listesi sayfası.
+final class InboxPage {
+  const InboxPage({
+    this.items = const [],
+    this.nextCursor,
+    this.hasMore = false,
+  });
+
+  final List<InboxNotification> items;
+  final String? nextCursor;
+  final bool hasMore;
 }
 
 final class InboxNotification {
@@ -59,6 +137,8 @@ final class InboxNotification {
     required this.title,
     required this.body,
     required this.createdAt,
+    this.category = '',
+    this.deepLink,
     this.readAt,
   });
 
@@ -66,6 +146,8 @@ final class InboxNotification {
       InboxNotification(
         id: json['id'] as String,
         type: json['type'] as String? ?? '',
+        category: json['category'] as String? ?? '',
+        deepLink: json['deepLink'] as String?,
         title: json['title'] as String? ?? '',
         body: json['body'] as String? ?? '',
         createdAt:
@@ -76,6 +158,12 @@ final class InboxNotification {
 
   final String id;
   final String type;
+
+  /// `fasting` | `weight` | `water` | `streak` | `challenge` | `world` | …
+  final String category;
+
+  /// `fastingapp://water` gibi; dokununca ilgili ekran açılır.
+  final String? deepLink;
   final String title;
   final String body;
   final DateTime createdAt;
@@ -98,18 +186,35 @@ final class _UnreadCount implements BaseModel<_UnreadCount> {
   Map<String, dynamic> toJson() => {'count': count};
 }
 
-final class _InboxPage implements BaseModel<_InboxPage> {
-  const _InboxPage(this.items);
+final class _InboxPagePayload implements BaseModel<_InboxPagePayload> {
+  const _InboxPagePayload({
+    this.items = const [],
+    this.nextCursor,
+    this.hasMore = false,
+  });
 
-  factory _InboxPage.fromJson(Map<String, dynamic> json) => _InboxPage([
-    for (final item in json['items'] as List<dynamic>? ?? const [])
-      InboxNotification.fromJson(item as Map<String, dynamic>),
-  ]);
+  factory _InboxPagePayload.fromJson(Map<String, dynamic> json) {
+    final page = json['pageInfo'] as Map<String, dynamic>? ?? const {};
+    return _InboxPagePayload(
+      items: [
+        for (final item in json['items'] as List<dynamic>? ?? const [])
+          if (item is Map<String, dynamic>) InboxNotification.fromJson(item),
+      ],
+      nextCursor: page['nextCursor'] as String?,
+      hasMore: page['hasMore'] as bool? ?? false,
+    );
+  }
 
   final List<InboxNotification> items;
+  final String? nextCursor;
+  final bool hasMore;
+
+  InboxPage toPage() =>
+      InboxPage(items: items, nextCursor: nextCursor, hasMore: hasMore);
 
   @override
-  _InboxPage fromJson(Map<String, dynamic> json) => _InboxPage.fromJson(json);
+  _InboxPagePayload fromJson(Map<String, dynamic> json) =>
+      _InboxPagePayload.fromJson(json);
 
   @override
   Map<String, dynamic> toJson() => const {};

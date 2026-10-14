@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:easy_localization/easy_localization.dart';
+import 'package:fastingapp/core/utils/weight_progress.dart';
 import 'package:fastingapp/core/di/injection.dart';
 import 'package:fastingapp/core/dialogs/app_dialogs.dart';
 import 'package:fastingapp/core/snackbar/app_snackbar.dart';
@@ -20,6 +21,8 @@ import 'package:fastingapp/generated/app_images.g.dart';
 import 'package:fastingapp/generated/assets.gen.dart';
 import 'package:fastingapp/generated/colors.gen.dart';
 import 'package:fastingapp/presentation/fasting/view/fasting_first_time_view.dart';
+import 'package:fastingapp/presentation/home/bloc/home_bloc.dart';
+import 'package:fastingapp/presentation/home/bloc/home_state.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
@@ -32,12 +35,17 @@ final class FastingFinishArgs {
     required this.planTitle,
     required this.start,
     required this.end,
+    this.targetMinutes,
   });
 
   final String fastId;
   final String planTitle;
   final DateTime start;
   final DateTime end;
+
+  /// Orucun hedefi; bitiş planlanan bitişi 12 sa'ten fazla aşarsa onay
+  /// sorulur (sunucu `LONG_OVERRUN` kuralı).
+  final int? targetMinutes;
 }
 
 /// Oruç bitince açılan süre / kilo özeti — CaloriesTracker benzeri.
@@ -74,6 +82,15 @@ class _FastingFinishViewState extends State<FastingFinishView> {
   }
 
   Future<void> _loadWeight() async {
+    // Ana sayfa özeti zaten yüklüyse tekrar istenmez.
+    final home = getIt<HomeBloc>().state;
+    if (home is HomeLoaded && home.summary != null) {
+      final summary = home.summary!;
+      _currentKg = summary.weightCurrentKg;
+      _startKg = summary.weightStartKg;
+      _goalKg = summary.weightGoalKg;
+      return;
+    }
     try {
       final summary = await getIt<UserRepository>().getSummary();
       if (!mounted) return;
@@ -144,13 +161,11 @@ class _FastingFinishViewState extends State<FastingFinishView> {
     final startKg = _startKg;
     final currentKg = _currentKg;
     final goalKg = _goalKg;
-    final progress =
-        startKg != null &&
-            currentKg != null &&
-            goalKg != null &&
-            startKg > goalKg
-        ? ((startKg - currentKg) / (startKg - goalKg)).clamp(0.0, 1.0)
-        : 0.0;
+    final progress = weightProgressOf(
+      start: startKg,
+      goal: goalKg,
+      current: currentKg,
+    );
 
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: SystemUiOverlayStyle.dark,
@@ -264,6 +279,14 @@ class _FastingFinishViewState extends State<FastingFinishView> {
 
   Future<void> _onSave(BuildContext context) async {
     if (_saving) return;
+    final target = widget.args.targetMinutes;
+    if (target != null) {
+      final plannedEnd = _start.add(Duration(minutes: target));
+      if (_end.difference(plannedEnd) > const Duration(hours: 12)) {
+        final ok = await AppDialogs.instance.showLongOverrun(context);
+        if (ok != true || !context.mounted) return;
+      }
+    }
     setState(() => _saving = true);
     final feeling = switch (_feeling) {
       _FinishFeeling.tough => 'tough',
@@ -300,6 +323,11 @@ class _FastingFinishViewState extends State<FastingFinishView> {
       if (!context.mounted) return;
       if (done ?? false) context.pop(true);
       return;
+    }
+    // Seri / XP / seviye / ada / meydan okuma (önceden hiç gösterilmiyordu).
+    if (result.hasRewards) {
+      await AppDialogs.instance.showFastReward(context, result: result);
+      if (!context.mounted) return;
     }
     context.pop(true);
   }

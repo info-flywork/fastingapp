@@ -2,10 +2,17 @@ import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:easy_localization/easy_localization.dart';
+import 'package:fastingapp/generated/assets.gen.dart';
+import 'package:fastingapp/domain/trackers/trackers_repository.dart';
+import 'package:fastingapp/core/utils/weight_progress.dart';
+import 'package:fastingapp/presentation/fasting/fasting_finish_flow.dart';
+import 'package:fastingapp/core/dialogs/app_dialogs.dart';
 import 'package:fastingapp/core/di/injection.dart';
 import 'package:fastingapp/core/network/network_exception.dart';
 import 'package:fastingapp/core/router/route_paths.dart';
 import 'package:fastingapp/core/snackbar/app_snackbar.dart';
+import 'package:fastingapp/core/sync/data_sync.dart';
+import 'package:fastingapp/domain/nutrition/meals_repository.dart';
 import 'package:fastingapp/core/theme/app_text_styles.dart';
 import 'package:fastingapp/core/utils/enum/snackbar_type.dart';
 import 'package:fastingapp/core/widgets/app_button.dart';
@@ -86,8 +93,11 @@ class _CaloriesTrackerViewState extends State<CaloriesTrackerView>
                               child: _CaloriesHeader(
                                 topInset: top,
                                 eatenKcal: eatenKcal,
-                                overKcal: overKcal ?? 0,
+                                kcalGoal: kcalGoal,
                                 height: headerHeight,
+                                onEditGoal: kcalGoal == null
+                                    ? null
+                                    : () => unawaited(onEditKcalGoal()),
                               ),
                             ),
                             Column(
@@ -119,7 +129,8 @@ class _CaloriesTrackerViewState extends State<CaloriesTrackerView>
                                       AppButton(
                                         label: 'calories_page.protein_tracker'
                                             .tr(),
-                                        onPressed: onProteinTracker,
+                                        onPressed: () =>
+                                            unawaited(onProteinTracker()),
                                         decoration: AppButtonDecoration.dark(),
                                         showIcon: false,
                                       ),
@@ -139,6 +150,19 @@ class _CaloriesTrackerViewState extends State<CaloriesTrackerView>
                                         onDecrement: onManualDecrement,
                                         onIncrement: onManualIncrement,
                                       ),
+                                      if (manualKcal > 0) ...[
+                                        const SizedBox(height: 12),
+                                        AppButton(
+                                          label: 'calories_page.add_manual_cta'
+                                              .tr(args: ['$manualKcal']),
+                                          onPressed: savingManual
+                                              ? null
+                                              : () => unawaited(onManualAdd()),
+                                          decoration:
+                                              AppButtonDecoration.hungerResult(),
+                                          showIcon: false,
+                                        ),
+                                      ],
                                     ],
                                   ),
                                 ),
@@ -186,7 +210,7 @@ final class _CaloriesShimmerBody extends StatelessWidget {
             child: _CaloriesHeader(
               topInset: topInset,
               eatenKcal: 0,
-              overKcal: 0,
+              kcalGoal: null,
               height: headerHeight,
             ),
           ),
@@ -260,13 +284,17 @@ final class _CaloriesHeader extends StatelessWidget {
   const _CaloriesHeader({
     required this.topInset,
     required this.eatenKcal,
-    required this.overKcal,
+    required this.kcalGoal,
     required this.height,
+    this.onEditGoal,
   });
 
   final double topInset;
   final int eatenKcal;
-  final int overKcal;
+  final int? kcalGoal;
+
+  /// Hedefe dokununca düzenle (önceden değiştirilemiyordu).
+  final VoidCallback? onEditGoal;
   final double height;
 
   static const _mascotSize = 168.0;
@@ -276,7 +304,16 @@ final class _CaloriesHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final eatenFormatted = NumberFormat('#,###').format(eatenKcal);
+    final format = NumberFormat('#,###');
+    final eatenFormatted = format.format(eatenKcal);
+    final goal = kcalGoal;
+    // Hedef yoksa yenilen; hedef aşıldıysa fazlası; değilse kalan
+    // (önceden hedef yokken "0 kcal over", kalan hiç gösterilmiyordu).
+    final (int hero, String heroLabel) = goal == null
+        ? (eatenKcal, 'calories_page.kcal_eaten')
+        : eatenKcal > goal
+        ? (eatenKcal - goal, 'calories_page.kcal_over')
+        : (goal - eatenKcal, 'calories_page.kcal_left');
 
     return SizedBox(
       height: height,
@@ -310,24 +347,50 @@ final class _CaloriesHeader extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  'calories_page.eaten'.tr(args: [eatenFormatted]),
-                  style: AppTextStyles.caloriesEatenLabel,
-                ),
-                const SizedBox(height: 2),
+                if (goal != null) ...[
+                  Text(
+                    'calories_page.eaten'.tr(args: [eatenFormatted]),
+                    style: AppTextStyles.caloriesEatenLabel,
+                  ),
+                  const SizedBox(height: 2),
+                ],
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
-                    Text('$overKcal', style: AppTextStyles.caloriesHeroValue),
+                    Text(
+                      format.format(hero),
+                      style: AppTextStyles.caloriesHeroValue,
+                    ),
                     Padding(
                       padding: const EdgeInsets.only(left: 6, bottom: 14),
                       child: Text(
-                        'calories_page.kcal_over'.tr(),
+                        heroLabel.tr(),
                         style: AppTextStyles.caloriesOverLabel,
                       ),
                     ),
                   ],
                 ),
+                if (goal != null)
+                  GestureDetector(
+                    behavior: HitTestBehavior.opaque,
+                    onTap: onEditGoal,
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          'calories_page.goal_fmt'.tr(
+                            args: [format.format(goal)],
+                          ),
+                          style: AppTextStyles.caloriesEatenLabel,
+                        ),
+                        const SizedBox(width: 4),
+                        Assets.icons.solarPen2LineDuotone.svg(
+                          width: 16,
+                          height: 16,
+                        ),
+                      ],
+                    ),
+                  ),
               ],
             ),
           ),

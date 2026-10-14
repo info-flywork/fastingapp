@@ -26,7 +26,9 @@ final class OnboardingHighlightView extends StatelessWidget {
   final Widget subtitle;
   final Widget middle;
   final String buttonLabel;
-  final VoidCallback onContinue;
+
+  /// null → düğme pasif (ör. zorunlu onay verilmedi).
+  final VoidCallback? onContinue;
   final List<Color> gradientColors;
 
   @override

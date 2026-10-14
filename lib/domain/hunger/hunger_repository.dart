@@ -60,9 +60,7 @@ final class HungerRepository {
     final result = await _network.send<HungerCheckinSummary>(
       path: '/hunger-checkins/summary',
       method: RequestType.get,
-      queryParameters: {
-        if (date != null) 'date': _ymd(date),
-      },
+      queryParameters: {if (date != null) 'date': _ymd(date)},
       parserModel: HungerCheckinSummary.fromJson,
     );
     return result ?? const HungerCheckinSummary();
@@ -74,7 +72,9 @@ final class HungerRepository {
       '${d.day.toString().padLeft(2, '0')}';
 
   static Map<String, dynamic> _answersBody(HungerFlowArgs flow) {
-    final notices = flow.toBodyNotices();
+    // Yalnızca 3. sorudaki gerçek cevap: belirtiler `symptoms` ile ayrıca
+    // gider, onlardan türetmek puanı iki kez sayıyordu.
+    final notices = flow.bodyNotices;
     return {
       'symptoms': flow.symptoms.map((s) => s.name).toList(),
       if (flow.q1 != null) 'q1': flow.q1,
@@ -124,8 +124,7 @@ final class HungerEvaluation implements BaseModel<HungerEvaluation> {
   final String? activeFastId;
   final List<HungerRecommendation> recommendations;
 
-  HungerResultType get resultTypeEnum =>
-      resultType == 'emotional'
+  HungerResultType get resultTypeEnum => resultType == 'emotional'
       ? HungerResultType.emotional
       : HungerResultType.physical;
 
@@ -174,15 +173,28 @@ final class HungerCheckinSummary implements BaseModel<HungerCheckinSummary> {
     this.todayTotal = 0,
     this.todayPhysical = 0,
     this.todayEmotional = 0,
+    this.week = const [],
   });
 
   factory HungerCheckinSummary.fromJson(Map<String, dynamic> json) {
     final today = json['today'];
     final todayMap = today is Map<String, dynamic> ? today : null;
+    final week = json['week'];
     return HungerCheckinSummary(
       todayTotal: (todayMap?['total'] as num?)?.toInt() ?? 0,
       todayPhysical: (todayMap?['physical'] as num?)?.toInt() ?? 0,
       todayEmotional: (todayMap?['emotional'] as num?)?.toInt() ?? 0,
+      week: week is List
+          ? [
+              for (final d in week.whereType<Map<String, dynamic>>())
+                HungerWeekDay(
+                  date: d['date'] as String? ?? '',
+                  physical: (d['physical'] as num?)?.toInt() ?? 0,
+                  emotional: (d['emotional'] as num?)?.toInt() ?? 0,
+                  fastedMinutes: (d['fastedMinutes'] as num?)?.toInt() ?? 0,
+                ),
+            ]
+          : const [],
     );
   }
 
@@ -190,12 +202,29 @@ final class HungerCheckinSummary implements BaseModel<HungerCheckinSummary> {
   final int todayPhysical;
   final int todayEmotional;
 
+  /// Son 7 gün (`yyyy-MM-dd`, açlık kayıtları + oruç süresi).
+  final List<HungerWeekDay> week;
+
   @override
   HungerCheckinSummary fromJson(Map<String, dynamic> json) =>
       HungerCheckinSummary.fromJson(json);
 
   @override
   Map<String, dynamic> toJson() => const {};
+}
+
+final class HungerWeekDay {
+  const HungerWeekDay({
+    required this.date,
+    this.physical = 0,
+    this.emotional = 0,
+    this.fastedMinutes = 0,
+  });
+
+  final String date;
+  final int physical;
+  final int emotional;
+  final int fastedMinutes;
 }
 
 final class _HungerCheckinPage implements BaseModel<_HungerCheckinPage> {

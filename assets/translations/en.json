@@ -4,7 +4,10 @@
     "failed": "Failed",
     "retry": "Retry",
     "cancel": "Cancel",
-    "confirm": "Confirm"
+    "confirm": "Confirm",
+    "save": "Save",
+    "error_generic": "Something went wrong. Please try again.",
+    "no_connection": "No internet connection. Please check your connection and try again."
   },
   "auth": {
     "welcome_title": "Welcome",
@@ -211,7 +214,11 @@
     "good_company_rating_label": "app rating",
     "good_company_reviewer": "Defne K.",
     "good_company_quote": "First time fasting didn't feel like punishment. Coach Mochi talked me through the 11am cravings and I actually laughed.",
-    "good_company_cta": "See my goal ->"
+    "good_company_cta": "See my goal ->",
+    "plans_age_note": "Under 18, only age-appropriate plans are shown.",
+    "goal_bmi_low": "Goal weight is too low for your height. Please choose a healthier goal.",
+    "meal_window_same_error": "Start and end time can't be the same.",
+    "health_consent": "I agree that MochiFast processes my health data (weight, fasting, meals) to personalise my plan."
   },
   "home": {
     "nav_home": "Home",
@@ -262,7 +269,15 @@
     "hunger_tracker": "Hunger Tracker",
     "hunger_question": "Are you actually hungry?",
     "hunger_subtitle": "“Emotional hunger” can mislead you. Learn the difference, then log how you feel.",
-    "log_hunger": "Log my hunger level"
+    "log_hunger": "Log my hunger level",
+    "challenge_progress": "{}/{} done",
+    "fasting_goal_reached": "Goal reached",
+    "eating_window": "Eating window",
+    "metric_goal": " /{}",
+    "weight_unit_lb": "lb",
+    "challenge_leave_title": "Leave challenge?",
+    "challenge_leave_body": "Your progress in this challenge will be lost.",
+    "challenge_leave": "Leave"
   },
   "mochi_world": {
     "title": "Mochi World",
@@ -356,8 +371,22 @@
     "widget_lets_do_this": "Let's do this!",
     "widget_this_week": "This Week",
     "widget_keep_going": "Keep going!\nYou're on a roll.",
-    "start_now_cta": "Start fasting now",
-    "plan_changed_next": "Plan updated. The new plan applies from your next fast."
+    "plan_changed_next": "Plan updated. The new plan applies from your next fast.",
+    "overtime": "Goal +{}",
+    "next_fast_at": "Your next fast starts at {} on your plan",
+    "start_next_cta": "Start next fast",
+    "long_overrun_title": "Did you end at this time?",
+    "long_overrun_body": "The end time is more than 12 hours after the planned end. Save if you really ended your fast then; otherwise fix the end time.",
+    "long_overrun_confirm": "Yes, save",
+    "long_overrun_cancel": "Fix the time",
+    "free_day_title": "Free day today",
+    "free_day_body": "Your plan has no fast today. You can still start one if you like.",
+    "reduced_day_title": "{} kcal day today",
+    "reduced_day_body": "Keep today to about {} kcal. Mark it at the end of the day.",
+    "reduced_day_done": "Marked as done ✓",
+    "reduced_day_skipped": "Marked as skipped",
+    "reduced_day_done_cta": "I did it",
+    "reduced_day_skip_cta": "I skipped"
   },
   "fasting_struggle": {
     "back": "Back to timer",
@@ -540,7 +569,9 @@
     "emotional_rec_3": "Do a quick breathing exercise",
     "emotional_rec_4": "Talk to Mochi if you want support",
     "primary": "Log this hunger",
-    "secondary": "Talk to Mochi"
+    "secondary": "Talk to Mochi",
+    "safety_note": "Your symptoms need attention. If you feel unwell, end your fast, and talk to a health professional if it doesn't pass.",
+    "end_fast_cta": "End my fast"
   },
   "hunger_log_page": {
     "title_line1": "Save to your",
@@ -605,7 +636,13 @@
     "feeling_good": "Good",
     "feeling_super": "Super!",
     "notes_title": "Notes for yourself",
-    "notes_hint": "Write your note..."
+    "notes_hint": "Write your note...",
+    "delete": "Delete meal",
+    "delete_title": "Delete this meal?",
+    "delete_body": "This meal record will be removed. You can’t undo this.",
+    "delete_confirm": "Delete",
+    "delete_cancel": "Keep",
+    "delete_failed": "Couldn’t delete the meal. Try again."
   },
   "water_page": {
     "today": "Today",
@@ -628,7 +665,8 @@
     "edit_goal_hint": "ml",
     "save": "Save",
     "goal_range_error": "Daily goal must be between {}–{} ml.",
-    "glass_range_error": "Glass size must be between {}–{} ml."
+    "glass_range_error": "Glass size must be between {}–{} ml.",
+    "high_intake_warning": "That's a lot of water today. Drinking more than 6 liters a day can be harmful, so take it easy."
   },
   "steps_page": {
     "today": "Today",
@@ -650,7 +688,8 @@
     "day_thu": "Thu",
     "day_fri": "Fri",
     "day_sat": "Sat",
-    "day_sun": "Sun"
+    "day_sun": "Sun",
+    "goal_title": "Daily step goal"
   },
   "body_history": {
     "title": "Body History",
@@ -667,7 +706,10 @@
     "week": "Week",
     "month": "Month",
     "unit": "kg",
-    "progress_percent": "{}%"
+    "progress_percent": "{}%",
+    "entries_title": "Entries",
+    "delete_title": "Delete this weight entry?",
+    "delete_body": "It will be removed from your chart."
   },
   "water_reminder": {
     "title": "Water Reminder",
@@ -684,7 +726,13 @@
     "unit_dialog_subtitle": "Choose your preferred unit",
     "custom_size_dialog_subtitle": "Add a custom glass size",
     "unit_ml": "ml",
-    "unit_oz": "oz"
+    "unit_oz": "oz",
+    "glass_range_error": "Glass size must be between {} and {} ml",
+    "custom_size_limit": "You can add up to {} custom glasses",
+    "interval": "Reminder interval",
+    "every_minutes": "Every {} min",
+    "every_hours": "Every {} h",
+    "every_hours_minutes": "Every {} h {} min"
   },
   "profile": {
     "premium_badge": "Premium",
@@ -749,7 +797,14 @@
     "restore_success": "Your Premium is active again.",
     "restore_none": "No purchases found to restore.",
     "restore_failed": "Couldn't restore purchases. Please try again.",
-    "guest_name": "Guest"
+    "guest_name": "Guest",
+    "weight_range_error": "Weight must be between {} and {} kg",
+    "sync_health_connect": "Sync with Health Connect",
+    "health_sync_denied": "Health access was denied. You can enable it in Settings.",
+    "share_app_text": "I'm tracking my fasting with MochiFast. Join me!",
+    "legal_support": "Legal & support",
+    "contact_support": "Contact support",
+    "support_email_copied": "Email address copied"
   },
   "notifications": {
     "title": "Notifications",
@@ -761,7 +816,11 @@
     "meal_ended_body": "Prepare yourself, the fasting time is starting soon!",
     "empty_title": "You don't have any notifications, yet",
     "empty_subtitle": "We will let you know when you have some.",
-    "back": "Back"
+    "back": "Back",
+    "yesterday_date": "Yesterday, {date}",
+    "just_now": "JUST NOW",
+    "minutes_ago": "{minutes}M AGO",
+    "load_failed": "We couldn't load your notifications."
   },
   "languages": {
     "title": "Languages",
@@ -814,7 +873,13 @@
     "delete": "Delete",
     "empty_title": "No chats yet",
     "empty_subtitle": "Start a conversation with Coach Mochi and your chats will show up here.",
-    "start_chat": "Start a chat"
+    "start_chat": "Start a chat",
+    "safety_urgent": "If you feel you're in danger, please call your local emergency number right away or reach out to someone you trust. You're not alone.",
+    "quota_left": {
+      "zero": "No messages left today",
+      "one": "1 message left today",
+      "other": "{} messages left today"
+    }
   },
   "plans": {
     "title": "Fasting Plans",
@@ -858,10 +923,45 @@
     "active_fast_body": "Switching plans will affect your current fast. What would you like to do?",
     "active_fast_cancel_existing": "End fast",
     "active_fast_reject": "Keep fasting",
-    "active_fast_restart_same": "Continue with same time"
+    "active_fast_restart_same": "Continue with same time",
+    "safety_ack_title": "Extended fasting plan",
+    "safety_ack_body": "This plan includes long fasting periods. If you are pregnant, breastfeeding, have diabetes or a history of eating disorders, or take medication, talk to your doctor before starting. End your fast if you feel unwell.",
+    "safety_ack_confirm": "I understand, continue",
+    "safety_ack_cancel": "Cancel",
+    "weekly_title": "Weekly Plans",
+    "weekly_emphasis": "Pick your days,",
+    "weekly_rest": " rest the others.",
+    "chip_weekly": "Weekly",
+    "subtitle_5_2": "2 days 500 kcal",
+    "subtitle_6_1": "1 day 500 kcal",
+    "subtitle_alternate_day": "500 kcal every other day",
+    "subtitle_crescendo": "fast 2–3 days a week",
+    "subtitle_custom_weekly": "design your own week",
+    "title_alternate_day": "Alternate Day",
+    "title_crescendo": "Crescendo",
+    "title_custom_weekly": "Custom Week",
+    "weekly_desc_5_2": "Eat normally 5 days a week. On 2 non-consecutive days, keep it to about 500 kcal.",
+    "weekly_desc_6_1": "Eat normally 6 days a week. On 1 day, keep it to about 500 kcal.",
+    "weekly_desc_alternate_day": "Alternate between a 500 kcal day and a normal day through the week.",
+    "weekly_desc_crescendo": "A gentle start: fast 12–16 hours on 2–3 non-consecutive days, eat normally on the rest.",
+    "weekly_desc_custom_weekly": "Choose what each day looks like: a fast, a 500 kcal day or a free day.",
+    "weekly_hint_weeklyReduced": "Tap a day to make it a 500 kcal day.",
+    "weekly_hint_alternateDay": "Tap a day to switch between 500 kcal and free.",
+    "weekly_hint_selectedDays": "Tap a day to make it a fasting day.",
+    "weekly_hint_customWeekly": "Tap a day to switch: free → fast → 500 kcal.",
+    "weekly_day_fast": "Fast {}h",
+    "weekly_day_reduced": "{} kcal day",
+    "weekly_day_normal": "Free day",
+    "weekly_fast_hours": "Fasting length: {}h",
+    "weekly_error_days": "This plan does not allow that kind of day.",
+    "weekly_error_reduced_count": "Pick exactly the required number of 500 kcal days.",
+    "weekly_error_consecutive": "Special days can not be back to back.",
+    "weekly_error_alternate": "Pick 3–4 days that are not back to back.",
+    "weekly_error_fast_count": "Pick 2 or 3 fasting days.",
+    "weekly_error_hours": "Fasting length is out of range for this plan."
   },
   "calories_page": {
-    "eaten": "Eated {}",
+    "eaten": "Eaten {}",
     "kcal_over": "kcal over",
     "calorie_tracking": "Calorie Tracking",
     "carbs": "Carbs",
@@ -874,7 +974,12 @@
     "goal": "Goal:",
     "add_daily_manual": "Add Daily Manual",
     "manual_value": "{} kcal",
-    "calculate": "Calculate Calories"
+    "calculate": "Calculate Calories",
+    "add_manual_cta": "Add {} kcal",
+    "kcal_left": "kcal left",
+    "kcal_eaten": "kcal eaten",
+    "goal_fmt": "Goal {} kcal",
+    "goal_title": "Daily calorie goal"
   },
   "calories_camera": {
     "no_camera": "No camera found on this device.",
@@ -890,7 +995,13 @@
     "protein_value": "27g",
     "carbs_value": "64g",
     "fats_value": "22g",
-    "recalculate": "Calculate calories again"
+    "recalculate": "Calculate calories again",
+    "analyzing": "Analyzing…",
+    "no_result_title": "No result",
+    "not_food": "This doesn't look like a food photo. Try a new photo that clearly shows your plate.",
+    "analysis_failed": "The analysis failed. Try again with a new photo.",
+    "still_processing": "The analysis is still running. Check again in a moment; it won't use another credit.",
+    "check_again": "Check again"
   },
   "sleep_page": {
     "title": "Sleep",
@@ -911,7 +1022,13 @@
     "day_thu": "Thu",
     "day_fri": "Fri",
     "day_sat": "Sat",
-    "day_sun": "Sun"
+    "day_sun": "Sun",
+    "log_title": "Log sleep",
+    "entry_title": "Last night's sleep",
+    "entry_body": "Edit the bedtime and wake-up time or delete this entry.",
+    "entry_delete": "Delete",
+    "entry_edit": "Edit",
+    "goal_title": "Sleep goal"
   },
   "protein_page": {
     "title": "Protein Tracker",
@@ -941,7 +1058,8 @@
     "kind_lunch": "Lunch",
     "kind_dinner": "Dinner",
     "kind_snack": "Snack",
-    "kind_other": "Meal"
+    "kind_other": "Meal",
+    "goal_title": "Daily protein goal"
   },
   "insights_page": {
     "brand_mochi": "Mochi",
@@ -1035,5 +1153,74 @@
     "subtitle": "Mochi is looking for a connection. Check your Wi‑Fi or mobile data and try again.",
     "retry": "Try again",
     "checking": "Checking…"
+  },
+  "ai_consent": {
+    "title": "Sharing with Mochi",
+    "body": "For chat and meal photo analysis, your messages and photos are sent to AI. This is not medical advice; you can delete your account anytime.",
+    "confirm": "Accept",
+    "cancel": "Not now"
+  },
+  "fasting_history_page": {
+    "title": "Fasting History",
+    "list_title": "Past fasts",
+    "stats_title": "All-time",
+    "stat_fasts": "Fasts",
+    "stat_completed": "Completed",
+    "stat_rate": "Success",
+    "stat_total": "Total time",
+    "stat_longest": "Longest",
+    "stat_avg": "Average",
+    "status_completed": "Completed",
+    "status_ended_early": "Ended early",
+    "status_cancelled": "Cancelled",
+    "status_active": "Active",
+    "empty_title": "No fasts yet",
+    "empty_subtitle": "Finish your first fast and it will show up here.",
+    "error": "Couldn't load history",
+    "retry": "Try again",
+    "entry_edit_title": "Edit fast",
+    "entry_add_title": "Add a past fast",
+    "entry_start": "Start",
+    "entry_end": "End",
+    "entry_delete": "Delete fast",
+    "delete_title": "Delete this fast?",
+    "delete_body": "It will be removed from your history and stats.",
+    "entry_invalid": "End must be at least 1 hour after start.",
+    "entry_too_long": "A fast can be at most 72 hours."
+  },
+  "legal_update": {
+    "title": "We've updated our terms",
+    "body": "Our Terms of Service and Privacy Policy have changed. Please accept the updated versions to keep using MochiFast.",
+    "accept": "Accept",
+    "later": "Later"
+  },
+  "fasting_finish": {
+    "reward_title": "Nice work!",
+    "reward_streak": "{}-day streak",
+    "reward_xp": "+{} XP",
+    "reward_level": "You reached level {}!",
+    "reward_world": "Your Mochi island grew",
+    "reward_challenge": "Challenge completed",
+    "reward_continue": "Continue"
+  },
+  "app_update": {
+    "title": "Update available",
+    "body": "A new version of MochiFast is ready with improvements and fixes.",
+    "required_title": "Update required",
+    "required_body": "This version is no longer supported. Please update MochiFast to continue.",
+    "update": "Update",
+    "later": "Later"
+  },
+  "notification_settings": {
+    "title": "Notification settings",
+    "fasting": "Fasting",
+    "streak": "Streak",
+    "weight": "Weight",
+    "water": "Water",
+    "challenges": "Challenges",
+    "world": "Mochi World",
+    "quiet_hours": "Quiet hours",
+    "quiet_start": "Starts",
+    "quiet_end": "Ends"
   }
 }

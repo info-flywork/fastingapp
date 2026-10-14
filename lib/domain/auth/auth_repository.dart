@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:io';
-import 'dart:ui';
 
 import 'package:fastingapp/core/managers/auth_cache_manager.dart';
 import 'package:fastingapp/core/managers/device_manager.dart';
@@ -17,6 +16,7 @@ import 'package:fastingapp/data/model/auth/no_content.dart';
 import 'package:fastingapp/data/model/user/user.dart';
 import 'package:fastingapp/domain/auth/auth_exception.dart';
 import 'package:fastingapp/domain/auth/social_auth_service.dart';
+import 'package:fastingapp/domain/chat/ai_consent.dart';
 import 'package:fastingapp/domain/notification/push_service.dart';
 import 'package:fastingapp/domain/revenue_cat/revenue_cat_service.dart';
 import 'package:flutter_timezone/flutter_timezone.dart';
@@ -79,6 +79,13 @@ final class AuthRepository {
       await _deviceManager.resetInstall();
       return loginAsGuest(restoreAccount: restoreAccount, retried: true);
     }
+  }
+
+  /// Silinmek üzere olan misafir hesabı geri alınmak istenmezse: bu cihaz
+  /// için yeni kurulum kimliğiyle yepyeni misafir (onboarding sonunda).
+  Future<AuthResponse> loginAsNewGuest() async {
+    await _deviceManager.resetInstall();
+    return loginAsGuest();
   }
 
   /// Hesap silme talebi (7 gün sonra kalıcı). Apple ile girildiyse önce Apple
@@ -165,28 +172,43 @@ final class AuthRepository {
     return result;
   }
 
-  /// Çıkış: sunucuda bu cihazın oturumu kapanır (push token silinir), sonra
-  /// yerel temizlik. Sunucuya ulaşılamasa da yerel çıkış yapılır.
+  /// Çıkış: önce yerel temizlik, sonra sunucuda bu oturum kapanır (push
+  /// token silinir) — istek eski token'la açıkça gider. Önceden sunucu
+  /// yanıtı beklenirken hızlıca yeniden girilirse yeni oturumun token'ı
+  /// siliniyordu. Sunucuya ulaşılamasa da yerel çıkış yapılmış olur.
   Future<void> logout() async {
-    try {
-      await _networkManager.send<NoContent>(
-        path: '/auth/logout',
-        method: RequestType.post,
-        data: const <String, dynamic>{},
-        parserModel: NoContent.fromJson,
-      );
-    } on Exception {
-      // Oturum zaten geçersiz olabilir; yerel çıkış yine yapılır.
-    }
+    final token = await _authCacheManager.getAccessToken();
     await endLocalSession();
+    if (token == null || token.isEmpty) return;
+    unawaited(
+      _networkManager
+          .send<NoContent>(
+            path: '/auth/logout',
+            method: RequestType.post,
+            data: const <String, dynamic>{},
+            headers: {'Authorization': 'Bearer $token'},
+            parserModel: NoContent.fromJson,
+          )
+          // Oturum zaten geçersiz olabilir.
+          .catchError((Object _) => null),
+    );
   }
+
+  /// Silinmek üzere olan hesabı geri almayı reddetti: yalnızca yarım kalan
+  /// sosyal giriş (Firebase / Google) kapatılır. Önceden tam çıkış yapılıyor,
+  /// cihazdaki mevcut (ör. misafir) oturumun token'ı siliniyordu.
+  Future<void> discardSocialSignIn() =>
+      _socialAuthService.signOut().catchError((Object _) {});
 
   /// Yalnızca yerel oturum (token, kullanıcı, Firebase/Google, RevenueCat)
   /// temizlenir.
   Future<void> endLocalSession() async {
+    // Önce token: diğer adımlar (ağ) sürerken yapılan yeni giriş silinmesin.
+    await _authCacheManager.clearAll();
     await _revenueCat.logOut();
     await _socialAuthService.signOut().catchError((_) {});
-    await _authCacheManager.clearAll();
+    await SharedPrefManager.instance.clearHomeSummary();
+    AiConsent.clear();
   }
 
   /// Saklı token varsa önbellekteki kullanıcı (yoksa boş kullanıcı); token
@@ -239,9 +261,10 @@ final class AuthRepository {
 
   static String get _platform => Platform.isIOS ? 'ios' : 'android';
 
-  /// Desteklenmeyen dil gönderilmez (backend reddeder; varsayılanı kullanır).
+  /// Uygulamada seçili dil (cihaz dili değil: kullanıcı uygulama içinden
+  /// değiştirmiş olabilir). Desteklenmeyen dil gönderilmez.
   static String? get _locale {
-    final locale = PlatformDispatcher.instance.locale;
+    final locale = LocalizationManager.current;
     return LocalizationManager.isSupported(locale) ? locale.languageCode : null;
   }
 }

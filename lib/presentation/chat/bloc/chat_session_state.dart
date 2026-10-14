@@ -7,20 +7,25 @@ final class ChatMessage extends Equatable {
     required this.id,
     required this.text,
     required this.sender,
+    this.urgent = false,
   });
 
   final String id;
   final String text;
   final ChatSender sender;
 
+  /// Sunucu `safety: urgent` (kriz işareti): yanıtın altında yardım uyarısı.
+  final bool urgent;
+
   ChatMessage copyWith({String? text}) => ChatMessage(
     id: id,
     text: text ?? this.text,
     sender: sender,
+    urgent: urgent,
   );
 
   @override
-  List<Object?> get props => [id, text, sender];
+  List<Object?> get props => [id, text, sender, urgent];
 }
 
 final class ChatHistoryItem extends Equatable {

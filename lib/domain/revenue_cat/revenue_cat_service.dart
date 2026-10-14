@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:fastingapp/core/managers/auth_cache_manager.dart';
 import 'package:fastingapp/core/network/network_exception.dart';
 import 'package:fastingapp/core/network/network_manager.dart';
+import 'package:fastingapp/core/sync/data_sync.dart';
 import 'package:fastingapp/core/utils/constants/revenue_cat_constants.dart';
 import 'package:fastingapp/core/utils/enum/request_type.dart';
 import 'package:fastingapp/data/model/subscription/subscription_status.dart';
@@ -77,6 +78,7 @@ final class RevenueCatService {
   Future<void> logOut() async {
     isPremium.value = false;
     _lastSync = null;
+    _serverPremium = null;
     if (!_configured) return;
     try {
       if (!await Purchases.isAnonymous) await Purchases.logOut();
@@ -85,10 +87,16 @@ final class RevenueCatService {
     }
   }
 
+  /// Sunucunun en son bildirdiği premium (yerel satın almadan bağımsız);
+  /// bilinmiyorsa null.
+  bool? _serverPremium;
+
   /// `POST /subscription/sync`: sunucu RevenueCat'ten okur, premium'u
   /// günceller (bekleyen premium planı da etkinleştirir). Oturum yoksa
   /// çağrılmaz. Sonuç premium mu.
-  Future<bool> sync({bool force = false}) async {
+  /// [keepPremium]: satın almanın hemen ardından sunucu henüz RevenueCat'i
+  /// görmemiş olabilir; "premium değil" yanıtı yerel premium'u düşürmez.
+  Future<bool> sync({bool force = false, bool keepPremium = false}) async {
     final last = _lastSync;
     if (!force &&
         last != null &&
@@ -105,7 +113,19 @@ final class RevenueCatService {
         data: const <String, dynamic>{},
         parserModel: SubscriptionStatus.fromJson,
       );
-      if (result != null) isPremium.value = result.isPremium;
+      if (result != null && (result.isPremium || !keepPremium)) {
+        isPremium.value = result.isPremium;
+      }
+      if (result != null) {
+        // Sunucu premium'a geçince bekleyen premium planı etkinleştirir:
+        // plan / profil / ana sayfa her yerde tazelenmeli (önceden yalnızca
+        // ana sayfadaki "Premium" hapından alınca yenileniyordu).
+        if (result.isPremium && _serverPremium == false) {
+          DataSync.afterWrite(profile: true);
+        }
+        _serverPremium = result.isPremium;
+        return result.isPremium;
+      }
     } on Object catch (e) {
       // Sunucuya ulaşılamadı / billing kapalı (503): anlık UI mağazadan.
       debugPrint('Abonelik senkronu: $e');
@@ -135,14 +155,39 @@ final class RevenueCatService {
       );
       if (result == PaywallResult.purchased ||
           result == PaywallResult.restored) {
-        // Sunucu senkronu başarısız olsa da satın alma geçerli.
+        // Sunucu senkronu başarısız / gecikmeli olsa da satın alma geçerli.
         isPremium.value = true;
-        await sync(force: true);
+        final confirmed = await sync(force: true, keepPremium: true);
+        if (!confirmed) unawaited(_confirmPurchaseLater());
       }
     } on Object catch (e) {
       debugPrint('RevenueCat paywall: $e');
     }
     return isPremium.value;
+  }
+
+  /// Satın alma sunucuya birkaç saniye geç yansıyabilir (RevenueCat):
+  /// premium'u düşürmeden birkaç kez yeniden senkronlanır.
+  Future<void> _confirmPurchaseLater() async {
+    _confirmingPurchase = true;
+    try {
+      for (final wait in const [3, 10, 30]) {
+        await Future<void>.delayed(Duration(seconds: wait));
+        if (await sync(force: true, keepPremium: true)) return;
+      }
+    } finally {
+      _confirmingPurchase = false;
+    }
+  }
+
+  bool _confirmingPurchase = false;
+
+  /// Sunucu yanıtındaki premium (ör. `/user/summary`); satın alma henüz
+  /// sunucuya yansımadıysa yerel premium düşürülmez.
+  void applyServerPremium(bool premium) {
+    _serverPremium = premium;
+    if (!premium && _confirmingPurchase) return;
+    isPremium.value = premium;
   }
 
   /// "Satın alımları geri yükle". Mağaza hatası fırlatılır (UI mesaj
@@ -153,6 +198,24 @@ final class RevenueCatService {
     final info = await Purchases.restorePurchases();
     if (_hasEntitlement(info)) isPremium.value = true;
     return sync(force: true);
+  }
+
+  /// Satın alma sonrası tekrar: mağaza premium dediği hâlde sunucu henüz
+  /// bilmiyorsa (`PREMIUM_REQUIRED` / kota) birkaç saniye senkronlayıp yeniden
+  /// dener. Önceden satın almadan hemen sonraki ilk tekrar 402 alabiliyordu.
+  Future<T> retryAfterUpgrade<T>(Future<T> Function() call) async {
+    for (final wait in const [0, 2, 4]) {
+      if (wait > 0) {
+        await Future<void>.delayed(Duration(seconds: wait));
+        await sync(force: true, keepPremium: true);
+      }
+      try {
+        return await call();
+      } on NetworkException catch (e) {
+        if (!needsUpgrade(e) || !isPremium.value || wait == 4) rethrow;
+      }
+    }
+    return call();
   }
 
   /// Backend `402 PREMIUM_REQUIRED` ya da yükseltilebilir

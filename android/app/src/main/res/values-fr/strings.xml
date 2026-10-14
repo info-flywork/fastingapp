@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="water_widget_name">Eau</string>
+    <string name="water_widget_description">Objectif d\'eau quotidien</string>
+    <string name="water_widget_medium_name">Suivi de l\'eau</string>
+    <string name="water_widget_medium_description">Eau du jour et chronologie</string>
+    <string name="water_widget_large_name">Résumé de l\'eau</string>
+    <string name="water_widget_large_description">Résumé hebdomadaire de l\'eau</string>
+    <string name="fasting_widget_name">Jeûne</string>
+    <string name="fasting_widget_description">Temps de jeûne restant</string>
+    <string name="fasting_widget_medium_name">Carte de jeûne</string>
+    <string name="fasting_widget_medium_description">Plan et temps restant</string>
+    <string name="fasting_widget_detail_name">Résumé du jeûne</string>
+    <string name="fasting_widget_detail_description">Début, fin et objectif</string>
+    <string name="fasting_widget_plan_name">Plan du jour</string>
+    <string name="fasting_widget_plan_description">Ton plan et démarrer le jeûne</string>
+    <string name="fasting_widget_omh_name">Aujourd\'hui</string>
+    <string name="fasting_widget_omh_description">Plan et motivation</string>
+    <string name="fasting_widget_week_name">Cette semaine</string>
+    <string name="fasting_widget_week_description">Résumé hebdomadaire du jeûne</string>
+    <string name="notification_channel_default">Notifications</string>
+    <string name="notification_channel_quiet">Notifications silencieuses</string>
+</resources>

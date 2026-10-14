@@ -19,27 +19,40 @@ final class HomeFastingCard extends StatefulWidget {
 
 class _HomeFastingCardState extends State<HomeFastingCard> {
   Timer? _timer;
-  late DateTime _anchor = DateTime.now();
 
-  Duration get _remaining {
-    final at = _anchor;
+  /// Kalan süre [FastingSessionCubit]'teki ölçümden: özetin alındığı an
+  /// (`fetchedAt`) ve sunucu saat farkı orada saklı. Kart kaydırılıp yeniden
+  /// kurulsa da geri sayım kaymaz (önceden kurulma anı esas alınıyordu).
+  FastingLiveMetrics? get _metrics {
+    final session = getIt<FastingSessionCubit>().state;
+    final sameFast = session.fast?.id == widget.activeFast?.id;
+    final sameWindow =
+        session.eatingWindow?.endsAt == widget.eatingWindow?.endsAt;
+    final live = sameFast && sameWindow ? session.liveMetrics : null;
+    if (live != null) return live;
+    // Cubit henüz bu veriyi görmediyse: özet zamanı ≈ şimdi.
+    final at = DateTime.now();
     final offset = clockOffsetFromServer(widget.serverTime, at);
     if (widget.activeFast != null) {
       return FastingLiveMetrics.active(
         fast: widget.activeFast!,
         fetchedAt: at,
         clockOffset: offset,
-      ).remainingToPlannedEnd;
+      );
     }
     if (widget.eatingWindow != null) {
       return FastingLiveMetrics.eating(
         window: widget.eatingWindow!,
         fetchedAt: at,
         clockOffset: offset,
-      ).remainingToPlannedEnd;
+      );
     }
-    return Duration.zero;
+    return null;
   }
+
+  /// Yeme penceresi sıfıra inince bir kez özet yenilenir (pencere kapanır,
+  /// kart güncel durumu gösterir).
+  bool _refreshedAtZero = false;
 
   @override
   void initState() {
@@ -51,25 +64,38 @@ class _HomeFastingCardState extends State<HomeFastingCard> {
   }
 
   @override
-  void didUpdateWidget(covariant HomeFastingCard oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (oldWidget.activeFast?.id != widget.activeFast?.id ||
-        oldWidget.eatingWindow?.endsAt != widget.eatingWindow?.endsAt ||
-        oldWidget.serverTime != widget.serverTime) {
-      _anchor = DateTime.now();
-      setState(() {});
-    }
-  }
-
-  @override
   void dispose() {
     _timer?.cancel();
     super.dispose();
   }
 
   @override
+  void didUpdateWidget(covariant HomeFastingCard oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.eatingWindow?.endsAt != widget.eatingWindow?.endsAt ||
+        oldWidget.activeFast?.id != widget.activeFast?.id) {
+      _refreshedAtZero = false;
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final rem = _remaining;
+    final metrics = _metrics;
+    final fasting = widget.activeFast != null;
+    final eating = !fasting && widget.eatingWindow != null;
+    final remaining = metrics?.remainingToPlannedEnd ?? Duration.zero;
+    // Oruç hedefi geçti: geri sayım yerine toplam oruç süresi ileri sayar.
+    final goalReached = fasting && remaining == Duration.zero;
+    final rem = goalReached ? metrics?.elapsed ?? Duration.zero : remaining;
+    if (eating && remaining == Duration.zero && !_refreshedAtZero) {
+      _refreshedAtZero = true;
+      getIt<HomeBloc>().add(const HomeRefreshRequested());
+    }
+    final title = goalReached
+        ? 'home.fasting_goal_reached'
+        : eating
+        ? 'home.eating_window'
+        : 'home.fasting';
     final hours = rem.inHours;
     final minutes = rem.inMinutes.remainder(60);
     final seconds = rem.inSeconds.remainder(60);
@@ -101,7 +127,7 @@ class _HomeFastingCardState extends State<HomeFastingCard> {
                 ),
               ),
               const SizedBox(width: 6),
-              Text('home.fasting'.tr(), style: AppTextStyles.homeCardTitle),
+              Text(title.tr(), style: AppTextStyles.homeCardTitle),
               const Spacer(),
               Container(
                 height: 28,

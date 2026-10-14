@@ -4,13 +4,18 @@ import 'dart:io';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:fastingapp/core/di/injection.dart';
 import 'package:fastingapp/core/dialogs/app_dialogs.dart';
+import 'package:fastingapp/core/managers/url_launcher_manager.dart';
+import 'package:fastingapp/domain/app/app_links_repository.dart';
 import 'package:fastingapp/core/router/route_paths.dart';
 import 'package:fastingapp/core/snackbar/app_snackbar.dart';
 import 'package:fastingapp/core/theme/app_text_styles.dart';
+import 'package:fastingapp/core/utils/constants/store_links.dart';
 import 'package:fastingapp/core/utils/enum/snackbar_type.dart';
 import 'package:fastingapp/core/widgets/bottom_navigation_bar/app_bottom_nav.dart';
 import 'package:fastingapp/domain/notification/notifications_repository.dart';
+import 'package:fastingapp/domain/profile/profile_repository.dart';
 import 'package:fastingapp/domain/revenue_cat/revenue_cat_service.dart';
+import 'package:fastingapp/domain/trackers/health_sync_service.dart';
 import 'package:fastingapp/generated/app_images.g.dart';
 import 'package:fastingapp/generated/assets.gen.dart';
 import 'package:fastingapp/generated/colors.gen.dart';
@@ -27,6 +32,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:in_app_review/in_app_review.dart';
+import 'package:share_plus/share_plus.dart';
 
 part 'mixin/profile_view_mixin.dart';
 part 'widgets/profile_header.dart';
@@ -58,6 +65,7 @@ class _ProfileViewState extends State<ProfileView> with ProfileViewMixin {
 
   @override
   Widget build(BuildContext context) {
+    final links = this.links;
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: SystemUiOverlayStyle.dark,
       child: Scaffold(
@@ -111,6 +119,14 @@ class _ProfileViewState extends State<ProfileView> with ProfileViewMixin {
                         onChanged: onPushNotificationsChanged,
                       ),
                     ),
+                    if (pushNotifications)
+                      ProfileMenuRow(
+                        icon: Assets.icons.solarBellBingLineDuotone,
+                        title: 'notification_settings.title'.tr(),
+                        onTap: () => context.pushNamed(
+                          RoutePaths.notificationSettings.name,
+                        ),
+                      ),
                   ],
                 ),
               ),
@@ -149,7 +165,8 @@ class _ProfileViewState extends State<ProfileView> with ProfileViewMixin {
                       subtitle: 'profile.health_sync_subtitle'.tr(),
                       trailing: _profileSwitch(
                         value: healthSync,
-                        onChanged: onHealthSyncChanged,
+                        onChanged: (value) =>
+                            unawaited(onHealthSyncChanged(value)),
                       ),
                     ),
                   ],
@@ -191,16 +208,50 @@ class _ProfileViewState extends State<ProfileView> with ProfileViewMixin {
                     ProfileMenuRow(
                       icon: Assets.icons.solarHandStarsLineDuotone,
                       title: 'profile.rate_app'.tr(),
-                      onTap: onRateApp,
+                      onTap: () => unawaited(onRateApp()),
                     ),
                     ProfileMenuRow(
                       icon: Assets.icons.solarShareLineDuotone,
                       title: 'profile.share_app'.tr(),
-                      onTap: onShareApp,
+                      onTap: () => unawaited(onShareApp(context)),
                     ),
                   ],
                 ),
               ),
+              // Yasal metinler ve destek (`/app/config`); adres yoksa satır
+              // gizli. Önceden uygulama içinden hiçbiri açılamıyordu.
+              if (links != null &&
+                  (links.termsUrl != null ||
+                      links.privacyUrl != null ||
+                      links.supportEmail != null)) ...[
+                const SizedBox(height: 24),
+                ProfileSection(
+                  title: 'profile.legal_support'.tr(),
+                  child: ProfileMenuCard(
+                    children: [
+                      if (links.supportEmail case final email?)
+                        ProfileMenuRow(
+                          icon: Assets.icons.solarChatDotsLineDuotone,
+                          title: 'profile.contact_support'.tr(),
+                          subtitle: email,
+                          onTap: () => unawaited(onContactSupport(email)),
+                        ),
+                      if (links.termsUrl case final url?)
+                        ProfileMenuRow(
+                          icon: Assets.icons.solarSquareShareLineLineDuotone,
+                          title: 'auth.terms_of_service'.tr(),
+                          onTap: () => unawaited(onOpenLink(url)),
+                        ),
+                      if (links.privacyUrl case final url?)
+                        ProfileMenuRow(
+                          icon: Assets.icons.solarSquareShareLineLineDuotone,
+                          title: 'auth.privacy_policy'.tr(),
+                          onTap: () => unawaited(onOpenLink(url)),
+                        ),
+                    ],
+                  ),
+                ),
+              ],
               const SizedBox(height: 16),
               ProfileLogoutCard(onTap: onLogOut),
               const SizedBox(height: AppBottomNav.barClearance),

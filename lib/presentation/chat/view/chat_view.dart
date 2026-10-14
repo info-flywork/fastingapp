@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:easy_localization/easy_localization.dart';
@@ -6,6 +7,8 @@ import 'package:fastingapp/core/router/route_paths.dart';
 import 'package:fastingapp/core/snackbar/app_snackbar.dart';
 import 'package:fastingapp/core/theme/app_text_styles.dart';
 import 'package:fastingapp/core/utils/enum/snackbar_type.dart';
+import 'package:fastingapp/domain/chat/ai_consent.dart';
+import 'package:fastingapp/domain/chat/chat_repository.dart';
 import 'package:fastingapp/generated/app_images.g.dart';
 import 'package:fastingapp/generated/assets.gen.dart';
 import 'package:fastingapp/generated/colors.gen.dart';
@@ -30,21 +33,54 @@ class _ChatViewState extends State<ChatView> {
   final _focusNode = FocusNode();
   final _scrollController = ScrollController();
   late final ChatSessionCubit _cubit = getIt<ChatSessionCubit>();
+
   /// Kullanıcı yukarı kaydırdıysa otomatik kaydırmayı durdur.
   var _stickToBottom = true;
 
-  static const _suggestions = <String>[
+  /// Sunucu önerileri gelene kadar (veya gelmezse) yerel metinler.
+  static const _fallbackSuggestions = <String>[
     'chat.suggestion_hungry',
     'chat.suggestion_coffee',
     'chat.suggestion_weight',
     'chat.suggestion_eat',
   ];
 
+  List<String>? _serverSuggestions;
+
+  List<String> get _suggestions =>
+      _serverSuggestions ?? [for (final k in _fallbackSuggestions) k.tr()];
+
   @override
   void initState() {
     super.initState();
     // Geçmiş listesini arka planda taze tut.
     _cubit.loadHistory();
+    unawaited(_loadSuggestions());
+    unawaited(_loadQuota());
+  }
+
+  /// Ücretsiz kullanıcıya bugün kalan mesaj (önceden sınır ancak 402'de
+  /// öğreniliyordu).
+  int? _remaining;
+
+  Future<void> _loadQuota() async {
+    try {
+      final remaining = await getIt<ChatRepository>().remainingMessages();
+      if (mounted) setState(() => _remaining = remaining);
+    } on Object {
+      // Gösterge ikincil.
+    }
+  }
+
+  Future<void> _loadSuggestions() async {
+    try {
+      final items = await getIt<ChatRepository>().suggestions();
+      if (mounted && items.isNotEmpty) {
+        setState(() => _serverSuggestions = items.take(4).toList());
+      }
+    } on Object {
+      // Yerel öneriler kalır.
+    }
   }
 
   @override
@@ -95,14 +131,21 @@ class _ChatViewState extends State<ChatView> {
 
   Future<void> _sendText(String raw) async {
     final text = raw.trim();
-    if (text.isEmpty || _cubit.state.isAiTyping) return;
+    if (text.isEmpty || _cubit.isBusy) return;
+    if (!await AiConsent.ensure(context)) return;
+    if (!mounted) return;
     _stickToBottom = true;
     _controller.clear();
     _focusNode.unfocus();
-    await _cubit.sendMessage(text);
+    final delivered = await _cubit.sendMessage(text);
+    unawaited(_loadQuota());
+    // Ulaşmadıysa yazılan metin kaybolmasın.
+    if (!delivered && mounted && _controller.text.isEmpty) {
+      _controller.text = text;
+    }
   }
 
-  void _onSuggestionTap(String key) => _sendText(key.tr());
+  void _onSuggestionTap(String text) => _sendText(text);
 
   void _onSend() => _sendText(_controller.text);
 
@@ -121,8 +164,8 @@ class _ChatViewState extends State<ChatView> {
           child: AppImages.mascotChat.image(height: 220, fit: BoxFit.contain),
         ),
         const SizedBox(height: 24),
-        for (final key in _suggestions) ...[
-          _SuggestionChip(label: key.tr(), onTap: () => _onSuggestionTap(key)),
+        for (final text in _suggestions) ...[
+          _SuggestionChip(label: text, onTap: () => _onSuggestionTap(text)),
           const SizedBox(height: 10),
         ],
       ],
@@ -153,19 +196,19 @@ class _ChatViewState extends State<ChatView> {
         padding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
         itemCount: messages.length + (isTyping ? 1 : 0),
         itemBuilder: (context, index) {
-        if (isTyping && index == messages.length) {
-          return const _AppearOnce(
-            key: ValueKey('typing'),
-            child: _TypingRow(),
+          if (isTyping && index == messages.length) {
+            return const _AppearOnce(
+              key: ValueKey('typing'),
+              child: _TypingRow(),
+            );
+          }
+          final message = messages[index];
+          return _AppearOnce(
+            key: ValueKey(message.id),
+            onLayoutChanged: _stickToBottom ? _scrollToBottom : null,
+            child: _MessageBubble(message: message),
           );
-        }
-        final message = messages[index];
-        return _AppearOnce(
-          key: ValueKey(message.id),
-          onLayoutChanged: _stickToBottom ? _scrollToBottom : null,
-          child: _MessageBubble(message: message),
-        );
-      },
+        },
       ),
     );
   }
@@ -219,6 +262,17 @@ class _ChatViewState extends State<ChatView> {
                 },
               ),
             ),
+            if (_remaining case final remaining?)
+              Padding(
+                padding: const EdgeInsets.only(top: 6),
+                child: Text(
+                  'chat.quota_left'.plural(remaining),
+                  textAlign: TextAlign.center,
+                  style: AppTextStyles.chatHistoryEmptySubtitle.copyWith(
+                    color: ColorName.colorWhite.withValues(alpha: 0.7),
+                  ),
+                ),
+              ),
             _ChatInputBar(
               controller: _controller,
               focusNode: _focusNode,
@@ -233,11 +287,7 @@ class _ChatViewState extends State<ChatView> {
 
 /// Key sabit kaldığı sürece animasyon bir kez çalışır.
 final class _AppearOnce extends StatefulWidget {
-  const _AppearOnce({
-    required this.child,
-    this.onLayoutChanged,
-    super.key,
-  });
+  const _AppearOnce({required this.child, this.onLayoutChanged, super.key});
 
   final Widget child;
   final VoidCallback? onLayoutChanged;
@@ -340,8 +390,42 @@ final class _MessageBubble extends StatelessWidget {
             ),
             const SizedBox(width: 10),
           ],
-          Flexible(child: bubble),
+          Flexible(
+            child: message.urgent
+                ? Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      bubble,
+                      const SizedBox(height: 8),
+                      const _UrgentHelpCard(),
+                    ],
+                  )
+                : bubble,
+          ),
         ],
+      ),
+    );
+  }
+}
+
+/// Kriz işaretli mesajlarda (sunucu `safety: urgent`) yardım yönlendirmesi.
+final class _UrgentHelpCard extends StatelessWidget {
+  const _UrgentHelpCard();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: Colors.red.shade50,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Colors.red.shade200),
+      ),
+      child: Text(
+        'chat.safety_urgent'.tr(),
+        style: AppTextStyles.chatBubbleMessage.copyWith(
+          color: Colors.red.shade900,
+        ),
       ),
     );
   }

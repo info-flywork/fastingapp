@@ -50,21 +50,27 @@ mixin CaloriesCameraViewMixin on State<CaloriesCameraView> {
 
   Future<void> onCapture() async {
     final controller = cameraController;
-    if (controller == null ||
-        !controller.value.isInitialized ||
-        isCapturing) {
+    if (controller == null || !controller.value.isInitialized || isCapturing) {
       return;
     }
+
+    if (!await AiConsent.ensure(context)) return;
+    if (!mounted) return;
 
     setState(() => isCapturing = true);
     try {
       await HapticFeedback.mediumImpact();
       final shot = await controller.takePicture();
       if (!mounted) return;
-      await context.pushNamed(
+      final saved = await context.pushNamed<bool>(
         RoutePaths.caloriesResult.name,
         extra: shot.path,
       );
+      // Öğün kaydedildiyse kameraya değil takip ekranına dönülür.
+      if ((saved ?? false) && mounted) {
+        context.pop(true);
+        return;
+      }
     } on CameraException catch (e) {
       if (!mounted) return;
       setState(() {

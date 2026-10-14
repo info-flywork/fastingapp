@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:easy_localization/easy_localization.dart';
 import 'package:fastingapp/core/di/injection.dart';
 import 'package:fastingapp/core/snackbar/app_snackbar.dart';
@@ -188,12 +190,13 @@ final class _LatestChatsHeader extends StatelessWidget {
               ],
             ),
           ),
+          // Bu ekran zaten geçmiş: düğme yeni sohbet açar (önceden boştu).
           _IconButton(
-            onTap: () {},
-            child: Assets.icons.solarHistory2LineDuotone1.svg(
-              width: 24,
-              height: 24,
-            ),
+            onTap: () {
+              unawaited(getIt<ChatSessionCubit>().startNewChat());
+              context.pop();
+            },
+            child: Assets.icons.solarPen2LineDuotone.svg(width: 24, height: 24),
           ),
         ],
       ),

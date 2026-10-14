@@ -25,11 +25,16 @@ final class MealDatePickerDialog extends StatefulWidget {
     required this.initialDate,
     this.includeTime = false,
     this.accentColor,
+    this.maxDaysBack,
     super.key,
   });
 
   final DateTime initialDate;
   final bool includeTime;
+
+  /// Verilirse en fazla bu kadar gün geriye gidilir (öğün: sunucu 30 gün);
+  /// yoksa 2 yıl.
+  final int? maxDaysBack;
   final Color? accentColor;
 
   @override
@@ -52,11 +57,19 @@ class _MealDatePickerDialogState extends State<MealDatePickerDialog> {
   }
 
   DateTime get _today => DateUtils.dateOnly(DateTime.now());
-  DateTime get _firstDate => DateTime(_today.year - _firstDateYearsBack);
+  DateTime get _firstDate {
+    final days = widget.maxDaysBack;
+    if (days != null) return _today.subtract(Duration(days: days));
+    return DateTime(_today.year - _firstDateYearsBack);
+  }
+
   DateTime get _lastDate => _today;
 
   void _onConfirm() {
-    Navigator.of(context).pop(MealDatePickerResult(date: _selected));
+    // Saatli seçimde gelecek saat olmaz (bugün seçilip ileri saat).
+    final now = DateTime.now();
+    final date = widget.includeTime && _selected.isAfter(now) ? now : _selected;
+    Navigator.of(context).pop(MealDatePickerResult(date: date));
   }
 
   void _shiftMonth(int delta) {
@@ -120,11 +133,9 @@ class _MealDatePickerDialogState extends State<MealDatePickerDialog> {
     });
   }
 
-  Color get _accent =>
-      widget.accentColor ?? ColorName.colorCtaGradientBottom;
+  Color get _accent => widget.accentColor ?? ColorName.colorCtaGradientBottom;
 
-  Color get _accentTop =>
-      widget.accentColor ?? ColorName.colorCtaGradientTop;
+  Color get _accentTop => widget.accentColor ?? ColorName.colorCtaGradientTop;
 
   @override
   Widget build(BuildContext context) {
@@ -204,18 +215,23 @@ class _MealDatePickerDialogState extends State<MealDatePickerDialog> {
                                   locale,
                                 ).format(_displayedMonth),
                                 yearPickerOpen: _yearPicker,
-                                canGoPrev: DateTime(
-                                  _displayedMonth.year,
-                                  _displayedMonth.month,
-                                ).isAfter(
-                                  DateTime(_firstDate.year, _firstDate.month),
-                                ),
-                                canGoNext: DateTime(
-                                  _displayedMonth.year,
-                                  _displayedMonth.month,
-                                ).isBefore(
-                                  DateTime(_lastDate.year, _lastDate.month),
-                                ),
+                                canGoPrev:
+                                    DateTime(
+                                      _displayedMonth.year,
+                                      _displayedMonth.month,
+                                    ).isAfter(
+                                      DateTime(
+                                        _firstDate.year,
+                                        _firstDate.month,
+                                      ),
+                                    ),
+                                canGoNext:
+                                    DateTime(
+                                      _displayedMonth.year,
+                                      _displayedMonth.month,
+                                    ).isBefore(
+                                      DateTime(_lastDate.year, _lastDate.month),
+                                    ),
                                 onTitleTap: () =>
                                     setState(() => _yearPicker = !_yearPicker),
                                 onPrev: () => _shiftMonth(-1),

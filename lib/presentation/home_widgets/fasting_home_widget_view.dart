@@ -12,6 +12,7 @@ final class FastingHomeWidgetView extends StatelessWidget {
     required this.leftLabel,
     required this.statusLabel,
     required this.progress,
+    this.live = false,
     super.key,
   });
 
@@ -20,7 +21,29 @@ final class FastingHomeWidgetView extends StatelessWidget {
   final String statusLabel;
   final double progress;
 
+  /// Canlı geri sayım: süre metni ve ilerleme yayı görselde boş bırakılır,
+  /// widget'ın yerel kodu ([liveSpec] konumunda) çizer.
+  final bool live;
+
   static const logicalSize = Size(310, 310);
+
+  /// Yerel katman için konumlar (mantıksal piksel; görsel 310×310).
+  /// Halka: üst boşluk 56, altta durum satırı (28) ve 18 boşluk → 208'lik
+  /// alanın ortası; süre metni halkanın içindeki sütunun ilk satırı.
+  static Map<String, Object> liveSpec() => {
+    'w': 310,
+    'h': 310,
+    'tx': 155,
+    'ty': 149,
+    'ta': 'c',
+    'ts': 48,
+    'tc': _hex(ColorName.colorTitle),
+    'rx': 155,
+    'ry': 160,
+    'rr': 89,
+    'rs': 22,
+    'rc': _hex(ColorName.colorCtaGradientBottom),
+  };
 
   @override
   Widget build(BuildContext context) {
@@ -45,11 +68,20 @@ final class FastingHomeWidgetView extends StatelessWidget {
                           width: 200,
                           height: 200,
                           child: CustomPaint(
-                            painter: _FastingRingPainter(progress: progress),
+                            painter: _FastingRingPainter(
+                              progress: live ? 0 : progress,
+                            ),
                             child: Column(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                Text(timeLabel, style: _time),
+                                Text(
+                                  timeLabel,
+                                  style: live
+                                      ? _time.copyWith(
+                                          color: Colors.transparent,
+                                        )
+                                      : _time,
+                                ),
                                 Text(leftLabel, style: _left),
                               ],
                             ),
@@ -164,3 +196,6 @@ const _status = TextStyle(
   letterSpacing: -0.5,
   color: ColorName.colorTitle,
 );
+
+String _hex(Color c) =>
+    '#${(c.toARGB32() & 0xFFFFFF).toRadixString(16).padLeft(6, '0')}';

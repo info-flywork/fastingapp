@@ -1,9 +1,11 @@
 import 'dart:async';
 import 'dart:math' as math;
-import 'dart:ui';
 
 import 'package:easy_localization/easy_localization.dart';
+import 'package:fastingapp/core/di/injection.dart';
 import 'package:fastingapp/core/remote_images/app_image.dart';
+import 'package:fastingapp/core/snackbar/app_snackbar.dart';
+import 'package:fastingapp/domain/gamification/world_repository.dart';
 import 'package:fastingapp/core/router/route_paths.dart';
 import 'package:fastingapp/core/theme/app_text_styles.dart';
 import 'package:fastingapp/generated/app_images.g.dart';
@@ -48,57 +50,110 @@ class _MochiWorldViewState extends State<MochiWorldView>
   bool _opened = false;
   Timer? _openTimer;
 
-  bool _precached = false;
+  bool _didInitialPrecache = false;
+  final Set<String> _precachedAssets = {};
 
-  /// Kullanıcının dünya ilerleyişi (0..1). TODO: gerçek veriden beslenecek.
-  static const double _worldProgress = 0.12;
+  /// Sunucu verisi (`/v1/world`); yüklenene kadar önceki yanıt ya da boş ada.
+  WorldData? _data = getIt<WorldRepository>().cached;
 
-  /// Adanın sağlığı. TODO: aksatılan günlerden (seri kırılması) beslenecek.
-  static const MochiHealth _health = MochiHealth.thriving;
+  Future<void> _loadWorld() async {
+    try {
+      final data = await getIt<WorldRepository>().get();
+      if (!mounted) return;
+      setState(() => _data = data);
+      _precacheVisibleWorld();
+    } on Object catch (e) {
+      if (mounted && _data == null) AppSnackbar.showError(context, e);
+    }
+  }
 
-  static final _zones = <_Zone>[
-    const _Zone(
-      id: _ZoneId.forest,
-      icon: AppImages.forest,
-      titleKey: 'mochi_world.forest',
-      progressKey: 'mochi_world.forest_progress',
-      current: 3,
-      goal: 10,
+  void _precacheAsset(String asset) {
+    if (!_precachedAssets.add(asset)) return;
+    unawaited(precacheImage(appImageProvider(asset), context));
+  }
+
+  /// Yalnızca ekranda görünen (veya hemen belirecek) ada görselleri.
+  void _precacheVisibleWorld() {
+    final levels = _dataLevels;
+    final health = _health;
+    final peak = levels.values.fold(0, math.max);
+    _precacheAsset(mochiBaseAsset(peak, health));
+    for (final p in mochiCompose(levels, health)) {
+      _precacheAsset(p.kind.asset);
+    }
+  }
+
+  /// Sürükleyici modda dolaşan demo sahneleri — sayfa açılışında değil.
+  void _precacheDemoWorld() {
+    for (final s in kMochiDemoStates) {
+      _precacheAsset(mochiBaseAsset(s.level, s.health));
+      final levels = {for (final z in MochiZone.values) z: s.level};
+      for (final p in mochiCompose(levels, s.health)) {
+        _precacheAsset(p.kind.asset);
+      }
+    }
+  }
+
+  /// Kullanıcının dünya ilerleyişi (0..1).
+  double get _worldProgress => _data?.worldProgress ?? 0;
+
+  /// Adanın sağlığı (aksatılan günlerden, sunucu).
+  MochiHealth get _health => switch (_data?.health) {
+    'wilting' => MochiHealth.wilting,
+    'drought' => MochiHealth.drought,
+    _ => MochiHealth.thriving,
+  };
+
+  static const _zoneMeta = <(_ZoneId, AppImageAsset, String, String)>[
+    (
+      _ZoneId.forest,
+      AppImages.forest,
+      'mochi_world.forest',
+      'mochi_world.forest_progress',
     ),
-    const _Zone(
-      id: _ZoneId.lake,
-      icon: AppImages.lake,
-      titleKey: 'mochi_world.lake',
-      progressKey: 'mochi_world.lake_progress',
-      current: 2,
-      goal: 7,
+    (
+      _ZoneId.lake,
+      AppImages.lake,
+      'mochi_world.lake',
+      'mochi_world.lake_progress',
     ),
-    const _Zone(
-      id: _ZoneId.summit,
-      icon: AppImages.summit,
-      titleKey: 'mochi_world.summit',
-      progressKey: 'mochi_world.summit_progress',
-      current: 0,
-      goal: 2,
+    (
+      _ZoneId.summit,
+      AppImages.summit,
+      'mochi_world.summit',
+      'mochi_world.summit_progress',
     ),
-    const _Zone(
-      id: _ZoneId.garden,
-      icon: AppImages.garden,
-      titleKey: 'mochi_world.garden',
-      progressKey: 'mochi_world.garden_progress',
-      current: 3,
-      goal: 10,
+    (
+      _ZoneId.garden,
+      AppImages.garden,
+      'mochi_world.garden',
+      'mochi_world.garden_progress',
     ),
+  ];
+
+  List<_Zone> get _zones => [
+    for (final (id, icon, titleKey, progressKey) in _zoneMeta)
+      () {
+        final z = _data?.zones[id.name];
+        return _Zone(
+          id: id,
+          icon: icon,
+          titleKey: titleKey,
+          progressKey: progressKey,
+          current: z?.current ?? 0,
+          goal: z?.goal ?? 0,
+          level: z?.level ?? 0,
+        );
+      }(),
   ];
 
   _ZoneId _selected = _ZoneId.forest;
 
   _Zone get _active => _zones.firstWhere((z) => z.id == _selected);
 
-  /// Her bölgenin ilerlemesine göre büyüme seviyesi.
+  /// Her bölgenin büyüme seviyesi (sunucu eşikleri).
   Map<MochiZone, int> get _dataLevels => {
-    for (final z in _zones)
-      MochiZone.values.byName(z.id.name): mochiZoneLevel(z.ratio),
+    for (final z in _zones) MochiZone.values.byName(z.id.name): z.level,
   };
 
   /// Ekrandaki dünya: gösterideyse sıradaki referans durum, değilse
@@ -131,6 +186,7 @@ class _MochiWorldViewState extends State<MochiWorldView>
   @override
   void initState() {
     super.initState();
+    unawaited(_loadWorld());
     _ticker = createTicker((elapsed) {
       _clock.value = elapsed.inMicroseconds / Duration.microsecondsPerSecond;
     })..start();
@@ -139,18 +195,20 @@ class _MochiWorldViewState extends State<MochiWorldView>
     });
   }
 
+  /// Sekme görünür mü: kabuk (indexedStack) gizli sekmede TickerMode'u
+  /// kapatır. Sekme her açılışta yenilenir; önceden yalnızca ilk açılışta
+  /// yükleniyordu, oruç/öğün sonrası ada güncellenmiyordu.
+  bool _visible = true;
+
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    if (_precached) return;
-    _precached = true;
-    // Belirme ve dönüşüm anında görsel çözülürken boş kare kalmasın.
-    for (final kind in MochiElementKind.values) {
-      precacheImage(appImageProvider(kind.asset), context);
-    }
-    for (final (:level, :health) in kMochiDemoStates) {
-      precacheImage(appImageProvider(mochiBaseAsset(level, health)), context);
-    }
+    final visible = TickerMode.of(context);
+    if (visible && !_visible) unawaited(_loadWorld());
+    _visible = visible;
+    if (_didInitialPrecache) return;
+    _didInitialPrecache = true;
+    _precacheVisibleWorld();
   }
 
   @override
@@ -167,6 +225,7 @@ class _MochiWorldViewState extends State<MochiWorldView>
     if (_immersive) return;
     HapticFeedback.lightImpact();
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
+    _precacheDemoWorld();
     // Kurak, boş adadan başla; referans sahneleri sırayla dolaş.
     setState(() {
       _immersive = true;
@@ -239,6 +298,8 @@ class _MochiWorldViewState extends State<MochiWorldView>
                       selected: _selected,
                       active: _active,
                       worldProgress: _worldProgress,
+                      level: _data?.level ?? 1,
+                      week: _data?.week ?? const [],
                       onSelect: (id) => setState(() => _selected = id),
                       onExplore: _enterImmersive,
                     ),
@@ -359,8 +420,12 @@ final class _Chrome extends StatelessWidget {
     required this.worldProgress,
     required this.onSelect,
     required this.onExplore,
+    required this.level,
+    required this.week,
   });
 
+  final int level;
+  final List<({String date, int fastedMinutes})> week;
   final double top;
   final double bottom;
   final List<_Zone> zones;
@@ -379,11 +444,11 @@ final class _Chrome extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          const _Header(),
+          _Header(level: level),
           const SizedBox(height: 6),
-          const Padding(
-            padding: EdgeInsets.symmetric(horizontal: 16),
-            child: _WeekCard(),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: _WeekCard(week: week),
           ),
           const SizedBox(height: 6),
           Padding(
@@ -498,20 +563,30 @@ final class _Zone {
     required this.progressKey,
     required this.current,
     required this.goal,
+    required this.level,
   });
 
   final _ZoneId id;
   final AppImageAsset icon;
   final String titleKey;
   final String progressKey;
-  final int current;
-  final int goal;
+  final double current;
+  final double goal;
+  final int level;
 
   double get ratio => goal <= 0 ? 0 : (current / goal).clamp(0.0, 1.0);
+
+  static String _fmt(double v) =>
+      v == v.roundToDouble() ? '${v.toInt()}' : v.toStringAsFixed(1);
+
+  String get currentText => _fmt(current);
+  String get goalText => _fmt(goal);
 }
 
 final class _Header extends StatelessWidget {
-  const _Header();
+  const _Header({required this.level});
+
+  final int level;
 
   @override
   Widget build(BuildContext context) {
@@ -543,7 +618,10 @@ final class _Header extends StatelessWidget {
             ),
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-              child: Text('mochi_world.level'.tr(args: ['1']), style: _level),
+              child: Text(
+                'mochi_world.level'.tr(args: ['$level']),
+                style: _level,
+              ),
             ),
           ),
         ],
@@ -586,24 +664,22 @@ final class _GlassCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(radius),
-      child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
-        child: DecoratedBox(
-          decoration: BoxDecoration(
-            color: ColorName.colorBodyPageBg.withValues(alpha: 0.5),
-            borderRadius: BorderRadius.circular(radius),
-          ),
-          child: Padding(padding: padding, child: child),
-        ),
+    // BackdropFilter animasyonlu sahnenin üzerinde her karede pahalı;
+    // yarı saydam dolgu yeterli okunurluk sağlar.
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: ColorName.colorBodyPageBg.withValues(alpha: 0.72),
+        borderRadius: BorderRadius.circular(radius),
       ),
+      child: Padding(padding: padding, child: child),
     );
   }
 }
 
 final class _WeekCard extends StatelessWidget {
-  const _WeekCard();
+  const _WeekCard({required this.week});
+
+  final List<({String date, int fastedMinutes})> week;
 
   static const _dayKeys = [
     'home.week_mon',
@@ -614,6 +690,19 @@ final class _WeekCard extends StatelessWidget {
     'home.week_sat',
     'home.week_sun',
   ];
+
+  /// Sunucudaki oruç süresi (saat); yoksa / 1 saatten azsa null.
+  int? _hoursFor(DateTime date) {
+    final key =
+        '${date.year.toString().padLeft(4, '0')}-'
+        '${date.month.toString().padLeft(2, '0')}-'
+        '${date.day.toString().padLeft(2, '0')}';
+    for (final d in week) {
+      if (d.date == key)
+        return d.fastedMinutes >= 60 ? d.fastedMinutes ~/ 60 : null;
+    }
+    return null;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -634,7 +723,7 @@ final class _WeekCard extends StatelessWidget {
                 dayKey: _dayKeys[i],
                 date: monday.add(Duration(days: i)),
                 selected: i == selectedIndex,
-                hours: i == selectedIndex ? 10 : null,
+                hours: _hoursFor(monday.add(Duration(days: i))),
               ),
             ),
           ],
@@ -805,7 +894,7 @@ final class _ZoneCard extends StatelessWidget {
             ),
             const SizedBox(height: 2),
             Text(
-              zone.progressKey.tr(args: ['${zone.current}', '${zone.goal}']),
+              zone.progressKey.tr(args: [zone.currentText, zone.goalText]),
               textAlign: TextAlign.center,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
@@ -884,7 +973,7 @@ final class _ZoneProgressCard extends StatelessWidget {
                   );
                 },
                 child: Text(
-                  '${zone.current}/${zone.goal}',
+                  '${zone.currentText}/${zone.goalText}',
                   key: ValueKey('count-${zone.id}'),
                   textAlign: TextAlign.right,
                   style: _sectionTitle.copyWith(color: _fill),

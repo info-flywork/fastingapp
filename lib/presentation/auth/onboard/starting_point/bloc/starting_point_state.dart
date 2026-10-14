@@ -13,6 +13,16 @@ final class StartingPointState extends Equatable {
   final int heightCm;
   final int age;
 
+  /// BMI 17.5'e karşılık gelen en düşük hedef (0.5 kg'a yukarı yuvarlı).
+  static double minGoalKgFor(int heightCm) {
+    final m = heightCm / 100;
+    return (17.5 * m * m * 2).ceil() / 2;
+  }
+
+  /// Hedef BMI 17.5'in altında (mevcut kilo zaten çok düşük ve hedef kilo
+  /// vermek): sunucu reddeder, devam edilemez.
+  bool get isGoalSafe => goalWeightKg >= minGoalKgFor(heightCm) - 1e-9;
+
   StartingPointState copyWith({
     double? weightKg,
     double? goalWeightKg,

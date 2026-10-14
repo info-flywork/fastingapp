@@ -1,3 +1,7 @@
+import 'dart:async';
+
+import 'package:fastingapp/core/network/network_exception.dart';
+import 'package:fastingapp/domain/notification/push_service.dart';
 import 'package:fastingapp/core/di/injection.dart';
 import 'package:fastingapp/core/router/route_paths.dart';
 import 'package:fastingapp/data/model/auth/auth_response.dart';
@@ -41,8 +45,17 @@ final class WelcomeBloc extends Bloc<WelcomeEvent, WelcomeState> {
     AccountPendingDeletionException<AuthResponse> pending,
   ) => _complete(pending.restore());
 
+  Future<void> _requestPushPermission() async {
+    try {
+      await getIt<PushService>().requestPermission();
+      await _authRepository.registerDevice();
+    } on Object {
+      // İzin / kayıt sonra yine denenir (açılışta cihaz kaydı).
+    }
+  }
+
   /// Geri almayı reddetti: Firebase/Google oturumu da kapanır.
-  Future<void> discardPendingLogin() => _authRepository.logout();
+  Future<void> discardPendingLogin() => _authRepository.discardSocialSignIn();
 
   /// Onboarding'i bitmiş hesap ana sayfaya; bitmemiş (ör. çıkış sonrası
   /// açılan yeni misafir) onboarding'e, cevaplar baştan (splash'teki kural).
@@ -50,6 +63,10 @@ final class WelcomeBloc extends Bloc<WelcomeEvent, WelcomeState> {
     final response = await login;
     _authBloc.add(AuthLoggedIn(response));
     if (response.user?.isAnsweredQuestions ?? false) {
+      // Onboarding'i olan hesapla (ör. yeni cihaz) giriş: izin onboarding
+      // sonunda isteniyordu, bu yolda hiç istenmiyordu. Sistem diyaloğu
+      // yalnızca ilk seferde çıkar; sonuç cihaz kaydıyla sunucuya gider.
+      unawaited(_requestPushPermission());
       return RoutePaths.home.path;
     }
     getIt<OnboardingDraft>().reset();
@@ -64,7 +81,7 @@ final class WelcomeBloc extends Bloc<WelcomeEvent, WelcomeState> {
       final navigateTo = await loginWithGoogle();
       emit(WelcomeSuccess(navigateTo: navigateTo));
     } on Exception catch (e) {
-      emit(WelcomeError(message: e.toString()));
+      emit(WelcomeError(message: errorMessageOf(e)));
     }
   }
 
@@ -76,7 +93,7 @@ final class WelcomeBloc extends Bloc<WelcomeEvent, WelcomeState> {
       final navigateTo = await loginWithApple();
       emit(WelcomeSuccess(navigateTo: navigateTo));
     } on Exception catch (e) {
-      emit(WelcomeError(message: e.toString()));
+      emit(WelcomeError(message: errorMessageOf(e)));
     }
   }
 
@@ -88,7 +105,7 @@ final class WelcomeBloc extends Bloc<WelcomeEvent, WelcomeState> {
       final navigateTo = await loginAsGuest();
       emit(WelcomeSuccess(navigateTo: navigateTo));
     } on Exception catch (e) {
-      emit(WelcomeError(message: e.toString()));
+      emit(WelcomeError(message: errorMessageOf(e)));
     }
   }
 }

@@ -1,4 +1,8 @@
+import 'dart:async';
+
 import 'package:easy_localization/easy_localization.dart';
+import 'package:fastingapp/core/di/injection.dart';
+import 'package:fastingapp/domain/content/content_repository.dart';
 import 'package:fastingapp/core/theme/app_text_styles.dart';
 import 'package:fastingapp/generated/assets.gen.dart';
 import 'package:fastingapp/generated/colors.gen.dart';
@@ -17,6 +21,31 @@ final class FaqView extends StatefulWidget {
 class _FaqViewState extends State<FaqView> {
   /// İlk soru açık; null = hiçbiri açık değil.
   int? _expandedIndex = 0;
+
+  /// Sunucudaki SSS (`/catalog/faq`); gelene kadar / gelmezse yerel metinler.
+  List<FaqItem>? _server;
+
+  @override
+  void initState() {
+    super.initState();
+    unawaited(_load());
+  }
+
+  Future<void> _load() async {
+    try {
+      final items = await getIt<ContentRepository>().faq();
+      if (mounted && items.isNotEmpty) setState(() => _server = items);
+    } on Object {
+      // Yerel liste kalır.
+    }
+  }
+
+  List<FaqItem> get _faq =>
+      _server ??
+      [
+        for (final i in _items)
+          FaqItem(question: i.questionKey.tr(), answer: i.answerKey.tr()),
+      ];
 
   static const _items = <({String questionKey, String answerKey})>[
     (questionKey: 'faq.q_what', answerKey: 'faq.a_what'),
@@ -64,11 +93,11 @@ class _FaqViewState extends State<FaqView> {
                       padding: const EdgeInsets.all(8),
                       child: Column(
                         children: [
-                          for (var i = 0; i < _items.length; i++) ...[
+                          for (final (i, item) in _faq.indexed) ...[
                             if (i > 0) const SizedBox(height: 8),
                             _FaqCard(
-                              question: _items[i].questionKey.tr(),
-                              answer: _items[i].answerKey.tr(),
+                              question: item.question,
+                              answer: item.answer,
                               isExpanded: _expandedIndex == i,
                               onTap: () => _onTap(i),
                             ),
@@ -125,10 +154,7 @@ final class _FaqCard extends StatelessWidget {
                 Row(
                   children: [
                     Expanded(
-                      child: Text(
-                        question,
-                        style: AppTextStyles.faqQuestion,
-                      ),
+                      child: Text(question, style: AppTextStyles.faqQuestion),
                     ),
                     const SizedBox(width: 10),
                     AnimatedRotation(
@@ -153,10 +179,7 @@ final class _FaqCard extends StatelessWidget {
                   child: isExpanded
                       ? Padding(
                           padding: const EdgeInsets.only(top: 10, right: 30),
-                          child: Text(
-                            answer,
-                            style: AppTextStyles.faqAnswer,
-                          ),
+                          child: Text(answer, style: AppTextStyles.faqAnswer),
                         )
                       : const SizedBox(width: double.infinity),
                 ),

@@ -42,22 +42,58 @@ mixin BuildingPlanViewMixin on State<BuildingPlanView> {
   Future<void> onContinue() async {
     final submission = _submission ??= getIt<OnboardingRepository>().submit();
     try {
-      final result = await submission.withLoading(context);
+      // Gönderim çoğunlukla animasyon sırasında biter: dialog yanıp sönmesin.
+      final result = await submission.withLoading(
+        context,
+        showAfter: const Duration(milliseconds: 300),
+      );
       getIt<AuthBloc>().add(AuthUserUpdated(result.user));
       if (!mounted) return;
       await context.push(
         RoutePaths.weightProjection.path,
         extra: result.projection,
       );
+    } on AccountPendingDeletionException<AuthResponse> catch (e) {
+      _submission = null;
+      if (!mounted) return;
+      await _onPendingDeletion(e);
     } on Exception catch (e) {
       // Tekrar denenebilsin: başarısız gönderim saklanmaz.
       _submission = null;
       if (!mounted) return;
       AppSnackbar.show(
         context: context,
-        text: e is NetworkException ? e.message : e.toString(),
+        text: errorMessageOf(e),
         type: SnackBarType.failure,
       );
     }
+  }
+
+  /// Bu cihazın misafir hesabı silinmek üzere: geri al (cevaplar o hesaba
+  /// yazılır) ya da yeni misafirle devam. Önceden sabit "Hesap silinmek
+  /// üzere" hatasında kalınıyordu.
+  Future<void> _onPendingDeletion(
+    AccountPendingDeletionException<AuthResponse> pending,
+  ) async {
+    final restore = await AppDialogs.instance.showRestoreAccount(
+      context,
+      scheduledFor: pending.scheduledFor,
+    );
+    if (!mounted || restore == null) return;
+    try {
+      await (restore
+              ? pending.restore()
+              : getIt<AuthRepository>().loginAsNewGuest())
+          .withLoading(context);
+    } on Exception catch (e) {
+      if (!mounted) return;
+      AppSnackbar.show(
+        context: context,
+        text: errorMessageOf(e),
+        type: SnackBarType.failure,
+      );
+      return;
+    }
+    if (mounted) await onContinue();
   }
 }

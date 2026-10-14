@@ -9,7 +9,12 @@ import 'package:fastingapp/presentation/profile/bloc/profile_bloc.dart';
 /// taşıdığı için her yazmadan sonra yenilenir; profil yalnızca profil
 /// alanlarını (kilo, plan…) etkileyen yazmalarda.
 abstract final class DataSync {
+  /// Her yazmada artar. Yazmadan önce başlamış bir özet isteğinin yanıtı
+  /// (eski veri) yeni durumu ezmesin diye karşılaştırılır.
+  static int generation = 0;
+
   static void afterWrite({bool profile = false}) {
+    generation++;
     getIt<NutritionRepository>().invalidate();
     getIt<HomeBloc>().add(const HomeRefreshRequested());
     if (profile) getIt<ProfileBloc>().add(const ProfileStarted(force: true));

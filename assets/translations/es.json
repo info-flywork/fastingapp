@@ -4,7 +4,10 @@
     "failed": "Fallido",
     "retry": "Rever",
     "cancel": "Cancelar",
-    "confirm": "Confirmar"
+    "confirm": "Confirmar",
+    "save": "Guardar",
+    "error_generic": "Algo salió mal. Inténtalo de nuevo.",
+    "no_connection": "Sin conexión a internet. Revisa tu conexión e inténtalo de nuevo."
   },
   "auth": {
     "welcome_title": "Bienvenido",
@@ -211,7 +214,11 @@
     "good_company_rating_label": "app rating",
     "good_company_reviewer": "Defne K.",
     "good_company_quote": "First time fasting didn't feel like punishment. Coach Mochi talked me through the 11am cravings and I actually laughed.",
-    "good_company_cta": "See my goal ->"
+    "good_company_cta": "See my goal ->",
+    "plans_age_note": "Si tienes menos de 18 años, solo se muestran planes adecuados para tu edad.",
+    "goal_bmi_low": "El peso objetivo es demasiado bajo para tu altura. Elige una meta más saludable.",
+    "meal_window_same_error": "La hora de inicio y fin no pueden ser iguales.",
+    "health_consent": "Acepto que MochiFast trate mis datos de salud (peso, ayuno, comidas) para personalizar mi plan."
   },
   "home": {
     "nav_home": "Home",
@@ -262,7 +269,15 @@
     "hunger_tracker": "Rastreador de hambre",
     "hunger_question": "¿De verdad tienes hambre?",
     "hunger_subtitle": "El “hambre emocional” puede engañarte. Conozca la diferencia y luego registre cómo se siente.",
-    "log_hunger": "Registrar mi nivel de hambre"
+    "log_hunger": "Registrar mi nivel de hambre",
+    "challenge_progress": "{}/{} completado",
+    "fasting_goal_reached": "¡Meta alcanzada!",
+    "eating_window": "Ventana de comida",
+    "metric_goal": " /{}",
+    "weight_unit_lb": "lb",
+    "challenge_leave_title": "¿Abandonar el reto?",
+    "challenge_leave_body": "Perderás tu progreso en este reto.",
+    "challenge_leave": "Abandonar"
   },
   "mochi_world": {
     "title": "Mochi World",
@@ -356,8 +371,22 @@
     "widget_lets_do_this": "¡Hagamos esto!",
     "widget_this_week": "Esta semana",
     "widget_keep_going": "¡Sigue adelante!\nEstás en racha.",
-    "start_now_cta": "Empezar ayuno ahora",
-    "plan_changed_next": "Plan actualizado. El nuevo plan se aplicará en tu próximo ayuno."
+    "plan_changed_next": "Plan actualizado. El nuevo plan se aplicará en tu próximo ayuno.",
+    "overtime": "Meta +{}",
+    "next_fast_at": "Según tu plan, tu próximo ayuno empieza a las {}",
+    "start_next_cta": "Empezar el próximo ayuno",
+    "long_overrun_title": "¿Terminaste a esta hora?",
+    "long_overrun_body": "La hora de fin es más de 12 horas después del fin previsto. Guarda si de verdad terminaste entonces; si no, corrige la hora.",
+    "long_overrun_confirm": "Sí, guardar",
+    "long_overrun_cancel": "Corregir hora",
+    "free_day_title": "Hoy es día libre",
+    "free_day_body": "Tu plan no tiene ayuno hoy. Aun así puedes empezar uno si quieres.",
+    "reduced_day_title": "Hoy día de {} kcal",
+    "reduced_day_body": "Mantente hoy en unas {} kcal. Márcalo al final del día.",
+    "reduced_day_done": "Marcado como hecho ✓",
+    "reduced_day_skipped": "Marcado como omitido",
+    "reduced_day_done_cta": "Lo hice",
+    "reduced_day_skip_cta": "Lo salté"
   },
   "fasting_struggle": {
     "back": "Volver al cronómetro",
@@ -540,7 +569,9 @@
     "emotional_rec_3": "Do a quick breathing exercise",
     "emotional_rec_4": "Talk to Mochi if you want support",
     "primary": "Log this hunger",
-    "secondary": "Talk to Mochi"
+    "secondary": "Talk to Mochi",
+    "safety_note": "Tus síntomas requieren atención. Si no te encuentras bien, termina el ayuno y consulta a un profesional de la salud si no se pasa.",
+    "end_fast_cta": "Terminar mi ayuno"
   },
   "hunger_log_page": {
     "title_line1": "Save to your",
@@ -605,7 +636,13 @@
     "feeling_good": "Bien",
     "feeling_super": "¡Súper!",
     "notes_title": "Notas para ti",
-    "notes_hint": "Escribe tu nota..."
+    "notes_hint": "Escribe tu nota...",
+    "delete": "Eliminar comida",
+    "delete_title": "¿Eliminar esta comida?",
+    "delete_body": "Este registro se eliminará. No se puede deshacer.",
+    "delete_confirm": "Eliminar",
+    "delete_cancel": "Conservar",
+    "delete_failed": "No se pudo eliminar la comida. Inténtalo de nuevo."
   },
   "water_page": {
     "today": "Hoy",
@@ -628,7 +665,8 @@
     "edit_goal_hint": "ml",
     "save": "Ahorrar",
     "goal_range_error": "El objetivo diario debe estar entre {}–{} ml.",
-    "glass_range_error": "El tamaño del vaso debe estar entre {}–{} ml."
+    "glass_range_error": "El tamaño del vaso debe estar entre {}–{} ml.",
+    "high_intake_warning": "Hoy has bebido mucha agua. Más de 6 litros al día puede ser perjudicial, tómatelo con calma."
   },
   "steps_page": {
     "today": "Hoy",
@@ -650,7 +688,8 @@
     "day_thu": "Jue",
     "day_fri": "Vie",
     "day_sat": "Se sentó",
-    "day_sun": "Sol"
+    "day_sun": "Sol",
+    "goal_title": "Objetivo diario de pasos"
   },
   "body_history": {
     "title": "Historia del cuerpo",
@@ -667,7 +706,10 @@
     "week": "Semana",
     "month": "Mes",
     "unit": "kg",
-    "progress_percent": "{}%"
+    "progress_percent": "{}%",
+    "entries_title": "Registros",
+    "delete_title": "¿Eliminar este registro de peso?",
+    "delete_body": "Se quitará de tu gráfico."
   },
   "water_reminder": {
     "title": "Recordatorio de agua",
@@ -684,7 +726,13 @@
     "unit_dialog_subtitle": "Elige tu unidad preferida",
     "custom_size_dialog_subtitle": "Agregar un tamaño de vidrio personalizado",
     "unit_ml": "ml",
-    "unit_oz": "onz"
+    "unit_oz": "onz",
+    "glass_range_error": "El vaso debe estar entre {} y {} ml",
+    "custom_size_limit": "Puedes añadir hasta {} vasos personalizados",
+    "interval": "Intervalo de recordatorio",
+    "every_minutes": "Cada {} min",
+    "every_hours": "Cada {} h",
+    "every_hours_minutes": "Cada {} h {} min"
   },
   "profile": {
     "premium_badge": "De primera calidad",
@@ -749,19 +797,30 @@
     "restore_success": "Tu Premium vuelve a estar activo.",
     "restore_none": "No se encontraron compras para restaurar.",
     "restore_failed": "No se pudieron restaurar las compras. Inténtalo de nuevo.",
-    "guest_name": "Invitado"
+    "guest_name": "Invitado",
+    "weight_range_error": "El peso debe estar entre {} y {} kg",
+    "sync_health_connect": "Sincronizar con Health Connect",
+    "health_sync_denied": "Se denegó el acceso a salud. Puedes activarlo en Ajustes.",
+    "share_app_text": "Sigo mi ayuno con MochiFast. ¡Únete!",
+    "legal_support": "Legal y soporte",
+    "contact_support": "Contactar con soporte",
+    "support_email_copied": "Correo copiado"
   },
   "notifications": {
     "title": "Notificaciones",
     "today_date": "Hoy, {date}",
-    "hours_ago": "{hours}HACE",
+    "hours_ago": "HACE {hours} H",
     "weight_updates": "Actualizaciones de peso",
     "weight_body_prefix": "Su nuevo peso registrado es",
     "meal_ended": "La hora de comer ha terminado.",
     "meal_ended_body": "¡Prepárate, pronto comienza el tiempo de ayuno!",
     "empty_title": "Aún no tienes ninguna notificación",
     "empty_subtitle": "Te avisaremos cuando tengas alguno.",
-    "back": "Atrás"
+    "back": "Atrás",
+    "yesterday_date": "Ayer, {date}",
+    "just_now": "AHORA",
+    "minutes_ago": "HACE {minutes} MIN",
+    "load_failed": "No pudimos cargar tus notificaciones."
   },
   "languages": {
     "title": "Idiomas",
@@ -814,7 +873,13 @@
     "delete": "Borrar",
     "empty_title": "Aún no hay chats",
     "empty_subtitle": "Inicie una conversación con el entrenador Mochi y sus chats aparecerán aquí.",
-    "start_chat": "Iniciar un chat"
+    "start_chat": "Iniciar un chat",
+    "safety_urgent": "Si sientes que estás en peligro, llama de inmediato al número de emergencias local (112 en Europa) o habla con alguien de confianza. No estás solo.",
+    "quota_left": {
+      "zero": "Hoy no te quedan mensajes",
+      "one": "Hoy te queda 1 mensaje",
+      "other": "Hoy te quedan {} mensajes"
+    }
   },
   "plans": {
     "title": "Planes de ayuno",
@@ -858,7 +923,42 @@
     "active_fast_body": "Cambiar de plan afectará tu ayuno actual. ¿Qué quieres hacer?",
     "active_fast_cancel_existing": "Terminar ayuno",
     "active_fast_reject": "Seguir en ayuno",
-    "active_fast_restart_same": "Continuar con el mismo tiempo"
+    "active_fast_restart_same": "Continuar con el mismo tiempo",
+    "safety_ack_title": "Plan de ayuno prolongado",
+    "safety_ack_body": "Este plan incluye periodos de ayuno largos. Si estás embarazada, en lactancia, tienes diabetes o antecedentes de trastornos alimentarios, o tomas medicación, consulta a tu médico antes de empezar. Termina el ayuno si te encuentras mal.",
+    "safety_ack_confirm": "Entendido, continuar",
+    "safety_ack_cancel": "Cancelar",
+    "weekly_title": "Planes semanales",
+    "weekly_emphasis": "Elige tus días,",
+    "weekly_rest": " el resto son libres.",
+    "chip_weekly": "Semanal",
+    "subtitle_5_2": "2 días 500 kcal",
+    "subtitle_6_1": "1 día 500 kcal",
+    "subtitle_alternate_day": "500 kcal en días alternos",
+    "subtitle_crescendo": "ayuna 2–3 días por semana",
+    "subtitle_custom_weekly": "diseña tu semana",
+    "title_alternate_day": "Días alternos",
+    "title_crescendo": "Crescendo",
+    "title_custom_weekly": "Semana personalizada",
+    "weekly_desc_5_2": "Come con normalidad 5 días. En 2 días no consecutivos, toma unas 500 kcal.",
+    "weekly_desc_6_1": "Come con normalidad 6 días. En 1 día, toma unas 500 kcal.",
+    "weekly_desc_alternate_day": "Alterna durante la semana un día de 500 kcal y un día normal.",
+    "weekly_desc_crescendo": "Inicio suave: ayuna 12–16 horas en 2–3 días no consecutivos y come normal el resto.",
+    "weekly_desc_custom_weekly": "Elige cómo será cada día: ayuno, día de 500 kcal o día libre.",
+    "weekly_hint_weeklyReduced": "Toca un día para convertirlo en día de 500 kcal.",
+    "weekly_hint_alternateDay": "Toca un día para alternar entre 500 kcal y libre.",
+    "weekly_hint_selectedDays": "Toca un día para convertirlo en día de ayuno.",
+    "weekly_hint_customWeekly": "Toca para cambiar: libre → ayuno → 500 kcal.",
+    "weekly_day_fast": "Ayuno {} h",
+    "weekly_day_reduced": "Día de {} kcal",
+    "weekly_day_normal": "Día libre",
+    "weekly_fast_hours": "Duración del ayuno: {} h",
+    "weekly_error_days": "Este plan no permite ese tipo de día.",
+    "weekly_error_reduced_count": "Elige exactamente los días de 500 kcal necesarios.",
+    "weekly_error_consecutive": "Los días especiales no pueden ser seguidos.",
+    "weekly_error_alternate": "Elige 3–4 días que no sean seguidos.",
+    "weekly_error_fast_count": "Elige 2 o 3 días de ayuno.",
+    "weekly_error_hours": "La duración del ayuno está fuera del rango del plan."
   },
   "calories_page": {
     "eaten": "Comido {}",
@@ -874,7 +974,12 @@
     "goal": "Meta:",
     "add_daily_manual": "Agregar manual diario",
     "manual_value": "{} kilocalorías",
-    "calculate": "Calcular calorías"
+    "calculate": "Calcular calorías",
+    "add_manual_cta": "Añadir {} kcal",
+    "kcal_left": "kcal restantes",
+    "kcal_eaten": "kcal consumidas",
+    "goal_fmt": "Objetivo {} kcal",
+    "goal_title": "Objetivo diario de calorías"
   },
   "calories_camera": {
     "no_camera": "No se encontró ninguna cámara en este dispositivo.",
@@ -890,7 +995,13 @@
     "protein_value": "27g",
     "carbs_value": "64g",
     "fats_value": "22g",
-    "recalculate": "Calcular calorías nuevamente"
+    "recalculate": "Calcular calorías nuevamente",
+    "analyzing": "Analizando…",
+    "no_result_title": "Sin resultado",
+    "not_food": "No parece una foto de comida. Prueba con una foto nueva que muestre bien tu plato.",
+    "analysis_failed": "El análisis falló. Inténtalo de nuevo con otra foto.",
+    "still_processing": "El análisis sigue en curso. Vuelve a comprobarlo en un momento; no gastará otro uso.",
+    "check_again": "Comprobar de nuevo"
   },
   "sleep_page": {
     "title": "Dormir",
@@ -911,7 +1022,13 @@
     "day_thu": "Jue",
     "day_fri": "Vie",
     "day_sat": "Se sentó",
-    "day_sun": "Sol"
+    "day_sun": "Sol",
+    "log_title": "Registrar sueño",
+    "entry_title": "Sueño de anoche",
+    "entry_body": "Edita la hora de dormir y de despertar o elimina este registro.",
+    "entry_delete": "Eliminar",
+    "entry_edit": "Editar",
+    "goal_title": "Objetivo de sueño"
   },
   "protein_page": {
     "title": "Rastreador de proteínas",
@@ -941,7 +1058,8 @@
     "kind_lunch": "Almuerzo",
     "kind_dinner": "Cena",
     "kind_snack": "Tentempié",
-    "kind_other": "Comida"
+    "kind_other": "Comida",
+    "goal_title": "Objetivo diario de proteína"
   },
   "insights_page": {
     "brand_mochi": "Mochi",
@@ -1035,5 +1153,74 @@
     "subtitle": "Mochi está buscando conexión. Revisa tu Wi‑Fi o tus datos móviles e inténtalo de nuevo.",
     "retry": "Reintentar",
     "checking": "Comprobando…"
+  },
+  "ai_consent": {
+    "title": "Compartir con Mochi",
+    "body": "Para el chat y el análisis de fotos, tus mensajes y fotos se envían a la IA. No es consejo médico; puedes borrar tu cuenta cuando quieras.",
+    "confirm": "Aceptar",
+    "cancel": "Ahora no"
+  },
+  "fasting_history_page": {
+    "title": "Historial de ayuno",
+    "list_title": "Ayunos anteriores",
+    "stats_title": "Todo el tiempo",
+    "stat_fasts": "Ayunos",
+    "stat_completed": "Completados",
+    "stat_rate": "Éxito",
+    "stat_total": "Tiempo total",
+    "stat_longest": "Más largo",
+    "stat_avg": "Promedio",
+    "status_completed": "Completado",
+    "status_ended_early": "Terminó pronto",
+    "status_cancelled": "Cancelado",
+    "status_active": "Activo",
+    "empty_title": "Aún no hay ayunos",
+    "empty_subtitle": "Termina tu primer ayuno y aparecerá aquí.",
+    "error": "No se pudo cargar el historial",
+    "retry": "Reintentar",
+    "entry_edit_title": "Editar ayuno",
+    "entry_add_title": "Añadir un ayuno pasado",
+    "entry_start": "Inicio",
+    "entry_end": "Fin",
+    "entry_delete": "Eliminar ayuno",
+    "delete_title": "¿Eliminar este ayuno?",
+    "delete_body": "Se quitará de tu historial y tus estadísticas.",
+    "entry_invalid": "El fin debe ser al menos 1 hora después del inicio.",
+    "entry_too_long": "Un ayuno puede durar como máximo 72 horas."
+  },
+  "legal_update": {
+    "title": "Hemos actualizado nuestras condiciones",
+    "body": "Nuestros Términos del servicio y Política de privacidad han cambiado. Acepta las nuevas versiones para seguir usando MochiFast.",
+    "accept": "Aceptar",
+    "later": "Más tarde"
+  },
+  "fasting_finish": {
+    "reward_title": "¡Buen trabajo!",
+    "reward_streak": "Racha de {} días",
+    "reward_xp": "+{} XP",
+    "reward_level": "¡Has llegado al nivel {}!",
+    "reward_world": "Tu isla Mochi ha crecido",
+    "reward_challenge": "Reto completado",
+    "reward_continue": "Continuar"
+  },
+  "app_update": {
+    "title": "Actualización disponible",
+    "body": "Hay una nueva versión de MochiFast con mejoras y correcciones.",
+    "required_title": "Actualización necesaria",
+    "required_body": "Esta versión ya no es compatible. Actualiza MochiFast para continuar.",
+    "update": "Actualizar",
+    "later": "Más tarde"
+  },
+  "notification_settings": {
+    "title": "Ajustes de notificaciones",
+    "fasting": "Ayuno",
+    "streak": "Racha",
+    "weight": "Peso",
+    "water": "Agua",
+    "challenges": "Retos",
+    "world": "Mundo Mochi",
+    "quiet_hours": "Horas de silencio",
+    "quiet_start": "Inicio",
+    "quiet_end": "Fin"
   }
 }

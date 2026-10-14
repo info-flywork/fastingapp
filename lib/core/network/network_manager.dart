@@ -17,17 +17,19 @@ final class NetworkManager {
     required T Function(Map<String, dynamic> json) parserModel,
     Map<String, dynamic>? data,
     Map<String, dynamic>? queryParameters,
+    Map<String, dynamic>? headers,
   }) async {
     try {
       // Global Content-Type: application/json iken gövdesiz POST/PATCH/PUT/DELETE
       // Fastify'da "İstek gövdesi okunamadı" (empty JSON body) üretir.
-      final requestBody = data ??
+      final requestBody =
+          data ??
           (method == RequestType.get ? null : const <String, dynamic>{});
       final response = await _dio.request<Map<String, dynamic>>(
         path,
         data: requestBody,
         queryParameters: queryParameters,
-        options: Options(method: method.value),
+        options: Options(method: method.value, headers: headers),
       );
 
       final responseBody = response.data;

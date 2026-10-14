@@ -21,6 +21,7 @@ abstract final class FastingFinishFlow {
         fastId: fast.id,
         planTitle: session.planTitle,
         start: fast.startedAt,
+        targetMinutes: fast.targetMinutes,
         // Cihaz saati kaymışsa sunucu "gelecek" diye reddetmesin.
         end: DateTime.now().add(session.clockOffset),
       ),

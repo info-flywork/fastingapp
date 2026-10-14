@@ -22,17 +22,17 @@ mixin HungerFourthQuestionViewMixin on State<HungerFourthQuestionView> {
         extra: HungerSessionArgs(
           flow: flow,
           resultType: evaluation.resultTypeEnum,
+          recommendations: [
+            for (final r in evaluation.recommendations)
+              if (r.title.isNotEmpty) r.title,
+          ],
+          safetyFlag: evaluation.safetyFlag,
         ),
       );
-    } on Object {
+    } on Object catch (e) {
+      // Önceden uydurma "fiziksel" sonuç gösteriliyordu; artık hata + tekrar.
       if (!mounted) return;
-      context.pushNamed(
-        RoutePaths.hungerResult.name,
-        extra: HungerSessionArgs(
-          flow: flow,
-          resultType: HungerResultType.physical,
-        ),
-      );
+      AppSnackbar.showError(context, e);
     } finally {
       if (mounted) setState(() => evaluating = false);
     }

@@ -1,0 +1,4 @@
+/* İzin metinleri (de). */
+"NSCameraUsageDescription" = "Die Kamera wird für Profilfotos und die Kalorienerkennung von Mahlzeiten verwendet.";
+"NSHealthShareUsageDescription" = "Wir übernehmen deine Schritte aus Apple Health, damit deine Aktivitätsziele stimmen.";
+"NSPhotoLibraryUsageDescription" = "Dein Profilfoto kannst du aus deiner Mediathek wählen.";

@@ -132,13 +132,17 @@ final class _DayBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Negatif: haftalık planda serbest gün (hedef yok) — soluk sütun.
+    final restDay = progress < 0;
     final fillH = (_trackH * progress.clamp(0.0, 1.0)).roundToDouble();
     return SizedBox(
       width: _barW,
       height: _trackH,
       child: DecoratedBox(
         decoration: BoxDecoration(
-          color: ColorName.colorCtaGradientBottom.withValues(alpha: 0.1),
+          color: ColorName.colorCtaGradientBottom.withValues(
+            alpha: restDay ? 0.03 : 0.1,
+          ),
           borderRadius: BorderRadius.circular(12),
         ),
         child: Align(

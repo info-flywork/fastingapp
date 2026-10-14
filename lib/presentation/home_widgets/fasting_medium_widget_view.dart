@@ -9,6 +9,7 @@ final class FastingMediumWidgetView extends StatelessWidget {
     required this.headline,
     required this.timeLabel,
     required this.planLabel,
+    this.live = false,
     super.key,
   });
 
@@ -16,7 +17,30 @@ final class FastingMediumWidgetView extends StatelessWidget {
   final String timeLabel;
   final String planLabel;
 
+  /// Canlı geri sayım: süre satırı boş, yerel kod çizer ([liveSpec]).
+  final bool live;
+
   static const logicalSize = Size(310, 310);
+
+  /// Süre satırının konumu başlığın satır sayısına bağlı: başlık 258 px
+  /// genişlikte ölçülür; satır üst 56 + başlık + 6, yazı 26 (yükseklik 1).
+  static Map<String, Object> liveSpec(String headline, TextDirection dir) {
+    final painter = TextPainter(
+      text: TextSpan(text: headline, style: _headline),
+      textDirection: dir,
+    )..layout(maxWidth: logicalSize.width - 52);
+    final top = 56 + painter.height + 6;
+    painter.dispose();
+    return {
+      'w': 310,
+      'h': 310,
+      'tx': 26,
+      'ty': top + 13,
+      'ta': 'l',
+      'ts': 26,
+      'tc': _hex(ColorName.colorSubtitle),
+    };
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -36,6 +60,7 @@ final class FastingMediumWidgetView extends StatelessWidget {
                   headline: headline,
                   timeLabel: timeLabel,
                   planLabel: planLabel,
+                  live: live,
                 ),
               ),
               Positioned(
@@ -59,11 +84,13 @@ final class _Copy extends StatelessWidget {
     required this.headline,
     required this.timeLabel,
     required this.planLabel,
+    required this.live,
   });
 
   final String headline;
   final String timeLabel;
   final String planLabel;
+  final bool live;
 
   @override
   Widget build(BuildContext context) {
@@ -72,7 +99,10 @@ final class _Copy extends StatelessWidget {
       children: [
         Text(headline, style: _headline),
         const SizedBox(height: 6),
-        Text(timeLabel, style: _time),
+        Text(
+          timeLabel,
+          style: live ? _time.copyWith(color: Colors.transparent) : _time,
+        ),
         const SizedBox(height: 14),
         DecoratedBox(
           decoration: const BoxDecoration(
@@ -143,3 +173,6 @@ const _chip = TextStyle(
   height: 1,
   color: ColorName.colorSubtitle,
 );
+
+String _hex(Color c) =>
+    '#${(c.toARGB32() & 0xFFFFFF).toRadixString(16).padLeft(6, '0')}';

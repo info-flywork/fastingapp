@@ -11,9 +11,9 @@ import 'package:go_router/go_router.dart';
 
 /// Su molası — 8 yudumluk görev. Her dokunuş bir yudum sayar.
 final class FastingSipChallengeView extends StatefulWidget {
-  const FastingSipChallengeView({required this.bodyKey, super.key});
+  const FastingSipChallengeView({required this.bodyText, super.key});
 
-  final String bodyKey;
+  final String bodyText;
 
   @override
   State<FastingSipChallengeView> createState() =>
@@ -80,7 +80,7 @@ class _FastingSipChallengeViewState extends State<FastingSipChallengeView> {
             ),
             const SizedBox(height: 12),
             Text(
-              widget.bodyKey.tr(),
+              widget.bodyText,
               textAlign: TextAlign.center,
               style: AppTextStyles.fastingStruggleBody,
             ),

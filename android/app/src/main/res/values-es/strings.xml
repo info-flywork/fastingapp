@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="water_widget_name">Agua</string>
+    <string name="water_widget_description">Objetivo diario de agua</string>
+    <string name="water_widget_medium_name">Registro de agua</string>
+    <string name="water_widget_medium_description">Agua del día y cronología</string>
+    <string name="water_widget_large_name">Resumen de agua</string>
+    <string name="water_widget_large_description">Resumen semanal de agua</string>
+    <string name="fasting_widget_name">Ayuno</string>
+    <string name="fasting_widget_description">Tiempo restante de ayuno</string>
+    <string name="fasting_widget_medium_name">Tarjeta de ayuno</string>
+    <string name="fasting_widget_medium_description">Plan y tiempo restante</string>
+    <string name="fasting_widget_detail_name">Resumen del ayuno</string>
+    <string name="fasting_widget_detail_description">Inicio, fin y objetivo</string>
+    <string name="fasting_widget_plan_name">Plan de hoy</string>
+    <string name="fasting_widget_plan_description">Tu plan y empezar a ayunar</string>
+    <string name="fasting_widget_omh_name">Hoy</string>
+    <string name="fasting_widget_omh_description">Plan y motivación</string>
+    <string name="fasting_widget_week_name">Esta semana</string>
+    <string name="fasting_widget_week_description">Resumen semanal de ayuno</string>
+    <string name="notification_channel_default">Notificaciones</string>
+    <string name="notification_channel_quiet">Notificaciones silenciosas</string>
+</resources>

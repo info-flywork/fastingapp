@@ -9,7 +9,8 @@ import 'package:uuid/uuid.dart';
 /// İstek bağlamı (backend doküman 13 §1): `X-Timezone` (IANA), `X-App-Version`,
 /// `X-Platform`, `X-Install-Id`; yazma isteklerine `Idempotency-Key`.
 ///
-/// Saat dilimi ve sürüm bir kez okunur. Idempotency anahtarı istek
+/// Sürüm ve kurulum kimliği bir kez okunur; saat dilimi en fazla 10 dk'da bir
+/// yeniden okunur (seyahatte sunucunun "bugün"ü cihazla ayrışmasın). Idempotency anahtarı istek
 /// seçeneklerinde saklanır: token yenileme sonrası tekrar denemede aynı kalır.
 final class ContextInterceptor extends Interceptor {
   ContextInterceptor(this._deviceManager);
@@ -19,6 +20,8 @@ final class ContextInterceptor extends Interceptor {
   static const _writeMethods = {'POST', 'PUT', 'PATCH', 'DELETE'};
 
   Future<_Context>? _context;
+  DateTime? _loadedAt;
+  static const _timezoneTtl = Duration(minutes: 10);
 
   Future<_Context> _load() async {
     final results = await Future.wait<Object>([
@@ -39,7 +42,13 @@ final class ContextInterceptor extends Interceptor {
     RequestInterceptorHandler handler,
   ) async {
     try {
-      final context = await (_context ??= _load());
+      final loadedAt = _loadedAt;
+      if (loadedAt == null ||
+          DateTime.now().difference(loadedAt) > _timezoneTtl) {
+        _context = _load();
+        _loadedAt = DateTime.now();
+      }
+      final context = await _context!;
       options.headers.addAll({
         'X-Timezone': context.timezone,
         'X-App-Version': context.appVersion,
@@ -48,6 +57,7 @@ final class ContextInterceptor extends Interceptor {
     } on Object {
       // Bağlam okunamazsa istek yine gider (sunucu varsayılanları kullanır).
       _context = null;
+      _loadedAt = null;
     }
     options.headers['X-Platform'] = Platform.isIOS ? 'ios' : 'android';
     if (_writeMethods.contains(options.method.toUpperCase())) {

@@ -4,14 +4,14 @@ final class ObstaclesOptions extends StatelessWidget {
   const ObstaclesOptions({
     required this.items,
     required this.selected,
-    required this.onSelected,
+    required this.onToggle,
     super.key,
   });
 
   final List<({OnboardingObstacle obstacle, String titleKey, String iconPath})>
   items;
-  final OnboardingObstacle? selected;
-  final ValueChanged<OnboardingObstacle> onSelected;
+  final Set<OnboardingObstacle> selected;
+  final ValueChanged<OnboardingObstacle> onToggle;
 
   @override
   Widget build(BuildContext context) {
@@ -22,8 +22,8 @@ final class ObstaclesOptions extends StatelessWidget {
           if (i > 0) const SizedBox(height: 12),
           OnboardingOptionCard(
             title: items[i].titleKey.tr(),
-            isSelected: selected == items[i].obstacle,
-            onTap: () => onSelected(items[i].obstacle),
+            isSelected: selected.contains(items[i].obstacle),
+            onTap: () => onToggle(items[i].obstacle),
             icon: appImage(items[i].iconPath, fit: BoxFit.contain),
           ),
         ],
