@@ -64,9 +64,9 @@ mixin ProfileViewMixin on State<ProfileView> {
 
   /// İyimser: anahtar hemen döner, hata olursa geri alınır.
   Future<void> _saveSetting({
+    required VoidCallback revert,
     bool? push,
     bool? health,
-    required VoidCallback revert,
   }) async {
     try {
       await _profileRepo.updateSettings(

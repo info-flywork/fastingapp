@@ -280,7 +280,6 @@ final class _Sprite extends StatelessWidget {
       height: height,
       fit: BoxFit.fill,
       cacheWidth: cacheWidth,
-      filterQuality: FilterQuality.medium,
       gaplessPlayback: true,
     );
     if (flip) image = Transform.flip(flipX: true, child: image);

@@ -2,9 +2,9 @@ import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:easy_localization/easy_localization.dart';
-import 'package:fastingapp/core/snackbar/app_snackbar.dart';
 import 'package:fastingapp/core/di/injection.dart';
 import 'package:fastingapp/core/router/route_paths.dart';
+import 'package:fastingapp/core/snackbar/app_snackbar.dart';
 import 'package:fastingapp/core/theme/app_text_styles.dart';
 import 'package:fastingapp/domain/hunger/hunger_repository.dart';
 import 'package:fastingapp/generated/app_images.g.dart';
@@ -33,7 +33,6 @@ class _HungerHistoryLogViewState extends State<HungerHistoryLogView>
   @override
   Widget build(BuildContext context) {
     final top = MediaQuery.paddingOf(context).top;
-    final bottom = MediaQuery.paddingOf(context).bottom;
 
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: SystemUiOverlayStyle.dark,

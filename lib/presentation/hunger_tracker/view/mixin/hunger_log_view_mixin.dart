@@ -44,7 +44,7 @@ mixin HungerLogViewMixin on State<HungerLogView> {
       );
       DataSync.afterWrite();
       if (!mounted) return;
-      context.pushNamed(RoutePaths.hungerSuccess.name);
+      await context.pushNamed(RoutePaths.hungerSuccess.name);
     } on Object catch (e) {
       // Kaydedilmediyse başarı ekranı gösterilmez.
       if (!mounted) return;

@@ -36,7 +36,7 @@ mixin CaloriesTrackerViewMixin on State<CaloriesTrackerView> {
     super.initState();
     _seedLocal();
     // Cache varsa anında göster; ağ tazelemesi sessiz (spinner yok).
-    unawaited(loadDay(force: true));
+    unawaited(loadDay());
   }
 
   void _seedLocal() {
@@ -91,7 +91,7 @@ mixin CaloriesTrackerViewMixin on State<CaloriesTrackerView> {
     try {
       final day = await _nutrition.getDay(force: force);
       // Protein tracker açılınca week beklemesin.
-      unawaited(_nutrition.getWeek(metric: 'protein'));
+      unawaited(_nutrition.getWeek());
       if (!mounted) return;
       _seedWeightFromHome();
       setState(() {
@@ -151,17 +151,17 @@ mixin CaloriesTrackerViewMixin on State<CaloriesTrackerView> {
           return;
         }
         if (!mounted) return;
-        if (choice == true) {
+        if (choice ?? false) {
           DataSync.afterWrite();
           setState(() => manualKcal = 0);
           await FastingFinishFlow.open();
-          if (mounted) await loadDay(force: true);
+          if (mounted) await loadDay();
           return;
         }
       }
       DataSync.afterWrite();
       setState(() => manualKcal = 0);
-      if (mounted) await loadDay(force: true);
+      if (mounted) await loadDay();
     } on Object catch (e) {
       if (mounted) AppSnackbar.showError(context, e);
     } finally {
@@ -186,7 +186,7 @@ mixin CaloriesTrackerViewMixin on State<CaloriesTrackerView> {
     try {
       await getIt<TrackersRepository>().updateGoals({'kcalGoal': value});
       DataSync.afterWrite();
-      if (mounted) await loadDay(force: true);
+      if (mounted) await loadDay();
     } on Object catch (e) {
       if (mounted) AppSnackbar.showError(context, e);
     }
@@ -195,12 +195,12 @@ mixin CaloriesTrackerViewMixin on State<CaloriesTrackerView> {
   /// Protein ekranından öğün eklenebilir: dönünce tazele.
   Future<void> onProteinTracker() async {
     await context.pushNamed(RoutePaths.proteinTracker.name);
-    if (mounted) await loadDay(force: true);
+    if (mounted) await loadDay();
   }
 
   /// Kamera → analiz → kayıt; dönünce sessiz taze (spinner yok).
   Future<void> onCalculate() async {
     await context.pushNamed(RoutePaths.caloriesCamera.name);
-    if (mounted) await loadDay(force: true);
+    if (mounted) await loadDay();
   }
 }

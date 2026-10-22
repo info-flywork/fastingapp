@@ -5,29 +5,30 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:fastingapp/core/di/injection.dart';
 import 'package:fastingapp/core/dialogs/app_dialogs.dart';
 import 'package:fastingapp/core/home_widgets/fasting_widget_publisher.dart';
-import 'package:fastingapp/core/snackbar/app_snackbar.dart';
-import 'package:fastingapp/core/utils/enum/snackbar_type.dart'
-    show SnackBarType;
-import 'package:fastingapp/core/sync/data_sync.dart';
-import 'package:fastingapp/domain/fasting/fasting_repository.dart';
-import 'package:fastingapp/domain/fasting/weekly_schedule.dart';
-import 'package:fastingapp/domain/revenue_cat/revenue_cat_service.dart';
-import 'package:fastingapp/domain/user/user_repository.dart';
-import 'package:fastingapp/presentation/auth/bloc/auth_bloc.dart';
-import 'package:fastingapp/presentation/auth/bloc/auth_state.dart';
-import 'package:fastingapp/presentation/fasting/bloc/fasting_session_cubit.dart';
-import 'package:fastingapp/presentation/fasting/bloc/fasting_session_state.dart';
 import 'package:fastingapp/core/remote_images/app_image.dart';
 import 'package:fastingapp/core/router/route_paths.dart';
+import 'package:fastingapp/core/snackbar/app_snackbar.dart';
+import 'package:fastingapp/core/sync/data_sync.dart';
 import 'package:fastingapp/core/theme/app_text_styles.dart';
+import 'package:fastingapp/core/utils/enum/snackbar_type.dart'
+    show SnackBarType;
 import 'package:fastingapp/core/widgets/app_button.dart';
 import 'package:fastingapp/core/widgets/app_button_decoration.dart';
 import 'package:fastingapp/core/widgets/bottom_navigation_bar/'
     'app_bottom_nav.dart';
 import 'package:fastingapp/core/widgets/horseshoe_arc.dart';
+import 'package:fastingapp/domain/fasting/fasting_repository.dart';
+import 'package:fastingapp/domain/fasting/mochi_plan_repository.dart';
+import 'package:fastingapp/domain/fasting/weekly_schedule.dart';
+import 'package:fastingapp/domain/revenue_cat/revenue_cat_service.dart';
+import 'package:fastingapp/domain/user/user_repository.dart';
 import 'package:fastingapp/generated/app_images.g.dart';
 import 'package:fastingapp/generated/assets.gen.dart';
 import 'package:fastingapp/generated/colors.gen.dart';
+import 'package:fastingapp/presentation/auth/bloc/auth_bloc.dart';
+import 'package:fastingapp/presentation/auth/bloc/auth_state.dart';
+import 'package:fastingapp/presentation/fasting/bloc/fasting_session_cubit.dart';
+import 'package:fastingapp/presentation/fasting/bloc/fasting_session_state.dart';
 import 'package:fastingapp/presentation/fasting/fasting_arc_stages.dart';
 import 'package:fastingapp/presentation/fasting/fasting_finish_flow.dart';
 import 'package:fastingapp/presentation/fasting/view/fasting_fast_forecast_card.dart';
@@ -36,10 +37,10 @@ import 'package:fastingapp/presentation/fasting/view/fasting_plan_day_card.dart'
 import 'package:fastingapp/presentation/fasting/view/fasting_plan_sheet.dart';
 import 'package:fastingapp/presentation/fasting/view/fasting_start_sheet.dart';
 import 'package:fastingapp/presentation/home/bloc/home_bloc.dart';
-import 'package:fastingapp/presentation/meal_records/meal_detail_args.dart';
 import 'package:fastingapp/presentation/home/bloc/home_state.dart';
 import 'package:fastingapp/presentation/home/view/home_view.dart';
 import 'package:fastingapp/presentation/home/weight_entry_flow.dart';
+import 'package:fastingapp/presentation/meal_records/meal_detail_args.dart';
 import 'package:fastingapp/presentation/plans/plan_change_flow.dart';
 import 'package:fastingapp/presentation/plans/plans_catalog.dart';
 import 'package:flutter/material.dart';
@@ -229,13 +230,37 @@ class _FastingViewState extends State<FastingView> {
     if (!mounted || picked == null) return;
     await _cubit.startFast(startedAt: picked);
     if (!mounted) return;
-    if (_cubit.state.errorMessage != null) {
-      AppSnackbar.show(
-        context: context,
-        text: _cubit.state.errorMessage!,
-        type: SnackBarType.failure,
-      );
-    }
+    _showStartError();
+  }
+
+  /// Mochi'nin önerdiği süreyi başlatır; kayıtlı planın saatini kullanmaz.
+  Future<void> _startMochiPlan(
+    FastingSessionState session,
+    MochiDailyPlan plan,
+  ) async {
+    if (session.isFasting) return;
+    final now = DateTime.now();
+    final initial = plan.startsAt.isAfter(now) ? now : plan.startsAt;
+    final picked = await showModalBottomSheet<DateTime>(
+      context: context,
+      useRootNavigator: true,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => FastingStartSheet(initial: initial),
+    );
+    if (!mounted || picked == null) return;
+    await _cubit.startFast(
+      startedAt: picked,
+      targetMinutes: plan.fastHours * 60,
+    );
+    if (!mounted) return;
+    _showStartError();
+  }
+
+  void _showStartError() {
+    final error = _cubit.state.errorMessage;
+    if (error == null) return;
+    AppSnackbar.show(context: context, text: error, type: SnackBarType.failure);
   }
 
   void _publishFastingWidget(FastingSessionState session) =>
@@ -407,21 +432,6 @@ class _FastingViewState extends State<FastingView> {
     );
   }
 
-  /// Bugünün oruç süresi: haftalık planda günün süresi (Crescendo / özel
-  /// hafta), yoksa planınki.
-  int? _todayFastHours(FastingSessionState session) {
-    final minutes = _todayPlanDay(session)?.fastMinutes;
-    if (minutes != null) return (minutes / 60).round();
-    return session.plan?.fastHours;
-  }
-
-  int? _todayEatHours(FastingSessionState session) {
-    if (_todayPlanDay(session)?.fastMinutes case final m?) {
-      return 24 - (m / 60).round();
-    }
-    return session.plan?.eatHours;
-  }
-
   /// Plan etiketi `14-10` veya `14:10` olabilir.
   List<String> _planParts(String title) =>
       title.replaceAll(':', '-').split('-').map((e) => e.trim()).toList();
@@ -429,12 +439,6 @@ class _FastingViewState extends State<FastingView> {
   int _planHours(String title) {
     final parts = _planParts(title);
     return int.tryParse(parts.isNotEmpty ? parts.first : '') ?? 16;
-  }
-
-  int _eatHours(String title) {
-    final parts = _planParts(title);
-    if (parts.length < 2) return 8;
-    return int.tryParse(parts[1]) ?? 8;
   }
 
   Duration _fastTarget(FastingSessionState session) {
@@ -462,32 +466,6 @@ class _FastingViewState extends State<FastingView> {
     if (h == null || m == null) return null;
     final now = DateTime.now();
     return DateTime(now.year, now.month, now.day, h, m);
-  }
-
-  String _mochiStartedClock(FastingSessionState session) {
-    final start = session.fast?.startedAt ?? _nextFastStart(session);
-    if (start != null) {
-      return DateFormat('HH:mm', context.locale.toString()).format(start);
-    }
-    return '–';
-  }
-
-  String _mochiEndsClock(FastingSessionState session) {
-    final fast = session.fast;
-    if (fast != null) {
-      return DateFormat(
-        'HH:mm',
-        context.locale.toString(),
-      ).format(fast.startedAt.add(_fastTarget(session)));
-    }
-    final start = _nextFastStart(session);
-    if (start != null) {
-      return DateFormat(
-        'HH:mm',
-        context.locale.toString(),
-      ).format(start.add(_fastTarget(session)));
-    }
-    return '–';
   }
 
   /// Aktif oruç yokken "başladı" denmez: sıradaki saat gelecek zamandır.
@@ -720,11 +698,7 @@ class _FastingViewState extends State<FastingView> {
                 },
               ),
               FastingMochiPlanCard(
-                fastHours: _todayFastHours(session) ?? _planHours(planTitle),
-                eatHours: _todayEatHours(session) ?? _eatHours(planTitle),
-                startedLabel: _mochiStartedClock(session),
-                endsLabel: _mochiEndsClock(session),
-                onStart: () => unawaited(_pickStart(session)),
+                onStart: (plan) => unawaited(_startMochiPlan(session, plan)),
               ),
               const SizedBox(height: 60),
             ],
@@ -1515,10 +1489,7 @@ final class _TimeRow extends StatelessWidget {
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              startedCaption.tr(),
-              style: AppTextStyles.fastingBoundLabel,
-            ),
+            Text(startedCaption.tr(), style: AppTextStyles.fastingBoundLabel),
             Text(started ?? '–', style: AppTextStyles.fastingBoundValue),
           ],
         ),
@@ -1526,10 +1497,7 @@ final class _TimeRow extends StatelessWidget {
         Column(
           crossAxisAlignment: CrossAxisAlignment.end,
           children: [
-            Text(
-              endsCaption.tr(),
-              style: AppTextStyles.fastingBoundLabel,
-            ),
+            Text(endsCaption.tr(), style: AppTextStyles.fastingBoundLabel),
             Text(ends ?? '–', style: AppTextStyles.fastingBoundValue),
           ],
         ),

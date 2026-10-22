@@ -1,42 +1,68 @@
-import 'dart:async';
-
 import 'package:easy_localization/easy_localization.dart';
 import 'package:fastingapp/core/di/injection.dart';
 import 'package:fastingapp/core/theme/app_text_styles.dart';
 import 'package:fastingapp/core/widgets/app_button.dart';
 import 'package:fastingapp/core/widgets/app_button_decoration.dart';
 import 'package:fastingapp/core/widgets/horseshoe_arc.dart';
-import 'package:fastingapp/domain/fasting/fasting_repository.dart';
+import 'package:fastingapp/domain/fasting/mochi_plan_repository.dart';
 import 'package:fastingapp/generated/app_images.g.dart';
 import 'package:fastingapp/generated/colors.gen.dart';
-import 'package:fastingapp/presentation/fasting/bloc/fasting_session_cubit.dart';
-import 'package:fastingapp/presentation/fasting/bloc/fasting_session_state.dart';
 import 'package:flutter/material.dart';
 
-/// Fasting sayfası altı — Mochi'nin bugünkü plan kartı.
-final class FastingMochiPlanCard extends StatelessWidget {
-  const FastingMochiPlanCard({
-    required this.fastHours,
-    required this.eatHours,
-    required this.startedLabel,
-    required this.endsLabel,
-    required this.onStart,
-    super.key,
-  });
+/// Fasting sayfası altı — Mochi'nin bugünkü önerisi.
+/// Üstteki yay kullanıcının o anki orucudur; burası onun kopyası değildir.
+final class FastingMochiPlanCard extends StatefulWidget {
+  const FastingMochiPlanCard({required this.onStart, super.key});
 
-  final int fastHours;
-  final int eatHours;
-  final String startedLabel;
-  final String endsLabel;
-  final VoidCallback onStart;
+  final ValueChanged<MochiDailyPlan> onStart;
 
   static const _arcDiameter = 280.0;
 
   @override
-  Widget build(BuildContext context) {
-    final total = (fastHours + eatHours).clamp(1, 48);
-    final progress = fastHours / total;
+  State<FastingMochiPlanCard> createState() => _FastingMochiPlanCardState();
+}
 
+class _FastingMochiPlanCardState extends State<FastingMochiPlanCard> {
+  MochiDailyPlan? _plan;
+  var _refreshed = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _load();
+  }
+
+  Future<void> _load() async {
+    try {
+      final plan = await getIt<MochiPlanRepository>().getPlan();
+      if (!mounted) return;
+      setState(() => _plan = plan);
+      if (!plan.settled && !_refreshed) {
+        _refreshed = true;
+        await Future<void>.delayed(const Duration(seconds: 3));
+        if (mounted) await _load();
+      }
+    } on Object {
+      if (!mounted || _plan != null) return;
+      setState(() => _plan = MochiDailyPlan.fallback());
+    }
+  }
+
+  String _clock(DateTime time) =>
+      DateFormat('HH:mm', context.locale.toString()).format(time);
+
+  String _insight(MochiDailyPlan plan) {
+    final text = plan.insight?.trim();
+    if (text != null && text.isNotEmpty) return text;
+    final key = 'fasting_page.mochi_plan_reason_${plan.reason}';
+    final translated = key.tr();
+    if (translated == key) return 'fasting_page.mochi_plan_insight'.tr();
+    return translated;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final plan = _plan;
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
       child: Column(
@@ -44,21 +70,28 @@ final class FastingMochiPlanCard extends StatelessWidget {
         children: [
           const _Header(),
           const SizedBox(height: 16),
-          _ArcBlock(
-            progress: progress,
-            fastHours: fastHours,
-            eatHours: eatHours,
-          ),
-          _TimeRow(started: startedLabel, ends: endsLabel),
-          const SizedBox(height: 16),
-          const _InsightBox(),
-          const SizedBox(height: 16),
-          AppButton(
-            label: 'fasting_page.mochi_plan_start'.tr(),
-            onPressed: onStart,
-            showIcon: false,
-            decoration: AppButtonDecoration.hungerResult(),
-          ),
+          if (plan == null)
+            const SizedBox(
+              height: 220,
+              child: Center(child: CircularProgressIndicator()),
+            )
+          else ...[
+            _ArcBlock(
+              progress: plan.fastHours / (plan.fastHours + plan.eatHours),
+              fastHours: plan.fastHours,
+              eatHours: plan.eatHours,
+            ),
+            _TimeRow(started: _clock(plan.startsAt), ends: _clock(plan.endsAt)),
+            const SizedBox(height: 16),
+            _InsightBox(text: _insight(plan)),
+            const SizedBox(height: 16),
+            AppButton(
+              label: 'fasting_page.mochi_plan_start'.tr(),
+              onPressed: () => widget.onStart(plan),
+              showIcon: false,
+              decoration: AppButtonDecoration.hungerResult(),
+            ),
+          ],
         ],
       ),
     );
@@ -262,57 +295,10 @@ final class _TimeRow extends StatelessWidget {
   }
 }
 
-/// Günün ipucu (`GET /fasts/daily-tip`); yüklenemezse yerel çeviri.
-final class _InsightBox extends StatefulWidget {
-  const _InsightBox();
+final class _InsightBox extends StatelessWidget {
+  const _InsightBox({required this.text});
 
-  @override
-  State<_InsightBox> createState() => _InsightBoxState();
-}
-
-class _InsightBoxState extends State<_InsightBox> {
-  String? _tipText;
-  StreamSubscription<String>? _fastChanges;
-  String? _loadedFor;
-
-  @override
-  void initState() {
-    super.initState();
-    unawaited(_load());
-    // Oruç başlayınca / bitince, plan (saat, süre, haftalık gün) değişince
-    // ve gün dönünce yeniden yüklenir; önceden yalnızca oruç değişiminde.
-    final session = getIt<FastingSessionCubit>();
-    _fastChanges = session.stream
-        .map(_keyOf)
-        .distinct()
-        .where((key) => key != _loadedFor)
-        .listen((_) => unawaited(_load()));
-  }
-
-  static String _keyOf(FastingSessionState s) {
-    final now = DateTime.now();
-    return '${s.fast?.id}|${s.plan?.signature}|${now.year}-${now.month}-${now.day}';
-  }
-
-  @override
-  void dispose() {
-    _fastChanges?.cancel();
-    super.dispose();
-  }
-
-  Future<void> _load() async {
-    _loadedFor = _keyOf(getIt<FastingSessionCubit>().state);
-    try {
-      final tip = await getIt<FastingRepository>().getDailyTip();
-      if (!mounted) return;
-      final text = tip?.text.trim();
-      setState(
-        () => _tipText = (text != null && text.isNotEmpty) ? text : null,
-      );
-    } on Object {
-      if (mounted) setState(() => _tipText = null);
-    }
-  }
+  final String text;
 
   @override
   Widget build(BuildContext context) {
@@ -325,7 +311,7 @@ class _InsightBoxState extends State<_InsightBox> {
       child: Padding(
         padding: const EdgeInsets.all(12),
         child: Text(
-          _tipText ?? 'fasting_page.mochi_plan_insight'.tr(),
+          text,
           style: AppTextStyles.fastingMochiPlanInsight,
         ),
       ),

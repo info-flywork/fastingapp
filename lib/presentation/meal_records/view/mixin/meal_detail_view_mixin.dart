@@ -161,7 +161,7 @@ mixin MealDetailViewMixin on State<MealDetailView> {
             if (id != null && id.isNotEmpty) await _meals.deleteMeal(id);
             return;
           }
-          endFast = choice == true;
+          endFast = choice ?? false;
         }
       }
       DataSync.afterWrite();

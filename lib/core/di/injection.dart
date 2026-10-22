@@ -15,6 +15,7 @@ import 'package:fastingapp/domain/chat/chat_repository.dart';
 import 'package:fastingapp/domain/content/content_repository.dart';
 import 'package:fastingapp/domain/fasting/fasting_repository.dart';
 import 'package:fastingapp/domain/fasting/forecast_repository.dart';
+import 'package:fastingapp/domain/fasting/mochi_plan_repository.dart';
 import 'package:fastingapp/domain/fasting/plan_catalog_repository.dart';
 import 'package:fastingapp/domain/gamification/challenges_repository.dart';
 import 'package:fastingapp/domain/gamification/world_repository.dart';
@@ -102,6 +103,9 @@ Future<void> configureDependencies() async {
     )
     ..registerLazySingleton<ForecastRepository>(
       () => ForecastRepository(getIt()),
+    )
+    ..registerLazySingleton<MochiPlanRepository>(
+      () => MochiPlanRepository(getIt()),
     )
     ..registerLazySingleton<FastingRepository>(() => FastingRepository(getIt()))
     ..registerLazySingleton<OnboardingDraft>(OnboardingDraft.new)

@@ -2,25 +2,25 @@ import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:easy_localization/easy_localization.dart';
-import 'package:fastingapp/core/utils/extensions/future_extensions.dart';
-import 'package:fastingapp/core/utils/weight_progress.dart';
 import 'package:fastingapp/core/di/injection.dart';
 import 'package:fastingapp/core/dialogs/app_dialogs.dart';
-import 'package:fastingapp/core/snackbar/app_snackbar.dart';
-import 'package:fastingapp/core/utils/enum/snackbar_type.dart'
-    show SnackBarType;
-import 'package:fastingapp/domain/user/user_repository.dart';
-import 'package:fastingapp/presentation/fasting/bloc/fasting_session_cubit.dart';
 import 'package:fastingapp/core/remote_images/app_image.dart';
 import 'package:fastingapp/core/router/route_paths.dart';
+import 'package:fastingapp/core/snackbar/app_snackbar.dart';
 import 'package:fastingapp/core/theme/app_text_styles.dart';
+import 'package:fastingapp/core/utils/enum/snackbar_type.dart'
+    show SnackBarType;
+import 'package:fastingapp/core/utils/extensions/future_extensions.dart';
+import 'package:fastingapp/core/utils/weight_progress.dart';
 import 'package:fastingapp/core/widgets/app_button.dart';
 import 'package:fastingapp/core/widgets/app_button_decoration.dart';
 import 'package:fastingapp/core/widgets/flip_clock_unit.dart';
 import 'package:fastingapp/core/widgets/weight_progress_bar.dart';
+import 'package:fastingapp/domain/user/user_repository.dart';
 import 'package:fastingapp/generated/app_images.g.dart';
 import 'package:fastingapp/generated/assets.gen.dart';
 import 'package:fastingapp/generated/colors.gen.dart';
+import 'package:fastingapp/presentation/fasting/bloc/fasting_session_cubit.dart';
 import 'package:fastingapp/presentation/fasting/view/fasting_first_time_view.dart';
 import 'package:fastingapp/presentation/home/bloc/home_bloc.dart';
 import 'package:fastingapp/presentation/home/bloc/home_state.dart';

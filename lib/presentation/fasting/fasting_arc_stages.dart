@@ -221,7 +221,7 @@ double mealArcMinGap(int fastMinutes, int eatMinutes) {
   final fast = fastMinutes > 0 ? fastMinutes : 960;
   final eat = eatMinutes > 0 ? eatMinutes : math.max(60, 1440 - fast);
   final cycle = fast + eat;
-  return ((eat / cycle) * 0.25).clamp(0.08, 0.12).toDouble();
+  return ((eat / cycle) * 0.25).clamp(0.08, 0.12);
 }
 
 /// Orucunu boz: yayın sol yarısı, plana göre (uzun oruç → biraz daha sağda).
@@ -230,7 +230,7 @@ double mealArcBreakT(int fastMinutes, int eatMinutes) {
   final eat = eatMinutes > 0 ? eatMinutes : math.max(60, 1440 - fast);
   final fastShare = fast / (fast + eat);
   // 12:12 → ~0.20, 16:8 → ~0.22, 18:6 → ~0.23, 20:4 → ~0.24
-  return (0.12 + 0.15 * fastShare).clamp(0.16, 0.26).toDouble();
+  return (0.12 + 0.15 * fastShare).clamp(0.16, 0.26);
 }
 
 /// Öğün (besle): yayda %60.

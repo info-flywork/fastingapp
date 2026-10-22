@@ -62,7 +62,6 @@ abstract final class AppUpdateGate {
     unawaited(
       showDialog<void>(
         context: context,
-        useRootNavigator: true,
         barrierDismissible: !blocking,
         builder: (_) => PopScope(
           canPop: !blocking,

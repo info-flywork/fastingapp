@@ -829,7 +829,7 @@ final class _RainbowShimmerPainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     final t = clock.value;
     // Üst bölgede yavaşça süzülen yumuşak ışık süpürmesi.
-    final sweep = (math.sin(t * 0.5) * 0.5 + 0.5);
+    final sweep = math.sin(t * 0.5) * 0.5 + 0.5;
     final cx = size.width * (0.2 + sweep * 0.6);
     final glow = Paint()
       ..blendMode = BlendMode.plus

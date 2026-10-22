@@ -1,12 +1,12 @@
 import 'dart:async';
 
-import 'package:fastingapp/core/network/network_exception.dart';
-import 'package:fastingapp/domain/notification/push_service.dart';
 import 'package:fastingapp/core/di/injection.dart';
+import 'package:fastingapp/core/network/network_exception.dart';
 import 'package:fastingapp/core/router/route_paths.dart';
 import 'package:fastingapp/data/model/auth/auth_response.dart';
 import 'package:fastingapp/domain/auth/auth_exception.dart';
 import 'package:fastingapp/domain/auth/auth_repository.dart';
+import 'package:fastingapp/domain/notification/push_service.dart';
 import 'package:fastingapp/domain/onboarding/onboarding_draft.dart';
 import 'package:fastingapp/presentation/auth/bloc/auth_bloc.dart';
 import 'package:fastingapp/presentation/auth/bloc/auth_event.dart';

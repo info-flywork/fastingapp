@@ -32,7 +32,7 @@ final class SplashLogo extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 20),
-        Text(
+        const Text(
           'MochiFast',
           style: TextStyle(
             fontFamily: FontFamily.sFProDisplay,

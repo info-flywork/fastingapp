@@ -3,9 +3,9 @@ import 'dart:typed_data';
 
 import 'package:dio/dio.dart';
 import 'package:easy_localization/easy_localization.dart';
-import 'package:fastingapp/core/managers/localization_manager.dart';
 import 'package:fastingapp/core/base/model/base_model.dart';
 import 'package:fastingapp/core/base/model/base_response.dart';
+import 'package:fastingapp/core/managers/localization_manager.dart';
 import 'package:fastingapp/core/network/network_exception.dart';
 import 'package:fastingapp/core/network/network_manager.dart';
 import 'package:fastingapp/core/utils/enum/request_type.dart';

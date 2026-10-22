@@ -2,13 +2,12 @@ import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:easy_localization/easy_localization.dart';
-import 'package:fastingapp/core/dialogs/app_dialogs.dart';
-import 'package:fastingapp/domain/trackers/trackers_repository.dart';
-import 'package:fastingapp/core/sync/data_sync.dart';
 import 'package:fastingapp/core/di/injection.dart';
+import 'package:fastingapp/core/dialogs/app_dialogs.dart';
 import 'package:fastingapp/core/network/network_exception.dart';
 import 'package:fastingapp/core/router/route_paths.dart';
 import 'package:fastingapp/core/snackbar/app_snackbar.dart';
+import 'package:fastingapp/core/sync/data_sync.dart';
 import 'package:fastingapp/core/theme/app_text_styles.dart';
 import 'package:fastingapp/core/utils/enum/snackbar_type.dart';
 import 'package:fastingapp/core/widgets/app_button.dart';
@@ -16,6 +15,7 @@ import 'package:fastingapp/core/widgets/app_button_decoration.dart';
 import 'package:fastingapp/core/widgets/app_shimmer.dart';
 import 'package:fastingapp/core/widgets/horseshoe_arc.dart';
 import 'package:fastingapp/domain/nutrition/nutrition_repository.dart';
+import 'package:fastingapp/domain/trackers/trackers_repository.dart';
 import 'package:fastingapp/generated/app_images.g.dart';
 import 'package:fastingapp/generated/assets.gen.dart';
 import 'package:fastingapp/generated/colors.gen.dart';
@@ -63,12 +63,12 @@ class _ProteinTrackerViewState extends State<ProteinTrackerView> {
     } else {
       _scheduleEntranceDone();
     }
-    unawaited(_load(force: true));
+    unawaited(_load());
   }
 
   void _seedLocal() {
     final cachedDay = _nutrition.cachedDay();
-    final cachedWeek = _nutrition.cachedWeek(metric: 'protein');
+    final cachedWeek = _nutrition.cachedWeek();
     if (cachedDay == null && cachedWeek == null) return;
     if (cachedDay != null) _day = cachedDay;
     if (cachedWeek != null) _week = cachedWeek;
@@ -96,7 +96,7 @@ class _ProteinTrackerViewState extends State<ProteinTrackerView> {
     try {
       final results = await Future.wait([
         _nutrition.getDay(force: force),
-        _nutrition.getWeek(metric: 'protein', force: force),
+        _nutrition.getWeek(force: force),
       ]);
       if (!mounted) return;
       final revealFromShimmer = _showShimmer || !_hasContent;
@@ -138,7 +138,7 @@ class _ProteinTrackerViewState extends State<ProteinTrackerView> {
     try {
       await getIt<TrackersRepository>().updateGoals({'proteinGoalG': value});
       DataSync.afterWrite();
-      if (mounted) await _load(force: true);
+      if (mounted) await _load();
     } on Object catch (e) {
       if (mounted) AppSnackbar.showError(context, e);
     }
@@ -146,7 +146,7 @@ class _ProteinTrackerViewState extends State<ProteinTrackerView> {
 
   Future<void> _onCalculate() async {
     await context.pushNamed(RoutePaths.caloriesCamera.name);
-    if (mounted) await _load(force: true);
+    if (mounted) await _load();
   }
 
   @override
@@ -187,7 +187,7 @@ class _ProteinTrackerViewState extends State<ProteinTrackerView> {
                 child: _showShimmer
                     ? const _ProteinShimmerBody()
                     : RefreshIndicator(
-                        onRefresh: () => _load(force: true),
+                        onRefresh: _load,
                         child: ListView(
                           physics: const AlwaysScrollableScrollPhysics(
                             parent: ClampingScrollPhysics(),

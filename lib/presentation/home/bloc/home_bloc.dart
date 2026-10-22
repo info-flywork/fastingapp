@@ -1,7 +1,7 @@
 import 'package:fastingapp/core/di/injection.dart';
-import 'package:fastingapp/data/model/user/home_summary.dart';
-import 'package:fastingapp/core/sync/data_sync.dart';
 import 'package:fastingapp/core/network/network_exception.dart';
+import 'package:fastingapp/core/sync/data_sync.dart';
+import 'package:fastingapp/data/model/user/home_summary.dart';
 import 'package:fastingapp/domain/revenue_cat/revenue_cat_service.dart';
 import 'package:fastingapp/domain/user/user_repository.dart';
 import 'package:fastingapp/presentation/auth/bloc/auth_bloc.dart';
@@ -175,10 +175,7 @@ final class HomeBloc extends Bloc<HomeEvent, HomeState> {
         user: current.user,
         progress: current.progress,
         isPremium: current.isPremium,
-        summary: summary.copyWith(
-          waterMl: event.waterMl,
-          steps: event.steps,
-        ),
+        summary: summary.copyWith(waterMl: event.waterMl, steps: event.steps),
       ),
     );
   }

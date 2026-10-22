@@ -2,28 +2,28 @@ import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:easy_localization/easy_localization.dart';
-import 'package:fastingapp/generated/assets.gen.dart';
-import 'package:fastingapp/domain/trackers/trackers_repository.dart';
-import 'package:fastingapp/core/utils/weight_progress.dart';
-import 'package:fastingapp/presentation/fasting/fasting_finish_flow.dart';
-import 'package:fastingapp/core/dialogs/app_dialogs.dart';
 import 'package:fastingapp/core/di/injection.dart';
+import 'package:fastingapp/core/dialogs/app_dialogs.dart';
 import 'package:fastingapp/core/network/network_exception.dart';
 import 'package:fastingapp/core/router/route_paths.dart';
 import 'package:fastingapp/core/snackbar/app_snackbar.dart';
 import 'package:fastingapp/core/sync/data_sync.dart';
-import 'package:fastingapp/domain/nutrition/meals_repository.dart';
 import 'package:fastingapp/core/theme/app_text_styles.dart';
 import 'package:fastingapp/core/utils/enum/snackbar_type.dart';
+import 'package:fastingapp/core/utils/weight_progress.dart';
 import 'package:fastingapp/core/widgets/app_button.dart';
 import 'package:fastingapp/core/widgets/app_button_decoration.dart';
 import 'package:fastingapp/core/widgets/app_shimmer.dart';
 import 'package:fastingapp/core/widgets/arc_progress_gauge.dart';
 import 'package:fastingapp/core/widgets/onboarding/onboarding_stepper_field.dart';
 import 'package:fastingapp/core/widgets/weight_progress_bar.dart';
+import 'package:fastingapp/domain/nutrition/meals_repository.dart';
 import 'package:fastingapp/domain/nutrition/nutrition_repository.dart';
+import 'package:fastingapp/domain/trackers/trackers_repository.dart';
 import 'package:fastingapp/generated/app_images.g.dart';
+import 'package:fastingapp/generated/assets.gen.dart';
 import 'package:fastingapp/generated/colors.gen.dart';
+import 'package:fastingapp/presentation/fasting/fasting_finish_flow.dart';
 import 'package:fastingapp/presentation/home/bloc/home_bloc.dart';
 import 'package:fastingapp/presentation/home/bloc/home_state.dart';
 import 'package:flutter/material.dart';
@@ -78,7 +78,7 @@ class _CaloriesTrackerViewState extends State<CaloriesTrackerView>
                       cardOverlap: _cardOverlap,
                     )
                   : RefreshIndicator(
-                      onRefresh: () => loadDay(force: true),
+                      onRefresh: loadDay,
                       child: SingleChildScrollView(
                         physics: const AlwaysScrollableScrollPhysics(
                           parent: ClampingScrollPhysics(),
@@ -218,11 +218,11 @@ final class _CaloriesShimmerBody extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               SizedBox(height: headerHeight - cardOverlap + 24),
-              AppShimmer(
+              const AppShimmer(
                 child: Padding(
-                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+                  padding: EdgeInsets.fromLTRB(16, 0, 16, 16),
                   child: Column(
-                    children: const [
+                    children: [
                       AppShimmerBone(
                         height: 168,
                         borderRadius: BorderRadius.all(Radius.circular(20)),

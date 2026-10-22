@@ -1,10 +1,10 @@
 import 'dart:async';
 
 import 'package:easy_localization/easy_localization.dart';
+import 'package:fastingapp/core/base/model/base_model.dart';
 import 'package:fastingapp/core/di/injection.dart';
 import 'package:fastingapp/core/dialogs/app_dialogs.dart';
 import 'package:fastingapp/core/network/network_manager.dart';
-import 'package:fastingapp/core/base/model/base_model.dart';
 import 'package:fastingapp/core/snackbar/app_snackbar.dart';
 import 'package:fastingapp/core/utils/enum/request_type.dart';
 import 'package:fastingapp/core/widgets/app_loading.dart';

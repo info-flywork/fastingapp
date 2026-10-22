@@ -145,7 +145,9 @@ class _HomeFastingCardState extends State<HomeFastingCard> {
                   : null,
               border: goalReached
                   ? Border.all(
-                      color: ColorName.colorMealPositive.withValues(alpha: 0.65),
+                      color: ColorName.colorMealPositive.withValues(
+                        alpha: 0.65,
+                      ),
                       width: 1.5,
                     )
                   : null,
@@ -192,14 +194,15 @@ class _HomeFastingCardState extends State<HomeFastingCard> {
                         child: Transform.scale(
                           // clockv2 şeffaf; clock beyaz kare — tamamlandıda v2.
                           scale: goalReached ? 1.15 : 1.21,
-                          child: (goalReached
-                                  ? AppImages.mascotClockv2
-                                  : AppImages.mascotClock)
-                              .image(
-                                width: 96,
-                                height: 96,
-                                fit: BoxFit.contain,
-                              ),
+                          child:
+                              (goalReached
+                                      ? AppImages.mascotClockv2
+                                      : AppImages.mascotClock)
+                                  .image(
+                                    width: 96,
+                                    height: 96,
+                                    fit: BoxFit.contain,
+                                  ),
                         ),
                       ),
                     ),

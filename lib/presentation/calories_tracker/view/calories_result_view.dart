@@ -3,9 +3,8 @@ import 'dart:io';
 import 'dart:math' as math;
 
 import 'package:easy_localization/easy_localization.dart';
-import 'package:fastingapp/presentation/fasting/fasting_finish_flow.dart';
-import 'package:fastingapp/core/dialogs/app_dialogs.dart';
 import 'package:fastingapp/core/di/injection.dart';
+import 'package:fastingapp/core/dialogs/app_dialogs.dart';
 import 'package:fastingapp/core/network/network_exception.dart';
 import 'package:fastingapp/core/remote_images/app_image.dart';
 import 'package:fastingapp/core/sync/data_sync.dart';
@@ -18,6 +17,7 @@ import 'package:fastingapp/domain/revenue_cat/revenue_cat_service.dart';
 import 'package:fastingapp/generated/app_images.g.dart';
 import 'package:fastingapp/generated/assets.gen.dart';
 import 'package:fastingapp/generated/colors.gen.dart';
+import 'package:fastingapp/presentation/fasting/fasting_finish_flow.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
@@ -41,7 +41,6 @@ class _CaloriesResultViewState extends State<CaloriesResultView>
     final top = MediaQuery.paddingOf(context).top;
     final bottom = MediaQuery.paddingOf(context).bottom;
     final a = analysis;
-
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: SystemUiOverlayStyle.light,
       child: Scaffold(
@@ -68,7 +67,7 @@ class _CaloriesResultViewState extends State<CaloriesResultView>
                 bottomInset: math.max(bottom, 10),
                 loading: a == null && errorMessage == null,
                 // Örnek başlık hiç gösterilmez: sonuç yoksa durum başlığı.
-                title: a?.succeeded == true
+                title: a?.succeeded ?? false
                     ? (a!.mealTitle ?? '')
                     : errorMessage == null
                     ? 'calories_result.analyzing'.tr()
@@ -78,7 +77,7 @@ class _CaloriesResultViewState extends State<CaloriesResultView>
                 carbsG: a?.carbsG,
                 fatG: a?.fatG,
                 errorMessage: errorMessage,
-                canSave: a?.succeeded == true,
+                canSave: a?.succeeded ?? false,
                 saving: saving,
                 onSave: onSaveMeal,
                 // Süren analiz: aynı analizi yokla; değilse yeni fotoğraf.

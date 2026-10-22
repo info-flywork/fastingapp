@@ -1,8 +1,8 @@
 import 'package:fastingapp/core/base/model/base_model.dart';
 import 'package:fastingapp/core/network/network_manager.dart';
 import 'package:fastingapp/core/utils/enum/request_type.dart';
-import 'package:fastingapp/domain/fasting/weekly_schedule.dart';
 import 'package:fastingapp/data/model/auth/no_content.dart';
+import 'package:fastingapp/domain/fasting/weekly_schedule.dart';
 import 'package:uuid/uuid.dart';
 
 /// Oruç çekirdeği (`/v1/fasts/*`, `/v1/plans/current`, `/v1/catalog/stages`).
@@ -77,8 +77,8 @@ final class FastingRepository {
   /// Zorlanma olayı (`POST /fasts/:id/struggles`, oruç yoksa `/struggles`).
   /// Forecast'taki "en zor saat" bu kayıtlardan hesaplanır.
   Future<void> logStruggle({
-    String? fastId,
     required String reason,
+    String? fastId,
     String? tip,
   }) async {
     await _network.send<_EmptyData>(

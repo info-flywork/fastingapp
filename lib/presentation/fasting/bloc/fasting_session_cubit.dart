@@ -60,9 +60,10 @@ final class FastingSessionCubit extends Cubit<FastingSessionState> {
     }
   }
 
-  Future<void> startFast({DateTime? startedAt}) async {
+  Future<void> startFast({DateTime? startedAt, int? targetMinutes}) async {
     final start = startedAt ?? DateTime.now();
-    final targetMinutes =
+    final minutes =
+        targetMinutes ??
         state.plan?.fastMinutes ??
         state.fast?.targetMinutes ??
         16 * 60;
@@ -71,11 +72,9 @@ final class FastingSessionCubit extends Cubit<FastingSessionState> {
     final optimistic = ActiveFast(
       id: '_local',
       planCode: state.plan?.planCode,
-      targetMinutes: targetMinutes,
+      targetMinutes: minutes,
       startedAt: start,
-      plannedEndAt: start.add(Duration(minutes: targetMinutes)),
-      elapsedMinutes: 0,
-      progress: 0,
+      plannedEndAt: start.add(Duration(minutes: minutes)),
       serverTime: fetchedAt,
     );
     final previous = state;
@@ -92,7 +91,10 @@ final class FastingSessionCubit extends Cubit<FastingSessionState> {
     try {
       // POST yanıtı oruç DTO'sunu taşır: ayrıca /fasts/active + /plans/current
       // istenmez; seri/hafta için özet (afterWrite) yenilenir.
-      final fast = await _repository.startFast(startedAt: start);
+      final fast = await _repository.startFast(
+        startedAt: start,
+        targetMinutes: targetMinutes,
+      );
       final at = DateTime.now();
       emit(
         state.copyWith(
@@ -109,15 +111,10 @@ final class FastingSessionCubit extends Cubit<FastingSessionState> {
         await refresh(showLoading: false);
         return;
       }
-      emit(
-        previous.copyWith(isLoading: false, errorMessage: e.message),
-      );
+      emit(previous.copyWith(isLoading: false, errorMessage: e.message));
     } on Object catch (e) {
       emit(
-        previous.copyWith(
-          isLoading: false,
-          errorMessage: errorMessageOf(e),
-        ),
+        previous.copyWith(isLoading: false, errorMessage: errorMessageOf(e)),
       );
     }
   }
@@ -140,9 +137,7 @@ final class FastingSessionCubit extends Cubit<FastingSessionState> {
         notes: notes,
         weightKg: weightKg,
       );
-      emit(
-        state.copyWith(isLoading: false, clearFast: true, eatingWindow: null),
-      );
+      emit(state.copyWith(isLoading: false, clearFast: true));
       await refresh(showLoading: false);
       // Seri, hafta şeridi, XP; bitişte kilo girildiyse profil de.
       DataSync.afterWrite(profile: weightKg != null);
@@ -181,11 +176,11 @@ final class FastingSessionCubit extends Cubit<FastingSessionState> {
 
   Future<bool> _putPlan({
     required String planCode,
+    required bool safetyAcknowledged,
     String? timing,
     String? eatStart,
     String? eatEnd,
     List<WeeklyDay>? weeklySchedule,
-    required bool safetyAcknowledged,
   }) async {
     Future<CurrentPlanEnvelope> put() => _repository.setCurrentPlan(
       planCode: planCode,
@@ -241,12 +236,12 @@ final class FastingSessionCubit extends Cubit<FastingSessionState> {
   /// [restartWithSameData] ise aynı [startedAt] ile yeni planda yeniden başlar.
   Future<bool> changePlanWhileFasting({
     required String planCode,
+    required bool restartWithSameData,
     String? timing,
     String? eatStart,
     String? eatEnd,
     List<WeeklyDay>? weeklySchedule,
     bool safetyAcknowledged = false,
-    required bool restartWithSameData,
   }) async {
     final fastId = state.fast?.id;
     final startedAt = state.fast?.startedAt;

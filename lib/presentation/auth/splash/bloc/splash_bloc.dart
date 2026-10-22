@@ -84,10 +84,7 @@ final class SplashBloc extends Bloc<SplashEvent, SplashState> {
   Future<void> _warmupNutrition() async {
     final nutrition = getIt<NutritionRepository>();
     try {
-      await Future.wait([
-        nutrition.getDay(),
-        nutrition.getWeek(metric: 'protein'),
-      ]);
+      await Future.wait([nutrition.getDay(), nutrition.getWeek()]);
     } on Object {
       // Kalori/protein sayfaları kendi shimmer/error akışına düşer.
     }

@@ -7,10 +7,10 @@ import 'package:fastingapp/core/di/injection.dart';
 import 'package:fastingapp/core/remote_images/app_image.dart';
 import 'package:fastingapp/core/theme/app_text_styles.dart';
 import 'package:fastingapp/domain/fasting/forecast_repository.dart';
-import 'package:fastingapp/presentation/fasting/bloc/fasting_session_cubit.dart';
-import 'package:fastingapp/presentation/fasting/bloc/fasting_session_state.dart';
 import 'package:fastingapp/generated/app_images.g.dart';
 import 'package:fastingapp/generated/colors.gen.dart';
+import 'package:fastingapp/presentation/fasting/bloc/fasting_session_cubit.dart';
+import 'package:fastingapp/presentation/fasting/bloc/fasting_session_state.dart';
 import 'package:flutter/material.dart';
 
 enum _ForecastDay { easy, moderate, hard }

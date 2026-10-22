@@ -86,7 +86,6 @@ final class FastingOmhWidgetView extends StatelessWidget {
                 child: AppImages.mascotOmh.image(
                   height: 260,
                   fit: BoxFit.contain,
-                  gaplessPlayback: true,
                 ),
               ),
             ],

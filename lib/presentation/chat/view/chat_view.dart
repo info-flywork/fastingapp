@@ -242,7 +242,7 @@ class _ChatViewState extends State<ChatView> {
                     _cubit.clearError();
                   }
                 },
-                buildWhen: (prev, next) => _chatContentChanged(prev, next),
+                buildWhen: _chatContentChanged,
                 builder: (context, state) {
                   if (_stickToBottom && state.hasConversation) {
                     _scrollToBottom(animated: false);

@@ -99,7 +99,6 @@ final class FastingPlanWidgetView extends StatelessWidget {
                 child: AppImages.mascotWidget.image(
                   height: 230,
                   fit: BoxFit.contain,
-                  gaplessPlayback: true,
                 ),
               ),
             ],

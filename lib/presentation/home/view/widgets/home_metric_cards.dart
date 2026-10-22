@@ -3,13 +3,13 @@ part of '../home_view.dart';
 /// Su ve adım metrik kartları (yan yana).
 final class HomeMetricCards extends StatelessWidget {
   const HomeMetricCards({
+    required this.onWaterTapped,
+    required this.onStepsTapped,
     this.waterMl = 0,
     this.waterGoalMl = 2500,
     this.steps = 0,
     this.stepsGoal = 8000,
     this.waterUnit = 'ml',
-    required this.onWaterTapped,
-    required this.onStepsTapped,
     super.key,
   });
 
@@ -78,11 +78,11 @@ final class _MetricCard extends StatelessWidget {
     required this.goal,
     required this.valueKey,
     required this.goalKey,
-    this.format,
-    this.formatGoal,
     required this.trackColor,
     required this.fillColor,
     required this.progress,
+    this.format,
+    this.formatGoal,
     this.liquid = false,
     this.onTap,
   });
@@ -151,9 +151,8 @@ final class _MetricCard extends StatelessWidget {
                         style: AppTextStyles.homeMetricValue.copyWith(
                           color: const Color(0xFF1C1C21),
                         ),
-                        format: (n) => valueKey.tr(
-                          args: [format?.call(n) ?? '$n'],
-                        ),
+                        format: (n) =>
+                            valueKey.tr(args: [format?.call(n) ?? '$n']),
                       ),
                     ),
                     TextSpan(

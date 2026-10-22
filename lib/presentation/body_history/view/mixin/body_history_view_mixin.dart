@@ -312,7 +312,7 @@ mixin BodyHistoryViewMixin on State<BodyHistoryView> {
       DataSync.afterWrite(profile: true);
       if (!mounted) return;
       setState(() {
-        if (summary.goalKg != null) targetKg = summary.goalKg!;
+        if (summary.goalKg != null) targetKg = summary.goalKg;
       });
     } on Object catch (e) {
       if (!mounted) return;
