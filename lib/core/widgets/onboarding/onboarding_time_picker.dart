@@ -20,10 +20,10 @@ final class OnboardingTimePicker extends StatefulWidget {
   final ValueChanged<int> onMinuteChanged;
 
   @override
-  State<OnboardingTimePicker> createState() => _OnboardingTimePickerState();
+  State<OnboardingTimePicker> createState() => OnboardingTimePickerState();
 }
 
-class _OnboardingTimePickerState extends State<OnboardingTimePicker> {
+final class OnboardingTimePickerState extends State<OnboardingTimePicker> {
   /// Seçili satır: 12 + 40 (metin) + 12 divider boşluğu.
   static const _itemExtent = 64.0;
   static const _visibleCount = 3;
@@ -31,6 +31,20 @@ class _OnboardingTimePickerState extends State<OnboardingTimePicker> {
 
   late final FixedExtentScrollController _hourController;
   late final FixedExtentScrollController _minuteController;
+
+  /// Tekerleğin ortasında duran değer. Kayıt, son bildirimi değil bunu okur.
+  int get selectedHour => _selected(_hourController, 24, widget.hour);
+
+  int get selectedMinute => _selected(_minuteController, 60, widget.minute);
+
+  int _selected(
+    FixedExtentScrollController controller,
+    int count,
+    int fallback,
+  ) {
+    if (!controller.hasClients) return fallback;
+    return controller.selectedItem % count;
+  }
 
   int _loopCenter(int itemCount) => itemCount * (_loopPasses ~/ 2);
 

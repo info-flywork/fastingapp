@@ -3,12 +3,14 @@ import 'dart:math' as math;
 
 import 'package:easy_localization/easy_localization.dart';
 import 'package:fastingapp/core/di/injection.dart';
-import 'package:fastingapp/presentation/fasting/bloc/fasting_session_cubit.dart';
 import 'package:fastingapp/core/remote_images/app_image.dart';
 import 'package:fastingapp/core/theme/app_text_styles.dart';
 import 'package:fastingapp/generated/app_images.g.dart';
 import 'package:fastingapp/generated/assets.gen.dart';
 import 'package:fastingapp/generated/colors.gen.dart';
+import 'package:fastingapp/presentation/fasting/bloc/fasting_session_cubit.dart';
+import 'package:fastingapp/presentation/fasting/bloc/fasting_session_state.dart';
+import 'package:fastingapp/presentation/fasting/fasting_arc_stages.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
@@ -28,15 +30,51 @@ class _FastingBodyStatusViewState extends State<FastingBodyStatusView> {
   final _scroll = ScrollController();
   var _step = 0;
 
+  /// Bu planın aşamaları (katalog sırası). Daha uzun oruçların aşamaları yok.
+  late final List<int> _planStages;
+
+  /// Ulaşılan son aşama (katalog sırası); bundan ilerisine tıklanamaz.
+  late final int _unlocked;
+
   @override
   void initState() {
     super.initState();
     final cubit = getIt<FastingSessionCubit>();
-    final pos = cubit.state.fast?.stage?.position;
-    if (pos != null && pos > 0) {
-      _step = (pos - 1).clamp(0, _stages.length - 1);
-    }
+    final session = cubit.state;
+    final targetHours = _targetHours(session);
+    _planStages = bodyPlanStageIndices(targetHours);
+    _unlocked = _unlockedIndex(session, targetHours);
+    _step = _unlocked;
     unawaited(cubit.ensureBodyStages());
+    WidgetsBinding.instance.addPostFrameCallback(
+      (_) => _reveal(_planStages.indexOf(_step)),
+    );
+  }
+
+  double _targetHours(FastingSessionState session) {
+    final minutes =
+        session.fast?.targetMinutes ?? session.plan?.fastMinutes ?? 0;
+    if (minutes > 0) return minutes / 60;
+    return 16;
+  }
+
+  /// Oruç kartıyla aynı aşama. Hedef dolunca planın son aşaması açılır.
+  int _unlockedIndex(FastingSessionState session, double targetHours) {
+    final metrics = session.liveMetrics;
+    if (metrics != null && session.isFasting) {
+      return bodyPlanStageIndex(
+        targetHours: targetHours,
+        elapsedHours: metrics.elapsed.inSeconds / 3600,
+      );
+    }
+    final pos = session.fast?.stage?.position;
+    if (pos != null && pos > 0) {
+      final catalog = pos - 1;
+      for (var i = _planStages.length - 1; i >= 0; i--) {
+        if (_planStages[i] <= catalog) return _planStages[i];
+      }
+    }
+    return _planStages.first;
   }
 
   @override
@@ -46,17 +84,22 @@ class _FastingBodyStatusViewState extends State<FastingBodyStatusView> {
   }
 
   void _select(int index) {
+    if (index > _unlocked) return;
     setState(() => _step = index);
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted || !_scroll.hasClients) return;
-      const stride = _circle + _connector;
-      final viewport = _scroll.position.viewportDimension;
-      final target = (index * stride + _circle / 2 - viewport / 2).clamp(
-        0.0,
-        _scroll.position.maxScrollExtent,
-      );
-      _scroll.animateTo(target, duration: _motion, curve: Curves.easeOutCubic);
-    });
+    WidgetsBinding.instance.addPostFrameCallback((_) => _reveal(index));
+  }
+
+  void _reveal(int index) {
+    if (!mounted || !_scroll.hasClients) return;
+    const stride = _circle + _connector;
+    final viewport = _scroll.position.viewportDimension;
+    if (viewport <= 0) return;
+    final target = (index * stride + _circle / 2 - viewport / 2).clamp(
+      0.0,
+      _scroll.position.maxScrollExtent,
+    );
+    if ((_scroll.offset - target).abs() < 1) return;
+    _scroll.animateTo(target, duration: _motion, curve: Curves.easeOutCubic);
   }
 
   @override
@@ -72,7 +115,13 @@ class _FastingBodyStatusViewState extends State<FastingBodyStatusView> {
           children: [
             const _Header(),
             const SizedBox(height: 28),
-            _Stepper(step: _step, scroll: _scroll, onTap: _select),
+            _Stepper(
+              order: _planStages,
+              step: _step,
+              unlocked: _unlocked,
+              scroll: _scroll,
+              onTap: _select,
+            ),
             const SizedBox(height: 20),
             _AnimatedCopy(step: _step),
           ],
@@ -236,12 +285,19 @@ final class _BackButton extends StatelessWidget {
 
 final class _Stepper extends StatelessWidget {
   const _Stepper({
+    required this.order,
     required this.step,
+    required this.unlocked,
     required this.scroll,
     required this.onTap,
   });
 
+  /// Katalog sırası; yalnızca bu plana giren aşamalar.
+  final List<int> order;
+
+  /// Seçili ve ulaşılmış aşama, katalog sırası.
   final int step;
+  final int unlocked;
   final ScrollController scroll;
   final ValueChanged<int> onTap;
 
@@ -253,18 +309,19 @@ final class _Stepper extends StatelessWidget {
       scrollDirection: Axis.horizontal,
       child: Row(
         children: [
-          for (var i = 0; i < _stages.length; i++) ...[
-            if (i > 0)
+          for (var v = 0; v < order.length; v++) ...[
+            if (v > 0)
               SizedBox(
                 width: _connector,
-                child: _StepLine(solid: step >= i),
+                child: _StepLine(solid: unlocked >= order[v]),
               ),
             _StepCircle(
-              stage: _stages[i],
-              reached: i <= step,
-              partial: i == step && i < _stages.length - 1,
-              ringOnLeft: i > 0,
-              onTap: () => onTap(i),
+              stage: _stages[order[v]],
+              reached: order[v] <= unlocked,
+              partial: order[v] == step && v < order.length - 1,
+              ringOnLeft: v > 0,
+              // Tamamlanmamış aşamaya geçilemez.
+              onTap: order[v] <= unlocked ? () => onTap(order[v]) : null,
             ),
           ],
         ],
@@ -319,14 +376,14 @@ final class _StepCircle extends StatelessWidget {
     required this.reached,
     required this.partial,
     required this.ringOnLeft,
-    required this.onTap,
+    this.onTap,
   });
 
   final _Stage stage;
   final bool reached;
   final bool partial;
   final bool ringOnLeft;
-  final VoidCallback onTap;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {

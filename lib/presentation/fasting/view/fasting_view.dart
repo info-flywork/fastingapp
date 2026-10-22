@@ -12,6 +12,9 @@ import 'package:fastingapp/core/sync/data_sync.dart';
 import 'package:fastingapp/domain/fasting/fasting_repository.dart';
 import 'package:fastingapp/domain/fasting/weekly_schedule.dart';
 import 'package:fastingapp/domain/revenue_cat/revenue_cat_service.dart';
+import 'package:fastingapp/domain/user/user_repository.dart';
+import 'package:fastingapp/presentation/auth/bloc/auth_bloc.dart';
+import 'package:fastingapp/presentation/auth/bloc/auth_state.dart';
 import 'package:fastingapp/presentation/fasting/bloc/fasting_session_cubit.dart';
 import 'package:fastingapp/presentation/fasting/bloc/fasting_session_state.dart';
 import 'package:fastingapp/core/remote_images/app_image.dart';
@@ -33,6 +36,7 @@ import 'package:fastingapp/presentation/fasting/view/fasting_plan_day_card.dart'
 import 'package:fastingapp/presentation/fasting/view/fasting_plan_sheet.dart';
 import 'package:fastingapp/presentation/fasting/view/fasting_start_sheet.dart';
 import 'package:fastingapp/presentation/home/bloc/home_bloc.dart';
+import 'package:fastingapp/presentation/meal_records/meal_detail_args.dart';
 import 'package:fastingapp/presentation/home/bloc/home_state.dart';
 import 'package:fastingapp/presentation/home/view/home_view.dart';
 import 'package:fastingapp/presentation/home/weight_entry_flow.dart';
@@ -66,13 +70,14 @@ class _FastingViewState extends State<FastingView> {
   @override
   void initState() {
     super.initState();
-    // Ana sayfa özeti oruç durumunu zaten getirdiyse tekrar istenmez;
-    // yoksa ya da bayatsa (1 dk) sessizce tazelenir.
+    // Önce özet/önbellek — uzak /fasts/active beklerken boş 00:00:00 kalmasın.
+    final hadSession = _cubit.state.fetchedAt != null;
+    if (!hadSession) _seedFromHomeSummary();
     final fetchedAt = _cubit.state.fetchedAt;
-    if (fetchedAt == null) {
-      unawaited(_cubit.refresh());
-    } else if (DateTime.now().difference(fetchedAt) >
-        const Duration(minutes: 1)) {
+    // Loading gösterme: iskelet/boş durum uzamasın; arka planda doğrula.
+    if (fetchedAt == null ||
+        !hadSession ||
+        DateTime.now().difference(fetchedAt) > const Duration(minutes: 1)) {
       unawaited(_cubit.refresh(showLoading: false));
     }
     _tick = Timer.periodic(const Duration(seconds: 1), (_) {
@@ -81,6 +86,31 @@ class _FastingViewState extends State<FastingView> {
       }
     });
     // Widget yayını uygulama kökünde (`AppSyncScope`), cubit değiştikçe.
+  }
+
+  /// Ana sayfa / disk özetinden anında doldur (ağ yanıtını bekleme).
+  void _seedFromHomeSummary() {
+    final home = getIt<HomeBloc>().state;
+    if (home is HomeLoaded && home.summary != null) {
+      final s = home.summary!;
+      _cubit.applyFromSummary(
+        fast: s.activeFast,
+        eatingWindow: s.eatingWindow,
+        plan: s.plan,
+        serverTime: s.serverTime,
+      );
+      return;
+    }
+    final auth = getIt<AuthBloc>().state;
+    if (auth is! AuthAuthenticated) return;
+    final cached = getIt<UserRepository>().cachedSummary(auth.user.id);
+    if (cached == null) return;
+    _cubit.applyFromSummary(
+      fast: cached.activeFast,
+      eatingWindow: cached.eatingWindow,
+      plan: cached.plan,
+      serverTime: cached.serverTime,
+    );
   }
 
   @override
@@ -269,56 +299,111 @@ class _FastingViewState extends State<FastingView> {
         session.plan?.fastMinutes ??
         _planHours(planTitle) * 60;
 
+    final eatMinutes = (session.eatingWindow?.eatMinutes ?? 0) > 0
+        ? session.eatingWindow!.eatMinutes
+        : math.max(60, 24 * 60 - fastMinutes);
+    // Oruç bitti, öğün penceresi açık: iki sekme de ana sayfadaki gibi
+    // kalan süreyi sayar. Boş 00:00:00 oruç saati değildir.
+    if (session.isEating) {
+      final remaining = metrics?.remainingToPlannedEnd ?? Duration.zero;
+      final used = eatMinutes <= 0
+          ? 0.0
+          : (live.inSeconds / (eatMinutes * 60)).clamp(0.0, 1.0);
+      if (!_mealSelected) {
+        return _ArcView(
+          stages: const [],
+          card: null,
+          progress: used,
+          elapsed: remaining,
+          heading: 'fasting_page.on_break',
+          captionKey: 'fasting_page.eating_remaining',
+        );
+      }
+    }
+
     if (!_mealSelected) {
-      // Vücut sekmesi: orucun başından hedefe; hedef geçince yay dolu kalır,
-      // sayaç ve aşamalar ilerlemeye devam eder.
+      // Vücut sekmesi: orucun başından hedefe. Hedef dolunca sayaç hedefte
+      // donar, yay %100 kalır — aşım ("Hedef +…") gösterilmez.
       final fasting = session.isFasting;
-      final elapsed = fasting ? live : Duration.zero;
+      final target = Duration(minutes: fastMinutes);
+      final goalReached = fasting && live >= target;
+      final elapsed = !fasting ? Duration.zero : (goalReached ? target : live);
       final hours = elapsed.inSeconds / 3600;
-      final over = elapsed - Duration(minutes: fastMinutes);
       return _ArcView(
         stages: bodyArcStages(
           targetHours: fastMinutes / 60,
           elapsedHours: hours,
           active: fasting,
         ),
-        card: fasting ? bodyStage(bodyStageIndex(hours), reached: true) : null,
-        progress: fasting ? (metrics?.progress ?? 0.0) : 0.0,
-        elapsed: elapsed,
-        overtime: fasting && !over.isNegative && over > Duration.zero
-            ? over
+        card: fasting
+            ? bodyStage(
+                bodyPlanStageIndex(
+                  targetHours: fastMinutes / 60,
+                  elapsedHours: hours,
+                ),
+                reached: true,
+              )
             : null,
+        progress: fasting
+            ? (goalReached ? 1.0 : (metrics?.progress ?? 0.0))
+            : 0.0,
+        elapsed: elapsed,
+        goalReached: goalReached,
+        // Hedef doldu → "orucunu boz" aşaması; öğün kaydet göster.
+        showSaveMeal: goalReached,
       );
     }
 
     // Öğün sekmesi: 24 saatlik döngü (oruç + pencere) tek yayda. Oruçta
     // "orucunu boz" noktasına doğru dolar; kart pencere açılınca başlar.
-    final windowMinutes = session.eatingWindow?.eatMinutes ?? 0;
-    final eatMinutes = windowMinutes > 0
-        ? windowMinutes
-        : math.max(60, 24 * 60 - fastMinutes);
+    final cappedFastMinutes = session.isFasting
+        ? live.inMinutes.clamp(0, fastMinutes)
+        : null;
+    final fastingGoalReached =
+        session.isFasting && live.inMinutes >= fastMinutes;
     final cycle = mealCycleArc(
       fastMinutes: fastMinutes,
       eatMinutes: eatMinutes,
-      fastElapsedMinutes: session.isFasting ? live.inMinutes : null,
+      fastElapsedMinutes: cappedFastMinutes,
       eatElapsedMinutes: session.isEating ? live.inMinutes : null,
+      forceAllReached: fastingGoalReached,
     );
     final nextStart = session.plan?.eatWindow?.end;
+    // Sayaç saniyeli kalsın; hedef aşımında yalnızca üst sınıra tut (dakikaya yuvarlama yok).
+    final target = Duration(minutes: fastMinutes);
+    final displayElapsed = session.isEating
+        ? (metrics?.remainingToPlannedEnd ?? Duration.zero)
+        : session.isFasting
+        ? (live > target ? target : live)
+        : Duration.zero;
+    final eatStage = session.isEating
+        ? eatingStageIndex(live.inMinutes, eatMinutes)
+        : -1;
+    // Yazı, yayın konumunu değil öğün penceresindeki gerçek payı söylesin.
+    // Yayın başı ~%22'de; yeni biten oruçta bu "geçen süre" gibi okunuyordu.
+    final eatingShare = session.isEating && eatMinutes > 0
+        ? (live.inSeconds / (eatMinutes * 60)).clamp(0.0, 1.0)
+        : null;
     return _ArcView(
-      heading: session.isEating ? 'fasting_page.meal_time' : null,
-      stages: cycle.stages,
-      card: session.isEating
-          ? eatingStage(
-              eatingStageIndex(live.inMinutes, eatMinutes),
-              reached: true,
-            )
-          : null,
-      progress: cycle.progress,
-      elapsed: session.isFasting || session.isEating ? live : Duration.zero,
+      heading: session.isEating ? 'fasting_page.on_break' : null,
+      stages: session.isEating ? const [] : cycle.stages,
+      card: null,
+      // Hedef dolunca yay görsel olarak tam dolu (24s döngü payı değil).
+      progress: fastingGoalReached
+          ? 1.0
+          : session.isEating
+          ? (eatingShare ?? cycle.progress)
+          : cycle.progress,
+      captionProgress: eatingShare,
+      elapsed: displayElapsed,
+      captionKey: session.isEating ? 'fasting_page.eating_remaining' : null,
+      goalReached: fastingGoalReached,
       // Ne oruç ne pencere: planın saatine göre bilgi.
       note: !session.isFasting && !session.isEating && nextStart != null
           ? 'fasting_page.next_fast_at'.tr(args: [nextStart])
           : null,
+      // Orucunu boz aşaması (hedef doldu veya pencerenin ilk dilimi).
+      showSaveMeal: fastingGoalReached || eatStage == 0,
     );
   }
 
@@ -337,49 +422,107 @@ class _FastingViewState extends State<FastingView> {
     return session.plan?.eatHours;
   }
 
+  /// Plan etiketi `14-10` veya `14:10` olabilir.
+  List<String> _planParts(String title) =>
+      title.replaceAll(':', '-').split('-').map((e) => e.trim()).toList();
+
   int _planHours(String title) {
-    final head = title.split('-').first.trim();
-    return int.tryParse(head) ?? 16;
+    final parts = _planParts(title);
+    return int.tryParse(parts.isNotEmpty ? parts.first : '') ?? 16;
   }
 
   int _eatHours(String title) {
-    final parts = title.split('-');
+    final parts = _planParts(title);
     if (parts.length < 2) return 8;
-    return int.tryParse(parts[1].trim()) ?? 8;
+    return int.tryParse(parts[1]) ?? 8;
+  }
+
+  Duration _fastTarget(FastingSessionState session) {
+    final minutes =
+        session.fast?.targetMinutes ??
+        _todayPlanDay(session)?.fastMinutes ??
+        session.plan?.fastMinutes ??
+        _planHours(_planTitle(session)) * 60;
+    return Duration(minutes: minutes);
+  }
+
+  /// Aktif oruç yoksa sıradaki oruç başlangıcı (yeme penceresi değil).
+  DateTime? _nextFastStart(FastingSessionState session) {
+    final eat = session.eatingWindow;
+    return eat?.suggestedNextStartAt ??
+        eat?.endsAt ??
+        _clockToday(session.plan?.eatWindow?.end);
+  }
+
+  DateTime? _clockToday(String? hm) {
+    final parts = hm?.split(':');
+    if (parts == null || parts.length < 2) return null;
+    final h = int.tryParse(parts[0]);
+    final m = int.tryParse(parts[1]);
+    if (h == null || m == null) return null;
+    final now = DateTime.now();
+    return DateTime(now.year, now.month, now.day, h, m);
   }
 
   String _mochiStartedClock(FastingSessionState session) {
-    final start =
-        session.fast?.startedAt ?? session.eatingWindow?.suggestedNextStartAt;
+    final start = session.fast?.startedAt ?? _nextFastStart(session);
     if (start != null) {
       return DateFormat('HH:mm', context.locale.toString()).format(start);
     }
-    // Oruç, yeme penceresi bitince başlar.
-    return session.plan?.eatWindow?.end ?? '–';
+    return '–';
   }
 
   String _mochiEndsClock(FastingSessionState session) {
-    final planTitle = _planTitle(session);
-    final start = session.fast?.startedAt;
-    final fastH = _todayFastHours(session) ?? _planHours(planTitle);
+    final fast = session.fast;
+    if (fast != null) {
+      return DateFormat(
+        'HH:mm',
+        context.locale.toString(),
+      ).format(fast.startedAt.add(_fastTarget(session)));
+    }
+    final start = _nextFastStart(session);
     if (start != null) {
       return DateFormat(
         'HH:mm',
         context.locale.toString(),
-      ).format(start.add(Duration(hours: fastH)));
+      ).format(start.add(_fastTarget(session)));
     }
-    // Oruç, ertesi yeme penceresi başlayınca biter.
-    return session.plan?.eatWindow?.start ?? '–';
+    return '–';
+  }
+
+  /// Aktif oruç yokken "başladı" denmez: sıradaki saat gelecek zamandır.
+  String _startedCaption(FastingSessionState session) {
+    if (session.isFasting) return 'fasting_page.started_label';
+    if (session.isEating) return 'fasting_page.eating_started_label';
+    return 'fasting_page.next_starts_label';
+  }
+
+  String _endsCaption(FastingSessionState session) {
+    if (session.isFasting) return 'fasting_page.ends_label';
+    if (session.isEating) return 'fasting_page.next_starts_label';
+    return 'fasting_page.next_ends_label';
   }
 
   String? _startedLabel(FastingSessionState session) {
-    final start = session.fast?.startedAt ?? session.eatingWindow?.startedAt;
+    final eat = session.eatingWindow;
+    if (session.isEating && eat != null) return _boundLabel(eat.startedAt);
+    final start = session.fast?.startedAt ?? _nextFastStart(session);
     return start == null ? null : _boundLabel(start);
   }
 
   String? _endsLabel(FastingSessionState session) {
-    final end = session.fast?.plannedEndAt ?? session.eatingWindow?.endsAt;
-    return end == null ? null : _boundLabel(end);
+    final fast = session.fast;
+    if (fast != null) {
+      // Hedef süre ile chip (14:10) aynı kalsın; sunucu plannedEnd saparsa
+      // start + hedef kullanılır.
+      return _boundLabel(fast.startedAt.add(_fastTarget(session)));
+    }
+    final eat = session.eatingWindow;
+    if (session.isEating && eat != null) {
+      return _boundLabel(eat.suggestedNextStartAt ?? eat.endsAt);
+    }
+    final start = _nextFastStart(session);
+    return start == null ? null : _boundLabel(start.add(_fastTarget(session)));
   }
 
   String _boundLabel(DateTime value) {
@@ -503,6 +646,8 @@ class _FastingViewState extends State<FastingView> {
                         planTitle: planTitle,
                         started: _startedLabel(session),
                         ends: _endsLabel(session),
+                        startedCaption: _startedCaption(session),
+                        endsCaption: _endsCaption(session),
                         state: session.isFasting
                             ? (_goalReached(session)
                                   ? _FastState.goalReached
@@ -804,8 +949,11 @@ final class _ArcView {
     required this.progress,
     required this.elapsed,
     this.heading,
-    this.overtime,
+    this.goalReached = false,
     this.note,
+    this.showSaveMeal = false,
+    this.captionProgress,
+    this.captionKey,
   });
 
   final List<ArcStage> stages;
@@ -816,13 +964,22 @@ final class _ArcView {
   final Duration elapsed;
   final String? heading;
 
-  /// Hedef aşıldıysa aşım süresi ("Hedef +1:23").
-  final Duration? overtime;
+  /// Hedef süre doldu — sayaç donar, üst yazı "Hedefe ulaştın".
+  final bool goalReached;
 
   /// Yay altında bilgi satırı (ör. planına göre sonraki oruç saati).
   final String? note;
 
-  int get percent => (progress * 100).round();
+  /// "Orucunu boz" aşamasında Öğün kaydet butonu.
+  final bool showSaveMeal;
+
+  /// "Geçen süre %" yazısı. Yoksa yayın ilerlemesi kullanılır.
+  final double? captionProgress;
+
+  /// Verilirse yüzde yazısı yerine bu anahtar (öğün penceresinde kalan süre).
+  final String? captionKey;
+
+  int get percent => ((captionProgress ?? progress) * 100).round();
 }
 
 /// Oruç ekranının durumu (butonlar buna göre).
@@ -835,6 +992,8 @@ final class _StageView extends StatelessWidget {
     required this.planTitle,
     required this.started,
     required this.ends,
+    required this.startedCaption,
+    required this.endsCaption,
     required this.state,
     required this.onEditPlan,
     required this.onAction,
@@ -847,6 +1006,8 @@ final class _StageView extends StatelessWidget {
   final String planTitle;
   final String? started;
   final String? ends;
+  final String startedCaption;
+  final String endsCaption;
   final _FastState state;
   final VoidCallback onEditPlan;
   final VoidCallback onAction;
@@ -890,10 +1051,10 @@ final class _StageView extends StatelessWidget {
               : ColorName.colorPlanFasting,
           progress: view.progress,
           elapsedText: formatElapsedHms(view.elapsed),
-          caption: view.overtime != null
-              ? 'fasting_page.overtime'.tr(
-                  args: [formatElapsedHms(view.overtime!)],
-                )
+          caption: view.goalReached
+              ? 'fasting_page.goal_reached'.tr()
+              : view.captionKey != null
+              ? view.captionKey!.tr()
               : 'fasting_page.time_passed'.tr(args: ['${view.percent}']),
         ),
         if (view.note != null) ...[
@@ -912,8 +1073,15 @@ final class _StageView extends StatelessWidget {
           planTitle: planTitle,
           started: started,
           ends: ends,
+          startedCaption: startedCaption,
+          endsCaption: endsCaption,
           state: state,
+          showSaveMeal: view.showSaveMeal,
           onAction: onAction,
+          onSaveMeal: () => context.pushNamed(
+            RoutePaths.mealDetail.name,
+            extra: MealDetailArgs(initialEatenAt: DateTime.now()),
+          ),
         ),
       ],
     );
@@ -999,7 +1167,7 @@ final class _FastingArc extends StatelessWidget {
   final double progress;
   final String elapsedText;
 
-  /// Sayaç üstü satır ("Geçen süre %75" ya da "Hedef +1:23").
+  /// Sayaç üstü satır ("Geçen süre %75" ya da "Hedefe ulaştın").
   final String caption;
 
   static const _arcTop = 18.0;
@@ -1247,50 +1415,78 @@ final class _FastingActions extends StatelessWidget {
     required this.planTitle,
     required this.started,
     required this.ends,
+    required this.startedCaption,
+    required this.endsCaption,
     required this.state,
     required this.onAction,
+    required this.onSaveMeal,
+    this.showSaveMeal = false,
   });
 
   final String planTitle;
   final String? started;
   final String? ends;
+  final String startedCaption;
+  final String endsCaption;
   final _FastState state;
   final VoidCallback onAction;
+  final VoidCallback onSaveMeal;
+  final bool showSaveMeal;
 
   @override
   Widget build(BuildContext context) {
     final fasting =
         state == _FastState.fasting || state == _FastState.goalReached;
-    final label = switch (state) {
+    // Mola: sıradaki oruç pencere bitmeden başlamaz, bu yüzden buton yok.
+    final primaryLabel = switch (state) {
       _FastState.fasting => 'fasting_page.finish_early'.tr(),
       _FastState.goalReached => 'fasting_page.finish_cta'.tr(),
-      _FastState.eating => 'fasting_page.start_next_cta'.tr(),
       _FastState.idle => 'fasting_page.start_cta'.tr(args: [planTitle]),
+      _FastState.eating => null,
     };
+    final showStruggle = fasting && state != _FastState.goalReached;
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16),
       child: Column(
         children: [
-          _TimeRow(started: started, ends: ends),
-          const SizedBox(height: 20),
-          AppButton(
-            label: label,
-            onPressed: onAction,
-            showIcon: false,
-            decoration: state == _FastState.fasting
-                ? AppButtonDecoration.dark()
-                : AppButtonDecoration.fastingStart(),
+          _TimeRow(
+            started: started,
+            ends: ends,
+            startedCaption: startedCaption,
+            endsCaption: endsCaption,
           ),
-          // Zorlanma yalnızca hedefe ulaşmadan önce anlamlı.
-          if (fasting && state != _FastState.goalReached) ...[
-            const SizedBox(height: 10),
-            AppButton(
-              label: 'fasting_page.struggling'.tr(),
-              onPressed: () =>
-                  context.pushNamed(RoutePaths.fastingStruggle.name),
-              showIcon: false,
-              decoration: AppButtonDecoration.fastingStruggle(),
-            ),
+          if (primaryLabel != null || showSaveMeal || showStruggle) ...[
+            const SizedBox(height: 20),
+            if (primaryLabel != null)
+              AppButton(
+                label: primaryLabel,
+                onPressed: onAction,
+                showIcon: false,
+                decoration: state == _FastState.fasting
+                    ? AppButtonDecoration.dark()
+                    : AppButtonDecoration.fastingStart(),
+              ),
+            // Orucunu boz: erken bitir ile zorlanıyorum arasında.
+            if (showSaveMeal) ...[
+              if (primaryLabel != null) const SizedBox(height: 10),
+              AppButton(
+                label: 'fasting_page.save_meal'.tr(),
+                onPressed: onSaveMeal,
+                showIcon: false,
+                decoration: AppButtonDecoration.fastingAnother(),
+              ),
+            ],
+            // Zorlanma yalnızca hedefe ulaşmadan önce anlamlı.
+            if (showStruggle) ...[
+              const SizedBox(height: 10),
+              AppButton(
+                label: 'fasting_page.struggling'.tr(),
+                onPressed: () =>
+                    context.pushNamed(RoutePaths.fastingStruggle.name),
+                showIcon: false,
+                decoration: AppButtonDecoration.fastingStruggle(),
+              ),
+            ],
           ],
         ],
       ),
@@ -1299,10 +1495,17 @@ final class _FastingActions extends StatelessWidget {
 }
 
 final class _TimeRow extends StatelessWidget {
-  const _TimeRow({required this.started, required this.ends});
+  const _TimeRow({
+    required this.started,
+    required this.ends,
+    required this.startedCaption,
+    required this.endsCaption,
+  });
 
   final String? started;
   final String? ends;
+  final String startedCaption;
+  final String endsCaption;
 
   @override
   Widget build(BuildContext context) {
@@ -1313,7 +1516,7 @@ final class _TimeRow extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'fasting_page.started_label'.tr(),
+              startedCaption.tr(),
               style: AppTextStyles.fastingBoundLabel,
             ),
             Text(started ?? '–', style: AppTextStyles.fastingBoundValue),
@@ -1324,7 +1527,7 @@ final class _TimeRow extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.end,
           children: [
             Text(
-              'fasting_page.ends_label'.tr(),
+              endsCaption.tr(),
               style: AppTextStyles.fastingBoundLabel,
             ),
             Text(ends ?? '–', style: AppTextStyles.fastingBoundValue),

@@ -71,7 +71,7 @@ void publishFastingWidget(BuildContext context, FastingSessionState session) {
 }
 
 int _planHoursOf(String title) {
-  final head = title.split('-').first.trim();
+  final head = title.replaceAll(':', '-').split('-').first.trim();
   return int.tryParse(head) ?? 16;
 }
 

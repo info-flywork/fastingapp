@@ -953,14 +953,20 @@ final class FastingLiveMetrics {
     required DateTime fetchedAt,
     required Duration clockOffset,
   }) {
-    final drift = DateTime.now().difference(fetchedAt);
-    final elapsed = Duration(minutes: fast.elapsedMinutes) + drift;
+    // Geçen ve kalan aynı "şimdi"den: ana sayfa geri sayımı ile oruç
+    // ileri sayımı senkron kalır.
+    final now = DateTime.now().add(clockOffset);
+    var elapsed = now.difference(fast.startedAt);
+    if (elapsed.isNegative) {
+      elapsed =
+          Duration(minutes: fast.elapsedMinutes) +
+          DateTime.now().difference(fetchedAt);
+    }
     final target = Duration(minutes: fast.targetMinutes);
     final progress = target.inSeconds <= 0
         ? 0.0
         : (elapsed.inSeconds / target.inSeconds).clamp(0.0, 1.0);
-    final end = fast.plannedEndAt.add(clockOffset);
-    final remaining = end.difference(DateTime.now());
+    final remaining = fast.plannedEndAt.difference(now);
     return FastingLiveMetrics(
       elapsed: elapsed.isNegative ? Duration.zero : elapsed,
       progress: progress,
@@ -973,12 +979,16 @@ final class FastingLiveMetrics {
     required DateTime fetchedAt,
     required Duration clockOffset,
   }) {
-    final drift = DateTime.now().difference(fetchedAt);
-    final elapsed = Duration(minutes: window.elapsedMinutes) + drift;
-    final ends = window.endsAt.add(clockOffset);
-    final remaining = ends.difference(DateTime.now());
+    final now = DateTime.now().add(clockOffset);
+    var elapsed = now.difference(window.startedAt);
+    if (elapsed.isNegative) {
+      elapsed =
+          Duration(minutes: window.elapsedMinutes) +
+          DateTime.now().difference(fetchedAt);
+    }
+    final remaining = window.endsAt.difference(now);
     return FastingLiveMetrics(
-      elapsed: elapsed,
+      elapsed: elapsed.isNegative ? Duration.zero : elapsed,
       progress: window.eatMinutes <= 0
           ? 0
           : (elapsed.inMinutes / window.eatMinutes).clamp(0.0, 1.0),

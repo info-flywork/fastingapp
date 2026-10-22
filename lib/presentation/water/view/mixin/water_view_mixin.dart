@@ -575,6 +575,7 @@ mixin WaterViewMixin on State<WaterView>, TickerProvider {
       reconcileBubbles();
     });
     _pendingOps.add(_PendingWaterOp.add(id: id, amountMl: amount));
+    getIt<HomeBloc>().add(HomeMetricsOptimistic(waterMl: currentMl));
     _scheduleWaterSync();
     unawaited(pushWaterWidget());
 
@@ -607,6 +608,7 @@ mixin WaterViewMixin on State<WaterView>, TickerProvider {
       if (waterSips.isNotEmpty) waterSips.removeAt(0);
       reconcileBubbles();
     });
+    getIt<HomeBloc>().add(HomeMetricsOptimistic(waterMl: currentMl));
     _scheduleWaterSync();
     unawaited(pushWaterWidget());
 

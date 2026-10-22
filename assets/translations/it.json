@@ -7,7 +7,8 @@
     "confirm": "Conferma",
     "save": "Salva",
     "error_generic": "Qualcosa è andato storto. Riprova.",
-    "no_connection": "Nessuna connessione internet. Controlla la connessione e riprova."
+    "no_connection": "Nessuna connessione internet. Controlla la connessione e riprova.",
+    "timeout": "Il server non ha risposto in tempo. Aspetta un momento e riprova."
   },
   "auth": {
     "welcome_title": "Benvenuto",
@@ -272,6 +273,7 @@
     "log_hunger": "Registra il mio livello di fame",
     "challenge_progress": "{}/{} completato",
     "fasting_goal_reached": "Obiettivo raggiunto",
+    "fasting_completed": "Completato",
     "eating_window": "Finestra alimentare",
     "metric_goal": " /{}",
     "weight_unit_lb": "lb",
@@ -296,6 +298,7 @@
   },
   "fasting_page": {
     "meal_time": "È ora di mangiare!",
+    "on_break": "Sei in pausa",
     "break_title": "Interrompi il digiuno",
     "break_body": "Il tuo digiuno è terminato. È il momento di rifornire delicatamente il corpo di energia e nutrienti.",
     "body_title": "La glicemia aumenta",
@@ -342,7 +345,11 @@
     "forecast_peak": "PICCO",
     "struggling": "Sono in difficoltà",
     "time_passed": "Tempo trascorso: {} %",
+    "eating_remaining": "Tempo rimasto",
     "started_label": "Inizio del digiuno:",
+    "eating_started_label": "Pasto iniziato:",
+    "next_starts_label": "Prossimo digiuno:",
+    "next_ends_label": "Fine:",
     "started_value": "Oggi, 09:34",
     "ends_label": "Fine del digiuno:",
     "ends_value": "Oggi, 20:34",
@@ -373,6 +380,7 @@
     "widget_keep_going": "Continua così!\nSei sulla strada giusta.",
     "plan_changed_next": "Piano aggiornato. Il nuovo piano varrà dal prossimo digiuno.",
     "overtime": "Obiettivo +{}",
+    "goal_reached": "Obiettivo raggiunto",
     "next_fast_at": "Secondo il tuo piano, il prossimo digiuno inizia alle {}",
     "start_next_cta": "Inizia il prossimo digiuno",
     "long_overrun_title": "Hai terminato a quest'ora?",

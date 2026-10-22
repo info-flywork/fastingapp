@@ -7,7 +7,8 @@
     "confirm": "Bestätigen",
     "save": "Speichern",
     "error_generic": "Etwas ist schiefgelaufen. Bitte versuche es erneut.",
-    "no_connection": "Keine Internetverbindung. Bitte prüfe deine Verbindung und versuche es erneut."
+    "no_connection": "Keine Internetverbindung. Bitte prüfe deine Verbindung und versuche es erneut.",
+    "timeout": "Der Server hat nicht rechtzeitig geantwortet. Warte kurz und versuche es erneut."
   },
   "auth": {
     "welcome_title": "Willkommen",
@@ -272,6 +273,7 @@
     "log_hunger": "Hungerlevel speichern",
     "challenge_progress": "{}/{} geschafft",
     "fasting_goal_reached": "Ziel erreicht",
+    "fasting_completed": "Abgeschlossen",
     "eating_window": "Essensfenster",
     "metric_goal": " /{}",
     "weight_unit_lb": "lb",
@@ -296,6 +298,7 @@
   },
   "fasting_page": {
     "meal_time": "Essenszeit!",
+    "on_break": "Du machst Pause",
     "break_title": "Beende dein Fasten",
     "break_body": "Dein Fasten ist vorbei. Jetzt ist es Zeit, deinen Körper sanft mit Energie und Nährstoffen aufzutanken.",
     "body_title": "Blutzucker steigt",
@@ -342,7 +345,11 @@
     "forecast_peak": "PEAK",
     "struggling": "Mir fällt es schwer",
     "time_passed": "Vergangene Zeit {}%",
+    "eating_remaining": "Verbleibende Zeit",
     "started_label": "Fasten begonnen:",
+    "eating_started_label": "Mahlzeit begonnen:",
+    "next_starts_label": "Nächstes Fasten:",
+    "next_ends_label": "Ende:",
     "started_value": "Heute, 9:34",
     "ends_label": "Fasten endet:",
     "ends_value": "Heute, 20:34",
@@ -373,6 +380,7 @@
     "widget_keep_going": "Weiter so!\nDu bist im Flow.",
     "plan_changed_next": "Plan aktualisiert. Der neue Plan gilt ab deinem nächsten Fasten.",
     "overtime": "Ziel +{}",
+    "goal_reached": "Ziel erreicht",
     "next_fast_at": "Laut Plan beginnt dein nächstes Fasten um {}",
     "start_next_cta": "Nächstes Fasten starten",
     "long_overrun_title": "Hast du zu dieser Zeit beendet?",

@@ -302,7 +302,7 @@ final class AppButtonDecoration {
       borderWidth: 1,
       borderRadius: BorderRadius.circular(99999),
       height: 48,
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 14),
+      padding: const EdgeInsets.symmetric(horizontal: 10),
       gap: 8,
       innerShadowColor: ColorName.colorWhite.withValues(alpha: 0.22),
       innerShadowOffset: const Offset(0, 4),
@@ -311,7 +311,7 @@ final class AppButtonDecoration {
       fontFamily: FontFamily.sFProDisplay,
       fontWeight: FontWeight.w700,
       defaultFontSize: 16,
-      lineHeight: 24,
+      lineHeight: 22,
       letterSpacingPercent: -0.02,
     );
   }

@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:easy_localization/easy_localization.dart';
+import 'package:fastingapp/core/utils/extensions/future_extensions.dart';
 import 'package:fastingapp/core/utils/weight_progress.dart';
 import 'package:fastingapp/core/di/injection.dart';
 import 'package:fastingapp/core/dialogs/app_dialogs.dart';
@@ -110,9 +111,16 @@ class _FastingFinishViewState extends State<FastingFinishView> {
     super.dispose();
   }
 
+  /// Sayaç plan hedefini aşmaz: geç bitirilse de üst sınır planın saatidir.
   Duration get _elapsed {
     final diff = _end.difference(_start);
-    return diff.isNegative ? Duration.zero : diff;
+    if (diff.isNegative) return Duration.zero;
+    final target = widget.args.targetMinutes;
+    if (target != null && target > 0) {
+      final cap = Duration(minutes: target);
+      if (diff > cap) return cap;
+    }
+    return diff;
   }
 
   void _toggleStart() {
@@ -294,14 +302,16 @@ class _FastingFinishViewState extends State<FastingFinishView> {
       _FinishFeeling.good => 'good',
       _FinishFeeling.superMood => 'super',
     };
-    final result = await getIt<FastingSessionCubit>().finishFast(
-      fastId: widget.args.fastId,
-      startedAt: _start,
-      endedAt: _end,
-      feeling: feeling,
-      notes: _notesController.text.trim(),
-      weightKg: _weightForSave,
-    );
+    final result = await getIt<FastingSessionCubit>()
+        .finishFast(
+          fastId: widget.args.fastId,
+          startedAt: _start,
+          endedAt: _end,
+          feeling: feeling,
+          notes: _notesController.text.trim(),
+          weightKg: _weightForSave,
+        )
+        .withLoading(context);
     if (!context.mounted) return;
     setState(() => _saving = false);
     if (result == null) {

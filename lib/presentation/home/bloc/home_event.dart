@@ -30,6 +30,18 @@ final class HomeWeightOptimistic extends HomeEvent {
   List<Object?> get props => [weightKg];
 }
 
+/// Su / adım kartı, detay ekranıyla aynı anda güncellensin diye.
+/// Sunucu yanıtı gelene kadar bu değer korunur.
+final class HomeMetricsOptimistic extends HomeEvent {
+  const HomeMetricsOptimistic({this.waterMl, this.steps});
+
+  final int? waterMl;
+  final int? steps;
+
+  @override
+  List<Object?> get props => [waterMl, steps];
+}
+
 final class HomePremiumTapped extends HomeEvent {
   const HomePremiumTapped();
 }

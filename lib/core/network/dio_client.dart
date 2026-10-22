@@ -1,7 +1,7 @@
 import 'package:dio/dio.dart';
+import 'package:fastingapp/core/app_update/app_update_gate.dart';
 import 'package:fastingapp/core/managers/auth_cache_manager.dart';
 import 'package:fastingapp/core/managers/device_manager.dart';
-import 'package:fastingapp/core/app_update/app_update_gate.dart';
 import 'package:fastingapp/core/network/interceptors/auth_interceptor.dart';
 import 'package:fastingapp/core/network/interceptors/context_interceptor.dart';
 import 'package:fastingapp/core/network/interceptors/expired_token_interceptor.dart';
@@ -20,11 +20,14 @@ final class DioClient {
     required DeviceManager deviceManager,
     required void Function() onSessionEnded,
   }) {
+    // Debug'ta yerel API + yavaş DB (slow query) 15 sn'yi aşabiliyor;
+    // production'da daha sıkı tut.
+    const timeout = kDebugMode ? Duration(seconds: 45) : Duration(seconds: 15);
     final dio = Dio(
       BaseOptions(
         baseUrl: StringConstants.baseUrl,
-        connectTimeout: const Duration(seconds: 15),
-        receiveTimeout: const Duration(seconds: 15),
+        connectTimeout: timeout,
+        receiveTimeout: timeout,
         headers: {'Content-Type': 'application/json'},
       ),
     );

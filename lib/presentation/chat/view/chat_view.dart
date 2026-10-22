@@ -53,7 +53,9 @@ class _ChatViewState extends State<ChatView> {
   @override
   void initState() {
     super.initState();
-    // Geçmiş listesini arka planda taze tut.
+    // Ana sayfadan her giriş yeni sohbet. Önceki konuşma saat ikonundaki
+    // geçmişte durur; buradan açılırsa aynı ekran yeniden kurulmaz.
+    unawaited(_cubit.startNewChat());
     _cubit.loadHistory();
     unawaited(_loadSuggestions());
     unawaited(_loadQuota());

@@ -63,7 +63,12 @@ final class HomeWeekStrip extends StatelessWidget {
     final day = days[index];
     if (day.isFuture) return null;
     if (day.fastedHours > 0) {
-      return 'home.week_hours'.tr(args: ['${day.fastedHours}']);
+      // Kayıt planı aşsa da şerit plan saatini geçmez (16:8 → en fazla 16s).
+      final capMinutes =
+          getIt<FastingSessionCubit>().state.plan?.fastMinutes ?? 0;
+      final capHours = capMinutes > 0 ? capMinutes ~/ 60 : day.fastedHours;
+      final hours = day.fastedHours > capHours ? capHours : day.fastedHours;
+      return 'home.week_hours'.tr(args: ['$hours']);
     }
     if (day.dayType == 'reduced' && day.checkin == 'done') return '✓';
     return null;

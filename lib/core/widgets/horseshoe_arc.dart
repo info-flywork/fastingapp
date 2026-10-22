@@ -9,6 +9,7 @@ import 'package:flutter/material.dart';
 final class HorseshoeArc extends StatelessWidget {
   const HorseshoeArc({
     required this.progress,
+    this.start = 0,
     this.diameter = diameterDefault,
     this.progressColor = ColorName.colorMealPositive,
     this.trackColor = ColorName.colorPlanFasting,
@@ -17,6 +18,10 @@ final class HorseshoeArc extends StatelessWidget {
   });
 
   final double progress;
+
+  /// İlerlemenin yay üzerindeki başlangıcı (0 = sol uç, 1 = sağ uç).
+  /// Plan detayında yeme penceresinin gün içindeki yeri.
+  final double start;
   final double diameter;
   final Color progressColor;
   final Color trackColor;
@@ -50,6 +55,7 @@ final class HorseshoeArc extends StatelessWidget {
       child: CustomPaint(
         painter: _HorseshoeArcPainter(
           progress: progress,
+          start: start,
           stroke: stroke,
           sweepRad: _sweepRad,
           startRad: startRad,
@@ -65,6 +71,7 @@ final class HorseshoeArc extends StatelessWidget {
 final class _HorseshoeArcPainter extends CustomPainter {
   const _HorseshoeArcPainter({
     required this.progress,
+    required this.start,
     required this.stroke,
     required this.sweepRad,
     required this.startRad,
@@ -74,6 +81,7 @@ final class _HorseshoeArcPainter extends CustomPainter {
   });
 
   final double progress;
+  final double start;
   final double stroke;
   final double sweepRad;
   final double startRad;
@@ -105,19 +113,50 @@ final class _HorseshoeArcPainter extends CustomPainter {
 
     if (progress <= 0) return;
 
-    final progressSweep = sweepRad * progress.clamp(minProgress, 0.95);
+    // 1.0 = yay ucuna kadar dolu (önceden 0.95 kesiliyordu → "tamamlandı"
+    // halinde at nalı eksik görünüyordu).
+    final length = progress.clamp(minProgress, 1.0);
+    final from = start.clamp(0.0, 1.0);
     final progressPaint = Paint()
       ..style = PaintingStyle.stroke
       ..strokeWidth = stroke + 4
       ..strokeCap = StrokeCap.round
       ..color = progressColor;
 
-    canvas.drawArc(rect, startRad, progressSweep, false, progressPaint);
+    final end = from + length;
+    if (end <= 1) {
+      canvas.drawArc(
+        rect,
+        startRad + sweepRad * from,
+        sweepRad * length,
+        false,
+        progressPaint,
+      );
+      return;
+    }
+    // Pencere gece yarısını aşıyorsa sağ uçtan sol uca devam eder.
+    final head = 1 - from;
+    canvas
+      ..drawArc(
+        rect,
+        startRad + sweepRad * from,
+        sweepRad * head,
+        false,
+        progressPaint,
+      )
+      ..drawArc(
+        rect,
+        startRad,
+        sweepRad * (end - 1),
+        false,
+        progressPaint,
+      );
   }
 
   @override
   bool shouldRepaint(covariant _HorseshoeArcPainter oldDelegate) {
     return oldDelegate.progress != progress ||
+        oldDelegate.start != start ||
         oldDelegate.stroke != stroke ||
         oldDelegate.sweepRad != sweepRad ||
         oldDelegate.startRad != startRad ||

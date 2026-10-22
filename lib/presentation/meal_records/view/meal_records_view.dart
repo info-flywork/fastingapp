@@ -247,7 +247,6 @@ final class _MealTimeline extends StatelessWidget {
           if (i > 0) const SizedBox(height: 20),
           _MealTimelineRow(
             meal: meals[i],
-            showLineBelow: i < meals.length - 1,
             onTap: () => onMealTap(meals[i].id),
           ),
         ],
@@ -257,14 +256,9 @@ final class _MealTimeline extends StatelessWidget {
 }
 
 final class _MealTimelineRow extends StatelessWidget {
-  const _MealTimelineRow({
-    required this.meal,
-    required this.showLineBelow,
-    required this.onTap,
-  });
+  const _MealTimelineRow({required this.meal, required this.onTap});
 
   final MealRecord meal;
-  final bool showLineBelow;
   final VoidCallback onTap;
 
   static const _lineColor = Color(0x993C3C43);
@@ -288,15 +282,14 @@ final class _MealTimelineRow extends StatelessWidget {
                     shape: BoxShape.circle,
                   ),
                 ),
-                if (showLineBelow)
-                  Expanded(
-                    child: Center(
-                      child: Container(
-                        width: 1.5,
-                        color: _lineColor.withValues(alpha: 0.4),
-                      ),
+                Expanded(
+                  child: Center(
+                    child: Container(
+                      width: 1.5,
+                      color: _lineColor.withValues(alpha: 0.4),
                     ),
                   ),
+                ),
               ],
             ),
           ),

@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:easy_localization/easy_localization.dart';
 import 'package:fastingapp/core/di/injection.dart';
 import 'package:fastingapp/core/snackbar/app_snackbar.dart';
@@ -73,23 +71,14 @@ class _LatestChatsViewState extends State<LatestChatsView> {
                     return const _LatestChatsEmptyState();
                   }
 
-                  return ListView.separated(
-                    physics: const ClampingScrollPhysics(),
-                    padding: const EdgeInsets.fromLTRB(16, 16, 16, 32),
-                    itemCount: state.history.length,
-                    separatorBuilder: (_, _) => const SizedBox(height: 12),
-                    itemBuilder: (context, index) {
-                      final item = state.history[index];
-                      return _ChatHistoryCard(
-                        item: item,
-                        onOpen: () async {
-                          await _cubit.openConversation(item.id);
-                          if (context.mounted) context.pop();
-                        },
-                        onPin: () => _cubit.togglePinHistory(item.id),
-                        onDelete: () => _cubit.deleteHistory(item.id),
-                      );
+                  return _AnimatedChatHistory(
+                    items: state.history,
+                    onOpen: (item) async {
+                      await _cubit.openConversation(item.id);
+                      if (context.mounted) context.pop();
                     },
+                    onPin: (item) => _cubit.togglePinHistory(item.id),
+                    onDelete: (item) => _cubit.deleteHistory(item.id),
                   );
                 },
               ),
@@ -190,14 +179,7 @@ final class _LatestChatsHeader extends StatelessWidget {
               ],
             ),
           ),
-          // Bu ekran zaten geçmiş: düğme yeni sohbet açar (önceden boştu).
-          _IconButton(
-            onTap: () {
-              unawaited(getIt<ChatSessionCubit>().startNewChat());
-              context.pop();
-            },
-            child: Assets.icons.solarPen2LineDuotone.svg(width: 24, height: 24),
-          ),
+          const SizedBox(width: 40),
         ],
       ),
     );
@@ -219,6 +201,157 @@ final class _IconButton extends StatelessWidget {
         borderRadius: BorderRadius.circular(20),
         child: SizedBox(width: 40, height: 40, child: Center(child: child)),
       ),
+    );
+  }
+}
+
+final class _AnimatedChatHistory extends StatefulWidget {
+  const _AnimatedChatHistory({
+    required this.items,
+    required this.onOpen,
+    required this.onPin,
+    required this.onDelete,
+  });
+
+  final List<ChatHistoryItem> items;
+  final ValueChanged<ChatHistoryItem> onOpen;
+  final ValueChanged<ChatHistoryItem> onPin;
+  final ValueChanged<ChatHistoryItem> onDelete;
+
+  @override
+  State<_AnimatedChatHistory> createState() => _AnimatedChatHistoryState();
+}
+
+class _AnimatedChatHistoryState extends State<_AnimatedChatHistory> {
+  static const _motion = Duration(milliseconds: 320);
+
+  final _listKey = GlobalKey<AnimatedListState>();
+  late List<ChatHistoryItem> _items = List.of(widget.items);
+  var _showEmpty = false;
+  var _syncScheduled = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _showEmpty = widget.items.isEmpty;
+  }
+
+  @override
+  void didUpdateWidget(covariant _AnimatedChatHistory oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (!_same(_items, widget.items)) _scheduleSync();
+  }
+
+  bool _same(List<ChatHistoryItem> a, List<ChatHistoryItem> b) {
+    if (a.length != b.length) return false;
+    for (var i = 0; i < a.length; i++) {
+      if (a[i] != b[i]) return false;
+    }
+    return true;
+  }
+
+  void _scheduleSync() {
+    if (_syncScheduled) return;
+    _syncScheduled = true;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _syncScheduled = false;
+      if (!mounted || _same(_items, widget.items)) return;
+      _sync(widget.items);
+    });
+  }
+
+  void _sync(List<ChatHistoryItem> next) {
+    final list = _listKey.currentState;
+    if (list == null || _showEmpty) {
+      setState(() {
+        _items = List.of(next);
+        _showEmpty = next.isEmpty;
+      });
+      return;
+    }
+
+    for (var i = _items.length - 1; i >= 0; i--) {
+      if (next.every((item) => item.id != _items[i].id)) {
+        _removeAt(list, i, revealEmpty: next.isEmpty);
+      }
+    }
+
+    var changedInPlace = false;
+    for (var target = 0; target < next.length; target++) {
+      final want = next[target];
+      final current = _items.indexWhere((item) => item.id == want.id);
+      if (current == -1) {
+        _items.insert(target, want);
+        list.insertItem(target, duration: _motion);
+      } else if (current != target) {
+        _removeAt(list, current, revealEmpty: false);
+        final insertAt = current < target ? target - 1 : target;
+        _items.insert(insertAt, want);
+        list.insertItem(insertAt, duration: _motion);
+      } else if (_items[target] != want) {
+        _items[target] = want;
+        changedInPlace = true;
+      }
+    }
+    if (changedInPlace) setState(() {});
+  }
+
+  void _removeAt(
+    AnimatedListState list,
+    int index, {
+    required bool revealEmpty,
+  }) {
+    final removed = _items.removeAt(index);
+    final leavingLast = revealEmpty && _items.isEmpty;
+    var armed = false;
+    list.removeItem(index, (context, animation) {
+      if (leavingLast && !armed) {
+        armed = true;
+        animation.addStatusListener((status) {
+          if (status == AnimationStatus.dismissed &&
+              mounted &&
+              _items.isEmpty) {
+            setState(() => _showEmpty = true);
+          }
+        });
+      }
+      return _row(removed, animation, interactive: false);
+    }, duration: _motion);
+  }
+
+  Widget _row(
+    ChatHistoryItem item,
+    Animation<double> animation, {
+    required bool interactive,
+  }) {
+    return _MotionRow(
+      animation: animation,
+      child: Padding(
+        padding: const EdgeInsets.only(bottom: 12),
+        child: _ChatHistoryCard(
+          item: item,
+          onOpen: interactive ? () => widget.onOpen(item) : () {},
+          onPin: interactive ? () => widget.onPin(item) : () {},
+          onDelete: interactive ? () => widget.onDelete(item) : () {},
+        ),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (_showEmpty) return const _LatestChatsEmptyState();
+    return AnimatedList(
+      key: _listKey,
+      physics: const ClampingScrollPhysics(),
+      padding: const EdgeInsets.fromLTRB(16, 16, 16, 32),
+      initialItemCount: _items.length,
+      itemBuilder: (context, index, animation) {
+        if (index < 0 || index >= _items.length) {
+          return const SizedBox.shrink();
+        }
+        return _row(_items[index], animation, interactive: true);
+      },
     );
   }
 }
@@ -297,19 +430,19 @@ final class _ChatHistoryCard extends StatelessWidget {
       child: InkWell(
         onTap: onOpen,
         borderRadius: BorderRadius.circular(16),
-        child: Container(
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 280),
+          curve: Curves.easeOutCubic,
           width: double.infinity,
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
             color: ColorName.colorChatSurface,
             borderRadius: BorderRadius.circular(16),
-            border: item.isPinned
-                ? Border.all(
-                    color: ColorName.colorChatUserBubble.withValues(
-                      alpha: 0.45,
-                    ),
-                  )
-                : null,
+            border: Border.all(
+              color: item.isPinned
+                  ? ColorName.colorChatUserBubble.withValues(alpha: 0.45)
+                  : const Color(0x00000000),
+            ),
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -317,14 +450,21 @@ final class _ChatHistoryCard extends StatelessWidget {
               Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  if (item.isPinned) ...[
-                    const Icon(
-                      Icons.push_pin_rounded,
-                      size: 16,
-                      color: ColorName.colorChatUserBubble,
-                    ),
-                    const SizedBox(width: 6),
-                  ],
+                  AnimatedSize(
+                    duration: const Duration(milliseconds: 220),
+                    curve: Curves.easeOutCubic,
+                    alignment: Alignment.centerLeft,
+                    child: item.isPinned
+                        ? const Padding(
+                            padding: EdgeInsets.only(right: 6),
+                            child: Icon(
+                              Icons.push_pin_rounded,
+                              size: 16,
+                              color: ColorName.colorChatUserBubble,
+                            ),
+                          )
+                        : const SizedBox(width: 0, height: 16),
+                  ),
                   Expanded(
                     child: Text(
                       item.title,
@@ -379,3 +519,42 @@ final class _ChatHistoryCard extends StatelessWidget {
 }
 
 enum _HistoryMenuAction { pin, delete }
+
+final class _MotionRow extends StatefulWidget {
+  const _MotionRow({required this.animation, required this.child});
+
+  final Animation<double> animation;
+  final Widget child;
+
+  @override
+  State<_MotionRow> createState() => _MotionRowState();
+}
+
+class _MotionRowState extends State<_MotionRow> {
+  late final CurvedAnimation _curved = CurvedAnimation(
+    parent: widget.animation,
+    curve: Curves.easeOutCubic,
+    reverseCurve: Curves.easeInCubic,
+  );
+  late final Animation<Offset> _slide = Tween<Offset>(
+    begin: const Offset(0.16, 0),
+    end: Offset.zero,
+  ).animate(_curved);
+
+  @override
+  void dispose() {
+    _curved.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return SizeTransition(
+      sizeFactor: _curved,
+      child: FadeTransition(
+        opacity: _curved,
+        child: SlideTransition(position: _slide, child: widget.child),
+      ),
+    );
+  }
+}

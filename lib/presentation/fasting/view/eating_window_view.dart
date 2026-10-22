@@ -1,15 +1,19 @@
 import 'dart:math' as math;
 
 import 'package:easy_localization/easy_localization.dart';
+import 'package:fastingapp/core/di/injection.dart';
 import 'package:fastingapp/core/remote_images/app_image.dart';
 import 'package:fastingapp/core/theme/app_text_styles.dart';
 import 'package:fastingapp/generated/app_images.g.dart';
 import 'package:fastingapp/generated/assets.gen.dart';
 import 'package:fastingapp/generated/colors.gen.dart';
+import 'package:fastingapp/presentation/fasting/bloc/fasting_session_cubit.dart';
+import 'package:fastingapp/presentation/fasting/fasting_arc_stages.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 const _motion = Duration(milliseconds: 280);
+const _stageCount = 3;
 
 /// Oruç sekmesindeki öğün kartından açılan öğün penceresi.
 final class EatingWindowView extends StatefulWidget {
@@ -21,6 +25,40 @@ final class EatingWindowView extends StatefulWidget {
 
 class _EatingWindowViewState extends State<EatingWindowView> {
   var _step = 0;
+
+  /// Ulaşılan son aşama; bundan ilerisine tıklanamaz.
+  late final int _unlocked;
+
+  @override
+  void initState() {
+    super.initState();
+    _unlocked = _unlockedIndex(getIt<FastingSessionCubit>());
+    _step = _unlocked;
+  }
+
+  int _unlockedIndex(FastingSessionCubit cubit) {
+    final session = cubit.state;
+    final metrics = session.liveMetrics;
+    final windowMinutes = session.eatingWindow?.eatMinutes ?? 0;
+    final plan = session.plan;
+    final eatMinutes = windowMinutes > 0
+        ? windowMinutes
+        : (plan != null
+            ? math.max(60, 24 * 60 - plan.fastMinutes)
+            : 0);
+    if (metrics != null && session.isEating && eatMinutes > 0) {
+      return eatingStageIndex(
+        metrics.elapsed.inMinutes,
+        eatMinutes,
+      ).clamp(0, _stageCount - 1);
+    }
+    return 0;
+  }
+
+  void _select(int index) {
+    if (index > _unlocked) return;
+    setState(() => _step = index);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -37,7 +75,8 @@ class _EatingWindowViewState extends State<EatingWindowView> {
             const SizedBox(height: 28),
             _Stepper(
               step: _step,
-              onTap: (index) => setState(() => _step = index),
+              unlocked: _unlocked,
+              onTap: _select,
             ),
             const SizedBox(height: 28),
             _AnimatedCopy(step: _step),
@@ -120,9 +159,16 @@ final class _BackButton extends StatelessWidget {
 }
 
 final class _Stepper extends StatelessWidget {
-  const _Stepper({required this.step, required this.onTap});
+  const _Stepper({
+    required this.step,
+    required this.unlocked,
+    required this.onTap,
+  });
 
   final int step;
+
+  /// Ulaşılan son aşama (dahil); sonrası kilitli.
+  final int unlocked;
   final ValueChanged<int> onTap;
 
   @override
@@ -145,18 +191,19 @@ final class _Stepper extends StatelessWidget {
           if (i > 0)
             Expanded(
               child: _StepLine(
-                solid: step >= i,
-                fade: step == 0 && step == i - 1,
+                solid: unlocked >= i,
+                fade: unlocked == 0 && i == 1,
               ),
             ),
           _StepCircle(
             colorImage: images[i],
             dimmedImage: dimmed[i],
-            reached: i <= step,
+            reached: i <= unlocked,
             partial: i == step,
             ringOnLeft: i > 0,
             coverScale: dimmedScales[i],
-            onTap: () => onTap(i),
+            // Tamamlanmamış aşamaya geçilemez.
+            onTap: i <= unlocked ? () => onTap(i) : null,
           ),
         ],
       ],
@@ -229,7 +276,7 @@ final class _StepCircle extends StatelessWidget {
     required this.partial,
     required this.ringOnLeft,
     required this.coverScale,
-    required this.onTap,
+    this.onTap,
   });
 
   final AppImageAsset colorImage;
@@ -238,7 +285,7 @@ final class _StepCircle extends StatelessWidget {
   final bool partial;
   final bool ringOnLeft;
   final double coverScale;
-  final VoidCallback onTap;
+  final VoidCallback? onTap;
 
   static const _size = 80.0;
 

@@ -7,12 +7,16 @@ import 'package:fastingapp/core/dialogs/app_dialogs.dart';
 import 'package:fastingapp/core/snackbar/app_snackbar.dart';
 import 'package:fastingapp/core/sync/data_sync.dart';
 import 'package:fastingapp/core/theme/app_text_styles.dart';
+import 'package:fastingapp/core/widgets/animated_count_text.dart';
 import 'package:fastingapp/core/widgets/day_switch_transition.dart';
 import 'package:fastingapp/domain/trackers/health_sync_service.dart';
 import 'package:fastingapp/domain/trackers/trackers_repository.dart';
 import 'package:fastingapp/generated/app_images.g.dart';
 import 'package:fastingapp/generated/assets.gen.dart';
 import 'package:fastingapp/generated/colors.gen.dart';
+import 'package:fastingapp/presentation/home/bloc/home_bloc.dart';
+import 'package:fastingapp/presentation/home/bloc/home_event.dart';
+import 'package:fastingapp/presentation/home/bloc/home_state.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
@@ -95,9 +99,8 @@ class _StepsViewState extends State<StepsView>
                       child: DaySwitchTransition(
                         date: selectedDate,
                         direction: dayNavDirection,
-                        child: SingleChildScrollView(
-                          padding: EdgeInsets.fromLTRB(20, 8, 20, bottom + 24),
-                          physics: const ClampingScrollPhysics(),
+                        child: Padding(
+                          padding: EdgeInsets.fromLTRB(16, 8, 16, bottom),
                           child: Column(
                             children: [
                               _StepsRing(
@@ -114,13 +117,13 @@ class _StepsViewState extends State<StepsView>
                                   goalReached: goalReached,
                                 ),
                               ),
-                              const SizedBox(height: 28),
+                              const SizedBox(height: 12),
                               _StepsStatsRow(
                                 calories: caloriesKcal,
                                 distanceKm: distanceKm,
                                 durationMin: durationMin,
                               ),
-                              const SizedBox(height: 28),
+                              const SizedBox(height: 12),
                               _StepsWeeklyChart(
                                 values: weeklySteps,
                                 goal: dailyGoalSteps,
@@ -333,7 +336,10 @@ final class _StepsRing extends StatelessWidget {
                 ),
                 const SizedBox(height: 4),
               ],
-              Text('$currentSteps', style: AppTextStyles.stepsHeroAmount),
+              AnimatedCountText(
+                value: currentSteps,
+                style: AppTextStyles.stepsHeroAmount,
+              ),
               Text('steps_page.unit'.tr(), style: AppTextStyles.stepsUnit),
             ],
           ),
@@ -364,23 +370,32 @@ final class _StepsRingPainter extends CustomPainter {
 
     if (progress <= 0.001) return;
 
+    // Yay 12 yönünden başlar. Gradyanın başı ve sonu aynı renk; yuvarlak
+    // uç geriye taşınca bir önceki durağın rengini almasın.
+    const sweep = SweepGradient(
+      startAngle: -math.pi / 2,
+      endAngle: math.pi * 1.5,
+      colors: [
+        ColorName.colorStepsFill,
+        ColorName.colorStepsAction,
+        ColorName.colorStreakGradientEnd,
+        ColorName.colorStepsFill,
+      ],
+      stops: [0.0, 0.55, 0.98, 1.0],
+    );
     final fill = Paint()
-      ..shader = const SweepGradient(
-        startAngle: -math.pi / 2,
-        endAngle: math.pi * 1.5,
-        colors: [
-          ColorName.colorStepsFill,
-          ColorName.colorStepsAction,
-          ColorName.colorStreakGradientEnd,
-        ],
-        stops: [0.0, 0.55, 1.0],
-        transform: GradientRotation(-math.pi / 2),
-      ).createShader(rect)
+      ..shader = sweep.createShader(rect)
       ..style = PaintingStyle.stroke
       ..strokeWidth = stroke
       ..strokeCap = StrokeCap.round;
 
     canvas.drawArc(rect, -math.pi / 2, 2 * math.pi * progress, false, fill);
+    // Yuvarlak uç gradyanın kapanış rengini taşır; başlangıcı düz renkle kapat.
+    canvas.drawCircle(
+      Offset(center.dx, center.dy - radius),
+      stroke / 2,
+      Paint()..color = ColorName.colorStepsFill,
+    );
   }
 
   @override

@@ -7,7 +7,8 @@
     "confirm": "Confirm",
     "save": "Save",
     "error_generic": "Something went wrong. Please try again.",
-    "no_connection": "No internet connection. Please check your connection and try again."
+    "no_connection": "No internet connection. Please check your connection and try again.",
+    "timeout": "The server didn’t respond in time. Wait a moment and try again."
   },
   "auth": {
     "welcome_title": "Welcome",
@@ -272,6 +273,7 @@
     "log_hunger": "Log my hunger level",
     "challenge_progress": "{}/{} done",
     "fasting_goal_reached": "Goal reached",
+    "fasting_completed": "Completed",
     "eating_window": "Eating window",
     "metric_goal": " /{}",
     "weight_unit_lb": "lb",
@@ -296,6 +298,7 @@
   },
   "fasting_page": {
     "meal_time": "Meal time!",
+    "on_break": "You're on a break",
     "break_title": "Break Your Fast",
     "break_body": "Your fast is complete. Now it's time to gently refuel your body with energy and nutrients.",
     "body_title": "Blood Sugar Rises",
@@ -342,7 +345,11 @@
     "forecast_peak": "PEAK",
     "struggling": "I'm Struggling",
     "time_passed": "Time Passed {}%",
+    "eating_remaining": "Time left",
     "started_label": "Fasting Started:",
+    "eating_started_label": "Meal started:",
+    "next_starts_label": "Next fast:",
+    "next_ends_label": "Ends:",
     "started_value": "Today, 9:34 AM",
     "ends_label": "Fasting Ends:",
     "ends_value": "Today, 08:34 PM",
@@ -373,6 +380,7 @@
     "widget_keep_going": "Keep going!\nYou're on a roll.",
     "plan_changed_next": "Plan updated. The new plan applies from your next fast.",
     "overtime": "Goal +{}",
+    "goal_reached": "Goal reached",
     "next_fast_at": "Your next fast starts at {} on your plan",
     "start_next_cta": "Start next fast",
     "long_overrun_title": "Did you end at this time?",

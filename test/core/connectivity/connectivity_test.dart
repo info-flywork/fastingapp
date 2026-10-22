@@ -33,6 +33,8 @@ void main() {
       probe: probe.call,
       retryInterval: const Duration(milliseconds: 20),
       offlineDebounce: const Duration(milliseconds: 20),
+      // Testlerde açılış grace'i kapalı; gerçek uygulama 2 sn bekler.
+      startupGrace: Duration.zero,
     );
   });
 
@@ -73,13 +75,56 @@ void main() {
     await Future<void>.delayed(const Duration(milliseconds: 40));
     expect(service.isOnline.value, isTrue);
 
-    // Kalıcı none: debounce sonrası çevrimdışı (yoklama yok).
+    // Kalıcı none: debounce sonrası çevrimdışı.
     changes.add([ConnectivityResult.none]);
     await pumpEventQueue();
     expect(service.isOnline.value, isTrue);
     await Future<void>.delayed(const Duration(milliseconds: 40));
     expect(service.isOnline.value, isFalse);
     expect(probe.calls, greaterThanOrEqualTo(before));
+  });
+
+  test('açılış probe sürerken none olayı offline flash yapmaz', () async {
+    probe.gate = Completer();
+    service.start();
+    await pumpEventQueue();
+    expect(service.isChecking.value, isTrue);
+    expect(service.isOnline.value, isTrue);
+
+    // Soğuk açılış blip'i: probe bitmeden none gelirse ertele.
+    changes.add([ConnectivityResult.none]);
+    await pumpEventQueue();
+    await Future<void>.delayed(const Duration(milliseconds: 40));
+    expect(service.isOnline.value, isTrue);
+
+    probe.online = true;
+    probe.gate!.complete();
+    await pumpEventQueue();
+    await Future<void>.delayed(const Duration(milliseconds: 20));
+    expect(service.isOnline.value, isTrue);
+  });
+
+  test('startup grace: ilk saniyelerde offline UI uygulanmaz', () async {
+    final gated = ConnectivityService(
+      changes: changes.stream,
+      probe: probe.call,
+      retryInterval: const Duration(milliseconds: 20),
+      offlineDebounce: const Duration(milliseconds: 20),
+      startupGrace: const Duration(milliseconds: 80),
+    );
+    addTearDown(gated.dispose);
+
+    probe.online = false;
+    gated.start();
+    await pumpEventQueue();
+    await Future<void>.delayed(const Duration(milliseconds: 40));
+    // Grace bitmeden çevrimdışı sayfa açılmaz.
+    expect(gated.isOnline.value, isTrue);
+
+    await Future<void>.delayed(const Duration(milliseconds: 80));
+    // Grace sonrası checkNow → debounce → offline.
+    await Future<void>.delayed(const Duration(milliseconds: 40));
+    expect(gated.isOnline.value, isFalse);
   });
 
   test('eşzamanlı kontroller tek yoklamada birleşir; kontrol sırasında '

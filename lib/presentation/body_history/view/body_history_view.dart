@@ -2,13 +2,13 @@ import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:easy_localization/easy_localization.dart';
-import 'package:fastingapp/core/utils/weight_progress.dart';
-import 'package:fastingapp/core/utils/weight_units.dart';
 import 'package:fastingapp/core/di/injection.dart';
 import 'package:fastingapp/core/dialogs/app_dialogs.dart';
 import 'package:fastingapp/core/snackbar/app_snackbar.dart';
 import 'package:fastingapp/core/sync/data_sync.dart';
 import 'package:fastingapp/core/theme/app_text_styles.dart';
+import 'package:fastingapp/core/utils/weight_progress.dart';
+import 'package:fastingapp/core/utils/weight_units.dart';
 import 'package:fastingapp/core/widgets/app_shimmer.dart';
 import 'package:fastingapp/core/widgets/weight_progress_bar.dart';
 import 'package:fastingapp/domain/trackers/trackers_repository.dart';
@@ -102,14 +102,6 @@ class _BodyHistoryViewState extends State<BodyHistoryView>
                         onPointSelected: onPointSelected,
                         chartLoading: chartLoading,
                       ),
-                      if (entries.isNotEmpty) ...[
-                        const SizedBox(height: 12),
-                        _WeightEntriesCard(
-                          entries: entries,
-                          onEdit: (e) => unawaited(onEditEntry(e)),
-                          onDelete: (e) => unawaited(onDeleteEntry(e)),
-                        ),
-                      ],
                     ],
                   ),
                 ),
@@ -1080,80 +1072,3 @@ String _formatKg(double kg) => WeightUnits.amount(kg, _weightUnit);
 String _unitLabel() => WeightUnits.label(_weightUnit);
 
 String _formatKgOrDash(double? kg) => kg == null ? '—' : _formatKg(kg);
-
-/// Son kilo kayıtları: dokun → düzenle, sola kaydır → sil (önceden yanlış
-/// girilen değer grafikte kalıcı kalıyordu).
-final class _WeightEntriesCard extends StatelessWidget {
-  const _WeightEntriesCard({
-    required this.entries,
-    required this.onEdit,
-    required this.onDelete,
-  });
-
-  final List<WeightEntry> entries;
-  final ValueChanged<WeightEntry> onEdit;
-  final ValueChanged<WeightEntry> onDelete;
-
-  @override
-  Widget build(BuildContext context) {
-    final format = DateFormat.MMMd(context.locale.toString()).add_Hm();
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        color: ColorName.colorWhite,
-        borderRadius: BorderRadius.circular(16),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Text(
-              'body_history.entries_title'.tr(),
-              style: AppTextStyles.bodyCardTitle,
-            ),
-            const SizedBox(height: 4),
-            for (final e in entries)
-              Dismissible(
-                key: ValueKey(e.id),
-                direction: DismissDirection.endToStart,
-                confirmDismiss: (_) async {
-                  onDelete(e);
-                  // Liste sunucu yanıtıyla yenilenir.
-                  return false;
-                },
-                background: Container(
-                  alignment: Alignment.centerRight,
-                  padding: const EdgeInsets.only(right: 16),
-                  color: ColorName.colorOptionNegative.withValues(alpha: 0.1),
-                  child: Assets.icons.solarTrashBinTrashBoldDuotone.svg(
-                    width: 22,
-                    height: 22,
-                  ),
-                ),
-                child: InkWell(
-                  onTap: () => onEdit(e),
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 12),
-                    child: Row(
-                      children: [
-                        Expanded(
-                          child: Text(
-                            format.format(e.recordedAt),
-                            style: AppTextStyles.bodyBmiTick,
-                          ),
-                        ),
-                        Text(
-                          '${_formatKg(e.weightKg)} ${_unitLabel()}',
-                          style: AppTextStyles.bodyCardTitle,
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-          ],
-        ),
-      ),
-    );
-  }
-}

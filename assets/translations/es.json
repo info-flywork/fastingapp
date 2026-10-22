@@ -7,7 +7,8 @@
     "confirm": "Confirmar",
     "save": "Guardar",
     "error_generic": "Algo salió mal. Inténtalo de nuevo.",
-    "no_connection": "Sin conexión a internet. Revisa tu conexión e inténtalo de nuevo."
+    "no_connection": "Sin conexión a internet. Revisa tu conexión e inténtalo de nuevo.",
+    "timeout": "El servidor no respondió a tiempo. Espera un momento e inténtalo de nuevo."
   },
   "auth": {
     "welcome_title": "Bienvenido",
@@ -272,6 +273,7 @@
     "log_hunger": "Registrar mi nivel de hambre",
     "challenge_progress": "{}/{} completado",
     "fasting_goal_reached": "¡Meta alcanzada!",
+    "fasting_completed": "Completado",
     "eating_window": "Ventana de comida",
     "metric_goal": " /{}",
     "weight_unit_lb": "lb",
@@ -296,6 +298,7 @@
   },
   "fasting_page": {
     "meal_time": "¡Hora de comer!",
+    "on_break": "Estás de descanso",
     "break_title": "Rompe tu ayuno",
     "break_body": "Tu ayuno está completo. Ahora es el momento de repostar suavemente tu cuerpo con energía y nutrientes.",
     "body_title": "El nivel de azúcar en la sangre aumenta",
@@ -342,7 +345,11 @@
     "forecast_peak": "CIMA",
     "struggling": "estoy luchando",
     "time_passed": "Tiempo transcurrido {}%",
+    "eating_remaining": "Tiempo restante",
     "started_label": "Ayuno iniciado:",
+    "eating_started_label": "Comida iniciada:",
+    "next_starts_label": "Próximo ayuno:",
+    "next_ends_label": "Fin:",
     "started_value": "Hoy, 09:34",
     "ends_label": "Finaliza el ayuno:",
     "ends_value": "Hoy, 20:34",
@@ -373,6 +380,7 @@
     "widget_keep_going": "¡Sigue adelante!\nEstás en racha.",
     "plan_changed_next": "Plan actualizado. El nuevo plan se aplicará en tu próximo ayuno.",
     "overtime": "Meta +{}",
+    "goal_reached": "¡Meta alcanzada!",
     "next_fast_at": "Según tu plan, tu próximo ayuno empieza a las {}",
     "start_next_cta": "Empezar el próximo ayuno",
     "long_overrun_title": "¿Terminaste a esta hora?",

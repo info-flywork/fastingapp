@@ -37,7 +37,7 @@ final class ChatSessionCubit extends Cubit<ChatSessionState> {
       _historyLoaded = true;
       emit(
         state.copyWith(
-          history: items.map(_toHistoryItem).toList(),
+          history: _orderedHistory(items.map(_toHistoryItem).toList()),
           isLoadingHistory: false,
         ),
       );
@@ -151,21 +151,14 @@ final class ChatSessionCubit extends Cubit<ChatSessionState> {
         clientMessageId: clientMessageId,
         onStreamUpdate: (update) {
           if (token != _replyToken || isClosed) return;
-          final nextMessages = [...state.messages];
-
           if (update.fullText == null) {
+            // Sunucu kimliği balonun anahtarını değiştirirse düşme
+            // animasyonu ikinci kez oynar. Yerel kimlik ekranda kalır.
             if (update.userMessageId != null) storedOnServer = true;
-            final userIdx = nextMessages.indexWhere((m) => m.id == localUserId);
-            if (userIdx >= 0 && update.userMessageId != null) {
-              nextMessages[userIdx] = ChatMessage(
-                id: update.userMessageId!,
-                text: text,
-                sender: ChatSender.user,
-              );
-            }
-            emit(state.copyWith(messages: nextMessages));
             return;
           }
+
+          final nextMessages = [...state.messages];
 
           final assistantId = update.assistantMessageId;
           if (assistantId == null) return;
@@ -203,14 +196,7 @@ final class ChatSessionCubit extends Cubit<ChatSessionState> {
         );
       } else {
         final nextMessages = [...state.messages];
-        final userIdx = nextMessages.indexWhere((m) => m.id == localUserId);
-        if (userIdx >= 0 && result.userMessageId != null) {
-          nextMessages[userIdx] = ChatMessage(
-            id: result.userMessageId!,
-            text: text,
-            sender: ChatSender.user,
-          );
-        }
+        if (result.userMessageId != null) storedOnServer = true;
         final assistantIdx = nextMessages.indexWhere(
           (m) => m.id == assistant.id,
         );
@@ -287,38 +273,109 @@ final class ChatSessionCubit extends Cubit<ChatSessionState> {
   }
 
   Future<void> togglePinHistory(String id) async {
-    ChatHistoryItem? item;
-    for (final e in state.history) {
-      if (e.id == id) {
-        item = e;
-        break;
-      }
-    }
-    if (item == null) return;
+    final previous = state.history;
+    final index = previous.indexWhere((e) => e.id == id);
+    if (index < 0) return;
+    final wasPinned = previous[index].isPinned;
+    final updated = [
+      for (final item in previous)
+        if (item.id == id) item.copyWith(isPinned: !wasPinned) else item,
+    ];
+    emit(state.copyWith(history: _orderedHistory(updated), clearError: true));
     try {
-      await _repository.updateConversation(id, isPinned: !item.isPinned);
-      await loadHistory(force: true);
-    } on NetworkException catch (e) {
-      emit(state.copyWith(errorMessage: e.message));
+      await _repository.updateConversation(id, isPinned: !wasPinned);
+    } on Object catch (e) {
+      if (isClosed) return;
+      _rollbackPin(id, wasPinned, _historyError(e));
     }
   }
 
   Future<void> deleteHistory(String id) async {
+    final snapshot = state;
+    final index = snapshot.history.indexWhere((e) => e.id == id);
+    if (index < 0) return;
+    final removed = snapshot.history[index];
+    final clearingActive = snapshot.activeConversationId == id;
+    if (clearingActive) _replyToken++;
+    emit(
+      snapshot.copyWith(
+        history: [
+          for (final item in snapshot.history)
+            if (item.id != id) item,
+        ],
+        messages: clearingActive ? const [] : null,
+        isAiTyping: clearingActive ? false : null,
+        clearActiveConversation: clearingActive,
+        clearError: true,
+      ),
+    );
     try {
       await _repository.deleteConversation(id);
-      final clearingActive = state.activeConversationId == id;
-      if (clearingActive) _replyToken++;
-      emit(
-        state.copyWith(
-          history: state.history.where((e) => e.id != id).toList(),
-          messages: clearingActive ? const [] : null,
-          isAiTyping: clearingActive ? false : null,
-          clearActiveConversation: clearingActive,
-        ),
+    } on Object catch (e) {
+      if (isClosed) return;
+      _rollbackDelete(
+        removed: removed,
+        snapshot: snapshot,
+        clearingActive: clearingActive,
+        message: _historyError(e),
       );
-    } on NetworkException catch (e) {
-      emit(state.copyWith(errorMessage: e.message));
     }
+  }
+
+  void _rollbackPin(String id, bool wasPinned, String message) {
+    if (!state.history.any((item) => item.id == id)) {
+      emit(state.copyWith(errorMessage: message));
+      return;
+    }
+    final restored = [
+      for (final item in state.history)
+        if (item.id == id) item.copyWith(isPinned: wasPinned) else item,
+    ];
+    emit(
+      state.copyWith(history: _orderedHistory(restored), errorMessage: message),
+    );
+  }
+
+  void _rollbackDelete({
+    required ChatHistoryItem removed,
+    required ChatSessionState snapshot,
+    required bool clearingActive,
+    required String message,
+  }) {
+    if (state.history.any((item) => item.id == removed.id)) {
+      emit(state.copyWith(errorMessage: message));
+      return;
+    }
+    final stillClearing =
+        clearingActive &&
+        state.activeConversationId == null &&
+        state.messages.isEmpty;
+    emit(
+      state.copyWith(
+        history: _orderedHistory([...state.history, removed]),
+        messages: stillClearing ? snapshot.messages : null,
+        isAiTyping: stillClearing ? snapshot.isAiTyping : null,
+        activeConversationId: stillClearing
+            ? snapshot.activeConversationId
+            : null,
+        errorMessage: message,
+      ),
+    );
+  }
+
+  String _historyError(Object error) {
+    if (error is NetworkException) return error.message;
+    return errorMessageOf(error);
+  }
+
+  /// Sabitlenenler üstte, sonra son mesaj zamanına göre.
+  List<ChatHistoryItem> _orderedHistory(List<ChatHistoryItem> items) {
+    return [...items]..sort((a, b) {
+      if (a.isPinned != b.isPinned) return a.isPinned ? -1 : 1;
+      final byDate = b.date.compareTo(a.date);
+      if (byDate != 0) return byDate;
+      return b.id.compareTo(a.id);
+    });
   }
 
   void clearActiveChat() {

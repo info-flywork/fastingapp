@@ -7,7 +7,8 @@
     "confirm": "Confirm",
     "save": "Enregistrer",
     "error_generic": "Un problème est survenu. Réessaie.",
-    "no_connection": "Pas de connexion internet. Vérifie ta connexion et réessaie."
+    "no_connection": "Pas de connexion internet. Vérifie ta connexion et réessaie.",
+    "timeout": "Le serveur n’a pas répondu à temps. Attends un moment et réessaie."
   },
   "auth": {
     "welcome_title": "Welcome",
@@ -272,6 +273,7 @@
     "log_hunger": "Enregistrer mon niveau de faim",
     "challenge_progress": "{}/{} terminé",
     "fasting_goal_reached": "Objectif atteint",
+    "fasting_completed": "Terminé",
     "eating_window": "Fenêtre alimentaire",
     "metric_goal": " /{}",
     "weight_unit_lb": "lb",
@@ -296,6 +298,7 @@
   },
   "fasting_page": {
     "meal_time": "C'est l'heure du repas !",
+    "on_break": "Vous êtes en pause",
     "break_title": "Rompre votre jeûne",
     "break_body": "Votre jeûne est terminé. Il est maintenant temps de ravitailler en douceur votre corps en énergie et en nutriments.",
     "body_title": "La glycémie augmente",
@@ -342,7 +345,11 @@
     "forecast_peak": "CULMINER",
     "struggling": "j'ai du mal",
     "time_passed": "Temps écoulé {}%",
+    "eating_remaining": "Temps restant",
     "started_label": "Jeûne commencé :",
+    "eating_started_label": "Repas commencé :",
+    "next_starts_label": "Prochain jeûne :",
+    "next_ends_label": "Fin :",
     "started_value": "Aujourd'hui, 9h34",
     "ends_label": "Fin du jeûne :",
     "ends_value": "Aujourd'hui, 20h34",
@@ -373,6 +380,7 @@
     "widget_keep_going": "Continue!\nVous êtes sur une lancée.",
     "plan_changed_next": "Plan mis à jour. Le nouveau plan s'appliquera à ton prochain jeûne.",
     "overtime": "Objectif +{}",
+    "goal_reached": "Objectif atteint",
     "next_fast_at": "Selon ton plan, ton prochain jeûne commence à {}",
     "start_next_cta": "Lancer le prochain jeûne",
     "long_overrun_title": "As-tu fini à cette heure-ci ?",

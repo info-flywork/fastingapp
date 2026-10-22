@@ -107,12 +107,22 @@ Future<bool> openWeeklyPlan({
     if (!await revenueCat.presentPaywall() || !context.mounted) return false;
   }
   final current = session.state.plan;
+  final repo = getIt<PlanCatalogRepository>();
+  await repo.ensureLoaded();
+  final detail = await repo.detail(plan.planCode);
+  final saved = current?.planCode == plan.planCode
+      ? current?.weeklySchedule
+      : null;
+  final template = detail?.weeklyTemplate;
+  if (!context.mounted) return false;
   final days = await context.pushNamed<List<WeeklyDay>>(
     RoutePaths.weeklyPlanDetail.name,
     extra: WeeklyPlanDetailArgs(
       plan: plan,
-      current: current?.planCode == plan.planCode
-          ? current?.weeklySchedule
+      current: saved != null && saved.length == 7
+          ? saved
+          : template != null && template.length == 7
+          ? template
           : null,
     ),
   );

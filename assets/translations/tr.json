@@ -7,7 +7,8 @@
     "confirm": "Onayla",
     "save": "Kaydet",
     "error_generic": "Bir şeyler ters gitti. Lütfen tekrar dene.",
-    "no_connection": "İnternet bağlantısı yok. Bağlantını kontrol edip tekrar dene."
+    "no_connection": "İnternet bağlantısı yok. Bağlantını kontrol edip tekrar dene.",
+    "timeout": "Sunucu yanıt vermedi. Biraz bekleyip tekrar dene."
   },
   "auth": {
     "welcome_title": "Hoş geldin",
@@ -272,6 +273,7 @@
     "log_hunger": "Açlık seviyemi kaydet",
     "challenge_progress": "{}/{} tamamlandı",
     "fasting_goal_reached": "Hedefe ulaştın",
+    "fasting_completed": "Tamamlandı",
     "eating_window": "Öğün penceresi",
     "metric_goal": " /{}",
     "weight_unit_lb": "lb",
@@ -296,6 +298,7 @@
   },
   "fasting_page": {
     "meal_time": "Öğün vakti!",
+    "on_break": "Moladasın",
     "break_title": "Orucunu boz",
     "break_body": "Orucun tamamlandı. Şimdi vücudunu enerji ve besinlerle nazikçe yenileme zamanı.",
     "body_title": "Kan şekeri yükseliyor",
@@ -342,7 +345,11 @@
     "forecast_peak": "PİK",
     "struggling": "Zorlanıyorum",
     "time_passed": "Geçen süre %{}",
+    "eating_remaining": "Kalan süre",
     "started_label": "Oruç başladı:",
+    "eating_started_label": "Öğün başladı:",
+    "next_starts_label": "Sonraki oruç:",
+    "next_ends_label": "Bitiş:",
     "started_value": "Bugün, 09:34",
     "ends_label": "Oruç bitiyor:",
     "ends_value": "Bugün, 20:34",
@@ -373,6 +380,7 @@
     "share_meal": "Mochi ile öğün vakti.\n\nPlan: {}\nÖğün penceresi açık.\nBaşlangıç: {}\nBitiş: {}\nSeri: {} gün",
     "plan_changed_next": "Plan güncellendi. Yeni plan bir sonraki orucunda geçerli olacak.",
     "overtime": "Hedef +{}",
+    "goal_reached": "Hedefe ulaştın",
     "next_fast_at": "Planına göre orucun {} başlar",
     "start_next_cta": "Sonraki orucu başlat",
     "long_overrun_title": "Bu saatte mi bitirdin?",

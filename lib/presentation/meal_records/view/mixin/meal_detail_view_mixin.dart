@@ -154,7 +154,14 @@ mixin MealDetailViewMixin on State<MealDetailView> {
           notes: notes.isEmpty ? null : notes,
         );
         if (result.suggestEndFast && mounted) {
-          endFast = await AppDialogs.instance.showEndFast(context) ?? false;
+          final choice = await AppDialogs.instance.showEndFast(context);
+          // Oruç sürsün: öğün yazılmasın.
+          if (choice == false) {
+            final id = result.meal?.id;
+            if (id != null && id.isNotEmpty) await _meals.deleteMeal(id);
+            return;
+          }
+          endFast = choice == true;
         }
       }
       DataSync.afterWrite();

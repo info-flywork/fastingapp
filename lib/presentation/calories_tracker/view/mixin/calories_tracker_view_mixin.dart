@@ -139,14 +139,28 @@ mixin CaloriesTrackerViewMixin on State<CaloriesTrackerView> {
       final result = await getIt<MealsRepository>().createQuickKcal(
         kcal: manualKcal,
       );
-      DataSync.afterWrite();
       if (!mounted) return;
-      setState(() => manualKcal = 0);
       // Oruç sürerken yenen kalori: "orucu bitir?" (elle öğün kaydıyla aynı).
       if (result.suggestEndFast) {
-        final endFast = await AppDialogs.instance.showEndFast(context);
-        if ((endFast ?? false) && mounted) await FastingFinishFlow.open();
+        final choice = await AppDialogs.instance.showEndFast(context);
+        if (choice == false) {
+          final id = result.meal?.id;
+          if (id != null && id.isNotEmpty) {
+            await getIt<MealsRepository>().deleteMeal(id);
+          }
+          return;
+        }
+        if (!mounted) return;
+        if (choice == true) {
+          DataSync.afterWrite();
+          setState(() => manualKcal = 0);
+          await FastingFinishFlow.open();
+          if (mounted) await loadDay(force: true);
+          return;
+        }
       }
+      DataSync.afterWrite();
+      setState(() => manualKcal = 0);
       if (mounted) await loadDay(force: true);
     } on Object catch (e) {
       if (mounted) AppSnackbar.showError(context, e);

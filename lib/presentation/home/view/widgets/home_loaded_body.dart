@@ -52,8 +52,6 @@ final class HomeLoadedBody extends StatelessWidget {
   /// Aktif oruç / yeme penceresi yoksa oruç kartı gizlenir; diğerleri kalır.
   List<Widget> _visibleItems() {
     final week = summary?.week ?? const <SummaryWeekDay>[];
-    final hasFast =
-        summary?.activeFast != null || summary?.eatingWindow != null;
 
     return [
       HomeTopBar(
@@ -63,12 +61,30 @@ final class HomeLoadedBody extends StatelessWidget {
         onChatTapped: onChatTapped,
       ),
       HomeWeekStrip(days: week),
-      if (hasFast)
-        HomeFastingCard(
-          activeFast: summary?.activeFast,
-          eatingWindow: summary?.eatingWindow,
-          serverTime: summary?.serverTime,
-        ),
+      // Cubit (optimistic start) özetten önce dolabilir — ikisini birleştir.
+      BlocBuilder<FastingSessionCubit, FastingSessionState>(
+        bloc: getIt<FastingSessionCubit>(),
+        buildWhen: (a, b) =>
+            a.fast?.id != b.fast?.id ||
+            a.eatingWindow?.endsAt != b.eatingWindow?.endsAt ||
+            a.fetchedAt != b.fetchedAt,
+        builder: (context, session) {
+          final fast = session.fast ?? summary?.activeFast;
+          final eating = fast != null
+              ? null
+              : (session.eatingWindow ?? summary?.eatingWindow);
+          if (fast == null && eating == null) {
+            return const SizedBox.shrink();
+          }
+          return HomeFastingCard(
+            activeFast: fast,
+            eatingWindow: eating,
+            serverTime: session.fetchedAt != null
+                ? DateTime.now().add(session.clockOffset)
+                : summary?.serverTime,
+          );
+        },
+      ),
       const HomeChallengeCard(),
       HomeMetricCards(
         waterMl: summary?.waterMl ?? 0,

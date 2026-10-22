@@ -95,14 +95,20 @@ mixin CaloriesResultViewMixin on State<CaloriesResultView> {
         carbsG: a.carbsG,
         fatG: a.fatG,
       );
-      DataSync.afterWrite();
       if (!mounted) return;
       // Oruç sürerken öğün: "orucu bitir?" (elle öğün kaydıyla aynı).
       var endFast = false;
       if (result.suggestEndFast) {
-        endFast = await AppDialogs.instance.showEndFast(context) ?? false;
+        final choice = await AppDialogs.instance.showEndFast(context);
+        if (choice == false) {
+          final id = result.meal?.id;
+          if (id != null && id.isNotEmpty) await _meals.deleteMeal(id);
+          return;
+        }
         if (!mounted) return;
+        endFast = choice == true;
       }
+      DataSync.afterWrite();
       context.pop(true);
       if (endFast) await FastingFinishFlow.open();
     } on NetworkException catch (e) {

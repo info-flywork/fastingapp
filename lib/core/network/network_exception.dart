@@ -20,18 +20,17 @@ final class NetworkException implements Exception {
     final apiError = envelope?['error'];
     final errorMap = apiError is Map<String, dynamic> ? apiError : null;
     final details = errorMap?['details'];
-    // Sunucu mesajı yoksa (zaman aşımı, bağlantı yok…) Dio'nun İngilizce
-    // teknik metni yerine çevrili genel mesaj.
-    final offline = switch (error.type) {
+    // Sunucu mesajı yoksa Dio'nun İngilizce teknik metni yerine çevrili mesaj.
+    // Zaman aşımı ≠ internet yok: yavaş API/DB de receiveTimeout üretir.
+    final fallbackKey = switch (error.type) {
       DioExceptionType.connectionTimeout ||
       DioExceptionType.sendTimeout ||
-      DioExceptionType.receiveTimeout ||
-      DioExceptionType.connectionError => true,
-      _ => false,
+      DioExceptionType.receiveTimeout => 'common.timeout',
+      DioExceptionType.connectionError => 'common.no_connection',
+      _ => 'common.error_generic',
     };
     return NetworkException(
-      envelope?['message'] as String? ??
-          (offline ? 'common.no_connection' : 'common.error_generic').tr(),
+      envelope?['message'] as String? ?? fallbackKey.tr(),
       statusCode: error.response?.statusCode,
       code: errorMap?['code'] as String?,
       details: details is Map<String, dynamic> ? details : null,

@@ -143,12 +143,17 @@ final class _MetricCard extends StatelessWidget {
               Text.rich(
                 TextSpan(
                   children: [
-                    TextSpan(
-                      text: valueKey.tr(
-                        args: [format?.call(value) ?? '$value'],
-                      ),
-                      style: AppTextStyles.homeMetricValue.copyWith(
-                        color: const Color(0xFF1C1C21),
+                    WidgetSpan(
+                      alignment: PlaceholderAlignment.baseline,
+                      baseline: TextBaseline.alphabetic,
+                      child: AnimatedCountText(
+                        value: value,
+                        style: AppTextStyles.homeMetricValue.copyWith(
+                          color: const Color(0xFF1C1C21),
+                        ),
+                        format: (n) => valueKey.tr(
+                          args: [format?.call(n) ?? '$n'],
+                        ),
                       ),
                     ),
                     TextSpan(

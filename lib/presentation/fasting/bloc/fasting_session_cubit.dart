@@ -61,18 +61,45 @@ final class FastingSessionCubit extends Cubit<FastingSessionState> {
   }
 
   Future<void> startFast({DateTime? startedAt}) async {
-    emit(state.copyWith(isLoading: true, clearError: true));
+    final start = startedAt ?? DateTime.now();
+    final targetMinutes =
+        state.plan?.fastMinutes ??
+        state.fast?.targetMinutes ??
+        16 * 60;
+    final fetchedAt = DateTime.now();
+    // Optimistic: UI ve ana sayfa kartı sunucu yanıtını beklemeden güncellenir.
+    final optimistic = ActiveFast(
+      id: '_local',
+      planCode: state.plan?.planCode,
+      targetMinutes: targetMinutes,
+      startedAt: start,
+      plannedEndAt: start.add(Duration(minutes: targetMinutes)),
+      elapsedMinutes: 0,
+      progress: 0,
+      serverTime: fetchedAt,
+    );
+    final previous = state;
+    emit(
+      state.copyWith(
+        isLoading: true,
+        clearError: true,
+        fast: optimistic,
+        fetchedAt: fetchedAt,
+        clockOffset: Duration.zero,
+        clearEating: true,
+      ),
+    );
     try {
       // POST yanıtı oruç DTO'sunu taşır: ayrıca /fasts/active + /plans/current
       // istenmez; seri/hafta için özet (afterWrite) yenilenir.
-      final fast = await _repository.startFast(startedAt: startedAt);
-      final fetchedAt = DateTime.now();
+      final fast = await _repository.startFast(startedAt: start);
+      final at = DateTime.now();
       emit(
         state.copyWith(
           isLoading: false,
           fast: fast,
-          fetchedAt: fetchedAt,
-          clockOffset: clockOffsetFromServer(fast.serverTime, fetchedAt),
+          fetchedAt: at,
+          clockOffset: clockOffsetFromServer(fast.serverTime, at),
           clearEating: true,
         ),
       );
@@ -82,9 +109,16 @@ final class FastingSessionCubit extends Cubit<FastingSessionState> {
         await refresh(showLoading: false);
         return;
       }
-      emit(state.copyWith(isLoading: false, errorMessage: e.message));
+      emit(
+        previous.copyWith(isLoading: false, errorMessage: e.message),
+      );
     } on Object catch (e) {
-      emit(state.copyWith(isLoading: false, errorMessage: errorMessageOf(e)));
+      emit(
+        previous.copyWith(
+          isLoading: false,
+          errorMessage: errorMessageOf(e),
+        ),
+      );
     }
   }
 

@@ -55,14 +55,18 @@ class _FastingTimeDialogState extends State<FastingTimeDialog> {
   late int _startMinute = widget.initialStartMinute;
   late int _endHour = widget.initialEndHour;
   late int _endMinute = widget.initialEndMinute;
+  final _startKey = GlobalKey<OnboardingTimePickerState>();
+  final _endKey = GlobalKey<OnboardingTimePickerState>();
 
   void _onSave() {
+    final start = _startKey.currentState;
+    final end = _endKey.currentState;
     Navigator.of(context).pop(
       FastingTimeResult(
-        startHour: _startHour,
-        startMinute: _startMinute,
-        endHour: _endHour,
-        endMinute: _endMinute,
+        startHour: start?.selectedHour ?? _startHour,
+        startMinute: start?.selectedMinute ?? _startMinute,
+        endHour: end?.selectedHour ?? _endHour,
+        endMinute: end?.selectedMinute ?? _endMinute,
       ),
     );
   }
@@ -96,6 +100,7 @@ class _FastingTimeDialogState extends State<FastingTimeDialog> {
                     ),
                     const SizedBox(height: 20),
                     OnboardingTimePicker(
+                      key: _startKey,
                       label: widget.startLabelKey.tr(),
                       hour: _startHour,
                       minute: _startMinute,
@@ -104,6 +109,7 @@ class _FastingTimeDialogState extends State<FastingTimeDialog> {
                     ),
                     const SizedBox(height: 16),
                     OnboardingTimePicker(
+                      key: _endKey,
                       label: widget.endLabelKey.tr(),
                       hour: _endHour,
                       minute: _endMinute,

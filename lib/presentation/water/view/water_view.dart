@@ -12,12 +12,14 @@ import 'package:fastingapp/core/snackbar/app_snackbar.dart';
 import 'package:fastingapp/core/sync/data_sync.dart';
 import 'package:fastingapp/core/theme/app_text_styles.dart';
 import 'package:fastingapp/core/utils/enum/snackbar_type.dart';
+import 'package:fastingapp/core/widgets/animated_count_text.dart';
 import 'package:fastingapp/core/widgets/day_switch_transition.dart';
 import 'package:fastingapp/domain/trackers/trackers_repository.dart';
 import 'package:fastingapp/generated/app_images.g.dart';
 import 'package:fastingapp/generated/assets.gen.dart';
 import 'package:fastingapp/generated/colors.gen.dart';
 import 'package:fastingapp/presentation/home/bloc/home_bloc.dart';
+import 'package:fastingapp/presentation/home/bloc/home_event.dart';
 import 'package:fastingapp/presentation/home/bloc/home_state.dart';
 import 'package:fastingapp/presentation/water/reminder/water_reminder_result.dart';
 import 'package:fastingapp/presentation/water/water_glass_icons.dart';
@@ -508,7 +510,11 @@ final class _WaterStats extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.end,
           children: [
-            Text(WaterUnits.amount(currentMl, unit), style: heroStyle),
+            AnimatedCountText(
+              value: currentMl,
+              style: heroStyle,
+              format: (n) => WaterUnits.amount(n, unit),
+            ),
             const SizedBox(width: 6),
             Padding(
               padding: const EdgeInsets.only(bottom: 12),

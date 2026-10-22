@@ -1,14 +1,18 @@
 import 'dart:math' as math;
 
 import 'package:easy_localization/easy_localization.dart';
+import 'package:fastingapp/core/di/injection.dart';
 import 'package:fastingapp/core/dialogs/app_dialogs.dart';
 import 'package:fastingapp/core/theme/app_text_styles.dart';
 import 'package:fastingapp/core/widgets/app_button.dart';
 import 'package:fastingapp/core/widgets/app_button_decoration.dart';
 import 'package:fastingapp/core/widgets/horseshoe_arc.dart';
+import 'package:fastingapp/domain/fasting/plan_catalog_repository.dart';
+import 'package:fastingapp/domain/fasting/plan_schedule.dart';
 import 'package:fastingapp/generated/app_images.g.dart';
 import 'package:fastingapp/generated/assets.gen.dart';
 import 'package:fastingapp/generated/colors.gen.dart';
+import 'package:fastingapp/presentation/fasting/bloc/fasting_session_cubit.dart';
 import 'package:fastingapp/presentation/plans/plan_detail_args.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -34,6 +38,7 @@ class _PlanDetailViewState extends State<PlanDetailView>
   void initState() {
     super.initState();
     initPlanDetail(widget.args);
+    loadCatalogSchedule();
   }
 
   @override
@@ -65,8 +70,9 @@ class _PlanDetailViewState extends State<PlanDetailView>
                         chipKey: plan.chipKey,
                         chipBg: plan.chipBg,
                         chipFg: plan.chipFg,
-                        eatHours: ratioEatHours,
-                        fastHours: fastHours,
+                        eatShare: eatShare,
+                        eatStartFraction:
+                            (eatStartHour * 60 + eatStartMinute) / (24 * 60),
                         endsLabel: formatTime(eatStartHour, eatStartMinute),
                         startsLabel: formatTime(eatEndHour, eatEndMinute),
                         onChange: onChangeTapped,
@@ -162,8 +168,8 @@ final class _PlanArcSection extends StatelessWidget {
     required this.chipKey,
     required this.chipBg,
     required this.chipFg,
-    required this.eatHours,
-    required this.fastHours,
+    required this.eatShare,
+    required this.eatStartFraction,
     required this.endsLabel,
     required this.startsLabel,
     required this.onChange,
@@ -173,8 +179,10 @@ final class _PlanArcSection extends StatelessWidget {
   final String chipKey;
   final Color chipBg;
   final Color chipFg;
-  final int eatHours;
-  final int fastHours;
+  final double eatShare;
+
+  /// Yeme penceresinin gün içindeki başlangıcı (0 = gece yarısı, 1 = ertesi).
+  final double eatStartFraction;
   final String endsLabel;
   final String startsLabel;
   final VoidCallback onChange;
@@ -185,8 +193,6 @@ final class _PlanArcSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final total = (eatHours + fastHours).clamp(1, 48);
-    final eatFraction = eatHours / total;
     final tipInset = _endpointInset;
 
     return SizedBox(
@@ -199,7 +205,10 @@ final class _PlanArcSection extends StatelessWidget {
             child: Stack(
               alignment: Alignment.center,
               children: [
-                HorseshoeArc(progress: eatFraction),
+                _AnimatedPlanArc(
+                  start: eatStartFraction,
+                  progress: eatShare,
+                ),
                 Padding(
                   padding: const EdgeInsets.only(top: 36),
                   child: Column(
@@ -257,6 +266,54 @@ final class _PlanArcSection extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+/// Yeme diliminin yerini ve uzunluğunu yaya doğru kaydırır.
+final class _AnimatedPlanArc extends ImplicitlyAnimatedWidget {
+  const _AnimatedPlanArc({required this.start, required this.progress})
+    : super(
+        duration: const Duration(milliseconds: 480),
+        curve: Curves.easeOutCubic,
+      );
+
+  final double start;
+  final double progress;
+
+  @override
+  AnimatedWidgetBaseState<_AnimatedPlanArc> createState() =>
+      _AnimatedPlanArcState();
+}
+
+final class _AnimatedPlanArcState
+    extends AnimatedWidgetBaseState<_AnimatedPlanArc> {
+  Tween<double>? _start;
+  Tween<double>? _progress;
+
+  @override
+  void forEachTween(TweenVisitor<dynamic> visitor) {
+    _start =
+        visitor(
+              _start,
+              widget.start,
+              (dynamic value) => Tween<double>(begin: value as double),
+            )
+            as Tween<double>?;
+    _progress =
+        visitor(
+              _progress,
+              widget.progress,
+              (dynamic value) => Tween<double>(begin: value as double),
+            )
+            as Tween<double>?;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return HorseshoeArc(
+      start: _start?.evaluate(animation) ?? widget.start,
+      progress: _progress?.evaluate(animation) ?? widget.progress,
     );
   }
 }
@@ -435,12 +492,71 @@ final class _WeeklySchedule extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 10),
-        for (var i = 0; i < _dayKeys.length; i++) ...[
+        _AnimatedWeekBars(
+          startHour: eatStartHour + eatStartMinute / 60,
+          endHour: eatEndHour + eatEndMinute / 60,
+          dayKeys: _dayKeys,
+        ),
+      ],
+    );
+  }
+}
+
+/// Yedi günün yeşil dilimini at nalıyla aynı sürede kaydırır.
+final class _AnimatedWeekBars extends ImplicitlyAnimatedWidget {
+  const _AnimatedWeekBars({
+    required this.startHour,
+    required this.endHour,
+    required this.dayKeys,
+  }) : super(
+         duration: const Duration(milliseconds: 480),
+         curve: Curves.easeOutCubic,
+       );
+
+  final double startHour;
+  final double endHour;
+  final List<String> dayKeys;
+
+  @override
+  AnimatedWidgetBaseState<_AnimatedWeekBars> createState() =>
+      _AnimatedWeekBarsState();
+}
+
+final class _AnimatedWeekBarsState
+    extends AnimatedWidgetBaseState<_AnimatedWeekBars> {
+  Tween<double>? _start;
+  Tween<double>? _end;
+
+  @override
+  void forEachTween(TweenVisitor<dynamic> visitor) {
+    _start =
+        visitor(
+              _start,
+              widget.startHour,
+              (dynamic value) => Tween<double>(begin: value as double),
+            )
+            as Tween<double>?;
+    _end =
+        visitor(
+              _end,
+              widget.endHour,
+              (dynamic value) => Tween<double>(begin: value as double),
+            )
+            as Tween<double>?;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final start = _start?.evaluate(animation) ?? widget.startHour;
+    final end = _end?.evaluate(animation) ?? widget.endHour;
+    return Column(
+      children: [
+        for (var i = 0; i < widget.dayKeys.length; i++) ...[
           if (i > 0) const SizedBox(height: 12),
           _DayBarRow(
-            dayKey: _dayKeys[i],
-            eatStartHour: eatStartHour + eatStartMinute / 60,
-            eatEndHour: eatEndHour + eatEndMinute / 60,
+            dayKey: widget.dayKeys[i],
+            eatStartHour: start,
+            eatEndHour: end,
           ),
         ],
       ],

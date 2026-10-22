@@ -1,4 +1,5 @@
 import 'package:fastingapp/core/di/injection.dart';
+import 'package:fastingapp/data/model/user/home_summary.dart';
 import 'package:fastingapp/core/sync/data_sync.dart';
 import 'package:fastingapp/core/network/network_exception.dart';
 import 'package:fastingapp/domain/revenue_cat/revenue_cat_service.dart';
@@ -20,6 +21,7 @@ final class HomeBloc extends Bloc<HomeEvent, HomeState> {
     on<HomeCleared>(_onCleared);
     on<HomeRefreshRequested>(_onRefreshRequested);
     on<HomeWeightOptimistic>(_onWeightOptimistic);
+    on<HomeMetricsOptimistic>(_onMetricsOptimistic);
     on<HomePremiumTapped>(_onPremiumTapped);
   }
 
@@ -27,6 +29,12 @@ final class HomeBloc extends Bloc<HomeEvent, HomeState> {
 
   /// [HomeWeightOptimistic] state'i sunucudan bağımsız değiştirdi.
   bool _locallyEdited = false;
+
+  /// Detay ekranının yazdığı su / adım. Aynı kuşaktaki eski özet yanıtı
+  /// bunu ezmesin; yazma bitip yeni özet gelince bırakılır.
+  int? _holdWaterMl;
+  int? _holdSteps;
+  int _holdGeneration = -1;
 
   /// Uçuşta bir özet isteği varken gelen yenilemeler tek bir "sonra bir kez
   /// daha" isteğine katlanır: eski yanıt yenisini ezemez, istek yağmuru olmaz.
@@ -58,13 +66,19 @@ final class HomeBloc extends Bloc<HomeEvent, HomeState> {
     var keepLoaded = state is HomeLoaded;
     if (!keepLoaded) {
       // Bugünün saklı özeti varsa iskelet yerine hemen o çizilir; ağ yanıtı
-      // gelince sessizce yenilenir. Oruç durumu cubit'e yalnızca canlı
-      // yanıttan aktarılır (eski süre sayaçları kaydırmasın).
+      // gelince sessizce yenilenir. Oruç cubit'e de yazılır — sayaçlar
+      // startedAt'ten hesaplanır, uzak özet gelene kadar boş ekran kalmaz.
       final auth = getIt<AuthBloc>().state;
       final cached = auth is AuthAuthenticated
           ? _userRepository.cachedSummary(auth.user.id)
           : null;
       if (cached != null) {
+        getIt<FastingSessionCubit>().applyFromSummary(
+          fast: cached.activeFast,
+          eatingWindow: cached.eatingWindow,
+          plan: cached.plan,
+          serverTime: cached.serverTime,
+        );
         emit(
           HomeLoaded(
             user: cached.user,
@@ -89,6 +103,7 @@ final class HomeBloc extends Bloc<HomeEvent, HomeState> {
         _again = true;
         return;
       }
+      final shown = _overlayHeldMetrics(summary, generation);
       getIt<FastingSessionCubit>().applyFromSummary(
         fast: summary.activeFast,
         eatingWindow: summary.eatingWindow,
@@ -108,10 +123,10 @@ final class HomeBloc extends Bloc<HomeEvent, HomeState> {
       _locallyEdited = false;
       emit(
         HomeLoaded(
-          user: summary.user,
-          progress: summary.progress,
-          isPremium: summary.user.isPremium,
-          summary: summary,
+          user: shown.user,
+          progress: shown.progress,
+          isPremium: shown.user.isPremium,
+          summary: shown,
         ),
       );
     } on Object catch (e) {
@@ -132,6 +147,40 @@ final class HomeBloc extends Bloc<HomeEvent, HomeState> {
     Emitter<HomeState> emit,
   ) async {
     add(const HomeStarted());
+  }
+
+  HomeSummary _overlayHeldMetrics(HomeSummary summary, int requestGeneration) {
+    if (requestGeneration != _holdGeneration) {
+      _holdWaterMl = null;
+      _holdSteps = null;
+      return summary;
+    }
+    return summary.copyWith(waterMl: _holdWaterMl, steps: _holdSteps);
+  }
+
+  void _onMetricsOptimistic(
+    HomeMetricsOptimistic event,
+    Emitter<HomeState> emit,
+  ) {
+    final current = state;
+    if (current is! HomeLoaded) return;
+    final summary = current.summary;
+    if (summary == null) return;
+    _locallyEdited = true;
+    _holdGeneration = DataSync.generation;
+    if (event.waterMl != null) _holdWaterMl = event.waterMl;
+    if (event.steps != null) _holdSteps = event.steps;
+    emit(
+      HomeLoaded(
+        user: current.user,
+        progress: current.progress,
+        isPremium: current.isPremium,
+        summary: summary.copyWith(
+          waterMl: event.waterMl,
+          steps: event.steps,
+        ),
+      ),
+    );
   }
 
   void _onWeightOptimistic(

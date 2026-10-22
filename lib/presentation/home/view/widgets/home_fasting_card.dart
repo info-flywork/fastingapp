@@ -1,6 +1,7 @@
 part of '../home_view.dart';
 
 /// Oruç kartı: maskot + flip-clock geri sayım.
+/// Hedef dolunca kutlama görünümü; dokununca her zaman Oruç sekmesine gider.
 final class HomeFastingCard extends StatefulWidget {
   const HomeFastingCard({
     this.activeFast,
@@ -19,18 +20,27 @@ final class HomeFastingCard extends StatefulWidget {
 
 class _HomeFastingCardState extends State<HomeFastingCard> {
   Timer? _timer;
+  StreamSubscription<FastingSessionState>? _sessionSub;
 
-  /// Kalan süre [FastingSessionCubit]'teki ölçümden: özetin alındığı an
-  /// (`fetchedAt`) ve sunucu saat farkı orada saklı. Kart kaydırılıp yeniden
-  /// kurulsa da geri sayım kaymaz (önceden kurulma anı esas alınıyordu).
+  /// Kalan süre: cubit canlı ölçümü öncelikli (optimistic start + ortak saat).
   FastingLiveMetrics? get _metrics {
     final session = getIt<FastingSessionCubit>().state;
-    final sameFast = session.fast?.id == widget.activeFast?.id;
-    final sameWindow =
-        session.eatingWindow?.endsAt == widget.eatingWindow?.endsAt;
-    final live = sameFast && sameWindow ? session.liveMetrics : null;
-    if (live != null) return live;
-    // Cubit henüz bu veriyi görmediyse: özet zamanı ≈ şimdi.
+    final cubitFast = session.fast;
+    final cubitEat = session.eatingWindow;
+    // Aynı oruç / pencere veya cubit daha güncel (_local → sunucu id).
+    if (cubitFast != null &&
+        (widget.activeFast == null ||
+            widget.activeFast!.id == cubitFast.id ||
+            cubitFast.id == '_local' ||
+            widget.activeFast!.id == '_local')) {
+      return session.liveMetrics;
+    }
+    if (cubitEat != null &&
+        widget.activeFast == null &&
+        (widget.eatingWindow == null ||
+            widget.eatingWindow!.endsAt == cubitEat.endsAt)) {
+      return session.liveMetrics;
+    }
     final at = DateTime.now();
     final offset = clockOffsetFromServer(widget.serverTime, at);
     if (widget.activeFast != null) {
@@ -61,11 +71,16 @@ class _HomeFastingCardState extends State<HomeFastingCard> {
       if (!mounted) return;
       setState(() {});
     });
+    // Optimistic start: cubit özetten önce dolar — kart hemen yenilensin.
+    _sessionSub = getIt<FastingSessionCubit>().stream.listen((_) {
+      if (mounted) setState(() {});
+    });
   }
 
   @override
   void dispose() {
     _timer?.cancel();
+    unawaited(_sessionSub?.cancel());
     super.dispose();
   }
 
@@ -78,15 +93,21 @@ class _HomeFastingCardState extends State<HomeFastingCard> {
     }
   }
 
+  void _openFastingTab() {
+    context.goNamed(RoutePaths.fasting.name);
+  }
+
   @override
   Widget build(BuildContext context) {
     final metrics = _metrics;
     final fasting = widget.activeFast != null;
     final eating = !fasting && widget.eatingWindow != null;
     final remaining = metrics?.remainingToPlannedEnd ?? Duration.zero;
-    // Oruç hedefi geçti: geri sayım yerine toplam oruç süresi ileri sayar.
+    // Oruç hedefi geçti: süre hedefte donar (ileri saymaz).
     final goalReached = fasting && remaining == Duration.zero;
-    final rem = goalReached ? metrics?.elapsed ?? Duration.zero : remaining;
+    final rem = goalReached
+        ? Duration(minutes: widget.activeFast!.targetMinutes)
+        : remaining;
     if (eating && remaining == Duration.zero && !_refreshedAtZero) {
       _refreshedAtZero = true;
       getIt<HomeBloc>().add(const HomeRefreshRequested());
@@ -100,101 +121,168 @@ class _HomeFastingCardState extends State<HomeFastingCard> {
     final minutes = rem.inMinutes.remainder(60);
     final seconds = rem.inSeconds.remainder(60);
 
-    return Container(
-      margin: const EdgeInsets.fromLTRB(16, 16, 16, 0),
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: ColorName.colorWhite,
-        borderRadius: BorderRadius.circular(20),
-      ),
-      child: Column(
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              SizedBox(
-                width: 28,
-                height: 28,
-                child: ClipRect(
-                  child: Transform.scale(
-                    scale: 1.75,
-                    child: AppImages.fork.image(
-                      width: 32,
-                      height: 32,
-                      fit: BoxFit.contain,
-                    ),
-                  ),
-                ),
-              ),
-              const SizedBox(width: 6),
-              Text(title.tr(), style: AppTextStyles.homeCardTitle),
-              const Spacer(),
-              Container(
-                height: 28,
-                padding: const EdgeInsets.fromLTRB(4, 4, 8, 4),
-                decoration: BoxDecoration(
-                  color: ColorName.colorHomeChipBg,
-                  borderRadius: BorderRadius.circular(16),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: _openFastingTab,
+          borderRadius: BorderRadius.circular(20),
+          child: Ink(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(20),
+              color: goalReached ? null : ColorName.colorWhite,
+              gradient: goalReached
+                  ? const LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: [
+                        ColorName.colorCtaGradientTop,
+                        ColorName.colorWhite,
+                      ],
+                    )
+                  : null,
+              border: goalReached
+                  ? Border.all(
+                      color: ColorName.colorMealPositive.withValues(alpha: 0.65),
+                      width: 1.5,
+                    )
+                  : null,
+            ),
+            child: Column(
+              children: [
+                Row(
                   children: [
                     SizedBox(
                       width: 28,
                       height: 28,
-                      child: ClipOval(
+                      child: ClipRect(
                         child: Transform.scale(
-                          scale: 1.85,
-                          child: AppImages.blood.image(
-                            width: 28,
-                            height: 28,
+                          scale: 1.75,
+                          child: AppImages.fork.image(
+                            width: 32,
+                            height: 32,
                             fit: BoxFit.contain,
                           ),
                         ),
                       ),
                     ),
-                    const SizedBox(width: 4),
-                    const Icon(
-                      Icons.chevron_right_rounded,
-                      size: 20,
-                      color: ColorName.colorTitle,
+                    const SizedBox(width: 6),
+                    Expanded(
+                      child: Text(
+                        title.tr(),
+                        style: AppTextStyles.homeCardTitle.copyWith(
+                          color: goalReached
+                              ? ColorName.colorBrandStrong
+                              : ColorName.colorTitle,
+                        ),
+                      ),
+                    ),
+                    _TrailingChip(goalReached: goalReached),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                Row(
+                  children: [
+                    SizedBox(
+                      width: 96,
+                      height: 96,
+                      child: ClipRect(
+                        child: Transform.scale(
+                          // clockv2 şeffaf; clock beyaz kare — tamamlandıda v2.
+                          scale: goalReached ? 1.15 : 1.21,
+                          child: (goalReached
+                                  ? AppImages.mascotClockv2
+                                  : AppImages.mascotClock)
+                              .image(
+                                width: 96,
+                                height: 96,
+                                fit: BoxFit.contain,
+                              ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          FlipClockUnit(
+                            value: hours,
+                            label: 'home.timer_hrs'.tr(),
+                          ),
+                          const SizedBox(width: 10),
+                          FlipClockUnit(
+                            value: minutes,
+                            label: 'home.timer_min'.tr(),
+                          ),
+                          const SizedBox(width: 10),
+                          FlipClockUnit(
+                            value: seconds,
+                            label: 'home.timer_sec'.tr(),
+                          ),
+                        ],
+                      ),
                     ),
                   ],
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
-          const SizedBox(height: 8),
-          Row(
-            children: [
-              SizedBox(
-                width: 96,
-                height: 96,
-                child: ClipRect(
-                  child: Transform.scale(
-                    scale: 1.21,
-                    child: AppImages.mascotClock.image(
-                      width: 96,
-                      height: 96,
-                      fit: BoxFit.contain,
-                    ),
+        ),
+      ),
+    );
+  }
+}
+
+final class _TrailingChip extends StatelessWidget {
+  const _TrailingChip({required this.goalReached});
+
+  final bool goalReached;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: 28,
+      padding: const EdgeInsets.fromLTRB(4, 4, 8, 4),
+      decoration: BoxDecoration(
+        color: goalReached
+            ? ColorName.colorMealPositive.withValues(alpha: 0.22)
+            : ColorName.colorHomeChipBg,
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          if (goalReached)
+            const Icon(
+              Icons.check_circle_rounded,
+              size: 20,
+              color: ColorName.colorBrandStrong,
+            )
+          else
+            SizedBox(
+              width: 28,
+              height: 28,
+              child: ClipOval(
+                child: Transform.scale(
+                  scale: 1.85,
+                  child: AppImages.blood.image(
+                    width: 28,
+                    height: 28,
+                    fit: BoxFit.contain,
                   ),
                 ),
               ),
-              const SizedBox(width: 8),
-              Expanded(
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    FlipClockUnit(value: hours, label: 'home.timer_hrs'.tr()),
-                    const SizedBox(width: 10),
-                    FlipClockUnit(value: minutes, label: 'home.timer_min'.tr()),
-                    const SizedBox(width: 10),
-                    FlipClockUnit(value: seconds, label: 'home.timer_sec'.tr()),
-                  ],
-                ),
-              ),
-            ],
+            ),
+          const SizedBox(width: 4),
+          Icon(
+            Icons.chevron_right_rounded,
+            size: 20,
+            color: goalReached
+                ? ColorName.colorBrandStrong
+                : ColorName.colorTitle,
           ),
         ],
       ),
