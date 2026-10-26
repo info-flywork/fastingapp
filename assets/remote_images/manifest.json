@@ -345,21 +345,6 @@
       "bytes": 112682,
       "sha256": "0d458ad93cb9b06fb2e8d7aafe9dec79af28b34fbd88a9f2392d3935fb6bd201"
     },
-    "assets/images/fasting_challenge_user_1.png": {
-      "file": "766a8eb53f125cdfe613.webp",
-      "bytes": 102262,
-      "sha256": "766a8eb53f125cdfe6135e2021a8699da1d3a2c5809d48185f5c182a681ed191"
-    },
-    "assets/images/fasting_challenge_user_2.png": {
-      "file": "1cd21837c34f02ad3be4.webp",
-      "bytes": 83404,
-      "sha256": "1cd21837c34f02ad3be466821b8e60043a54049ee3ebb56415f3910a887f0c67"
-    },
-    "assets/images/fasting_challenge_user_3.png": {
-      "file": "f0406f6ac25bf7f1618d.webp",
-      "bytes": 111770,
-      "sha256": "f0406f6ac25bf7f1618d4fa0d34512eced2c2c9ae55fb088b399a1d46653a6a7"
-    },
     "assets/images/fatigue.png": {
       "file": "abfb0d6da221a62c6f04.webp",
       "bytes": 65882,
@@ -630,6 +615,11 @@
       "bytes": 34926,
       "sha256": "5188abe2ec2c13dfee64909d4244f0c824626488dee0186271c4b1c10269d85d"
     },
+    "assets/images/mascot_clockv2.png": {
+      "file": "b695165fc2803383d020.webp",
+      "bytes": 51722,
+      "sha256": "b695165fc2803383d020566aeef397a3fd9cfa0e7f334d8ece176a16d0cb7a7d"
+    },
     "assets/images/mascot_diver.png": {
       "file": "f9a49bdb73c9a146d866.webp",
       "bytes": 89396,
@@ -717,6 +707,11 @@
       "file": "c97c61fce9e453751698.webp",
       "bytes": 7764,
       "sha256": "c97c61fce9e453751698ab0c70e5dd5850a90b928ac6097d23c6b6cab56d2392"
+    },
+    "assets/images/mochi-world-1.png": {
+      "file": "fcb637f24fc8a447e536.webp",
+      "bytes": 101090,
+      "sha256": "fcb637f24fc8a447e5367d8af0d48e4a94012f50982daf3d390a016ab6604ac4"
     },
     "assets/images/mochi-world-5.png": {
       "file": "51fcc6f32bc3a16edf0d.webp",
@@ -932,11 +927,6 @@
       "file": "e4e4902b6350a7498640.webp",
       "bytes": 5740,
       "sha256": "e4e4902b6350a749864002c2b7d77d115c50d9972da5560bd3b61a51a71fb033"
-    },
-    "assets/images/scramlbed_eggs.png": {
-      "file": "865b1ca3b9f7af85dd87.webp",
-      "bytes": 6268,
-      "sha256": "865b1ca3b9f7af85dd87051b2f6f275f7aaf3eef1fca7b9fcdaa36f18e213cf7"
     },
     "assets/images/searchpng.png": {
       "file": "bd8314ddabedfc8349b1.webp",
@@ -1192,11 +1182,6 @@
       "file": "2a5337ec577a8d1bf5b2.webp",
       "bytes": 64940,
       "sha256": "2a5337ec577a8d1bf5b27f7a99ba25f5e96645dd5915f52cd61eb1e72cc9d0bc"
-    },
-    "assets/images/yogurt.png": {
-      "file": "7496a532d3dba7d3b19b.webp",
-      "bytes": 5848,
-      "sha256": "7496a532d3dba7d3b19b5afb856a0ca6cd38b53eafe179d968bcbba227d393bd"
     },
     "assets/images/zzz.png": {
       "file": "8eaa265293a969304f8b.webp",

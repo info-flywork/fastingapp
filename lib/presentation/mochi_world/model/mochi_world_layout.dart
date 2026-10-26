@@ -34,16 +34,46 @@ enum MochiElementKind {
   flowerWilted('flower_wilted', 565 / 640),
   flowers('flowers', 375 / 640),
   pondLily('pond_lily', 323 / 640),
+
+  /// 3. seviyenin nilüferli göleti; sol kenarındaki girintiye ortadaki
+  /// büyük ağacın gövdesi oturur.
+  pondGarden('pond_garden', 379 / 640),
   pondDrying('pond_drying', 386 / 640),
   pondDried('pond_dried', 371 / 640),
   crackedPatch('cracked_patch', 405 / 640),
+
+  /// 3. seviyede ön kıyıdan rustik çitin yanından geçip orta ağacın soluna
+  /// kıvrılan taşlı kum patika (zemin dokusu; kesik üst kenarı hafifçe
+  /// yumuşatılmış, kenarında hafif gölge pişmiş).
+  path('path', 515 / 422),
+
+  /// 4. seviyede ön kıyıdan orta ağaca kıvrılan sıcak tonlu taş patika.
+  stonePath('stone_path', 550 / 480),
   shrubDry('shrub_dry', 506 / 640),
   mountain('mountain', 445 / 640),
-  waterfall('waterfall', 640 / 520),
+
+  /// 3. seviyenin dağı: karlı yeşil tepe + önündeki çimenli tepe.
+  hillSnow('hill_snow', 450 / 560),
+  hillGrass('hill_grass', 316 / 560),
+
+  /// İki katlı şelale + gölet (son seviyede göletin yerine geçer).
+  waterfall('waterfall', 641 / 582),
+  rainbow('rainbow', 342 / 960),
+  bird('bird', 316 / 400),
   fence('fence', 444 / 640),
+
+  /// 3. seviyenin üç direkli, çift raylı rustik çiti.
+  fenceRustic('fence_rustic', 365 / 640),
   bench('bench', 537 / 640),
-  lantern('lantern', 640 / 385),
-  lily('lily', 358 / 640);
+  lantern('lantern', 651 / 360),
+  lily('lily', 358 / 640),
+
+  /// Kıyı süsü: papatyalı yeşil çalı / yaprak öbekleri.
+  daisyBush1('daisy_bush_1', 275 / 400),
+  daisyBush2('daisy_bush_2', 297 / 400),
+  daisyBush3('daisy_bush_3', 271 / 400),
+  daisyBush4('daisy_bush_4', 267 / 400),
+  daisyBush5('daisy_bush_5', 250 / 400);
 
   const MochiElementKind(this.file, this.aspect);
 
@@ -78,25 +108,41 @@ enum MochiElementKind {
   };
 
   bool get isPond =>
-      this == pondLily || this == pondDrying || this == pondDried;
+      this == pondLily ||
+      this == pondGarden ||
+      this == pondDrying ||
+      this == pondDried;
 
   /// Kuru versiyonu olmayan, solunca rengi soluklaşan elementler.
   bool get fadesWhenUnwell => switch (this) {
     flowers ||
     fence ||
+    fenceRustic ||
     bench ||
     lantern ||
     mountain ||
+    path ||
+    stonePath ||
+    hillSnow ||
+    hillGrass ||
     waterfall ||
     lily => true,
+    _ when isDaisyBush => true,
     _ => false,
   };
+
+  bool get isDaisyBush =>
+      this == daisyBush1 ||
+      this == daisyBush2 ||
+      this == daisyBush3 ||
+      this == daisyBush4 ||
+      this == daisyBush5;
 }
 
 /// Bir elementin belirli bir seviyedeki görünümü.
 @immutable
 final class MochiElementSpec {
-  const MochiElementSpec(this.kind, this.width, {this.x, this.y});
+  const MochiElementSpec(this.kind, this.width, {this.x, this.y, this.sortY});
 
   final MochiElementKind kind;
 
@@ -107,6 +153,10 @@ final class MochiElementSpec {
   /// atlarken yeni yerlerine kayar.
   final double? x;
   final double? y;
+
+  /// Çizim sırası için taban yerine kullanılır (ör. gölet, girintisine oturan
+  /// ağacın arkasında kalsın diye ağacın tabanından biraz yukarıda sayılır).
+  final double? sortY;
 }
 
 /// Adadaki tek bir element yuvası.
@@ -123,6 +173,7 @@ final class MochiElementDef {
     this.saplingUntil = -1,
     this.droughtOnly = false,
     this.decal = false,
+    this.thrivingOnly = false,
   });
 
   /// Seviyeler ve durumlar arasında aynı kalan kimlik.
@@ -150,6 +201,9 @@ final class MochiElementDef {
 
   /// Zemin dokusu: her şeyin altında çizilir.
   final bool decal;
+
+  /// Yalnızca ada sağlıklıyken görünür (gökkuşağı).
+  final bool thrivingOnly;
 }
 
 /// Ekrana çizilecek, çözümlenmiş tek yerleşim.
@@ -164,6 +218,7 @@ final class MochiPlacement {
     required this.flip,
     required this.faded,
     required this.decal,
+    this.sortY,
   });
 
   final String key;
@@ -176,6 +231,16 @@ final class MochiPlacement {
   /// Renkleri soluklaşmış (solmuş ama kuru sprite'ı olmayan element).
   final bool faded;
   final bool decal;
+
+  /// Çizim sırası anahtarı (yoksa taban [y]).
+  final double? sortY;
+
+  /// Çizim sırası: zemin dokuları en altta, gerisi tabanı ekranda aşağıda
+  /// olan önde.
+  static int compareDrawOrder(MochiPlacement a, MochiPlacement b) {
+    if (a.decal != b.decal) return a.decal ? -1 : 1;
+    return (a.sortY ?? a.y).compareTo(b.sortY ?? b.y);
+  }
 }
 
 /// Bir dünya durumu: büyüme seviyesi + sağlık.
@@ -351,7 +416,8 @@ const List<MochiElementDef> kMochiElements = [
     y: 850,
     levels: {
       2: MochiElementSpec(MochiElementKind.treeRound, 112),
-      3: MochiElementSpec(MochiElementKind.tree, 210),
+      // Gövde göletin sol girintisine otursun diye biraz aşağıda.
+      3: MochiElementSpec(MochiElementKind.tree, 210, x: 420, y: 888),
       4: MochiElementSpec(MochiElementKind.tree, 300),
     },
     saplingUntil: 2,
@@ -362,9 +428,161 @@ const List<MochiElementDef> kMochiElements = [
     x: 0,
     y: 0,
     levels: {
-      3: MochiElementSpec(MochiElementKind.mountain, 384, x: 531, y: 712),
+      3: MochiElementSpec(
+        MochiElementKind.hillSnow,
+        250,
+        x: 548,
+        y: 722,
+        // Yanındaki fidanlarla (y: 712) eşitlenmesin, hep arkada kalsın.
+        sortY: 708,
+      ),
       4: MochiElementSpec(MochiElementKind.mountain, 561, x: 569, y: 712),
     },
+  ),
+  MochiElementDef(
+    key: 'hill',
+    zone: MochiZone.summit,
+    x: 660,
+    y: 762,
+    // Göletin arka kıyısının önünde çizilir.
+    levels: {3: MochiElementSpec(MochiElementKind.hillGrass, 224, sortY: 850)},
+  ),
+  // Tepelerin eteğinde ufak çalılar: tabanları zemine karışsın. Yeşil
+  // tepeninkiler, tepe gibi göletin önünde çizilir.
+  MochiElementDef(
+    key: 'hill-bush-1',
+    zone: MochiZone.summit,
+    x: 566,
+    y: 770,
+    levels: {3: MochiElementSpec(MochiElementKind.daisyBush3, 52, sortY: 853)},
+  ),
+  MochiElementDef(
+    key: 'hill-bush-2',
+    zone: MochiZone.summit,
+    x: 612,
+    y: 774,
+    levels: {3: MochiElementSpec(MochiElementKind.daisyBush4, 46, sortY: 854)},
+    flip: true,
+  ),
+  MochiElementDef(
+    key: 'hill-bush-3',
+    zone: MochiZone.summit,
+    x: 664,
+    y: 776,
+    levels: {3: MochiElementSpec(MochiElementKind.daisyBush2, 54, sortY: 855)},
+  ),
+  MochiElementDef(
+    key: 'hill-bush-4',
+    zone: MochiZone.summit,
+    x: 716,
+    y: 772,
+    levels: {3: MochiElementSpec(MochiElementKind.daisyBush3, 48, sortY: 856)},
+    flip: true,
+  ),
+  MochiElementDef(
+    key: 'hill-bush-5',
+    zone: MochiZone.summit,
+    x: 760,
+    y: 766,
+    levels: {3: MochiElementSpec(MochiElementKind.daisyBush4, 42, sortY: 857)},
+  ),
+  MochiElementDef(
+    key: 'hill-bush-6',
+    zone: MochiZone.summit,
+    x: 470,
+    y: 728,
+    levels: {3: MochiElementSpec(MochiElementKind.daisyBush4, 40)},
+    flip: true,
+  ),
+  MochiElementDef(
+    key: 'hill-bush-7',
+    zone: MochiZone.summit,
+    x: 540,
+    y: 730,
+    levels: {3: MochiElementSpec(MochiElementKind.daisyBush2, 44)},
+  ),
+  // Göletin sağ üst kıyısını dolduran irili ufaklı papatyalı çalılar.
+  MochiElementDef(
+    key: 'pond-bush-1',
+    zone: MochiZone.lake,
+    x: 706,
+    y: 786,
+    levels: {3: MochiElementSpec(MochiElementKind.daisyBush4, 48)},
+  ),
+  MochiElementDef(
+    key: 'pond-bush-2',
+    zone: MochiZone.lake,
+    x: 776,
+    y: 790,
+    levels: {3: MochiElementSpec(MochiElementKind.daisyBush2, 62)},
+    flip: true,
+  ),
+  MochiElementDef(
+    key: 'pond-bush-3',
+    zone: MochiZone.lake,
+    x: 846,
+    y: 802,
+    levels: {3: MochiElementSpec(MochiElementKind.daisyBush3, 52)},
+  ),
+  MochiElementDef(
+    key: 'pond-bush-4',
+    zone: MochiZone.lake,
+    x: 742,
+    y: 818,
+    levels: {3: MochiElementSpec(MochiElementKind.daisyBush1, 92)},
+  ),
+  MochiElementDef(
+    key: 'pond-bush-5',
+    zone: MochiZone.lake,
+    x: 818,
+    y: 830,
+    levels: {3: MochiElementSpec(MochiElementKind.daisyBush5, 86)},
+    flip: true,
+  ),
+  MochiElementDef(
+    key: 'pond-bush-6',
+    zone: MochiZone.lake,
+    x: 862,
+    y: 846,
+    levels: {3: MochiElementSpec(MochiElementKind.daisyBush3, 44)},
+    flip: true,
+  ),
+  MochiElementDef(
+    key: 'pond-bush-7',
+    zone: MochiZone.lake,
+    x: 704,
+    y: 840,
+    levels: {3: MochiElementSpec(MochiElementKind.daisyBush2, 50)},
+    flip: true,
+  ),
+  MochiElementDef(
+    key: 'pond-bush-8',
+    zone: MochiZone.lake,
+    x: 748,
+    y: 852,
+    levels: {3: MochiElementSpec(MochiElementKind.daisyBush4, 72)},
+  ),
+  MochiElementDef(
+    key: 'pond-bush-9',
+    zone: MochiZone.lake,
+    x: 796,
+    y: 851,
+    levels: {3: MochiElementSpec(MochiElementKind.daisyBush3, 58)},
+    flip: true,
+  ),
+  MochiElementDef(
+    key: 'pond-bush-10',
+    zone: MochiZone.lake,
+    x: 840,
+    y: 862,
+    levels: {3: MochiElementSpec(MochiElementKind.daisyBush5, 64)},
+  ),
+  MochiElementDef(
+    key: 'pond-bush-11',
+    zone: MochiZone.lake,
+    x: 874,
+    y: 890,
+    levels: {3: MochiElementSpec(MochiElementKind.daisyBush3, 46)},
   ),
   MochiElementDef(
     key: 'lily',
@@ -380,37 +598,114 @@ const List<MochiElementDef> kMochiElements = [
     y: 910,
     levels: {
       2: MochiElementSpec(MochiElementKind.pondLily, 340),
-      3: MochiElementSpec(MochiElementKind.pondLily, 400, x: 690, y: 912),
-      4: MochiElementSpec(MochiElementKind.pondLily, 440, x: 680, y: 915),
+      // Girintisi ortadaki ağacın (center: 420, 888) gövdesine denk gelir;
+      // ağaç göletin önünde çizilir.
+      3: MochiElementSpec(
+        MochiElementKind.pondGarden,
+        360,
+        x: 582,
+        y: 970,
+        sortY: 845,
+      ),
+      // 4. seviyede gölet, iki katlı şelalenin kendi göletine dönüşür.
     },
   ),
   MochiElementDef(
     key: 'waterfall',
     zone: MochiZone.lake,
-    x: 638,
-    y: 847,
-    levels: {4: MochiElementSpec(MochiElementKind.waterfall, 342)},
+    x: 692,
+    y: 938,
+    // Orta ağacın arkasında kalsın diye erken çizilir.
+    levels: {4: MochiElementSpec(MochiElementKind.waterfall, 372, sortY: 830)},
+  ),
+  // Son seviyede (cennet) dağın tepesinin üstünde, gökyüzünde pastel
+  // gökkuşağı. Tabanı en yukarıda olduğu için dağın ve ağaçların arkasında
+  // kalır; bacakları bulutlara karışır.
+  MochiElementDef(
+    key: 'rainbow',
+    zone: MochiZone.lake,
+    x: 565,
+    y: 410,
+    levels: {4: MochiElementSpec(MochiElementKind.rainbow, 600)},
+    thrivingOnly: true,
+  ),
+  // Cennette adanın iki yanında birbirine bakan beyaz kuşlar; gökyüzünde
+  // oldukları için her şeyin önünde çizilir.
+  MochiElementDef(
+    key: 'bird-l',
+    zone: MochiZone.lake,
+    x: 150,
+    y: 520,
+    levels: {4: MochiElementSpec(MochiElementKind.bird, 100, sortY: 2000)},
+    thrivingOnly: true,
+  ),
+  MochiElementDef(
+    key: 'bird-r',
+    zone: MochiZone.lake,
+    x: 830,
+    y: 520,
+    levels: {4: MochiElementSpec(MochiElementKind.bird, 88, sortY: 2000)},
+    flip: true,
+    thrivingOnly: true,
+  ),
+  MochiElementDef(
+    key: 'path',
+    zone: MochiZone.garden,
+    // Ön kıyıdan başlar, rustik çitin ucundan geçip orta ağacın solundan
+    // arkaya dolanır.
+    x: 325,
+    y: 1090,
+    levels: {3: MochiElementSpec(MochiElementKind.path, 240)},
+    decal: true,
+  ),
+  MochiElementDef(
+    key: 'stone-path',
+    zone: MochiZone.garden,
+    // Kıyıdaki fenerle çiçeklerin arasından başlar, bankın önünden orta
+    // ağaca kıvrılır.
+    x: 420,
+    y: 1120,
+    levels: {4: MochiElementSpec(MochiElementKind.stonePath, 330)},
+    decal: true,
   ),
   MochiElementDef(
     key: 'bench',
     zone: MochiZone.garden,
-    x: 196,
-    y: 792,
-    levels: {4: MochiElementSpec(MochiElementKind.bench, 80)},
+    x: 250,
+    y: 826,
+    levels: {4: MochiElementSpec(MochiElementKind.bench, 106)},
   ),
   MochiElementDef(
     key: 'lantern-a',
     zone: MochiZone.garden,
     x: 0,
     y: 0,
-    levels: {4: MochiElementSpec(MochiElementKind.lantern, 72, x: 180, y: 886)},
+    // Çitin başlangıcından hemen önce; arkadaki ağacın önünde çizilir.
+    levels: {
+      4: MochiElementSpec(
+        MochiElementKind.lantern,
+        34,
+        x: 132,
+        y: 890,
+        sortY: 920,
+      ),
+    },
   ),
   MochiElementDef(
     key: 'lantern-b',
     zone: MochiZone.garden,
     x: 0,
     y: 0,
-    levels: {4: MochiElementSpec(MochiElementKind.lantern, 72, x: 142, y: 926)},
+    // Çitin başında, çalıların arasında; çitin önünde çizilir.
+    levels: {
+      4: MochiElementSpec(
+        MochiElementKind.lantern,
+        50,
+        x: 134,
+        y: 944,
+        sortY: 990,
+      ),
+    },
   ),
   MochiElementDef(
     key: 'lantern-c',
@@ -418,29 +713,116 @@ const List<MochiElementDef> kMochiElements = [
     x: 0,
     y: 0,
     levels: {
-      4: MochiElementSpec(MochiElementKind.lantern, 72, x: 400, y: 1082),
+      4: MochiElementSpec(
+        MochiElementKind.lantern,
+        50,
+        x: 432,
+        y: 1086,
+        sortY: 1300,
+      ),
     },
+  ),
+  // Kıyı boyunca, çitin hemen önünü dolduran iri papatyalı çalılar.
+  // Çitin sonundaki fener bunların önünde çizilir (sortY).
+  MochiElementDef(
+    key: 'shore-daisy-1',
+    zone: MochiZone.garden,
+    x: 86,
+    y: 988,
+    levels: {4: MochiElementSpec(MochiElementKind.daisyBush3, 110)},
+  ),
+  // Lambanın dibinde iri çalı yerine alçak yeşillik + papatyalar.
+  MochiElementDef(
+    key: 'shore-daisy-2',
+    zone: MochiZone.garden,
+    x: 112,
+    y: 1034,
+    levels: {4: MochiElementSpec(MochiElementKind.daisyBush3, 84)},
+  ),
+  MochiElementDef(
+    key: 'shore-daisy-2b',
+    zone: MochiZone.garden,
+    x: 166,
+    y: 1046,
+    levels: {4: MochiElementSpec(MochiElementKind.daisyBush4, 72)},
+    flip: true,
+  ),
+  MochiElementDef(
+    key: 'shore-daisy-3',
+    zone: MochiZone.garden,
+    x: 212,
+    y: 1056,
+    levels: {4: MochiElementSpec(MochiElementKind.daisyBush2, 130)},
+    flip: true,
+  ),
+  MochiElementDef(
+    key: 'shore-daisy-4',
+    zone: MochiZone.garden,
+    x: 294,
+    y: 1076,
+    levels: {4: MochiElementSpec(MochiElementKind.daisyBush5, 170)},
+  ),
+  MochiElementDef(
+    key: 'shore-daisy-5',
+    zone: MochiZone.garden,
+    x: 382,
+    y: 1092,
+    levels: {4: MochiElementSpec(MochiElementKind.daisyBush4, 130)},
+    flip: true,
+  ),
+  MochiElementDef(
+    key: 'shore-daisy-6',
+    zone: MochiZone.garden,
+    x: 468,
+    y: 1094,
+    levels: {4: MochiElementSpec(MochiElementKind.daisyBush3, 100)},
+  ),
+  MochiElementDef(
+    key: 'fence-rustic',
+    zone: MochiZone.garden,
+    // Patikanın solunda, ön kıyının çimeninde.
+    x: 190,
+    y: 1025,
+    levels: {3: MochiElementSpec(MochiElementKind.fenceRustic, 200)},
+  ),
+  // Patikanın sol kenarında ufak papatyalı çalılar.
+  MochiElementDef(
+    key: 'path-bush-1',
+    zone: MochiZone.garden,
+    x: 259,
+    y: 1040,
+    levels: {3: MochiElementSpec(MochiElementKind.daisyBush4, 48)},
+  ),
+  MochiElementDef(
+    key: 'path-bush-2',
+    zone: MochiZone.garden,
+    x: 239,
+    y: 1064,
+    levels: {3: MochiElementSpec(MochiElementKind.daisyBush3, 54)},
+    flip: true,
+  ),
+  MochiElementDef(
+    key: 'path-bush-3',
+    zone: MochiZone.garden,
+    x: 271,
+    y: 1086,
+    levels: {3: MochiElementSpec(MochiElementKind.daisyBush5, 50)},
   ),
   MochiElementDef(
     key: 'fence-a',
     zone: MochiZone.garden,
-    x: 224,
-    y: 952,
-    levels: {
-      3: MochiElementSpec(MochiElementKind.fence, 160),
-      4: MochiElementSpec(MochiElementKind.fence, 160),
-    },
+    x: 216,
+    y: 980,
+    levels: {4: MochiElementSpec(MochiElementKind.fence, 160)},
     flip: true,
   ),
   MochiElementDef(
     key: 'fence-b',
     zone: MochiZone.garden,
-    x: 338,
-    y: 1014,
-    levels: {
-      3: MochiElementSpec(MochiElementKind.fence, 160),
-      4: MochiElementSpec(MochiElementKind.fence, 160),
-    },
+    // fence-a'nın son direğinden devam eder (aynı hizada).
+    x: 346,
+    y: 1032,
+    levels: {4: MochiElementSpec(MochiElementKind.fence, 160)},
     flip: true,
   ),
   MochiElementDef(
@@ -788,6 +1170,7 @@ List<MochiPlacement> mochiCompose(
   final out = <MochiPlacement>[];
   for (final e in kMochiElements) {
     if (e.droughtOnly && health != MochiHealth.drought) continue;
+    if (e.thrivingOnly && health != MochiHealth.thriving) continue;
     final level = levels[e.zone] ?? 0;
     final spec = e.levels[level];
     if (spec == null) continue;
@@ -802,13 +1185,11 @@ List<MochiPlacement> mochiCompose(
         flip: e.flip,
         faded: faded,
         decal: e.decal,
+        sortY: spec.sortY,
       ),
     );
   }
-  out.sort((a, b) {
-    if (a.decal != b.decal) return a.decal ? -1 : 1;
-    return a.y.compareTo(b.y);
-  });
+  out.sort(MochiPlacement.compareDrawOrder);
   return out;
 }
 

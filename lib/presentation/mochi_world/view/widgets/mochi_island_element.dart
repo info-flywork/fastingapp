@@ -176,7 +176,9 @@ final class _ElementBody extends StatelessWidget {
 
     final shadowStrength = switch (kind) {
       _ when placement.decal || kind.isPond || kind.isSingleFlower => 0.0,
+      MochiElementKind.rainbow || MochiElementKind.bird => 0.0,
       MochiElementKind.flowers => 0.5,
+      _ when kind.isDaisyBush => 0.5,
       MochiElementKind.shrubDry => 0.6,
       _ => 1.0,
     };
@@ -224,7 +226,12 @@ final class _ElementBody extends StatelessWidget {
               painter: _ContactShadowPainter(strength: shadowStrength),
             ),
           ),
-        _IdleMotion(kind: kind, clock: clock, phase: phase, child: sprite),
+        if (kind == MochiElementKind.rainbow)
+          _RainbowGlow(clock: clock, child: sprite)
+        else if (kind == MochiElementKind.bird)
+          _Hover(clock: clock, phase: phase, child: sprite)
+        else
+          _IdleMotion(kind: kind, clock: clock, phase: phase, child: sprite),
         if (_overlayFor(kind, phase) case final painter?)
           Positioned.fill(
             child: IgnorePointer(child: CustomPaint(painter: painter)),
@@ -240,12 +247,18 @@ final class _ElementBody extends StatelessWidget {
           faded: placement.faded,
         ),
         MochiElementKind.pondLily => _GlintPainter(clock: clock, phase: phase),
+        MochiElementKind.pondGarden => _GlintPainter(
+          clock: clock,
+          phase: phase,
+          spots: _GlintPainter.gardenPond,
+        ),
         MochiElementKind.pondDrying => _GlintPainter(
           clock: clock,
           phase: phase,
           spots: _GlintPainter.puddle,
           strength: 0.45,
         ),
+        MochiElementKind.rainbow => _RainbowCloudsPainter(clock: clock),
         MochiElementKind.lantern => _LanternGlowPainter(
           clock: clock,
           phase: phase,
@@ -315,6 +328,7 @@ final class _IdleMotion extends StatelessWidget {
       MochiElementKind.flowerWilted => (0.025, 0.8),
       _ when kind.isSingleFlower => (0.06, 1.6),
       MochiElementKind.flowers => (0.045, 1.5),
+      _ when kind.isDaisyBush => (0.03, 1.2),
       MochiElementKind.shrubDry => (0.015, 0.7),
       _ => (0.0, 0.0),
     };
@@ -411,12 +425,22 @@ final class _WaterfallPainter extends CustomPainter {
   final ValueListenable<double> clock;
   final bool faded;
 
-  // Sprite'a göre çağlayan dikdörtgenleri (0..1).
+  // İki katlı şelale sprite'ında çağlayanlar (0..1; kaynak görselden
+  // ölçüldü) ve sisin yükseldiği alt havuz.
   static const _falls = [
-    Rect.fromLTRB(0.47, 0.12, 0.58, 0.36),
-    Rect.fromLTRB(0.49, 0.50, 0.60, 0.69),
+    Rect.fromLTRB(0.433, 0.116, 0.541, 0.308),
+    Rect.fromLTRB(0.464, 0.407, 0.611, 0.587),
   ];
-  static const _pool = Offset(0.57, 0.77);
+  static const _pool = Offset(0.54, 0.62);
+
+  /// Alt göletin yüzeyinde pırıltılar (eski ayrı göletteki gibi).
+  static const _pondGlints = [
+    Offset(0.36, 0.74),
+    Offset(0.52, 0.79),
+    Offset(0.66, 0.71),
+    Offset(0.46, 0.87),
+    Offset(0.70, 0.83),
+  ];
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -473,6 +497,12 @@ final class _WaterfallPainter extends CustomPainter {
       mist.color = Colors.white.withValues(alpha: 0.35 * (1 - m) * strength);
       canvas.drawCircle(c, size.width * (0.05 + m * 0.05), mist);
     }
+    _GlintPainter(
+      clock: clock,
+      phase: 0,
+      spots: _pondGlints,
+      strength: strength,
+    ).paint(canvas, size);
   }
 
   @override
@@ -505,6 +535,15 @@ final class _GlintPainter extends CustomPainter {
   ];
 
   /// Kuruyan göletin ortasında kalan su birikintisi.
+  /// 3. seviye göletinin su yüzeyi.
+  static const gardenPond = [
+    Offset(0.30, 0.34),
+    Offset(0.46, 0.24),
+    Offset(0.58, 0.46),
+    Offset(0.38, 0.56),
+    Offset(0.66, 0.30),
+  ];
+
   static const puddle = [
     Offset(0.42, 0.52),
     Offset(0.58, 0.46),
@@ -539,7 +578,7 @@ final class _LanternGlowPainter extends CustomPainter {
   final ValueListenable<double> clock;
   final double phase;
 
-  static const _glass = Offset(0.31, 0.50);
+  static const _glass = Offset(0.50, 0.52);
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -550,7 +589,7 @@ final class _LanternGlowPainter extends CustomPainter {
         0.3 * math.sin(t * 2.3 + phase) +
         0.2 * math.sin(t * 7.1 + phase * 2);
     final c = Offset(_glass.dx * size.width, _glass.dy * size.height);
-    final r = size.width * (1.1 + 0.15 * flicker);
+    final r = size.width * (1.4 + 0.18 * flicker);
     final halo = Paint()
       ..blendMode = BlendMode.plus
       ..shader = ui.Gradient.radial(c, r, [
@@ -574,4 +613,105 @@ void _sparkle(Canvas canvas, Offset c, double r, Paint paint) {
     ..quadraticBezierTo(c.dx, c.dy, c.dx, c.dy - r)
     ..close();
   canvas.drawPath(path, paint);
+}
+
+/// Gökkuşağı: gökyüzünde yarı saydam, parlaklığı yavaşça dalgalanır.
+/// Uçan kuş: yerinde yavaşça yükselip alçalır, hafifçe yalpalar.
+final class _Hover extends StatelessWidget {
+  const _Hover({required this.clock, required this.phase, required this.child});
+
+  final ValueListenable<double> clock;
+  final double phase;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: clock,
+      child: child,
+      builder: (context, child) {
+        final t = clock.value * 1.4 + phase;
+        return Transform.translate(
+          offset: Offset(math.sin(t * 0.5) * 4, math.sin(t) * 6),
+          child: Transform.rotate(
+            angle: math.sin(t + 0.8) * 0.05,
+            child: child,
+          ),
+        );
+      },
+    );
+  }
+}
+
+final class _RainbowGlow extends StatelessWidget {
+  const _RainbowGlow({required this.clock, required this.child});
+
+  final ValueListenable<double> clock;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: clock,
+      child: child,
+      builder: (context, child) => Opacity(
+        opacity: 0.58 + 0.08 * math.sin(clock.value * 0.6),
+        child: child,
+      ),
+    );
+  }
+}
+
+/// Gökkuşağının iki ucunu saran yumuşak bulutlar: kavis bulutların içinden
+/// çıkıyormuş gibi görünür (sahnedeki bulutlarla aynı biçim; sıcak alt gölge
+/// + krem üst). Hareketli gökyüzü bulutları uçları sabit örtemediği için
+/// gökkuşağıyla birlikte çizilir.
+final class _RainbowCloudsPainter extends CustomPainter {
+  _RainbowCloudsPainter({required this.clock}) : super(repaint: clock);
+
+  final ValueListenable<double> clock;
+
+  /// Uçların sprite içindeki yeri (0..1) ve bulut yarıçapı (genişliğe oran).
+  static const _ends = [Offset(0.06, 0.86), Offset(0.94, 0.86)];
+  static const _radius = 0.13;
+
+  static const _shade = Color(0xFFFAD6CE);
+  static const _cream = Color(0xFFFFFBF8);
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final t = clock.value;
+    final r = size.width * _radius;
+    for (var i = 0; i < _ends.length; i++) {
+      final drift = math.sin(t * 0.35 + i * 2.1) * r * 0.04;
+      final c = Offset(
+        _ends[i].dx * size.width + drift,
+        _ends[i].dy * size.height,
+      );
+      _cloud(canvas, c + Offset(0, r * 0.10), r, _shade);
+      _cloud(canvas, c - Offset(0, r * 0.04), r * 0.92, _cream);
+    }
+  }
+
+  void _cloud(Canvas canvas, Offset center, double r, Color color) {
+    final paint = Paint()
+      ..color = color
+      ..maskFilter = MaskFilter.blur(BlurStyle.normal, r * 0.10);
+    canvas
+      ..drawCircle(center + Offset(-r * 0.6, r * 0.12), r * 0.5, paint)
+      ..drawCircle(center + Offset(r * 0.6, r * 0.14), r * 0.46, paint)
+      ..drawCircle(center + Offset(-r * 0.1, -r * 0.18), r * 0.58, paint)
+      ..drawCircle(center + Offset(r * 0.28, r * 0.02), r * 0.5, paint)
+      ..drawOval(
+        Rect.fromCenter(
+          center: center + Offset(0, r * 0.28),
+          width: r * 2.1,
+          height: r * 0.7,
+        ),
+        paint,
+      );
+  }
+
+  @override
+  bool shouldRepaint(covariant _RainbowCloudsPainter old) => false;
 }

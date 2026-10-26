@@ -14,6 +14,16 @@ import 'package:fastingapp/presentation/auth/onboard/food_loves/bloc/food_loves_
 import 'package:fastingapp/presentation/auth/onboard/food_skips/bloc/food_skips_bloc.dart';
 import 'package:fastingapp/presentation/auth/onboard/goal/bloc/goal_bloc.dart';
 
+const _notificationKeys = [
+  'fasting',
+  'streak',
+  'weight',
+  'water',
+  'challenges',
+  'world',
+  'marketing',
+];
+
 /// Profili Düzenle ekranı (backend doküman 04 §3): hesap (`/user/me`), profil
 /// (`/user/profile`), avatar (`/user/me/avatar`) ve aktif plan
 /// (`/plans/current`). Enum'lar API'de istemcideki adlarıyla gider.
@@ -45,9 +55,12 @@ final class ProfileRepository {
   }
 
   /// `PATCH /user/settings` (yalnızca verilen alanlar).
+  /// [allNotifications] verilirse oruç, seri, kilo, su, meydan okuma, ada ve
+  /// pazarlama anahtarları birlikte o değere çekilir.
   Future<UserSettings> updateSettings({
     bool? pushEnabled,
     bool? healthSyncEnabled,
+    bool? allNotifications,
   }) async {
     final result = await _network.send<UserSettings>(
       path: '/user/settings',
@@ -55,6 +68,10 @@ final class ProfileRepository {
       data: {
         'pushEnabled': ?pushEnabled,
         'healthSyncEnabled': ?healthSyncEnabled,
+        if (allNotifications != null)
+          'notifications': {
+            for (final key in _notificationKeys) key: allNotifications,
+          },
       },
       parserModel: UserSettings.fromJson,
     );

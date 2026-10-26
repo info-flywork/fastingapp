@@ -119,14 +119,6 @@ class _ProfileViewState extends State<ProfileView> with ProfileViewMixin {
                         onChanged: onPushNotificationsChanged,
                       ),
                     ),
-                    if (pushNotifications)
-                      ProfileMenuRow(
-                        icon: Assets.icons.solarBellBingLineDuotone,
-                        title: 'notification_settings.title'.tr(),
-                        onTap: () => context.pushNamed(
-                          RoutePaths.notificationSettings.name,
-                        ),
-                      ),
                   ],
                 ),
               ),

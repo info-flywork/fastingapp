@@ -1,5 +1,4 @@
 import 'package:dio/dio.dart';
-import 'package:fastingapp/domain/app/app_links_repository.dart';
 import 'package:fastingapp/core/managers/auth_cache_manager.dart';
 import 'package:fastingapp/core/managers/device_manager.dart';
 import 'package:fastingapp/core/managers/localization_manager.dart';
@@ -9,6 +8,7 @@ import 'package:fastingapp/core/managers/shared_pref_manager.dart';
 import 'package:fastingapp/core/managers/url_launcher_manager.dart';
 import 'package:fastingapp/core/network/dio_client.dart';
 import 'package:fastingapp/core/network/network_manager.dart';
+import 'package:fastingapp/domain/app/app_links_repository.dart';
 import 'package:fastingapp/domain/auth/auth_repository.dart';
 import 'package:fastingapp/domain/auth/social_auth_service.dart';
 import 'package:fastingapp/domain/chat/chat_repository.dart';

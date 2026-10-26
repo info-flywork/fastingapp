@@ -1,11 +1,11 @@
-import 'package:fastingapp/domain/onboarding/onboarding_draft.dart';
-import 'package:fastingapp/core/di/injection.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:fastingapp/core/di/injection.dart';
 import 'package:fastingapp/core/router/route_paths.dart';
 import 'package:fastingapp/core/theme/app_text_styles.dart';
 import 'package:fastingapp/core/widgets/app_button.dart';
 import 'package:fastingapp/core/widgets/onboarding/fasting_plan_options_list.dart';
 import 'package:fastingapp/core/widgets/onboarding/onboarding_progress_header.dart';
+import 'package:fastingapp/domain/onboarding/onboarding_draft.dart';
 import 'package:fastingapp/domain/revenue_cat/revenue_cat_service.dart';
 import 'package:fastingapp/generated/colors.gen.dart';
 import 'package:fastingapp/presentation/auth/onboard/fasting_plan/bloc/fasting_plan_bloc.dart';

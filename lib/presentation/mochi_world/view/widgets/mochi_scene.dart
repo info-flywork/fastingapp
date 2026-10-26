@@ -78,12 +78,9 @@ class _MochiSceneState extends State<MochiScene> {
       for (final p in _last.values)
         if (!shownKeys.contains(p.key)) (placement: p, shown: false, order: 0),
     ];
-    items.sort((a, b) {
-      final pa = a.placement;
-      final pb = b.placement;
-      if (pa.decal != pb.decal) return pa.decal ? -1 : 1;
-      return pa.y.compareTo(pb.y);
-    });
+    items.sort(
+      (a, b) => MochiPlacement.compareDrawOrder(a.placement, b.placement),
+    );
     return items;
   }
 

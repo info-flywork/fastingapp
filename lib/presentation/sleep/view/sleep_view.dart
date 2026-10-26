@@ -3,12 +3,12 @@ import 'dart:async';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:fastingapp/core/di/injection.dart';
 import 'package:fastingapp/core/dialogs/app_dialogs.dart';
+import 'package:fastingapp/core/remote_images/app_image.dart';
 import 'package:fastingapp/core/snackbar/app_snackbar.dart';
 import 'package:fastingapp/core/sync/data_sync.dart';
-import 'package:fastingapp/domain/trackers/trackers_repository.dart';
-import 'package:fastingapp/core/remote_images/app_image.dart';
 import 'package:fastingapp/core/theme/app_text_styles.dart';
 import 'package:fastingapp/core/widgets/horseshoe_arc.dart';
+import 'package:fastingapp/domain/trackers/trackers_repository.dart';
 import 'package:fastingapp/generated/app_images.g.dart';
 import 'package:fastingapp/generated/assets.gen.dart';
 import 'package:fastingapp/generated/colors.gen.dart';
@@ -162,7 +162,7 @@ final class _SleepViewState extends State<SleepView> {
       min: 180,
       max: 720,
       step: 30,
-      format: (v) => _goalHours(v),
+      format: _goalHours,
     );
     if (minutes == null || !mounted) return;
     await _saveGoals({'sleepGoalMin': minutes});
@@ -197,7 +197,7 @@ final class _SleepViewState extends State<SleepView> {
     final summary = _summary;
     final progress = summary?.progress ?? 0;
     final lastNight = _formatMinutes(summary?.lastNightMinutes);
-    final weekHours = summary?.weekMinutes.isNotEmpty == true
+    final weekHours = summary?.weekMinutes.isNotEmpty ?? false
         ? summary!.weekMinutes.map((m) => m / 60).toList()
         : List<double>.filled(7, 0);
     // Sunucu haftası son 7 gündür (bugün en sonda): etiket gün tarihinden.
@@ -247,7 +247,7 @@ final class _SleepViewState extends State<SleepView> {
                     const SizedBox(height: 8),
                     GestureDetector(
                       behavior: HitTestBehavior.opaque,
-                      onTap: summary?.lastNightEditable == true
+                      onTap: summary?.lastNightEditable ?? false
                           ? () => unawaited(_onEntryTapped())
                           : null,
                       child: _BoundRow(bedtime: sleptAt, wakeTime: wokeAt),

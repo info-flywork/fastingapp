@@ -106,7 +106,7 @@ mixin CaloriesResultViewMixin on State<CaloriesResultView> {
           return;
         }
         if (!mounted) return;
-        endFast = choice == true;
+        endFast = choice ?? false;
       }
       DataSync.afterWrite();
       context.pop(true);

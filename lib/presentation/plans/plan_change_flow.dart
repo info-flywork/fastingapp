@@ -1,16 +1,16 @@
 import 'package:easy_localization/easy_localization.dart';
+import 'package:fastingapp/core/di/injection.dart';
 import 'package:fastingapp/core/dialogs/app_dialogs.dart';
 import 'package:fastingapp/core/dialogs/widgets/plan_change_while_fasting_dialog.dart';
+import 'package:fastingapp/core/router/route_paths.dart';
 import 'package:fastingapp/core/snackbar/app_snackbar.dart';
 import 'package:fastingapp/core/utils/enum/snackbar_type.dart';
 import 'package:fastingapp/core/utils/extensions/future_extensions.dart';
-import 'package:fastingapp/core/di/injection.dart';
 import 'package:fastingapp/domain/fasting/plan_catalog_repository.dart';
 import 'package:fastingapp/domain/fasting/plan_safety.dart';
 import 'package:fastingapp/domain/fasting/weekly_schedule.dart';
-import 'package:fastingapp/presentation/fasting/bloc/fasting_session_cubit.dart';
-import 'package:fastingapp/core/router/route_paths.dart';
 import 'package:fastingapp/domain/revenue_cat/revenue_cat_service.dart';
+import 'package:fastingapp/presentation/fasting/bloc/fasting_session_cubit.dart';
 import 'package:fastingapp/presentation/plans/plans_catalog.dart';
 import 'package:fastingapp/presentation/plans/view/weekly_plan_detail_view.dart';
 import 'package:flutter/material.dart';
@@ -50,7 +50,7 @@ Future<bool> applyPlanChange({
     restartSame = action == PlanChangeWhileFastingAction.restartWithSameData;
   }
 
-  final Future<bool> apply = whileFasting
+  final apply = whileFasting
       ? session.changePlanWhileFasting(
           planCode: planCode,
           timing: timing,

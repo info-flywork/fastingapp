@@ -100,7 +100,7 @@ mixin StepsViewMixin on State<StepsView>, TickerProvider {
     final editAtStart = _editGen;
     final date = selectedDate;
     try {
-      final range = await _trackers.getSteps(range: 'week', date: date);
+      final range = await _trackers.getSteps(date: date);
       if (!mounted || gen != _stepsLoadGen) return;
       if (!DateUtils.isSameDay(date, selectedDate)) return;
       _applyStepsRange(range, keepFocusDay: editAtStart != _editGen);

@@ -72,6 +72,7 @@ mixin ProfileViewMixin on State<ProfileView> {
       await _profileRepo.updateSettings(
         pushEnabled: push,
         healthSyncEnabled: health,
+        allNotifications: push,
       );
     } on Object catch (e) {
       if (!mounted) return;
