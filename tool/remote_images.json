@@ -1,7 +1,7 @@
 {
   "sourceDir": "asset_sources/images",
   "logicalPrefix": "assets/images/",
-  "bundled": ["App Icon.png", "mascot_search.png"],
+  "bundled": ["App Icon.png", "mascot_search.png", "mochi-world-green.png"],
   "bundledOutputDir": "assets/images/bundled",
   "manifest": "assets/remote_images/manifest.json",
   "generatedDart": "lib/generated/app_images.g.dart",

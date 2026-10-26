@@ -45,7 +45,7 @@ final class SplashLogo extends StatelessWidget {
         ),
         const SizedBox(height: 6),
         Text(
-          'fast together',
+          'auth.splash_tagline'.tr(),
           style: TextStyle(
             fontFamily: FontFamily.sFProDisplay,
             fontWeight: FontWeight.w500,

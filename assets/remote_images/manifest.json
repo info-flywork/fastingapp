@@ -728,6 +728,9 @@
       "bytes": 124186,
       "sha256": "55f7a5de38e9867b96bd1bafa409b940689c957ea56972ed9621c6323fc28104"
     },
+    "assets/images/mochi-world-green.png": {
+      "bundled": "assets/images/bundled/mochi_world_green.webp"
+    },
     "assets/images/mochi-worlds.png": {
       "file": "40b694e65db025687082.webp",
       "bytes": 98752,

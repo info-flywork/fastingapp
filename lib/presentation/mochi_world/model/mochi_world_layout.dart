@@ -1229,6 +1229,9 @@ List<MochiPlacement> mochiCompose(
 /// Adanın taban görseli: sağlıklıda yeşil, solarken kuru çim, kuraklıkta
 /// (boş adada) çatlak toprak.
 String mochiBaseAsset(int level, MochiHealth health) => switch (health) {
+  // 3. seviyeden itibaren adanın ortası kumdan çimene döner
+  // (asset_sources/mochi/grassify_base.py ile üretildi).
+  MochiHealth.thriving when level >= 3 => 'assets/images/mochi-world-green.png',
   MochiHealth.thriving => 'assets/images/mochi-worlds.png',
   MochiHealth.wilting when level == 0 => 'assets/images/mochi-world-6.png',
   MochiHealth.drought when level == 0 => 'assets/images/mochi-world-7.png',
