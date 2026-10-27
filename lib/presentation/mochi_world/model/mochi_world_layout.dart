@@ -73,7 +73,21 @@ enum MochiElementKind {
   daisyBush2('daisy_bush_2', 297 / 400),
   daisyBush3('daisy_bush_3', 271 / 400),
   daisyBush4('daisy_bush_4', 267 / 400),
-  daisyBush5('daisy_bush_5', 250 / 400);
+  daisyBush5('daisy_bush_5', 250 / 400),
+
+  /// Solgun (yağmurlu) ada: ağaçlar, gölet, çiçekler ve kıyı bitkileri.
+  wiltTreeBare('wilt_tree_bare', 459 / 400),
+  wiltTreeRound('wilt_tree_round', 417 / 400),
+  wiltTreePale('wilt_tree_pale', 445 / 400),
+  wiltTreeSparse('wilt_tree_sparse', 478 / 400),
+  wiltTreeYellow('wilt_tree_yellow', 437 / 400),
+  wiltPond('wilt_pond', 359 / 640),
+  wiltFlowersPink('wilt_flowers_pink', 322 / 400),
+  wiltDaisy('wilt_daisy', 333 / 400),
+  wiltGroundcover('wilt_groundcover', 273 / 400),
+  wiltRosette('wilt_rosette', 247 / 400),
+  wiltGrass('wilt_grass', 303 / 400),
+  wiltReeds('wilt_reeds', 429 / 400);
 
   const MochiElementKind(this.file, this.aspect);
 
@@ -92,9 +106,31 @@ enum MochiElementKind {
 
   bool get isTree =>
       isHealthyTree ||
+      isWiltTree ||
       this == treePale ||
       this == treeBare ||
       this == saplingWilting;
+
+  /// Solgun adanın ağaçları.
+  bool get isWiltTree => switch (this) {
+    wiltTreeBare ||
+    wiltTreeRound ||
+    wiltTreePale ||
+    wiltTreeSparse ||
+    wiltTreeYellow => true,
+    _ => false,
+  };
+
+  /// Solgun adanın çiçek / ot / yaprak bitkileri (rüzgârda hafif sallanır).
+  bool get isWiltPlant => switch (this) {
+    wiltFlowersPink ||
+    wiltDaisy ||
+    wiltGroundcover ||
+    wiltRosette ||
+    wiltGrass ||
+    wiltReeds => true,
+    _ => false,
+  };
 
   /// Tek tek dikilmiş çiçekler.
   bool get isSingleFlower => switch (this) {
@@ -111,7 +147,8 @@ enum MochiElementKind {
       this == pondLily ||
       this == pondGarden ||
       this == pondDrying ||
-      this == pondDried;
+      this == pondDried ||
+      this == wiltPond;
 
   /// Kuru versiyonu olmayan, solunca rengi soluklaşan elementler.
   bool get fadesWhenUnwell => switch (this) {
@@ -1089,20 +1126,6 @@ const List<MochiElementDef> kMochiElements = [
     },
   ),
   MochiElementDef(
-    key: 'crack',
-    zone: MochiZone.lake,
-    x: 572,
-    y: 1040,
-    levels: {
-      1: MochiElementSpec(MochiElementKind.crackedPatch, 360),
-      2: MochiElementSpec(MochiElementKind.crackedPatch, 360),
-      3: MochiElementSpec(MochiElementKind.crackedPatch, 360),
-      4: MochiElementSpec(MochiElementKind.crackedPatch, 360),
-    },
-    droughtOnly: true,
-    decal: true,
-  ),
-  MochiElementDef(
     key: 'shrub-a',
     zone: MochiZone.garden,
     x: 250,
@@ -1175,13 +1198,16 @@ List<MochiPlacement> mochiCompose(
     final spec = e.levels[level];
     if (spec == null) continue;
     final (kind, faded) = _variant(e, spec.kind, level, health);
+    // Tek çiçeklerin yerine gelen solgun bitkiler daha geniş, seyrek
+    // görsellerdir: aynı yeri doldursunlar diye büyütülür.
+    final grow = spec.kind.isSingleFlower && kind.isWiltPlant ? 1.5 : 1.0;
     out.add(
       MochiPlacement(
         key: e.key,
         kind: kind,
         x: spec.x ?? e.x,
         y: spec.y ?? e.y,
-        width: spec.width,
+        width: spec.width * grow,
         flip: e.flip,
         faded: faded,
         decal: e.decal,
@@ -1201,11 +1227,44 @@ List<MochiPlacement> mochiCompose(
 ) {
   if (health == MochiHealth.thriving) return (kind, false);
   if (e.saplingUntil >= level) return (MochiElementKind.saplingWilting, false);
+  final wilting = health == MochiHealth.wilting;
   if (kind.isHealthyTree) {
-    return (
-      e.bare ? MochiElementKind.treeBare : MochiElementKind.treePale,
-      false,
-    );
+    return (wilting ? _wiltTree(e) : _droughtTree(e), false);
+  }
+  // Kuraklıkta yeşil öbekler kurumuş altın çimene / kuru çalıya döner.
+  if (!wilting && kind == MochiElementKind.flowers) {
+    return (MochiElementKind.wiltGrass, false);
+  }
+  if (!wilting && kind.isDaisyBush) {
+    const nearPond = [MochiElementKind.wiltReeds, MochiElementKind.wiltGrass];
+    const elsewhere = [MochiElementKind.wiltGrass, MochiElementKind.shrubDry];
+    final pick = e.key.startsWith('pond-bush') ? nearPond : elsewhere;
+    return (pick[_stableIndex(e.key) % pick.length], false);
+  }
+  // Solgun adada nilüferli gölet yağmurlu, solgun göletine döner; kuraklıkta
+  // eskisi gibi kurur.
+  if (wilting &&
+      (kind == MochiElementKind.pondGarden ||
+          kind == MochiElementKind.pondLily)) {
+    return (MochiElementKind.wiltPond, false);
+  }
+  if (wilting && kind == MochiElementKind.flowers) {
+    return (MochiElementKind.wiltFlowersPink, false);
+  }
+  if (wilting && kind.isDaisyBush) {
+    // Göletin kıyısında saz / kuru ot, diğer yerlerde yaprak / yer örtücü.
+    const nearPond = [
+      MochiElementKind.wiltReeds,
+      MochiElementKind.wiltGrass,
+      MochiElementKind.wiltRosette,
+    ];
+    const elsewhere = [
+      MochiElementKind.wiltRosette,
+      MochiElementKind.wiltGroundcover,
+      MochiElementKind.wiltGrass,
+    ];
+    final pick = e.key.startsWith('pond-bush') ? nearPond : elsewhere;
+    return (pick[_stableIndex(e.key) % pick.length], false);
   }
   if (kind.isPond) {
     // Büyük gölette kuraklıkta bile biraz su kalır; küçük gölet tamamen kurur.
@@ -1218,12 +1277,51 @@ List<MochiPlacement> mochiCompose(
   if (kind.isSingleFlower) {
     // Solarken çiçeklerin yarısı solar, kuraklıkta hepsi.
     final index = int.tryParse(e.key.replaceFirst('fl', '')) ?? 0;
+    if (wilting) {
+      const wilted = [
+        MochiElementKind.wiltDaisy,
+        MochiElementKind.wiltFlowersPink,
+        MochiElementKind.wiltGroundcover,
+      ];
+      return (wilted[index % wilted.length], false);
+    }
     if (health == MochiHealth.drought || index.isEven) {
       return (MochiElementKind.flowerWilted, false);
     }
     return (kind, true);
   }
   return (kind, kind.fadesWhenUnwell);
+}
+
+/// Anahtardan her çalıştırmada aynı kalan sıra (aynı ağaç hep aynı görselde).
+int _stableIndex(String key) =>
+    key.codeUnits.fold(0, (sum, c) => sum * 31 + c) & 0x7fffffff;
+
+/// Solgun adada ağaç: çıplak işaretliler çıplak; ortadaki büyük ağaç dolgun
+/// kalır; diğerleri dört solgun görsel arasında dağılır.
+MochiElementKind _wiltTree(MochiElementDef e) {
+  if (e.bare) return MochiElementKind.wiltTreeBare;
+  if (e.key == 'center') return MochiElementKind.wiltTreeRound;
+  const trees = [
+    MochiElementKind.wiltTreeRound,
+    MochiElementKind.wiltTreePale,
+    MochiElementKind.wiltTreeYellow,
+    MochiElementKind.wiltTreeSparse,
+  ];
+  return trees[_stableIndex(e.key) % trees.length];
+}
+
+/// Kurak adada ağaç: çıplak işaretliler ve diğerlerinin bir kısmı çıplak
+/// dallı; kalanlar seyrek ya da sararmış.
+MochiElementKind _droughtTree(MochiElementDef e) {
+  if (e.bare) return MochiElementKind.wiltTreeBare;
+  if (e.key == 'center') return MochiElementKind.wiltTreeSparse;
+  const trees = [
+    MochiElementKind.wiltTreeSparse,
+    MochiElementKind.wiltTreeBare,
+    MochiElementKind.wiltTreeYellow,
+  ];
+  return trees[_stableIndex(e.key) % trees.length];
 }
 
 /// Adanın taban görseli: sağlıklıda yeşil, solarken kuru çim, kuraklıkta
@@ -1235,7 +1333,9 @@ String mochiBaseAsset(int level, MochiHealth health) => switch (health) {
   MochiHealth.thriving => 'assets/images/mochi-worlds.png',
   MochiHealth.wilting when level == 0 => 'assets/images/mochi-world-6.png',
   MochiHealth.drought when level == 0 => 'assets/images/mochi-world-7.png',
-  _ => 'assets/images/mochi-world-5.png',
+  // Solgun ve kurak ada kasvetli, yağmurlu gökyüzüyle
+  // (asset_sources/mochi/rainify_base.py ile üretildi).
+  _ => 'assets/images/mochi-world-rain.png',
 };
 
 /// Gökyüzü: sağlıklıda güneşli, solarken yağmurlu (dolu adada fırtına).
@@ -1243,6 +1343,5 @@ MochiWeather mochiWeather(int level, MochiHealth health) => switch (health) {
   MochiHealth.thriving => MochiWeather.sunny,
   MochiHealth.wilting when level == 0 => MochiWeather.sunny,
   MochiHealth.wilting when level >= kMochiMaxLevel => MochiWeather.storm,
-  MochiHealth.drought when level == 0 => MochiWeather.storm,
   _ => MochiWeather.rainy,
 };

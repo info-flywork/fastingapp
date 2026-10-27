@@ -206,6 +206,7 @@ abstract final class AppImages {
   static const AppImageAsset mochiWorld8 = AppImageAsset('assets/images/mochi-world-8.png');
   static const AppImageAsset mochiWorld9 = AppImageAsset('assets/images/mochi-world-9.png');
   static const AppImageAsset mochiWorldGreen = AppImageAsset('assets/images/mochi-world-green.png');
+  static const AppImageAsset mochiWorldRain = AppImageAsset('assets/images/mochi-world-rain.png');
   static const AppImageAsset mochiWorlds = AppImageAsset('assets/images/mochi-worlds.png');
   static const AppImageAsset mochiWorlV2 = AppImageAsset('assets/images/mochi_worl_v2.png');
   static const AppImageAsset mood = AppImageAsset('assets/images/mood.png');

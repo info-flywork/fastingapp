@@ -713,11 +713,6 @@
       "bytes": 101090,
       "sha256": "fcb637f24fc8a447e5367d8af0d48e4a94012f50982daf3d390a016ab6604ac4"
     },
-    "assets/images/mochi-world-5.png": {
-      "file": "51fcc6f32bc3a16edf0d.webp",
-      "bytes": 103032,
-      "sha256": "51fcc6f32bc3a16edf0dcb1604100ead7fd163ced9491f2fed373f175daadb98"
-    },
     "assets/images/mochi-world-6.png": {
       "file": "037476ad4adc6c83ca16.webp",
       "bytes": 108188,
@@ -730,6 +725,9 @@
     },
     "assets/images/mochi-world-green.png": {
       "bundled": "assets/images/bundled/mochi_world_green.webp"
+    },
+    "assets/images/mochi-world-rain.png": {
+      "bundled": "assets/images/bundled/mochi_world_rain.webp"
     },
     "assets/images/mochi-worlds.png": {
       "file": "40b694e65db025687082.webp",

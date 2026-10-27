@@ -178,7 +178,7 @@ final class _ElementBody extends StatelessWidget {
       _ when placement.decal || kind.isPond || kind.isSingleFlower => 0.0,
       MochiElementKind.rainbow || MochiElementKind.bird => 0.0,
       MochiElementKind.flowers => 0.5,
-      _ when kind.isDaisyBush => 0.5,
+      _ when kind.isDaisyBush || kind.isWiltPlant => 0.5,
       MochiElementKind.shrubDry => 0.6,
       _ => 1.0,
     };
@@ -252,6 +252,12 @@ final class _ElementBody extends StatelessWidget {
           phase: phase,
           spots: _GlintPainter.gardenPond,
         ),
+        MochiElementKind.wiltPond => _GlintPainter(
+          clock: clock,
+          phase: phase,
+          spots: _GlintPainter.puddle,
+          strength: 0.55,
+        ),
         MochiElementKind.pondDrying => _GlintPainter(
           clock: clock,
           phase: phase,
@@ -296,8 +302,9 @@ final class _Sprite extends StatelessWidget {
       gaplessPlayback: true,
     );
     if (flip) image = Transform.flip(flipX: true, child: image);
-    if (faded)
+    if (faded) {
       image = ColorFiltered(colorFilter: _ElementBody._fade, child: image);
+    }
     return image;
   }
 }
@@ -325,10 +332,12 @@ final class _IdleMotion extends StatelessWidget {
       MochiElementKind.treePale ||
       MochiElementKind.saplingWilting => (0.020, 0.7),
       _ when kind.isHealthyTree => (0.028, 0.9),
+      _ when kind.isWiltTree => (0.018, 0.7),
       MochiElementKind.flowerWilted => (0.025, 0.8),
       _ when kind.isSingleFlower => (0.06, 1.6),
       MochiElementKind.flowers => (0.045, 1.5),
       _ when kind.isDaisyBush => (0.03, 1.2),
+      _ when kind.isWiltPlant => (0.025, 0.9),
       MochiElementKind.shrubDry => (0.015, 0.7),
       _ => (0.0, 0.0),
     };

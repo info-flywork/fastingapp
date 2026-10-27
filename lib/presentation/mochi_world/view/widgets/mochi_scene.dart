@@ -91,12 +91,23 @@ class _MochiSceneState extends State<MochiScene> {
     math.Random rnd(int salt) => math.Random(seed ^ salt);
     final s = widget.stage;
 
-    final clouds = rnd(1);
-    _cloudsFar = _makeClouds(clouds, count: 5, near: false);
-    _cloudsNear = _makeClouds(clouds, count: 4, near: true);
-
     final isWet = s.weather != MochiWeather.sunny;
-    final dropCount = s.weather == MochiWeather.storm ? 150 : (isWet ? 90 : 0);
+    final storm = s.weather == MochiWeather.storm;
+    final clouds = rnd(1);
+    _cloudsFar = [
+      ..._makeClouds(clouds, count: isWet ? 8 : 5, near: false, wet: isWet),
+      // Kasvetli havada gökyüzünün tepesini kapatan koyu bulut tavanı.
+      if (isWet) ..._makeCeiling(rnd(6), storm: storm),
+    ];
+    _cloudsNear = _makeClouds(
+      clouds,
+      count: isWet ? 7 : 4,
+      near: true,
+      wet: isWet,
+      storm: storm,
+    );
+
+    final dropCount = storm ? 320 : (isWet ? 220 : 0);
     final drops = rnd(2);
     _drops = List.generate(dropCount, (_) => _Drop.random(drops));
 
@@ -118,7 +129,13 @@ class _MochiSceneState extends State<MochiScene> {
     math.Random rnd, {
     required int count,
     required bool near,
+    bool wet = false,
+    bool storm = false,
   }) {
+    // Yağmurda bulutlar gri, daha iri ve daha yoğun.
+    final color = !wet
+        ? Colors.white
+        : (storm ? const Color(0xFF6B7480) : const Color(0xFF8C96A2));
     return List.generate(count, (i) {
       // Bulutlar sağa/sola karışık sürüklensin ("sağa sola gitme" hissi).
       final dir = rnd.nextBool() ? 1.0 : -1.0;
@@ -132,9 +149,35 @@ class _MochiSceneState extends State<MochiScene> {
       return _Cloud(
         fx: rnd.nextDouble(),
         fy: fy,
-        scale: (near ? 0.16 : 0.10) + rnd.nextDouble() * (near ? 0.12 : 0.08),
+        scale:
+            ((near ? 0.16 : 0.10) + rnd.nextDouble() * (near ? 0.12 : 0.08)) *
+            (wet ? 1.35 : 1),
         speed: dir * (baseSpeed + rnd.nextDouble() * baseSpeed),
-        opacity: (near ? 0.42 : 0.26) + rnd.nextDouble() * 0.18,
+        opacity:
+            (near ? 0.42 : 0.26) + rnd.nextDouble() * 0.18 + (wet ? 0.25 : 0),
+        color: color,
+      );
+    });
+  }
+
+  /// Ekranın üst kenarı boyunca birbirine değen iri, koyu bulutlar: gök
+  /// kapalı görünsün diye. Yavaş ve tek yöne sürüklenirler.
+  List<_Cloud> _makeCeiling(math.Random rnd, {required bool storm}) {
+    const count = 7;
+    return List.generate(count, (i) {
+      final dark = i.isEven;
+      return _Cloud(
+        fx: i / count * 1.4 + rnd.nextDouble() * 0.08,
+        fy: -0.03 + rnd.nextDouble() * 0.06,
+        scale: 0.24 + rnd.nextDouble() * 0.12,
+        speed: 0.004 + rnd.nextDouble() * 0.002,
+        opacity: 0.75 + rnd.nextDouble() * 0.2,
+        color: switch ((storm, dark)) {
+          (true, true) => const Color(0xFF4E5662),
+          (true, false) => const Color(0xFF636B77),
+          (false, true) => const Color(0xFF6E7884),
+          (false, false) => const Color(0xFF858F9B),
+        },
       );
     });
   }
@@ -363,14 +406,14 @@ final class _SkyBackground extends StatelessWidget {
         Color(0xFFB8D9F0),
       ],
       MochiWeather.rainy => const [
-        Color(0xFFBAC4CE),
-        Color(0xFFCAD1D8),
-        Color(0xFFD3D7DB),
+        Color(0xFF7E8894),
+        Color(0xFF9AA3AD),
+        Color(0xFFA9B0B8),
       ],
       MochiWeather.storm => const [
-        Color(0xFFA7B0BA),
-        Color(0xFFBFC6CD),
-        Color(0xFFCBCFD3),
+        Color(0xFF5E6672),
+        Color(0xFF7A838E),
+        Color(0xFF8C939C),
       ],
     };
     return DecoratedBox(
@@ -396,6 +439,7 @@ final class _Cloud {
     required this.scale,
     required this.speed,
     required this.opacity,
+    this.color = Colors.white,
   });
 
   final double fx;
@@ -403,6 +447,7 @@ final class _Cloud {
   final double scale;
   final double speed;
   final double opacity;
+  final Color color;
 }
 
 final class _CloudsPainter extends CustomPainter {
@@ -422,13 +467,19 @@ final class _CloudsPainter extends CustomPainter {
       final cx = (fx - 0.2) * size.width;
       final cy = c.fy * size.height;
       final r = c.scale * size.width;
-      _drawCloud(canvas, Offset(cx, cy), r, c.opacity);
+      _drawCloud(canvas, Offset(cx, cy), r, c.opacity, c.color);
     }
   }
 
-  void _drawCloud(Canvas canvas, Offset center, double r, double opacity) {
+  void _drawCloud(
+    Canvas canvas,
+    Offset center,
+    double r,
+    double opacity,
+    Color color,
+  ) {
     final paint = Paint()
-      ..color = Colors.white.withValues(alpha: opacity)
+      ..color = color.withValues(alpha: opacity)
       ..maskFilter = MaskFilter.blur(BlurStyle.normal, r * 0.22);
     // Üst üste binmiş kabarcıklardan klasik bulut silüeti.
     canvas.drawCircle(center + Offset(-r * 0.6, r * 0.12), r * 0.5, paint);
@@ -467,7 +518,7 @@ final class _Drop {
     len: 0.03 + r.nextDouble() * 0.05,
     speed: 0.9 + r.nextDouble() * 0.8,
     thick: 0.8 + r.nextDouble() * 1.4,
-    opacity: 0.18 + r.nextDouble() * 0.28,
+    opacity: 0.3 + r.nextDouble() * 0.35,
   );
 
   final double fx;
@@ -877,16 +928,19 @@ final class _MoodOverlay extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final gradient = switch (stage.weather) {
+      // Kasvetli hava adayı da karartır: tepe koyu, orta hafif gri-mavi,
+      // alt sisli.
       MochiWeather.storm => const LinearGradient(
         begin: Alignment.topCenter,
         end: Alignment.bottomCenter,
-        colors: [Color(0x55424A57), Color(0x00424A57), Color(0x33333A44)],
+        colors: [Color(0x99363D49), Color(0x40363D49), Color(0x66293038)],
         stops: [0, 0.5, 1],
       ),
       MochiWeather.rainy => const LinearGradient(
         begin: Alignment.topCenter,
         end: Alignment.bottomCenter,
-        colors: [Color(0x3368788C), Color(0x00000000)],
+        colors: [Color(0x80485466), Color(0x2E485466), Color(0x4D39424F)],
+        stops: [0, 0.5, 1],
       ),
       MochiWeather.sunny => const LinearGradient(
         begin: Alignment.topLeft,
