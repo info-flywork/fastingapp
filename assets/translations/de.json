@@ -1210,6 +1210,8 @@
     "title": "Fasten-Verlauf",
     "list_title": "Vergangene Fasten",
     "stats_title": "Gesamt",
+    "stats_headline": "{} Fasten",
+    "stats_completed_of": "{} von {} abgeschlossen",
     "stat_fasts": "Fasten",
     "stat_completed": "Abgeschlossen",
     "stat_rate": "Erfolg",

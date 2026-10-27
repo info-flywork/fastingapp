@@ -24,6 +24,8 @@ import 'package:fastingapp/presentation/auth/bloc/auth_event.dart';
 import 'package:fastingapp/presentation/auth/bloc/auth_state.dart';
 import 'package:fastingapp/presentation/chat/bloc/chat_session_cubit.dart';
 import 'package:fastingapp/presentation/fasting/bloc/fasting_session_cubit.dart';
+import 'package:fastingapp/presentation/fasting/view/fasting_fast_forecast_card.dart';
+import 'package:fastingapp/presentation/fasting/view/fasting_mochi_plan_card.dart';
 import 'package:fastingapp/presentation/home/bloc/home_bloc.dart';
 import 'package:fastingapp/presentation/home/bloc/home_event.dart';
 import 'package:fastingapp/presentation/profile/bloc/profile_bloc.dart';
@@ -156,6 +158,8 @@ final class AuthBloc extends Bloc<AuthEvent, AuthState> {
     if (getIt.isRegistered<ProfileRepository>()) {
       getIt<ProfileRepository>().cachedSettings = null;
     }
+    FastingFastForecastCard.clearCache();
+    FastingMochiPlanCard.clearCache();
     if (getIt.isRegistered<TrackersRepository>()) {
       getIt<TrackersRepository>().clearSession();
     }

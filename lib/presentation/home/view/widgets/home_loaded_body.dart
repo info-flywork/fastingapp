@@ -2,7 +2,9 @@ part of '../home_view.dart';
 
 /// Home yüklendi durumu gövdesi.
 ///
-/// [ListView.builder] ile yalnızca görünür (ve cache) widget'lar build edilir.
+/// Kartlar bir kez kurulur ve kaydırırken yaşar. Önceden `ListView.builder`
+/// ekrandan çıkanı atıyordu: geri kaydırınca ilerleme çubukları sıfırdan
+/// dolma animasyonunu tekrar oynatıyor, kartlar yeniden kurulup zıplıyordu.
 final class HomeLoadedBody extends StatelessWidget {
   const HomeLoadedBody({
     required this.user,
@@ -38,13 +40,13 @@ final class HomeLoadedBody extends StatelessWidget {
     final items = _visibleItems();
     return SafeArea(
       top: false,
-      child: ListView.builder(
+      child: SingleChildScrollView(
         physics: const ClampingScrollPhysics(),
         padding: const EdgeInsets.only(bottom: AppBottomNav.barClearance),
-        // Ekran dışındakiler tutulmasın; tekrar görünce yeniden build.
-        addAutomaticKeepAlives: false,
-        itemCount: items.length,
-        itemBuilder: (context, index) => items[index],
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: items,
+        ),
       ),
     );
   }

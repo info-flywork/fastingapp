@@ -1210,6 +1210,8 @@
     "title": "Historial de ayuno",
     "list_title": "Ayunos anteriores",
     "stats_title": "Todo el tiempo",
+    "stats_headline": "{} ayunos",
+    "stats_completed_of": "{} de {} completados",
     "stat_fasts": "Ayunos",
     "stat_completed": "Completados",
     "stat_rate": "Éxito",

@@ -36,10 +36,18 @@ class _NotificationSettingsViewState extends State<NotificationSettingsView> {
     ('world', 'notification_settings.world'),
   ];
 
-  Map<String, bool> _flags = const {};
-  String _quietStart = '22:30';
-  String _quietEnd = '08:00';
-  var _loading = true;
+  /// Son görülen ayarlar (oturum boyunca): ekran tekrar açılınca spinner
+  /// yerine hemen gösterilir, arkadan sessizce tazelenir.
+  static _Settings? _cached;
+
+  late Map<String, bool> _flags = _cached?.flags ?? const {};
+  late String _quietStart = _cached?.quietStart ?? '22:30';
+  late String _quietEnd = _cached?.quietEnd ?? '08:00';
+  late var _loading = _cached == null;
+
+  /// Her değişiklikte artar: değişiklikten önce başlamış okuma seçimi geri
+  /// almasın, eski kaydın hatası yeni seçimi bozmasın.
+  int _editGen = 0;
 
   NetworkManager get _network => getIt<NetworkManager>();
 
@@ -50,13 +58,18 @@ class _NotificationSettingsViewState extends State<NotificationSettingsView> {
   }
 
   Future<void> _load() async {
+    final gen = _editGen;
     try {
       final s = await _network.send<_Settings>(
         path: '/user/settings',
         method: RequestType.get,
         parserModel: _Settings.fromJson,
       );
-      if (!mounted || s == null) return;
+      if (s != null && gen == _editGen) _cached = s;
+      if (!mounted || s == null || gen != _editGen) {
+        if (mounted && _loading) setState(() => _loading = false);
+        return;
+      }
       setState(() {
         _flags = s.flags;
         _quietStart = s.quietStart;
@@ -65,8 +78,9 @@ class _NotificationSettingsViewState extends State<NotificationSettingsView> {
       });
     } on Object catch (e) {
       if (!mounted) return;
+      final hadContent = !_loading;
       setState(() => _loading = false);
-      AppSnackbar.showError(context, e);
+      if (!hadContent) AppSnackbar.showError(context, e);
     }
   }
 
@@ -74,16 +88,19 @@ class _NotificationSettingsViewState extends State<NotificationSettingsView> {
     Map<String, dynamic> fields,
     VoidCallback rollback,
   ) async {
+    final gen = ++_editGen;
     try {
-      await _network.send<_Settings>(
+      final saved = await _network.send<_Settings>(
         path: '/user/settings',
         method: RequestType.patch,
         data: fields,
         parserModel: _Settings.fromJson,
       );
+      if (saved != null && gen == _editGen) _cached = saved;
     } on Object catch (e) {
       if (!mounted) return;
-      setState(rollback);
+      // Arada yeni değişiklik olduysa o korunur; yalnızca hata söylenir.
+      if (gen == _editGen) setState(rollback);
       AppSnackbar.showError(context, e);
     }
   }

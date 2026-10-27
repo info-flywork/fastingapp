@@ -74,7 +74,7 @@ final class _SleepViewState extends State<SleepView> {
     final h = int.tryParse(parts[0]);
     final m = int.tryParse(parts[1]);
     return h == null || m == null ? fallback : (h, m);
-  }
+  } 
 
   /// Dün gecenin uykusu: kalkış saati henüz gelmediyse dünkü kalkış;
   /// yatış kalkıştan sonra görünüyorsa bir önceki güne düşer. [editing]

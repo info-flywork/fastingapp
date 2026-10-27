@@ -5,12 +5,16 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:fastingapp/core/di/injection.dart';
 import 'package:fastingapp/core/dialogs/app_dialogs.dart';
 import 'package:fastingapp/core/network/network_exception.dart';
+import 'package:fastingapp/core/remote_images/app_image.dart';
 import 'package:fastingapp/core/snackbar/app_snackbar.dart';
 import 'package:fastingapp/core/sync/data_sync.dart';
 import 'package:fastingapp/core/theme/app_text_styles.dart';
 import 'package:fastingapp/core/utils/extensions/future_extensions.dart';
+import 'package:fastingapp/core/widgets/app_button.dart';
+import 'package:fastingapp/core/widgets/app_button_decoration.dart';
 import 'package:fastingapp/core/widgets/app_loading.dart';
 import 'package:fastingapp/domain/fasting/fasting_repository.dart';
+import 'package:fastingapp/generated/app_images.g.dart';
 import 'package:fastingapp/generated/assets.gen.dart';
 import 'package:fastingapp/generated/colors.gen.dart';
 import 'package:fastingapp/presentation/fasting/view/fasting_entry_sheet.dart';
@@ -36,6 +40,9 @@ class _FastingHistoryViewState extends State<FastingHistoryView> {
   String? _cursor;
   String? _error;
 
+  /// Yeni yükleme başlayınca artar: eski yüklemenin cevabı yenisini ezmesin.
+  int _loadGen = 0;
+
   FastingRepository get _repo => getIt<FastingRepository>();
 
   @override
@@ -60,9 +67,12 @@ class _FastingHistoryViewState extends State<FastingHistoryView> {
     }
   }
 
+  /// Liste varken yeniden yükleme (düzenle / sil / aşağı çek) sayfayı
+  /// spinner'a çevirmez; mevcut liste kalır, cevap gelince yenilenir.
   Future<void> _load() async {
+    final gen = ++_loadGen;
     setState(() {
-      _loading = true;
+      _loading = _items.isEmpty;
       _error = null;
     });
     try {
@@ -70,7 +80,7 @@ class _FastingHistoryViewState extends State<FastingHistoryView> {
         _repo.listHistory(),
         _repo.getStats(range: 'all'),
       ]);
-      if (!mounted) return;
+      if (!mounted || gen != _loadGen) return;
       final page = results[0] as FastHistoryPage;
       final stats = results[1] as FastStats;
       setState(() {
@@ -83,11 +93,13 @@ class _FastingHistoryViewState extends State<FastingHistoryView> {
         _loading = false;
       });
     } on Object catch (e) {
-      if (!mounted) return;
+      if (!mounted || gen != _loadGen) return;
       setState(() {
         _loading = false;
         _error = errorMessageOf(e);
       });
+      // Liste görünürken hata sessiz kalmasın.
+      if (_items.isNotEmpty) AppSnackbar.showError(context, e);
     }
   }
 
@@ -177,6 +189,22 @@ class _FastingHistoryViewState extends State<FastingHistoryView> {
     }
   }
 
+  /// Liste ay ay gruplanır (yeniden eskiye; ay başlığı + oruç kartları).
+  List<_Row> _rows(BuildContext context) {
+    final locale = context.locale.toString();
+    final rows = <_Row>[];
+    DateTime? month;
+    for (final item in _items) {
+      final m = DateTime(item.startedAt.year, item.startedAt.month);
+      if (m != month) {
+        month = m;
+        rows.add(_MonthRow(DateFormat.yMMMM(locale).format(m)));
+      }
+      rows.add(_FastRow(item));
+    }
+    return rows;
+  }
+
   @override
   Widget build(BuildContext context) {
     final bottom = MediaQuery.paddingOf(context).bottom;
@@ -211,47 +239,61 @@ class _FastingHistoryViewState extends State<FastingHistoryView> {
                     : _error != null && _items.isEmpty
                     ? _ErrorBody(message: _error!, onRetry: _load)
                     : _items.isEmpty
-                    ? const _EmptyBody()
+                    ? _EmptyBody(onAdd: () => unawaited(_addPastFast()))
                     : RefreshIndicator(
                         onRefresh: _load,
-                        child: ListView.builder(
-                          controller: _scroll,
-                          physics: const AlwaysScrollableScrollPhysics(
-                            parent: ClampingScrollPhysics(),
-                          ),
-                          padding: EdgeInsets.fromLTRB(16, 16, 16, bottom + 24),
-                          itemCount: _items.length + 2 + (_loadingMore ? 1 : 0),
-                          itemBuilder: (context, index) {
-                            if (index == 0) {
-                              return Padding(
-                                padding: const EdgeInsets.only(bottom: 16),
-                                child: _StatsCard(stats: _stats),
-                              );
-                            }
-                            if (index == 1) {
-                              return Padding(
-                                padding: const EdgeInsets.only(bottom: 8),
-                                child: Text(
-                                  'fasting_history_page.list_title'.tr(),
-                                  style: AppTextStyles.notificationsDate,
-                                ),
-                              );
-                            }
-                            final i = index - 2;
-                            if (i >= _items.length) {
-                              return const Padding(
-                                padding: EdgeInsets.symmetric(vertical: 16),
-                                child: Center(child: AppLoading()),
-                              );
-                            }
-                            return Padding(
-                              padding: const EdgeInsets.only(bottom: 8),
-                              child: _HistoryCard(
-                                item: _items[i],
-                                onTap: _canEdit(_items[i])
-                                    ? () => unawaited(_editFast(_items[i]))
-                                    : null,
+                        child: Builder(
+                          builder: (context) {
+                            final rows = _rows(context);
+                            return ListView.builder(
+                              controller: _scroll,
+                              physics: const AlwaysScrollableScrollPhysics(
+                                parent: ClampingScrollPhysics(),
                               ),
+                              padding: EdgeInsets.fromLTRB(
+                                16,
+                                16,
+                                16,
+                                bottom + 24,
+                              ),
+                              itemCount:
+                                  rows.length + 1 + (_loadingMore ? 1 : 0),
+                              itemBuilder: (context, index) {
+                                if (index == 0) {
+                                  return Padding(
+                                    padding: const EdgeInsets.only(bottom: 20),
+                                    child: _StatsCard(stats: _stats),
+                                  );
+                                }
+                                final i = index - 1;
+                                if (i >= rows.length) {
+                                  return const Padding(
+                                    padding: EdgeInsets.symmetric(vertical: 16),
+                                    child: Center(child: AppLoading()),
+                                  );
+                                }
+                                return switch (rows[i]) {
+                                  _MonthRow(:final label) => Padding(
+                                    padding: EdgeInsets.only(
+                                      top: i == 0 ? 0 : 12,
+                                      bottom: 10,
+                                    ),
+                                    child: Text(
+                                      label,
+                                      style: AppTextStyles.notificationsDate,
+                                    ),
+                                  ),
+                                  _FastRow(:final item) => Padding(
+                                    padding: const EdgeInsets.only(bottom: 10),
+                                    child: _HistoryCard(
+                                      item: item,
+                                      onTap: _canEdit(item)
+                                          ? () => unawaited(_editFast(item))
+                                          : null,
+                                    ),
+                                  ),
+                                };
+                              },
                             );
                           },
                         ),
@@ -297,6 +339,31 @@ final class _BackButton extends StatelessWidget {
   }
 }
 
+sealed class _Row {
+  const _Row();
+}
+
+final class _MonthRow extends _Row {
+  const _MonthRow(this.label);
+
+  final String label;
+}
+
+final class _FastRow extends _Row {
+  const _FastRow(this.item);
+
+  final FastHistoryItem item;
+}
+
+String _hm(int minutes) {
+  if (minutes <= 0) return '—';
+  if (minutes < 60) return '${minutes}m';
+  final h = minutes ~/ 60;
+  final m = minutes % 60;
+  return m == 0 ? '${h}h' : '${h}h ${m}m';
+}
+
+/// Üstte maskot + başarı halkası, altında 3B ikonlu altı istatistik.
 final class _StatsCard extends StatelessWidget {
   const _StatsCard({required this.stats});
 
@@ -304,70 +371,80 @@ final class _StatsCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    String hours(int minutes) {
-      if (minutes < 60) return '${minutes}m';
-      final h = minutes ~/ 60;
-      final m = minutes % 60;
-      return m == 0 ? '${h}h' : '${h}h ${m}m';
-    }
-
-    final rate = (stats.completionRate * 100).round();
+    final rate = stats.completionRate.clamp(0.0, 1.0);
     return DecoratedBox(
       decoration: BoxDecoration(
         color: ColorName.colorWhite,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(24),
       ),
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.fromLTRB(16, 16, 16, 12),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Text(
-              'fasting_history_page.stats_title'.tr(),
-              style: AppTextStyles.notificationsDate,
-            ),
-            const SizedBox(height: 12),
             Row(
               children: [
+                AppImages.mascotClock.image(width: 84, height: 84),
+                const SizedBox(width: 12),
                 Expanded(
-                  child: _StatCell(
-                    label: 'fasting_history_page.stat_fasts'.tr(),
-                    value: '${stats.fasts}',
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'fasting_history_page.stats_title'.tr(),
+                        style: AppTextStyles.notificationsEmptySubtitle,
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        'fasting_history_page.stats_headline'.tr(
+                          args: ['${stats.fasts}'],
+                        ),
+                        style: AppTextStyles.homeChallengeTitle.copyWith(
+                          fontSize: 22,
+                          height: 28 / 22,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        'fasting_history_page.stats_completed_of'.tr(
+                          args: ['${stats.completedFasts}', '${stats.fasts}'],
+                        ),
+                        style: AppTextStyles.notificationsEmptySubtitle
+                            .copyWith(fontSize: 14),
+                      ),
+                    ],
                   ),
                 ),
-                Expanded(
-                  child: _StatCell(
-                    label: 'fasting_history_page.stat_completed'.tr(),
-                    value: '${stats.completedFasts}',
-                  ),
-                ),
-                Expanded(
-                  child: _StatCell(
-                    label: 'fasting_history_page.stat_rate'.tr(),
-                    value: '$rate%',
-                  ),
-                ),
+                _RateRing(rate: rate),
               ],
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: 14),
             Row(
               children: [
                 Expanded(
-                  child: _StatCell(
+                  child: _StatTile(
+                    image: AppImages.streakFlame,
+                    value: _hm(stats.totalFastedMinutes),
                     label: 'fasting_history_page.stat_total'.tr(),
-                    value: hours(stats.totalFastedMinutes),
+                    tint: ColorName.colorFastingWidgetChip,
                   ),
                 ),
+                const SizedBox(width: 8),
                 Expanded(
-                  child: _StatCell(
+                  child: _StatTile(
+                    image: AppImages.kingSl,
+                    value: _hm(stats.longestFastMinutes),
                     label: 'fasting_history_page.stat_longest'.tr(),
-                    value: hours(stats.longestFastMinutes),
+                    tint: ColorName.colorPlanFasting,
                   ),
                 ),
+                const SizedBox(width: 8),
                 Expanded(
-                  child: _StatCell(
+                  child: _StatTile(
+                    image: AppImages.sandClock,
+                    value: _hm(stats.avgFastMinutes),
                     label: 'fasting_history_page.stat_avg'.tr(),
-                    value: hours(stats.avgFastMinutes),
+                    tint: ColorName.colorHungerGreen,
                   ),
                 ),
               ],
@@ -379,24 +456,134 @@ final class _StatsCard extends StatelessWidget {
   }
 }
 
-final class _StatCell extends StatelessWidget {
-  const _StatCell({required this.label, required this.value});
+/// Başarı oranı halkası (tamamlanan / tüm oruçlar).
+final class _RateRing extends StatelessWidget {
+  const _RateRing({required this.rate});
 
-  final String label;
-  final String value;
+  final double rate;
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(value, style: AppTextStyles.bodyHistoryTitleSmall),
-        const SizedBox(height: 2),
-        Text(label, style: AppTextStyles.notificationsEmptySubtitle),
-      ],
+    return SizedBox(
+      width: 64,
+      height: 64,
+      child: TweenAnimationBuilder<double>(
+        tween: Tween(begin: 0, end: rate),
+        duration: const Duration(milliseconds: 900),
+        curve: Curves.easeOutCubic,
+        builder: (context, value, _) => Stack(
+          fit: StackFit.expand,
+          children: [
+            CircularProgressIndicator(
+              value: value,
+              strokeWidth: 7,
+              strokeCap: StrokeCap.round,
+              backgroundColor: ColorName.colorHungerGreen,
+              valueColor: const AlwaysStoppedAnimation(ColorName.colorToggleOn),
+            ),
+            Center(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    '${(value * 100).round()}%',
+                    style: AppTextStyles.notificationsDate,
+                  ),
+                  Text(
+                    'fasting_history_page.stat_rate'.tr(),
+                    style: AppTextStyles.notificationsEmptySubtitle.copyWith(
+                      fontSize: 10,
+                      height: 1.1,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
+
+final class _StatTile extends StatelessWidget {
+  const _StatTile({
+    required this.image,
+    required this.value,
+    required this.label,
+    required this.tint,
+  });
+
+  final AppImageAsset image;
+  final String value;
+  final String label;
+  final Color tint;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.fromLTRB(10, 10, 10, 12),
+      decoration: BoxDecoration(
+        color: tint.withValues(alpha: 0.45),
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          image.image(width: 28, height: 28),
+          const SizedBox(height: 8),
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            alignment: Alignment.centerLeft,
+            child: Text(
+              value,
+              maxLines: 1,
+              style: AppTextStyles.bodyHistoryTitleSmall.copyWith(fontSize: 17),
+            ),
+          ),
+          Text(
+            label,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: AppTextStyles.notificationsEmptySubtitle.copyWith(
+              fontSize: 13,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Durum rozeti: renk + 3B ikon.
+({AppImageAsset image, Color fg, Color bg, String key}) _statusStyle(
+  FastHistoryItem item,
+) => switch (item.status) {
+  'active' => (
+    image: AppImages.sandClock,
+    fg: ColorName.colorVibrantBlue,
+    bg: ColorName.colorPlanChipBreakfastBg,
+    key: 'fasting_history_page.status_active',
+  ),
+  'cancelled' => (
+    image: AppImages.redWarning,
+    fg: ColorName.colorOptionNegative,
+    bg: ColorName.colorNegativeV2.withValues(alpha: 0.10),
+    key: 'fasting_history_page.status_cancelled',
+  ),
+  'endedEarly' when !item.goalReached => (
+    image: AppImages.yellowLightning,
+    fg: ColorName.colorWarningOrange,
+    bg: ColorName.colorPlanChipDinnerBg,
+    key: 'fasting_history_page.status_ended_early',
+  ),
+  _ => (
+    image: AppImages.greenTick3d,
+    fg: ColorName.colorPhysicalHungerBadgeText,
+    bg: ColorName.colorHungerGreen,
+    key: 'fasting_history_page.status_completed',
+  ),
+};
 
 final class _HistoryCard extends StatelessWidget {
   const _HistoryCard({required this.item, this.onTap});
@@ -407,74 +594,137 @@ final class _HistoryCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final locale = context.locale.toString();
-    final date = DateFormat.yMMMd(locale).format(item.startedAt);
-    final start = DateFormat.jm(locale).format(item.startedAt);
+    final day = DateFormat.d(locale).format(item.startedAt);
+    final weekday = DateFormat.E(locale).format(item.startedAt);
+    final start = DateFormat.Hm(locale).format(item.startedAt);
     final end = item.endedAt != null
-        ? DateFormat.jm(locale).format(item.endedAt!)
+        ? DateFormat.Hm(locale).format(item.endedAt!)
         : '—';
-    // Sürmekte olan oruç: süre şimdiye kadar geçen (önceden "— / 16h").
+    // Sürmekte olan oruç: süre şimdiye kadar geçen.
     final minutes =
         item.durationMinutes ??
         (item.status == 'active'
             ? DateTime.now().difference(item.startedAt).inMinutes
             : 0);
-    final hours = minutes ~/ 60;
-    final mins = minutes % 60;
-    final duration = minutes <= 0
-        ? '—'
-        : mins == 0
-        ? '${hours}h'
-        : '${hours}h ${mins}m';
-    final targetH = (item.targetMinutes / 60).round();
-    final statusKey = switch (item.status) {
-      'completed' => 'fasting_history_page.status_completed',
-      'endedEarly' => 'fasting_history_page.status_ended_early',
-      'cancelled' => 'fasting_history_page.status_cancelled',
-      'active' => 'fasting_history_page.status_active',
-      _ => 'fasting_history_page.status_completed',
-    };
+    final target = item.targetMinutes;
+    final progress = target <= 0 ? 0.0 : (minutes / target).clamp(0.0, 1.0);
+    final style = _statusStyle(item);
+    final plan = item.planCode;
 
-    return GestureDetector(
-      behavior: HitTestBehavior.opaque,
-      onTap: onTap,
-      child: DecoratedBox(
-        decoration: BoxDecoration(
-          color: ColorName.colorWhite,
-          borderRadius: BorderRadius.circular(16),
-        ),
+    return Material(
+      color: ColorName.colorWhite,
+      borderRadius: BorderRadius.circular(20),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(20),
         child: Padding(
           padding: const EdgeInsets.all(14),
-          child: Column(
+          child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Row(
-                children: [
-                  Expanded(
-                    child: Text(date, style: AppTextStyles.notificationsDate),
-                  ),
-                  Text(
-                    statusKey.tr(),
-                    style: AppTextStyles.notificationsEmptySubtitle.copyWith(
-                      color: item.goalReached
-                          ? ColorName.colorOptionSelected
-                          : ColorName.colorTitle.withValues(alpha: 0.55),
+              // Gün rozeti: gün numarası + kısa gün adı.
+              Container(
+                width: 52,
+                padding: const EdgeInsets.symmetric(vertical: 8),
+                decoration: BoxDecoration(
+                  color: style.bg,
+                  borderRadius: BorderRadius.circular(14),
+                ),
+                child: Column(
+                  children: [
+                    Text(
+                      day,
+                      style: AppTextStyles.bodyHistoryTitleSmall.copyWith(
+                        fontSize: 20,
+                        height: 1.1,
+                        color: style.fg,
+                      ),
                     ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 8),
-              Text(
-                item.planCode != null && item.planCode!.isNotEmpty
-                    ? '${item.planCode} · $duration / ${targetH}h'
-                    : '$duration / ${targetH}h',
-                style: AppTextStyles.bodyHistoryTitleSmall.copyWith(
-                  fontSize: 16,
+                    Text(
+                      weekday,
+                      style: AppTextStyles.notificationsEmptySubtitle.copyWith(
+                        fontSize: 12,
+                        color: style.fg,
+                      ),
+                    ),
+                  ],
                 ),
               ),
-              const SizedBox(height: 4),
-              Text(
-                '$start → $end',
-                style: AppTextStyles.notificationsEmptySubtitle,
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Text.rich(
+                            TextSpan(
+                              text: _hm(minutes),
+                              style: AppTextStyles.bodyHistoryTitleSmall
+                                  .copyWith(fontSize: 18),
+                              children: [
+                                TextSpan(
+                                  text: ' / ${_hm(target)}',
+                                  style: AppTextStyles
+                                      .notificationsEmptySubtitle
+                                      .copyWith(fontSize: 14),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                        _StatusPill(
+                          image: style.image,
+                          text: style.key.tr(),
+                          fg: style.fg,
+                          bg: style.bg,
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 10),
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(4),
+                      child: LinearProgressIndicator(
+                        value: progress,
+                        minHeight: 8,
+                        backgroundColor: ColorName.colorPlanArcTrack,
+                        valueColor: AlwaysStoppedAnimation(style.fg),
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    Row(
+                      children: [
+                        Assets.icons.solarClockCircleLineDuotone.svg(
+                          width: 16,
+                          height: 16,
+                        ),
+                        const SizedBox(width: 4),
+                        Text(
+                          '$start → $end',
+                          style: AppTextStyles.notificationsEmptySubtitle
+                              .copyWith(fontSize: 13),
+                        ),
+                        const Spacer(),
+                        if (plan != null && plan.isNotEmpty)
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 3,
+                            ),
+                            decoration: BoxDecoration(
+                              color: ColorName.colorHomeChipBg,
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            child: Text(
+                              formatPlanLabel(plan, null),
+                              style: AppTextStyles.homeAlreadyInCount,
+                            ),
+                          ),
+                      ],
+                    ),
+                  ],
+                ),
               ),
             ],
           ),
@@ -484,17 +734,58 @@ final class _HistoryCard extends StatelessWidget {
   }
 }
 
+final class _StatusPill extends StatelessWidget {
+  const _StatusPill({
+    required this.image,
+    required this.text,
+    required this.fg,
+    required this.bg,
+  });
+
+  final AppImageAsset image;
+  final String text;
+  final Color fg;
+  final Color bg;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.fromLTRB(4, 3, 10, 3),
+      decoration: BoxDecoration(
+        color: bg,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          image.image(width: 18, height: 18),
+          const SizedBox(width: 4),
+          Text(
+            text,
+            style: AppTextStyles.homeAlreadyInCount.copyWith(color: fg),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Henüz oruç yok: maskot + geçmiş oruç ekleme çağrısı.
 final class _EmptyBody extends StatelessWidget {
-  const _EmptyBody();
+  const _EmptyBody({required this.onAdd});
+
+  final VoidCallback onAdd;
 
   @override
   Widget build(BuildContext context) {
     return Center(
-      child: Padding(
+      child: SingleChildScrollView(
         padding: const EdgeInsets.all(32),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
+            AppImages.mascotClockv2.image(width: 160, height: 160),
+            const SizedBox(height: 16),
             Text(
               'fasting_history_page.empty_title'.tr(),
               textAlign: TextAlign.center,
@@ -505,6 +796,13 @@ final class _EmptyBody extends StatelessWidget {
               'fasting_history_page.empty_subtitle'.tr(),
               textAlign: TextAlign.center,
               style: AppTextStyles.notificationsEmptySubtitle,
+            ),
+            const SizedBox(height: 24),
+            AppButton(
+              label: 'fasting_history_page.entry_add_title'.tr(),
+              onPressed: onAdd,
+              showIcon: false,
+              decoration: AppButtonDecoration.homeJoin(),
             ),
           ],
         ),

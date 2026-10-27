@@ -1212,6 +1212,8 @@
     "title": "История голодания",
     "list_title": "Прошлые голодания",
     "stats_title": "За всё время",
+    "stats_headline": "Голоданий: {}",
+    "stats_completed_of": "Выполнено {} из {}",
     "stat_fasts": "Голодания",
     "stat_completed": "Завершено",
     "stat_rate": "Успех",

@@ -540,184 +540,191 @@ class _FastingViewState extends State<FastingView> {
         final planTitle = _planTitle(session);
         return Scaffold(
           backgroundColor: ColorName.colorProfileBack,
-          body: ListView(
+          // ListView ekrandan çıkan kartları atıp geri gelince yeniden
+          // kuruyordu: kendi verisini yükleyen kartlar (tahmin, challenge,
+          // Mochi planı) önce boş gelip sonra açılıyor, kaydırırken sayfa
+          // zıplıyordu. Sayfa kısa; hepsi bir kez kurulur ve yaşar.
+          body: SingleChildScrollView(
             physics: const ClampingScrollPhysics(),
             padding: const EdgeInsets.only(bottom: AppBottomNav.barClearance),
-            children: [
-              ValueListenableBuilder<bool>(
-                valueListenable: getIt<RevenueCatService>().isPremium,
-                builder: (context, isPremium, _) =>
-                    BlocSelector<HomeBloc, HomeState, int>(
-                      bloc: getIt<HomeBloc>(),
-                      selector: (_) => _streakDays,
-                      builder: (context, streakDays) => HomeTopBar(
-                        streakDays: streakDays,
-                        isPremium: isPremium,
-                        onPremiumTapped: () => unawaited(
-                          getIt<RevenueCatService>().presentPaywall(),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                ValueListenableBuilder<bool>(
+                  valueListenable: getIt<RevenueCatService>().isPremium,
+                  builder: (context, isPremium, _) =>
+                      BlocSelector<HomeBloc, HomeState, int>(
+                        bloc: getIt<HomeBloc>(),
+                        selector: (_) => _streakDays,
+                        builder: (context, streakDays) => HomeTopBar(
+                          streakDays: streakDays,
+                          isPremium: isPremium,
+                          onPremiumTapped: () => unawaited(
+                            getIt<RevenueCatService>().presentPaywall(),
+                          ),
+                          onChatTapped: () =>
+                              context.pushNamed(RoutePaths.chat.name),
                         ),
-                        onChatTapped: () =>
-                            context.pushNamed(RoutePaths.chat.name),
                       ),
-                    ),
-              ),
-              const SizedBox(height: 16),
-              _ActionRow(
-                mealSelected: _mealSelected,
-                onBodyTap: () => _selectTab(meal: false),
-                onMealTap: () => _selectTab(meal: true),
-                onShare: _shareStatus,
-              ),
-              const SizedBox(height: 20),
-              // Haftalık plan: bugün oruç günü değilse günün kartı (serbest /
-              // 500 kcal); oruç yine de isteğe bağlı başlatılabilir.
-              if (_todayPlanDay(session) case final day?
-                  when day.type != WeeklyDayType.fast &&
-                      !session.isFasting &&
-                      !session.isEating) ...[
-                BlocSelector<HomeBloc, HomeState, String?>(
-                  bloc: getIt<HomeBloc>(),
-                  selector: _todayCheckin,
-                  builder: (context, checkin) => FastingPlanDayCard(
-                    day: day,
-                    checkin: _checkinOverride ?? checkin,
-                    onCheckin: (done) => unawaited(_checkinToday(done)),
-                  ),
                 ),
                 const SizedBox(height: 16),
-              ],
-              // Saniyelik sayaç yalnızca bu bölümü yeniden kurar (sayfanın tamamını değil).
-              ValueListenableBuilder<int>(
-                valueListenable: _clock,
-                builder: (context, _, _) {
-                  final view = _arcView(session);
-                  return AnimatedSize(
-                    duration: const Duration(milliseconds: 480),
-                    curve: Curves.easeOutCubic,
-                    alignment: Alignment.topCenter,
-                    child: AnimatedSwitcher(
-                      duration: const Duration(milliseconds: 480),
-                      layoutBuilder: (current, previous) {
-                        return ClipRect(
-                          child: Stack(
-                            alignment: Alignment.topCenter,
-                            children: [
-                              ...previous,
-                              if (current != null) current,
-                            ],
-                          ),
-                        );
-                      },
-                      transitionBuilder: (child, animation) {
-                        return AnimatedBuilder(
-                          animation: animation,
-                          builder: (context, child) {
-                            final reverse =
-                                animation.status == AnimationStatus.reverse;
-                            final toRight = !_mealSelected;
-                            final dx = reverse
-                                ? (toRight
-                                      ? 1 - animation.value
-                                      : animation.value - 1)
-                                : (toRight
-                                      ? animation.value - 1
-                                      : 1 - animation.value);
-                            return FractionalTranslation(
-                              translation: Offset(dx, 0),
-                              child: Opacity(
-                                opacity: animation.value,
-                                child: child,
-                              ),
-                            );
-                          },
-                          child: child,
-                        );
-                      },
-                      child: _StageView(
-                        key: ValueKey(_mealSelected ? 'meal' : 'body'),
-                        view: view,
-                        bodyMode: !_mealSelected,
-                        planTitle: planTitle,
-                        started: _startedLabel(session),
-                        ends: _endsLabel(session),
-                        startedCaption: _startedCaption(session),
-                        endsCaption: _endsCaption(session),
-                        state: session.isFasting
-                            ? (_goalReached(session)
-                                  ? _FastState.goalReached
-                                  : _FastState.fasting)
-                            : session.isEating
-                            ? _FastState.eating
-                            : _FastState.idle,
-                        onEditPlan: () => _pickPlan(session),
-                        onAction: session.isFasting
-                            ? () => unawaited(_finishFast(session))
-                            : () => unawaited(_pickStart(session)),
-                        onCardTap: () => context.pushNamed(
-                          _mealSelected
-                              ? RoutePaths.eatingWindow.name
-                              : RoutePaths.bodyStatus.name,
-                        ),
-                      ),
+                _ActionRow(
+                  mealSelected: _mealSelected,
+                  onBodyTap: () => _selectTab(meal: false),
+                  onMealTap: () => _selectTab(meal: true),
+                  onShare: _shareStatus,
+                ),
+                const SizedBox(height: 20),
+                // Haftalık plan: bugün oruç günü değilse günün kartı (serbest /
+                // 500 kcal); oruç yine de isteğe bağlı başlatılabilir.
+                if (_todayPlanDay(session) case final day?
+                    when day.type != WeeklyDayType.fast &&
+                        !session.isFasting &&
+                        !session.isEating) ...[
+                  BlocSelector<HomeBloc, HomeState, String?>(
+                    bloc: getIt<HomeBloc>(),
+                    selector: _todayCheckin,
+                    builder: (context, checkin) => FastingPlanDayCard(
+                      day: day,
+                      checkin: _checkinOverride ?? checkin,
+                      onCheckin: (done) => unawaited(_checkinToday(done)),
                     ),
-                  );
-                },
-              ),
-              // Kartların 12px üst boşluğuyla birlikte aralık 16.
-              const SizedBox(height: 4),
-              const FastingFastForecastCard(),
-              const SizedBox(height: 4),
-              const HomeChallengeCard(),
-              const SizedBox(height: 4),
-              // Su, adım, kilo, açlık: ana sayfayla aynı veri (/user/summary).
-              BlocBuilder<HomeBloc, HomeState>(
-                bloc: getIt<HomeBloc>(),
-                builder: (context, home) {
-                  final summary = home is HomeLoaded ? home.summary : null;
-                  return Column(
-                    children: [
-                      HomeMetricCards(
-                        waterMl: summary?.waterMl ?? 0,
-                        waterGoalMl: summary?.waterGoalMl ?? 2500,
-                        steps: summary?.steps ?? 0,
-                        stepsGoal: summary?.stepsGoal ?? 8000,
-                        waterUnit: summary?.waterUnit ?? 'ml',
-                        onWaterTapped: () =>
-                            context.pushNamed(RoutePaths.water.name),
-                        onStepsTapped: () =>
-                            context.pushNamed(RoutePaths.steps.name),
-                      ),
-                      const SizedBox(height: 4),
-                      HomeWeightCard(
-                        currentKg: summary?.weightCurrentKg,
-                        startKg: summary?.weightStartKg,
-                        goalKg: summary?.weightGoalKg,
-                        unit: summary?.weightUnit ?? 'kg',
-                        onTap: () =>
-                            context.pushNamed(RoutePaths.bodyHistory.name),
-                        onEditTap: () => unawaited(
-                          WeightEntryFlow.open(
-                            context,
-                            currentKg: summary?.weightCurrentKg,
+                  ),
+                  const SizedBox(height: 16),
+                ],
+                // Saniyelik sayaç yalnızca bu bölümü yeniden kurar (sayfanın tamamını değil).
+                ValueListenableBuilder<int>(
+                  valueListenable: _clock,
+                  builder: (context, _, _) {
+                    final view = _arcView(session);
+                    return AnimatedSize(
+                      duration: const Duration(milliseconds: 480),
+                      curve: Curves.easeOutCubic,
+                      alignment: Alignment.topCenter,
+                      child: AnimatedSwitcher(
+                        duration: const Duration(milliseconds: 480),
+                        layoutBuilder: (current, previous) {
+                          return ClipRect(
+                            child: Stack(
+                              alignment: Alignment.topCenter,
+                              children: [
+                                ...previous,
+                                if (current != null) current,
+                              ],
+                            ),
+                          );
+                        },
+                        transitionBuilder: (child, animation) {
+                          return AnimatedBuilder(
+                            animation: animation,
+                            builder: (context, child) {
+                              final reverse =
+                                  animation.status == AnimationStatus.reverse;
+                              final toRight = !_mealSelected;
+                              final dx = reverse
+                                  ? (toRight
+                                        ? 1 - animation.value
+                                        : animation.value - 1)
+                                  : (toRight
+                                        ? animation.value - 1
+                                        : 1 - animation.value);
+                              return FractionalTranslation(
+                                translation: Offset(dx, 0),
+                                child: Opacity(
+                                  opacity: animation.value,
+                                  child: child,
+                                ),
+                              );
+                            },
+                            child: child,
+                          );
+                        },
+                        child: _StageView(
+                          key: ValueKey(_mealSelected ? 'meal' : 'body'),
+                          view: view,
+                          bodyMode: !_mealSelected,
+                          planTitle: planTitle,
+                          started: _startedLabel(session),
+                          ends: _endsLabel(session),
+                          startedCaption: _startedCaption(session),
+                          endsCaption: _endsCaption(session),
+                          state: session.isFasting
+                              ? (_goalReached(session)
+                                    ? _FastState.goalReached
+                                    : _FastState.fasting)
+                              : session.isEating
+                              ? _FastState.eating
+                              : _FastState.idle,
+                          onEditPlan: () => _pickPlan(session),
+                          onAction: session.isFasting
+                              ? () => unawaited(_finishFast(session))
+                              : () => unawaited(_pickStart(session)),
+                          onCardTap: () => context.pushNamed(
+                            _mealSelected
+                                ? RoutePaths.eatingWindow.name
+                                : RoutePaths.bodyStatus.name,
                           ),
                         ),
                       ),
-                      const SizedBox(height: 4),
-                      HomeHungerTrackerCard(
-                        physicalCount: summary?.hungerPhysical ?? 0,
-                        emotionalCount: summary?.hungerEmotional ?? 0,
-                        onTap: () =>
-                            context.pushNamed(RoutePaths.hungerTracker.name),
-                      ),
-                    ],
-                  );
-                },
-              ),
-              FastingMochiPlanCard(
-                onStart: (plan) => unawaited(_startMochiPlan(session, plan)),
-              ),
-              const SizedBox(height: 60),
-            ],
+                    );
+                  },
+                ),
+                // Kartların 12px üst boşluğuyla birlikte aralık 16.
+                const SizedBox(height: 4),
+                const FastingFastForecastCard(),
+                const SizedBox(height: 4),
+                const HomeChallengeCard(),
+                const SizedBox(height: 4),
+                // Su, adım, kilo, açlık: ana sayfayla aynı veri (/user/summary).
+                BlocBuilder<HomeBloc, HomeState>(
+                  bloc: getIt<HomeBloc>(),
+                  builder: (context, home) {
+                    final summary = home is HomeLoaded ? home.summary : null;
+                    return Column(
+                      children: [
+                        HomeMetricCards(
+                          waterMl: summary?.waterMl ?? 0,
+                          waterGoalMl: summary?.waterGoalMl ?? 2500,
+                          steps: summary?.steps ?? 0,
+                          stepsGoal: summary?.stepsGoal ?? 8000,
+                          waterUnit: summary?.waterUnit ?? 'ml',
+                          onWaterTapped: () =>
+                              context.pushNamed(RoutePaths.water.name),
+                          onStepsTapped: () =>
+                              context.pushNamed(RoutePaths.steps.name),
+                        ),
+                        const SizedBox(height: 4),
+                        HomeWeightCard(
+                          currentKg: summary?.weightCurrentKg,
+                          startKg: summary?.weightStartKg,
+                          goalKg: summary?.weightGoalKg,
+                          unit: summary?.weightUnit ?? 'kg',
+                          onTap: () =>
+                              context.pushNamed(RoutePaths.bodyHistory.name),
+                          onEditTap: () => unawaited(
+                            WeightEntryFlow.open(
+                              context,
+                              currentKg: summary?.weightCurrentKg,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        HomeHungerTrackerCard(
+                          physicalCount: summary?.hungerPhysical ?? 0,
+                          emotionalCount: summary?.hungerEmotional ?? 0,
+                          onTap: () =>
+                              context.pushNamed(RoutePaths.hungerTracker.name),
+                        ),
+                      ],
+                    );
+                  },
+                ),
+                FastingMochiPlanCard(
+                  onStart: (plan) => unawaited(_startMochiPlan(session, plan)),
+                ),
+                const SizedBox(height: 60),
+              ],
+            ),
           ),
         );
       },

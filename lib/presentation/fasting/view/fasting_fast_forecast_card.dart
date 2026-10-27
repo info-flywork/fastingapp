@@ -22,14 +22,25 @@ enum _ForecastDay { easy, moderate, hard }
 final class FastingFastForecastCard extends StatefulWidget {
   const FastingFastForecastCard({super.key});
 
+  /// Çıkış / hesap değişimi: önceki kullanıcının tahmini görünmesin.
+  static void clearCache() {
+    _FastingFastForecastCardState._lastForecast = null;
+    _FastingFastForecastCardState._lastDay = null;
+  }
+
   @override
   State<FastingFastForecastCard> createState() =>
       _FastingFastForecastCardState();
 }
 
 class _FastingFastForecastCardState extends State<FastingFastForecastCard> {
-  var _day = _ForecastDay.easy;
-  FastForecast? _forecast;
+  /// Son tahmin ve seçili gün (oturum boyunca): kart yeniden kurulunca
+  /// (sekme / sayfa dönüşü) boş gelip sonra açılmasın, seçim sıfırlanmasın.
+  static FastForecast? _lastForecast;
+  static _ForecastDay? _lastDay;
+
+  late var _day = _lastDay ?? _dayFor(_lastForecast?.successChance);
+  FastForecast? _forecast = _lastForecast;
 
   StreamSubscription<String>? _fastChanges;
 
@@ -64,10 +75,15 @@ class _FastingFastForecastCardState extends State<FastingFastForecastCard> {
     _loadedFor = _keyOf(getIt<FastingSessionCubit>().state);
     try {
       final forecast = await getIt<ForecastRepository>().getForecast();
+      // Önerilen gün yalnızca tahmin değişince güncellenir; aynı tahmin
+      // yeniden gelince kullanıcının seçtiği sekme korunur.
+      final changed = forecast.successChance != _forecast?.successChance;
+      _lastForecast = forecast;
+      if (changed) _lastDay = _dayFor(forecast.successChance);
       if (!mounted) return;
       setState(() {
         _forecast = forecast;
-        _day = _dayFor(forecast.successChance);
+        if (changed) _day = _dayFor(forecast.successChance);
       });
     } on Exception {
       if (mounted)
@@ -104,7 +120,7 @@ class _FastingFastForecastCardState extends State<FastingFastForecastCard> {
           const SizedBox(height: 16),
           _DaySegment(
             day: _day,
-            onChanged: (value) => setState(() => _day = value),
+            onChanged: (value) => setState(() => _day = _lastDay = value),
           ),
           const SizedBox(height: 16),
           _ForecastSummary(day: _day, chance: forecast.successChance),

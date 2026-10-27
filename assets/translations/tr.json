@@ -1210,6 +1210,8 @@
     "title": "Oruç Geçmişi",
     "list_title": "Geçmiş oruçlar",
     "stats_title": "Tüm zamanlar",
+    "stats_headline": "{} oruç",
+    "stats_completed_of": "{} / {} tamamlandı",
     "stat_fasts": "Oruç",
     "stat_completed": "Tamamlanan",
     "stat_rate": "Başarı",

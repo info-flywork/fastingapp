@@ -51,6 +51,10 @@ mixin NotificationsViewMixin on State<NotificationsView> {
   }
 
   /// Liste gelir; ekran açıldığı için hepsi okundu sayılır (rozet sıfırlanır).
+  /// Bu ekranda silinen bildirimler (sunucu onaylasa da yoldaki eski liste
+  /// cevabı onları geri getirmesin).
+  final _removedIds = <String>{};
+
   Future<void> _load() async {
     // Önbellek yoksa spinner; varsa mevcut liste kalsın (boş flaş yok).
     if (items.isEmpty && mounted) setState(() => loading = true);
@@ -59,7 +63,11 @@ mixin NotificationsViewMixin on State<NotificationsView> {
       if (!mounted) return;
       setState(() {
         loadFailed = false;
-        items = [for (final n in page.items) _mapOne(n)];
+        // Silme yoldayken başlamış okuma, silinen bildirimi geri getirmesin.
+        items = [
+          for (final n in page.items)
+            if (!_removedIds.contains(n.id)) _mapOne(n),
+        ];
         _nextCursor = page.nextCursor;
         hasMore = page.hasMore;
         loading = false;
@@ -88,7 +96,11 @@ mixin NotificationsViewMixin on State<NotificationsView> {
       final page = await _repository.list(cursor: cursor);
       if (!mounted) return;
       setState(() {
-        items = [...items, for (final n in page.items) _mapOne(n)];
+        items = [
+          ...items,
+          for (final n in page.items)
+            if (!_removedIds.contains(n.id)) _mapOne(n),
+        ];
         _nextCursor = page.nextCursor;
         hasMore = page.hasMore;
         loadingMore = false;
@@ -161,10 +173,12 @@ mixin NotificationsViewMixin on State<NotificationsView> {
     final index = items.indexWhere((e) => e.id == id);
     if (index < 0) return;
     final removed = items[index];
+    _removedIds.add(id);
     setState(() => items = items.where((e) => e.id != id).toList());
     try {
       await _repository.remove(id);
     } on Object catch (e) {
+      _removedIds.remove(id);
       if (!mounted) return;
       setState(() {
         final next = List<AppNotificationItem>.of(items);

@@ -1210,6 +1210,8 @@
     "title": "Historique du jeûne",
     "list_title": "Jeûnes passés",
     "stats_title": "Tout le temps",
+    "stats_headline": "{} jeûnes",
+    "stats_completed_of": "{} sur {} terminés",
     "stat_fasts": "Jeûnes",
     "stat_completed": "Terminés",
     "stat_rate": "Réussite",

@@ -1210,6 +1210,8 @@
     "title": "Fasting History",
     "list_title": "Past fasts",
     "stats_title": "All-time",
+    "stats_headline": "{} fasts",
+    "stats_completed_of": "{} of {} completed",
     "stat_fasts": "Fasts",
     "stat_completed": "Completed",
     "stat_rate": "Success",

@@ -1210,6 +1210,8 @@
     "title": "Cronologia digiuno",
     "list_title": "Digiuni passati",
     "stats_title": "Di sempre",
+    "stats_headline": "{} digiuni",
+    "stats_completed_of": "{} su {} completati",
     "stat_fasts": "Digiuni",
     "stat_completed": "Completati",
     "stat_rate": "Successo",

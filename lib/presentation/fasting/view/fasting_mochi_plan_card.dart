@@ -14,6 +14,9 @@ import 'package:flutter/material.dart';
 final class FastingMochiPlanCard extends StatefulWidget {
   const FastingMochiPlanCard({required this.onStart, super.key});
 
+  /// Çıkış / hesap değişimi: önceki kullanıcının planı görünmesin.
+  static void clearCache() => _FastingMochiPlanCardState._lastPlan = null;
+
   final ValueChanged<MochiDailyPlan> onStart;
 
   static const _arcDiameter = 280.0;
@@ -23,7 +26,11 @@ final class FastingMochiPlanCard extends StatefulWidget {
 }
 
 class _FastingMochiPlanCardState extends State<FastingMochiPlanCard> {
-  MochiDailyPlan? _plan;
+  /// Son plan (oturum boyunca): kart yeniden kurulunca boş gelip sonra
+  /// açılmasın; arkadan sessizce tazelenir.
+  static MochiDailyPlan? _lastPlan;
+
+  MochiDailyPlan? _plan = _lastPlan;
   var _refreshed = false;
 
   @override
@@ -35,6 +42,7 @@ class _FastingMochiPlanCardState extends State<FastingMochiPlanCard> {
   Future<void> _load() async {
     try {
       final plan = await getIt<MochiPlanRepository>().getPlan();
+      _lastPlan = plan;
       if (!mounted) return;
       setState(() => _plan = plan);
       if (!plan.settled && !_refreshed) {
@@ -310,10 +318,7 @@ final class _InsightBox extends StatelessWidget {
       ),
       child: Padding(
         padding: const EdgeInsets.all(12),
-        child: Text(
-          text,
-          style: AppTextStyles.fastingMochiPlanInsight,
-        ),
+        child: Text(text, style: AppTextStyles.fastingMochiPlanInsight),
       ),
     );
   }

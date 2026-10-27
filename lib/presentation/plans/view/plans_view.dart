@@ -110,43 +110,49 @@ class _PlansViewState extends State<PlansView> {
                 child: BlocBuilder<FastingSessionCubit, FastingSessionState>(
                   bloc: _session,
                   buildWhen: (a, b) => a.plan?.signature != b.plan?.signature,
-                  builder: (context, session) => ListView(
+                  // Bölümler ve kartlar bir kez kurulur, kaydırırken yaşar:
+                  // ListView ekrandan çıkanı atıyordu; geri gelince yatay satır
+                  // başa dönüyor, kart görselleri bir an boş görünüyordu.
+                  builder: (context, session) => SingleChildScrollView(
                     physics: const ClampingScrollPhysics(),
                     padding: EdgeInsets.only(bottom: bottom + 100),
-                    children: [
-                      _PlansSection(
-                        titleKey: 'plans.beginner_title',
-                        emphasisKey: 'plans.beginner_emphasis',
-                        restKey: 'plans.beginner_rest',
-                        detailTitleKey: 'plans.detail_beginner_title',
-                        row1: PlansCatalog.beginnerRow1,
-                        row2: PlansCatalog.beginnerRow2,
-                        selected: _selectedFor(session),
-                        onOpenPlan: _openPlanDetail,
-                      ),
-                      const SizedBox(height: 32),
-                      _PlansSection(
-                        titleKey: 'plans.advanced_title',
-                        emphasisKey: 'plans.advanced_emphasis',
-                        restKey: 'plans.advanced_rest',
-                        detailTitleKey: 'plans.detail_advanced_title',
-                        row1: PlansCatalog.advancedRow1,
-                        row2: PlansCatalog.advancedRow2,
-                        selected: _selectedFor(session),
-                        onOpenPlan: _openPlanDetail,
-                      ),
-                      const SizedBox(height: 32),
-                      _PlansSection(
-                        titleKey: 'plans.weekly_title',
-                        emphasisKey: 'plans.weekly_emphasis',
-                        restKey: 'plans.weekly_rest',
-                        detailTitleKey: 'plans.weekly_title',
-                        row1: PlansCatalog.weeklyRow,
-                        row2: const [],
-                        selected: _selectedFor(session),
-                        onOpenPlan: _openPlanDetail,
-                      ),
-                    ],
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        _PlansSection(
+                          titleKey: 'plans.beginner_title',
+                          emphasisKey: 'plans.beginner_emphasis',
+                          restKey: 'plans.beginner_rest',
+                          detailTitleKey: 'plans.detail_beginner_title',
+                          row1: PlansCatalog.beginnerRow1,
+                          row2: PlansCatalog.beginnerRow2,
+                          selected: _selectedFor(session),
+                          onOpenPlan: _openPlanDetail,
+                        ),
+                        const SizedBox(height: 32),
+                        _PlansSection(
+                          titleKey: 'plans.advanced_title',
+                          emphasisKey: 'plans.advanced_emphasis',
+                          restKey: 'plans.advanced_rest',
+                          detailTitleKey: 'plans.detail_advanced_title',
+                          row1: PlansCatalog.advancedRow1,
+                          row2: PlansCatalog.advancedRow2,
+                          selected: _selectedFor(session),
+                          onOpenPlan: _openPlanDetail,
+                        ),
+                        const SizedBox(height: 32),
+                        _PlansSection(
+                          titleKey: 'plans.weekly_title',
+                          emphasisKey: 'plans.weekly_emphasis',
+                          restKey: 'plans.weekly_rest',
+                          detailTitleKey: 'plans.weekly_title',
+                          row1: PlansCatalog.weeklyRow,
+                          row2: const [],
+                          selected: _selectedFor(session),
+                          onOpenPlan: _openPlanDetail,
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ),
@@ -272,22 +278,29 @@ final class _PlansHorizontalRow extends StatelessWidget {
   Widget build(BuildContext context) {
     return SizedBox(
       height: _kCardHeight + 12,
-      child: ListView.separated(
+      // Satırda birkaç kart var: hepsi kurulu kalır (yana kaydırınca görsel
+      // yeniden yüklenip boş görünmesin).
+      child: SingleChildScrollView(
         scrollDirection: Axis.horizontal,
         clipBehavior: Clip.none,
         physics: const ClampingScrollPhysics(),
         padding: const EdgeInsets.symmetric(horizontal: 16),
-        itemCount: cards.length,
-        separatorBuilder: (_, _) => const SizedBox(width: _kCardGap),
-        itemBuilder: (context, index) {
-          final data = cards[index];
-          return _PlanCard(
-            data: data,
-            detailTitleKey: detailTitleKey,
-            isSelected: selected == data,
-            onOpenPlan: onOpenPlan,
-          );
-        },
+        // Yatay ListView'deki gibi kartlar satır yüksekliğini doldurur
+        // (görünüm aynı kalsın).
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            for (var i = 0; i < cards.length; i++) ...[
+              if (i > 0) const SizedBox(width: _kCardGap),
+              _PlanCard(
+                data: cards[i],
+                detailTitleKey: detailTitleKey,
+                isSelected: selected == cards[i],
+                onOpenPlan: onOpenPlan,
+              ),
+            ],
+          ],
+        ),
       ),
     );
   }
