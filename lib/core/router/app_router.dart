@@ -4,6 +4,7 @@ import 'package:fastingapp/core/router/go_router_refresh_stream.dart';
 import 'package:fastingapp/core/router/route_paths.dart';
 import 'package:fastingapp/core/widgets/bottom_navigation_bar/main_wrapper.dart';
 import 'package:fastingapp/data/model/onboarding/onboarding_result.dart';
+import 'package:fastingapp/domain/gamification/challenges_repository.dart';
 import 'package:fastingapp/presentation/auth/bloc/auth_bloc.dart';
 import 'package:fastingapp/presentation/auth/bloc/auth_state.dart';
 import 'package:fastingapp/presentation/auth/entry/view/entry_view.dart';
@@ -51,6 +52,7 @@ import 'package:fastingapp/presentation/body_history/view/body_history_view.dart
 import 'package:fastingapp/presentation/calories_tracker/view/calories_camera_view.dart';
 import 'package:fastingapp/presentation/calories_tracker/view/calories_result_view.dart';
 import 'package:fastingapp/presentation/calories_tracker/view/calories_tracker_view.dart';
+import 'package:fastingapp/presentation/challenges/view/challenge_detail_view.dart';
 import 'package:fastingapp/presentation/chat/latest/view/latest_chats_view.dart';
 import 'package:fastingapp/presentation/chat/view/chat_view.dart';
 import 'package:fastingapp/presentation/fasting/view/eating_window_view.dart';
@@ -577,6 +579,13 @@ final GoRouter appRouter = GoRouter(
       name: RoutePaths.fastingHistory.name,
       parentNavigatorKey: rootNavigatorKey,
       builder: (context, state) => const FastingHistoryView(),
+    ),
+    GoRoute(
+      path: RoutePaths.challengeDetail.path,
+      name: RoutePaths.challengeDetail.name,
+      parentNavigatorKey: rootNavigatorKey,
+      builder: (context, state) =>
+          ChallengeDetailView(initial: state.extra! as Challenge),
     ),
     GoRoute(
       path: RoutePaths.insights.path,

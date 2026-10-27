@@ -11,7 +11,7 @@ from content import PAGES  # noqa: E402  (aynı klasör)
 
 ROOT = Path(__file__).parent / "mochifast"
 YEAR = "2026"
-UPDATED = {"tr": "Son güncelleme: 14 Ekim 2026", "en": "Last updated: October 14, 2026"}
+UPDATED = {"tr": "Son güncelleme: 27 Ekim 2026", "en": "Last updated: October 27, 2026"}
 NAV = [
     ("privacy-policy", {"tr": "Gizlilik", "en": "Privacy"}),
     ("terms", {"tr": "Kullanım Koşulları", "en": "Terms"}),

@@ -170,7 +170,9 @@ final class _Wheel extends StatelessWidget {
       child: ListWheelScrollView.useDelegate(
         controller: controller,
         itemExtent: _itemExtent,
-        physics: const FixedExtentScrollPhysics(),
+        physics: const FixedExtentScrollPhysics(
+          parent: ClampingScrollPhysics(),
+        ),
         diameterRatio: 100,
         perspective: 0.0001,
         onSelectedItemChanged: (index) => onSelected(index % itemCount),

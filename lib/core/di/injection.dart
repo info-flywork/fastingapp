@@ -20,6 +20,7 @@ import 'package:fastingapp/domain/fasting/plan_catalog_repository.dart';
 import 'package:fastingapp/domain/gamification/challenges_repository.dart';
 import 'package:fastingapp/domain/gamification/world_repository.dart';
 import 'package:fastingapp/domain/hunger/hunger_repository.dart';
+import 'package:fastingapp/domain/hunger/hunger_store.dart';
 import 'package:fastingapp/domain/notification/notifications_repository.dart';
 import 'package:fastingapp/domain/notification/push_service.dart';
 import 'package:fastingapp/domain/nutrition/meals_repository.dart';
@@ -31,6 +32,10 @@ import 'package:fastingapp/domain/profile/profile_repository.dart';
 import 'package:fastingapp/domain/progress/progress_repository.dart';
 import 'package:fastingapp/domain/revenue_cat/revenue_cat_service.dart';
 import 'package:fastingapp/domain/trackers/health_sync_service.dart';
+import 'package:fastingapp/domain/trackers/sleep_store.dart';
+import 'package:fastingapp/domain/trackers/steps_store.dart';
+import 'package:fastingapp/domain/trackers/water_store.dart';
+import 'package:fastingapp/domain/trackers/weight_store.dart';
 import 'package:fastingapp/domain/trackers/trackers_repository.dart';
 import 'package:fastingapp/domain/user/user_repository.dart';
 import 'package:fastingapp/presentation/auth/bloc/auth_bloc.dart';
@@ -137,6 +142,11 @@ Future<void> configureDependencies() async {
     ..registerLazySingleton<HealthSyncService>(
       () => HealthSyncService(getIt(), getIt()),
     )
+    ..registerLazySingleton<StepsStore>(() => StepsStore(getIt()))
+    ..registerLazySingleton<WaterStore>(() => WaterStore(getIt()))
+    ..registerLazySingleton<SleepStore>(() => SleepStore(getIt()))
+    ..registerLazySingleton<WeightStore>(() => WeightStore(getIt()))
+    ..registerLazySingleton<HungerStore>(() => HungerStore(getIt()))
     ..registerLazySingleton<HungerRepository>(() => HungerRepository(getIt()))
     ..registerLazySingleton<PlanCatalogRepository>(
       () => PlanCatalogRepository(getIt()),
@@ -161,9 +171,7 @@ Future<void> configureDependencies() async {
       () => FastingSessionCubit(getIt(), getIt()),
     )
     ..registerLazySingleton<HomeBloc>(() => HomeBloc(getIt()))
-    ..registerLazySingleton<ProfileBloc>(
-      () => ProfileBloc(getIt(), getIt(), getIt()),
-    )
+    ..registerLazySingleton<ProfileBloc>(() => ProfileBloc(getIt()))
     // ── Ekran BLoC'ları (factory) ──
     ..registerFactory<SplashBloc>(() => SplashBloc(getIt(), getIt(), getIt()))
     ..registerFactory<WelcomeBloc>(() => WelcomeBloc(getIt(), getIt()))

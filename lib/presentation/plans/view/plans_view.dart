@@ -1,9 +1,11 @@
+import 'dart:async';
 import 'dart:ui';
 
 import 'package:easy_localization/easy_localization.dart';
 import 'package:fastingapp/core/di/injection.dart';
 import 'package:fastingapp/core/router/route_paths.dart';
 import 'package:fastingapp/core/theme/app_text_styles.dart';
+import 'package:fastingapp/domain/fasting/plan_catalog_repository.dart';
 import 'package:fastingapp/domain/revenue_cat/revenue_cat_service.dart';
 import 'package:fastingapp/generated/app_images.g.dart';
 import 'package:fastingapp/generated/colors.gen.dart';
@@ -34,6 +36,20 @@ final class PlansView extends StatefulWidget {
 
 class _PlansViewState extends State<PlansView> {
   FastingSessionCubit get _session => getIt<FastingSessionCubit>();
+
+  @override
+  void initState() {
+    super.initState();
+    // Plan detayları önceden hazırlanır: detay / haftalık sayfa beklemeden
+    // ve doğru saatlerle açılır.
+    unawaited(
+      () async {
+        final repo = getIt<PlanCatalogRepository>();
+        await repo.ensureLoaded();
+        repo.prefetchDetails(PlansCatalog.all.map((p) => p.planCode));
+      }().catchError((Object _) {}),
+    );
+  }
 
   /// Seçili kart = sunucudaki etkin plan.
   PlansCardData? _selectedFor(FastingSessionState state) =>

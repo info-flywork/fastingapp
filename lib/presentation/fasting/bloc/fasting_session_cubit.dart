@@ -1,9 +1,11 @@
 import 'dart:async';
 
 import 'package:bloc/bloc.dart';
+import 'package:fastingapp/core/di/injection.dart';
 import 'package:fastingapp/core/network/network_exception.dart';
 import 'package:fastingapp/core/sync/data_sync.dart';
 import 'package:fastingapp/domain/fasting/fasting_repository.dart';
+import 'package:fastingapp/domain/fasting/plan_catalog_repository.dart';
 import 'package:fastingapp/domain/fasting/weekly_schedule.dart';
 import 'package:fastingapp/domain/revenue_cat/revenue_cat_service.dart';
 import 'package:fastingapp/presentation/fasting/bloc/fasting_session_state.dart';
@@ -17,16 +19,46 @@ final class FastingSessionCubit extends Cubit<FastingSessionState> {
   final FastingRepository _repository;
   final RevenueCatService _revenueCat;
 
+  /// Süren yazma (başlat / bitir / iptal / plan) sayısı ve onaylı yazma
+  /// sırası. Yazma sürerken ya da yazmadan önce başlamış bir okumanın
+  /// (`refresh`, ana sayfa özeti) cevabı ekranı geri almaz: başlatılan oruç
+  /// bir an kaybolup, bitirilen oruç bir an geri gelmez.
+  int _pendingWrites = 0;
+  int _writeSeq = 0;
+
+  Future<T> _write<T>(Future<T> Function() body) async {
+    _pendingWrites++;
+    try {
+      return await body();
+    } finally {
+      _pendingWrites--;
+      _writeSeq++;
+    }
+  }
+
+  bool _isStale(int seqAtStart) =>
+      _pendingWrites > 0 || seqAtStart != _writeSeq;
+
   /// Çıkış / hesap değişimi: önceki kullanıcının orucu ekranda kalmasın.
   void reset() => emit(const FastingSessionState());
 
-  Future<void> refresh({bool showLoading = true}) async {
+  Future<void> refresh({bool showLoading = true}) =>
+      _load(showLoading: showLoading, guard: true);
+
+  /// [guard] false: bir yazmanın içinden, sunucu onayladıktan sonra
+  /// çağrılır (cevap taze; yok sayılmaz).
+  Future<void> _load({required bool showLoading, required bool guard}) async {
+    final seqAtStart = _writeSeq;
     if (showLoading) emit(state.copyWith(isLoading: true, clearError: true));
     try {
       final results = await Future.wait([
         _repository.getActive(),
         _repository.getCurrentPlan(),
       ]);
+      if (guard && _isStale(seqAtStart)) {
+        if (showLoading) emit(state.copyWith(isLoading: false));
+        return;
+      }
       final active = results[0] as ActiveFastingSnapshot;
       final planEnv = results[1] as CurrentPlanEnvelope;
       final fetchedAt = DateTime.now();
@@ -60,7 +92,11 @@ final class FastingSessionCubit extends Cubit<FastingSessionState> {
     }
   }
 
-  Future<void> startFast({DateTime? startedAt, int? targetMinutes}) async {
+  Future<void> startFast({DateTime? startedAt, int? targetMinutes}) => _write(
+    () => _startFast(startedAt: startedAt, targetMinutes: targetMinutes),
+  );
+
+  Future<void> _startFast({DateTime? startedAt, int? targetMinutes}) async {
     final start = startedAt ?? DateTime.now();
     final minutes =
         targetMinutes ??
@@ -108,7 +144,7 @@ final class FastingSessionCubit extends Cubit<FastingSessionState> {
       DataSync.afterWrite();
     } on NetworkException catch (e) {
       if (e.code == 'ACTIVE_FAST_EXISTS') {
-        await refresh(showLoading: false);
+        await _load(showLoading: false, guard: false);
         return;
       }
       emit(previous.copyWith(isLoading: false, errorMessage: e.message));
@@ -126,7 +162,7 @@ final class FastingSessionCubit extends Cubit<FastingSessionState> {
     String? feeling,
     String? notes,
     double? weightKg,
-  }) async {
+  }) => _write(() async {
     emit(state.copyWith(isLoading: true, clearError: true));
     try {
       final result = await _repository.finishFast(
@@ -138,7 +174,7 @@ final class FastingSessionCubit extends Cubit<FastingSessionState> {
         weightKg: weightKg,
       );
       emit(state.copyWith(isLoading: false, clearFast: true));
-      await refresh(showLoading: false);
+      await _load(showLoading: false, guard: false);
       // Seri, hafta şeridi, XP; bitişte kilo girildiyse profil de.
       DataSync.afterWrite(profile: weightKg != null);
       return result;
@@ -149,7 +185,7 @@ final class FastingSessionCubit extends Cubit<FastingSessionState> {
       emit(state.copyWith(isLoading: false, errorMessage: errorMessageOf(e)));
       return null;
     }
-  }
+  });
 
   /// Planı sunucuda değiştirir (bir sonraki oruçtan geçerli). Premium plan
   /// için paywall; vazgeçilirse false (hata yok). Hata mesajı state'te.
@@ -162,13 +198,15 @@ final class FastingSessionCubit extends Cubit<FastingSessionState> {
     List<WeeklyDay>? weeklySchedule,
     bool safetyAcknowledged = false,
   }) async {
-    final changed = await _putPlan(
-      planCode: planCode,
-      timing: timing,
-      eatStart: eatStart,
-      eatEnd: eatEnd,
-      weeklySchedule: weeklySchedule,
-      safetyAcknowledged: safetyAcknowledged,
+    final changed = await _write(
+      () => _putPlan(
+        planCode: planCode,
+        timing: timing,
+        eatStart: eatStart,
+        eatEnd: eatEnd,
+        weeklySchedule: weeklySchedule,
+        safetyAcknowledged: safetyAcknowledged,
+      ),
     );
     if (changed) DataSync.afterWrite(profile: true);
     return changed;
@@ -190,36 +228,90 @@ final class FastingSessionCubit extends Cubit<FastingSessionState> {
       weeklySchedule: weeklySchedule,
       safetyAcknowledged: safetyAcknowledged,
     );
-    // Önceki hata bu çağrının sonucu sanılmasın.
-    if (state.errorMessage != null) emit(state.copyWith(clearError: true));
+    // Seçilen plan anında görünür (Planlar kartı, oruç sekmesi); sunucu
+    // reddederse / paywall kapatılırsa eski plana dönülür. Önceki hata bu
+    // çağrının sonucu sanılmasın.
+    final previous = state.plan;
+    emit(
+      state.copyWith(
+        plan: _optimisticPlan(
+          previous: previous,
+          planCode: planCode,
+          timing: timing,
+          eatStart: eatStart,
+          eatEnd: eatEnd,
+          weeklySchedule: weeklySchedule,
+        ),
+        clearError: true,
+      ),
+    );
+    void revert({String? error}) => emit(
+      state.copyWith(
+        plan: previous,
+        clearPlan: previous == null,
+        errorMessage: error,
+      ),
+    );
     try {
       CurrentPlanEnvelope env;
       try {
         env = await put();
       } on NetworkException catch (e) {
         if (!RevenueCatService.needsUpgrade(e)) rethrow;
-        if (!await _revenueCat.presentPaywall()) return false;
+        if (!await _revenueCat.presentPaywall()) {
+          revert();
+          return false;
+        }
         env = await _revenueCat.retryAfterUpgrade(put);
       }
       emit(state.copyWith(plan: env.plan, clearError: true));
       return true;
     } on NetworkException catch (e) {
-      emit(state.copyWith(errorMessage: e.message));
+      revert(error: e.message);
       return false;
     } on Object catch (e) {
-      emit(state.copyWith(errorMessage: errorMessageOf(e)));
+      revert(error: errorMessageOf(e));
       return false;
     }
   }
 
+  /// Sunucu yanıtı gelene kadar gösterilecek plan: süre katalogdan, pencere
+  /// / zamanlama seçimden; aynı plan kalıyorsa bilinen alanlar korunur.
+  static UserFastingPlan _optimisticPlan({
+    required UserFastingPlan? previous,
+    required String planCode,
+    String? timing,
+    String? eatStart,
+    String? eatEnd,
+    List<WeeklyDay>? weeklySchedule,
+  }) {
+    final same = previous?.planCode == planCode ? previous : null;
+    final entry = getIt.isRegistered<PlanCatalogRepository>()
+        ? getIt<PlanCatalogRepository>().entry(planCode)
+        : null;
+    final fastHours = entry?.fastHours;
+    return UserFastingPlan(
+      planCode: planCode,
+      displayName: same?.displayName,
+      fastMinutes: fastHours != null
+          ? fastHours * 60
+          : same?.fastMinutes ?? 960,
+      timing: timing ?? same?.timing ?? entry?.defaultTiming,
+      eatWindow: eatStart != null && eatEnd != null
+          ? EatWindow(start: eatStart, end: eatEnd)
+          : same?.eatWindow,
+      weeklySchedule: weeklySchedule ?? same?.weeklySchedule ?? const [],
+    );
+  }
+
   /// Aktif orucu iptal eder (`POST /fasts/:id/cancel`).
-  Future<bool> cancelActiveFast() async {
+  Future<bool> cancelActiveFast() => _write(() async {
     final id = state.fast?.id;
     if (id == null || id.isEmpty) return false;
     if (state.errorMessage != null) emit(state.copyWith(clearError: true));
     try {
       await _repository.cancelFast(id);
-      await refresh(showLoading: false);
+      await _load(showLoading: false, guard: false);
       DataSync.afterWrite();
       return true;
     } on NetworkException catch (e) {
@@ -229,7 +321,7 @@ final class FastingSessionCubit extends Cubit<FastingSessionState> {
       emit(state.copyWith(errorMessage: errorMessageOf(e)));
       return false;
     }
-  }
+  });
 
   /// Aktif oruçta plan değişikliği: önce plan kaydedilir (paywall / ret
   /// olursa oruç bozulmaz), sonra aktif oruç iptal edilir;
@@ -242,7 +334,7 @@ final class FastingSessionCubit extends Cubit<FastingSessionState> {
     String? eatEnd,
     List<WeeklyDay>? weeklySchedule,
     bool safetyAcknowledged = false,
-  }) async {
+  }) => _write(() async {
     final fastId = state.fast?.id;
     final startedAt = state.fast?.startedAt;
     final changed = await _putPlan(
@@ -271,10 +363,10 @@ final class FastingSessionCubit extends Cubit<FastingSessionState> {
     } finally {
       // Başarılı ya da yarım kalmış olsun, ekran sunucudaki gerçek durumu
       // göstersin; loading dialog'u bunu beklemez.
-      unawaited(refresh(showLoading: false));
+      unawaited(_load(showLoading: false, guard: false));
       DataSync.afterWrite(profile: true);
     }
-  }
+  });
 
   void applyFromSummary({
     ActiveFast? fast,
@@ -282,6 +374,8 @@ final class FastingSessionCubit extends Cubit<FastingSessionState> {
     UserFastingPlan? plan,
     DateTime? serverTime,
   }) {
+    // Yazma sürerken gelen özet, yazmadan önceki durumu taşır.
+    if (_pendingWrites > 0) return;
     final fetchedAt = DateTime.now();
     emit(
       state.copyWith(

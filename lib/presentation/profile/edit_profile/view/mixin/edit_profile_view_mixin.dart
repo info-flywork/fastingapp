@@ -178,7 +178,9 @@ mixin EditProfileViewMixin on State<EditProfileView> {
     }, _profile.copyWith(foodSkips: result));
   }
 
-  /// Bir sonraki oruçtan geçerli; premium plan için paywall bloc'ta.
+  /// Planlar sayfasıyla aynı akış ([applyPlanChange]): güvenlik onayı, oruç
+  /// sürerken seçenekler, paywall, anında görünen seçim ve geri dönüş. Mevcut
+  /// yeme zamanlaması korunur.
   Future<void> onEditFastingPlan() async {
     final current = _bloc.state.plan;
     final result = await context.pushNamed<OnboardingFastingPlan>(
@@ -186,12 +188,17 @@ mixin EditProfileViewMixin on State<EditProfileView> {
       extra: current,
     );
     if (result == null || result == current || !mounted) return;
-    final needsAck = planRequiresSafetyAck(OnboardingDraft.planCodes[result]);
-    if (needsAck) {
-      final ok = await AppDialogs.instance.showPlanSafetyAck(context);
-      if (ok != true) return;
-    }
-    _bloc.add(ProfilePlanChanged(result, safetyAcknowledged: needsAck));
+    final planCode = OnboardingDraft.planCodes[result];
+    if (planCode == null) return;
+    final session = getIt<FastingSessionCubit>();
+    final timing = preservedPlanTiming(planCode, session.state.plan);
+    await applyPlanChange(
+      context: context,
+      session: session,
+      planCode: planCode,
+      timing: timing.timing,
+      eatStart: timing.eatStart,
+    );
   }
 
   void _save(Map<String, dynamic> fields, UserProfile optimistic) =>

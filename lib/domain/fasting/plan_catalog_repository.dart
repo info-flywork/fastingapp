@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:fastingapp/core/base/model/base_model.dart';
 import 'package:fastingapp/core/network/network_manager.dart';
 import 'package:fastingapp/core/utils/enum/request_type.dart';
@@ -20,7 +22,20 @@ final class PlanCatalogRepository {
   final NetworkManager _network;
   Map<String, PlanCatalogEntry> _entries = const {};
   final Map<String, PlanCatalogDetail> _details = {};
+  final Map<String, Future<PlanCatalogDetail?>> _detailsInFlight = {};
   Future<void>? _loading;
+
+  /// Bellekteki detay (detay ekranı doğru pencereyle açılsın, sonradan
+  /// zıplamasın).
+  PlanCatalogDetail? cachedDetail(String code) => _details[code];
+
+  /// Planlar sekmesi açılınca tüm detaylar arka planda hazırlanır.
+  void prefetchDetails(Iterable<String> codes) {
+    for (final code in codes.toSet()) {
+      if (_details.containsKey(code)) continue;
+      unawaited(detail(code));
+    }
+  }
 
   bool get isLoaded => _entries.isNotEmpty;
 
@@ -28,9 +43,16 @@ final class PlanCatalogRepository {
 
   /// `GET /catalog/plans/:code`. Örnek pencere ve haftalık şablon burada.
   /// Liste yanıtı yetmezse detay ekranı bunu kullanır. Hata → null.
-  Future<PlanCatalogDetail?> detail(String code) async {
+  Future<PlanCatalogDetail?> detail(String code) {
     final cached = _details[code];
-    if (cached != null) return cached;
+    if (cached != null) return Future.value(cached);
+    // Aynı plan için süren istek paylaşılır (ön yükleme + ekran).
+    return _detailsInFlight[code] ??= _fetchDetail(code).whenComplete(() {
+      _detailsInFlight.remove(code);
+    });
+  }
+
+  Future<PlanCatalogDetail?> _fetchDetail(String code) async {
     try {
       final result = await _network.send<PlanCatalogDetail>(
         path: '/catalog/plans/$code',

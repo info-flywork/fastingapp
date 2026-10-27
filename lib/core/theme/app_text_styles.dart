@@ -2267,9 +2267,9 @@ abstract final class AppTextStyles {
   static TextStyle get sleepCaption => TextStyle(
     fontFamily: FontFamily.sFProDisplay,
     fontWeight: FontWeight.w500,
-    fontSize: 16,
-    height: 22 / 16,
-    letterSpacing: 16 * -0.015,
+    fontSize: 14,
+    height: 22 / 14,
+    letterSpacing: 14 * -0.02,
     color: ColorName.colorSubtitle.withValues(alpha: 0.6),
   );
 

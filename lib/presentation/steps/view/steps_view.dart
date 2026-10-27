@@ -5,18 +5,17 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:fastingapp/core/di/injection.dart';
 import 'package:fastingapp/core/dialogs/app_dialogs.dart';
 import 'package:fastingapp/core/snackbar/app_snackbar.dart';
-import 'package:fastingapp/core/sync/data_sync.dart';
 import 'package:fastingapp/core/theme/app_text_styles.dart';
 import 'package:fastingapp/core/widgets/animated_count_text.dart';
 import 'package:fastingapp/core/widgets/day_switch_transition.dart';
 import 'package:fastingapp/domain/trackers/health_sync_service.dart';
-import 'package:fastingapp/domain/trackers/trackers_repository.dart';
+import 'package:fastingapp/domain/trackers/steps_store.dart';
 import 'package:fastingapp/generated/app_images.g.dart';
 import 'package:fastingapp/generated/assets.gen.dart';
 import 'package:fastingapp/generated/colors.gen.dart';
 import 'package:fastingapp/presentation/home/bloc/home_bloc.dart';
-import 'package:fastingapp/presentation/home/bloc/home_event.dart';
 import 'package:fastingapp/presentation/home/bloc/home_state.dart';
+import 'package:fastingapp/presentation/profile/bloc/profile_bloc.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
@@ -96,51 +95,49 @@ class _StepsViewState extends State<StepsView>
                       ),
                     ),
                     Expanded(
-                      child: DaySwitchTransition(
-                        date: selectedDate,
-                        direction: dayNavDirection,
-                        child: Padding(
-                          padding: EdgeInsets.fromLTRB(16, 8, 16, bottom),
-                          child: Column(
-                            children: [
-                              _StepsRing(
-                                progress: progress,
-                                currentSteps: currentSteps,
+                      child: Padding(
+                        padding: EdgeInsets.fromLTRB(16, 8, 16, bottom),
+                        child: Column(
+                          children: [
+                            _StepsRing(
+                              progress: progress,
+                              currentSteps: currentSteps,
+                              goalReached: goalReached,
+                            ),
+                            const SizedBox(height: 12),
+                            GestureDetector(
+                              behavior: HitTestBehavior.opaque,
+                              onTap: isStepsToday
+                                  ? () => unawaited(editStepsGoal())
+                                  : null,
+                              child: _StepsGoalRow(
+                                dailyGoalSteps: dailyGoalSteps,
                                 goalReached: goalReached,
                               ),
-                              const SizedBox(height: 12),
-                              GestureDetector(
-                                behavior: HitTestBehavior.opaque,
-                                onTap: () => unawaited(editStepsGoal()),
-                                child: _StepsGoalRow(
-                                  dailyGoalSteps: dailyGoalSteps,
-                                  goalReached: goalReached,
-                                ),
+                            ),
+                            const SizedBox(height: 12),
+                            _StepsStatsRow(
+                              calories: caloriesKcal,
+                              distanceKm: distanceKm,
+                              durationMin: durationMin,
+                            ),
+                            const SizedBox(height: 12),
+                            _StepsWeeklyChart(
+                              values: weeklySteps,
+                              goal: weekChartScale,
+                              todayIndex: todayWeekIndex,
+                            ),
+                            // Adımlar elle yalnızca bugün ve sağlık
+                            // uygulamasından gelmeyen günde girilir.
+                            if (canEditSteps) ...[
+                              const SizedBox(height: 28),
+                              _StepsControls(
+                                addSteps: StepsViewMixin.addStepAmount,
+                                onAdd: () => unawaited(addSteps()),
+                                onRemove: () => unawaited(removeSteps()),
                               ),
-                              const SizedBox(height: 12),
-                              _StepsStatsRow(
-                                calories: caloriesKcal,
-                                distanceKm: distanceKm,
-                                durationMin: durationMin,
-                              ),
-                              const SizedBox(height: 12),
-                              _StepsWeeklyChart(
-                                values: weeklySteps,
-                                goal: dailyGoalSteps,
-                                todayIndex: todayWeekIndex,
-                              ),
-                              // Adımlar elle yalnızca bugün ve sağlık
-                              // uygulamasından gelmeyen günde girilir.
-                              if (canEditSteps) ...[
-                                const SizedBox(height: 28),
-                                _StepsControls(
-                                  addSteps: StepsViewMixin.addStepAmount,
-                                  onAdd: () => unawaited(addSteps()),
-                                  onRemove: () => unawaited(removeSteps()),
-                                ),
-                              ],
                             ],
-                          ),
+                          ],
                         ),
                       ),
                     ),
@@ -624,27 +621,35 @@ final class _WeekBar extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.end,
       children: [
         Expanded(
-          child: Align(
-            alignment: Alignment.bottomCenter,
-            child: FractionallySizedBox(
-              heightFactor: ratio,
-              widthFactor: 1,
-              child: DecoratedBox(
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(10),
-                  gradient: LinearGradient(
-                    begin: Alignment.bottomCenter,
-                    end: Alignment.topCenter,
-                    colors: isToday
-                        ? const [
-                            ColorName.colorStepsAction,
-                            ColorName.colorStepsFill,
-                          ]
-                        : [
-                            ColorName.colorStepsFill.withValues(alpha: 0.35),
-                            ColorName.colorStepsFill.withValues(alpha: 0.55),
-                          ],
-                  ),
+          child: TweenAnimationBuilder<double>(
+            tween: Tween<double>(begin: 0, end: ratio),
+            duration: const Duration(milliseconds: 480),
+            curve: Curves.easeOutCubic,
+            builder: (context, animated, child) {
+              return Align(
+                alignment: Alignment.bottomCenter,
+                child: FractionallySizedBox(
+                  heightFactor: animated < 0.001 ? 0.001 : animated,
+                  widthFactor: 1,
+                  child: child,
+                ),
+              );
+            },
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(10),
+                gradient: LinearGradient(
+                  begin: Alignment.bottomCenter,
+                  end: Alignment.topCenter,
+                  colors: isToday
+                      ? const [
+                          ColorName.colorStepsAction,
+                          ColorName.colorStepsFill,
+                        ]
+                      : [
+                          ColorName.colorStepsFill.withValues(alpha: 0.35),
+                          ColorName.colorStepsFill.withValues(alpha: 0.55),
+                        ],
                 ),
               ),
             ),

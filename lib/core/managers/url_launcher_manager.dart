@@ -16,13 +16,15 @@ final class UrlLauncherManager {
   }
 
   Future<bool> openEmail(String address, {String? subject}) async {
-    final uri = Uri(
-      scheme: 'mailto',
-      path: address,
-      query: subject == null ? null : 'subject=${Uri.encodeComponent(subject)}',
-    );
+    // Uri(scheme, path) '@' işaretini kodlar; iOS bu mailto'yu açmaz ve
+    // çağıran adres kopyalamaya düşer. Ayrıca varsayılan kip uygulama içi
+    // görünüm ister, mailto orada açılmaz.
+    final query = subject == null
+        ? ''
+        : '?subject=${Uri.encodeComponent(subject)}';
+    final uri = Uri.parse('mailto:$address$query');
     try {
-      return await launchUrl(uri);
+      return await launchUrl(uri, mode: LaunchMode.externalApplication);
     } on Object {
       return false;
     }

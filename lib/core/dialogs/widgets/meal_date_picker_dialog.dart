@@ -149,188 +149,212 @@ class _MealDatePickerDialogState extends State<MealDatePickerDialog> {
         ? AppButtonDecoration.accent(accent)
         : AppButtonDecoration.primary();
 
-    return Dialog(
-      backgroundColor: Colors.transparent,
-      elevation: 0,
-      insetPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
-      child: Stack(
-        clipBehavior: Clip.none,
-        alignment: Alignment.topCenter,
-        children: [
-          Padding(
-            padding: const EdgeInsets.only(top: 36),
-            child: DecoratedBox(
-              decoration: BoxDecoration(
-                color: ColorName.colorWhite,
-                borderRadius: BorderRadius.circular(28),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.12),
-                    blurRadius: 24,
-                    offset: const Offset(0, 8),
-                  ),
-                ],
-              ),
-              child: ConstrainedBox(
-                constraints: BoxConstraints(
-                  maxHeight: MediaQuery.sizeOf(context).height * 0.85,
-                ),
-                child: SingleChildScrollView(
-                  padding: const EdgeInsets.fromLTRB(20, 48, 20, 20),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(
-                        widget.includeTime
-                            ? 'meal_detail.pick_date_time'.tr()
-                            : 'meal_records_page.pick_date'.tr(),
-                        style: AppTextStyles.mealRecordsDateTitle,
-                        textAlign: TextAlign.center,
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        selectedLabel,
-                        style: TextStyle(
-                          fontFamily: FontFamily.sFProDisplay,
-                          fontWeight: FontWeight.w500,
-                          fontSize: 14,
-                          height: 20 / 14,
-                          color: ColorName.colorSubtitle.withValues(alpha: 0.7),
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-                      const SizedBox(height: 16),
-                      DecoratedBox(
-                        decoration: BoxDecoration(
-                          color: ColorName.colorBodyPageBg,
-                          borderRadius: BorderRadius.circular(20),
-                        ),
-                        child: Padding(
-                          padding: const EdgeInsets.fromLTRB(12, 12, 12, 10),
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              _MonthHeader(
-                                title: DateFormat.yMMMM(
-                                  locale,
-                                ).format(_displayedMonth),
-                                yearPickerOpen: _yearPicker,
-                                canGoPrev:
-                                    DateTime(
-                                      _displayedMonth.year,
-                                      _displayedMonth.month,
-                                    ).isAfter(
-                                      DateTime(
-                                        _firstDate.year,
-                                        _firstDate.month,
-                                      ),
-                                    ),
-                                canGoNext:
-                                    DateTime(
-                                      _displayedMonth.year,
-                                      _displayedMonth.month,
-                                    ).isBefore(
-                                      DateTime(_lastDate.year, _lastDate.month),
-                                    ),
-                                onTitleTap: () =>
-                                    setState(() => _yearPicker = !_yearPicker),
-                                onPrev: () => _shiftMonth(-1),
-                                onNext: () => _shiftMonth(1),
-                              ),
-                              const SizedBox(height: 10),
-                              AnimatedSize(
-                                duration: const Duration(milliseconds: 220),
-                                curve: Curves.easeOutCubic,
-                                alignment: Alignment.topCenter,
-                                child: _yearPicker
-                                    ? _YearGrid(
-                                        selectedYear: _displayedMonth.year,
-                                        firstYear: _firstDate.year,
-                                        lastYear: _lastDate.year,
-                                        accent: accent,
-                                        onYearTap: _onYearTap,
-                                      )
-                                    : Column(
-                                        mainAxisSize: MainAxisSize.min,
-                                        children: [
-                                          _WeekdayRow(
-                                            localizations: localizations,
-                                          ),
-                                          const SizedBox(height: 6),
-                                          _DayGrid(
-                                            month: _displayedMonth,
-                                            selected: _selected,
-                                            today: _today,
-                                            firstDate: _firstDate,
-                                            lastDate: _lastDate,
-                                            localizations: localizations,
-                                            accent: accent,
-                                            accentTop: _accentTop,
-                                            onDayTap: _onDayTap,
-                                          ),
-                                        ],
-                                      ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                      if (widget.includeTime) ...[
-                        const SizedBox(height: 12),
-                        DecoratedBox(
-                          decoration: BoxDecoration(
-                            color: ColorName.colorBodyPageBg,
-                            borderRadius: BorderRadius.circular(20),
-                          ),
-                          child: Padding(
-                            padding: const EdgeInsets.fromLTRB(12, 12, 12, 8),
-                            child: OnboardingTimePicker(
-                              label: 'meal_detail.pick_time'.tr(),
-                              hour: _selected.hour,
-                              minute: _selected.minute,
-                              onHourChanged: _onHourChanged,
-                              onMinuteChanged: _onMinuteChanged,
-                            ),
-                          ),
-                        ),
-                      ],
-                      const SizedBox(height: 16),
-                      AppButton(
-                        label: 'meal_records_page.confirm_date'.tr(),
-                        onPressed: _onConfirm,
-                        decoration: buttonDecoration,
-                        showIcon: false,
-                        fontSize: 16,
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: () => Navigator.of(context).pop(),
+      child: Dialog(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        insetPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
+        child: GestureDetector(
+          onTap: () {},
+          child: Stack(
+            clipBehavior: Clip.none,
+            alignment: Alignment.topCenter,
+            children: [
+              Padding(
+                padding: const EdgeInsets.only(top: 36),
+                child: DecoratedBox(
+                  decoration: BoxDecoration(
+                    color: ColorName.colorWhite,
+                    borderRadius: BorderRadius.circular(28),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.12),
+                        blurRadius: 24,
+                        offset: const Offset(0, 8),
                       ),
                     ],
                   ),
+                  child: ConstrainedBox(
+                    constraints: BoxConstraints(
+                      maxHeight: MediaQuery.sizeOf(context).height * 0.85,
+                    ),
+                    child: SingleChildScrollView(
+                      physics: const ClampingScrollPhysics(),
+                      padding: const EdgeInsets.fromLTRB(20, 48, 20, 20),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            widget.includeTime
+                                ? 'meal_detail.pick_date_time'.tr()
+                                : 'meal_records_page.pick_date'.tr(),
+                            style: AppTextStyles.mealRecordsDateTitle,
+                            textAlign: TextAlign.center,
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            selectedLabel,
+                            style: TextStyle(
+                              fontFamily: FontFamily.sFProDisplay,
+                              fontWeight: FontWeight.w500,
+                              fontSize: 14,
+                              height: 20 / 14,
+                              color: ColorName.colorSubtitle.withValues(
+                                alpha: 0.7,
+                              ),
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                          const SizedBox(height: 16),
+                          DecoratedBox(
+                            decoration: BoxDecoration(
+                              color: ColorName.colorBodyPageBg,
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            child: Padding(
+                              padding: const EdgeInsets.fromLTRB(
+                                12,
+                                12,
+                                12,
+                                10,
+                              ),
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  _MonthHeader(
+                                    title: DateFormat.yMMMM(
+                                      locale,
+                                    ).format(_displayedMonth),
+                                    yearPickerOpen: _yearPicker,
+                                    canGoPrev:
+                                        DateTime(
+                                          _displayedMonth.year,
+                                          _displayedMonth.month,
+                                        ).isAfter(
+                                          DateTime(
+                                            _firstDate.year,
+                                            _firstDate.month,
+                                          ),
+                                        ),
+                                    canGoNext:
+                                        DateTime(
+                                          _displayedMonth.year,
+                                          _displayedMonth.month,
+                                        ).isBefore(
+                                          DateTime(
+                                            _lastDate.year,
+                                            _lastDate.month,
+                                          ),
+                                        ),
+                                    onTitleTap: () => setState(
+                                      () => _yearPicker = !_yearPicker,
+                                    ),
+                                    onPrev: () => _shiftMonth(-1),
+                                    onNext: () => _shiftMonth(1),
+                                  ),
+                                  const SizedBox(height: 10),
+                                  AnimatedSize(
+                                    duration: const Duration(milliseconds: 220),
+                                    curve: Curves.easeOutCubic,
+                                    alignment: Alignment.topCenter,
+                                    child: _yearPicker
+                                        ? _YearGrid(
+                                            selectedYear: _displayedMonth.year,
+                                            firstYear: _firstDate.year,
+                                            lastYear: _lastDate.year,
+                                            accent: accent,
+                                            onYearTap: _onYearTap,
+                                          )
+                                        : Column(
+                                            mainAxisSize: MainAxisSize.min,
+                                            children: [
+                                              _WeekdayRow(
+                                                localizations: localizations,
+                                              ),
+                                              const SizedBox(height: 6),
+                                              _DayGrid(
+                                                month: _displayedMonth,
+                                                selected: _selected,
+                                                today: _today,
+                                                firstDate: _firstDate,
+                                                lastDate: _lastDate,
+                                                localizations: localizations,
+                                                accent: accent,
+                                                accentTop: _accentTop,
+                                                onDayTap: _onDayTap,
+                                              ),
+                                            ],
+                                          ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                          if (widget.includeTime) ...[
+                            const SizedBox(height: 12),
+                            DecoratedBox(
+                              decoration: BoxDecoration(
+                                color: ColorName.colorBodyPageBg,
+                                borderRadius: BorderRadius.circular(20),
+                              ),
+                              child: Padding(
+                                padding: const EdgeInsets.fromLTRB(
+                                  12,
+                                  12,
+                                  12,
+                                  8,
+                                ),
+                                child: OnboardingTimePicker(
+                                  label: 'meal_detail.pick_time'.tr(),
+                                  hour: _selected.hour,
+                                  minute: _selected.minute,
+                                  onHourChanged: _onHourChanged,
+                                  onMinuteChanged: _onMinuteChanged,
+                                ),
+                              ),
+                            ),
+                          ],
+                          const SizedBox(height: 16),
+                          AppButton(
+                            label: 'meal_records_page.confirm_date'.tr(),
+                            onPressed: _onConfirm,
+                            decoration: buttonDecoration,
+                            showIcon: false,
+                            fontSize: 16,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
                 ),
               ),
-            ),
-          ),
-          Positioned(
-            top: 0,
-            child: Container(
-              width: 72,
-              height: 72,
-              decoration: BoxDecoration(
-                color: ColorName.colorFlipClock,
-                shape: BoxShape.circle,
-                border: Border.all(color: ColorName.colorWhite, width: 3),
-              ),
-              clipBehavior: Clip.antiAlias,
-              alignment: Alignment.center,
-              child: Assets.icons.solarCalendarMarkLineDuotone.svg(
-                width: 32,
-                height: 32,
-                colorFilter: ColorFilter.mode(
-                  widget.accentColor ?? ColorName.colorTitle,
-                  BlendMode.srcIn,
+              Positioned(
+                top: 0,
+                child: Container(
+                  width: 72,
+                  height: 72,
+                  decoration: BoxDecoration(
+                    color: ColorName.colorFlipClock,
+                    shape: BoxShape.circle,
+                    border: Border.all(color: ColorName.colorWhite, width: 3),
+                  ),
+                  clipBehavior: Clip.antiAlias,
+                  alignment: Alignment.center,
+                  child: Assets.icons.solarCalendarMarkLineDuotone.svg(
+                    width: 32,
+                    height: 32,
+                    colorFilter: ColorFilter.mode(
+                      widget.accentColor ?? ColorName.colorTitle,
+                      BlendMode.srcIn,
+                    ),
+                  ),
                 ),
               ),
-            ),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }
@@ -667,6 +691,7 @@ final class _YearGrid extends StatelessWidget {
     return SizedBox(
       height: 168,
       child: GridView.count(
+        physics: const ClampingScrollPhysics(),
         crossAxisCount: 3,
         mainAxisSpacing: 8,
         crossAxisSpacing: 8,

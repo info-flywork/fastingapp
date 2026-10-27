@@ -164,6 +164,29 @@ final class AppDialogs extends DialogHandler {
     );
   }
 
+  /// Molada (yemek penceresi bitmeden) oruç başlatma onayı. [remaining]
+  /// molanın bitmesine kalan süre. `true` → kullanıcı onayladı.
+  Future<bool?> showEarlyFastStart(
+    BuildContext context, {
+    required Duration remaining,
+  }) {
+    final hours = remaining.inHours;
+    final minutes = remaining.inMinutes.remainder(60);
+    final left = hours > 0
+        ? 'fasting_page.early_start_hm'.tr(args: ['$hours', '$minutes'])
+        : 'fasting_page.early_start_m'.tr(args: ['${minutes.clamp(1, 59)}']);
+    return showNormalDialog<bool>(
+      context: context,
+      child: ConfirmDialog(
+        icon: Assets.icons.solarClockCircleLineDuotone,
+        title: 'fasting_page.early_start_title'.tr(),
+        body: 'fasting_page.early_start_body'.tr(args: [left]),
+        confirmLabel: 'fasting_page.early_start_confirm'.tr(),
+        cancelLabel: 'fasting_page.early_start_cancel'.tr(),
+      ),
+    );
+  }
+
   /// Uzun oruç planı güvenlik uyarısı. `true` → kullanıcı onayladı.
   Future<bool?> showPlanSafetyAck(BuildContext context) {
     return showNormalDialog<bool>(

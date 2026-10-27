@@ -28,31 +28,49 @@ mixin MealDetailViewMixin on State<MealDetailView> {
     if (isEditing) unawaited(_loadMeal());
   }
 
+  /// Listede görülen öğün beklemeden gösterilir; sunucu yanıtı yalnızca
+  /// kullanıcı henüz bir şey değiştirmediyse uygulanır (yazdığı silinmesin).
   Future<void> _loadMeal() async {
+    final cached = _meals.cachedMeal(widget.mealId!);
+    if (cached != null) _applyMeal(cached);
     setState(() {
-      loading = true;
+      loading = cached == null;
       loadError = null;
     });
     try {
       final meal = await _meals.getById(widget.mealId!);
       if (!mounted || meal == null) return;
-      setState(() {
-        mealAt = meal.eatenAt;
-        _loadedMealAt = meal.eatenAt;
-        mealKind = _kindFromApi(meal.kind);
-        dietChoice = _dietFromApi(meal.dietType);
-        feeling = _feelingFromApi(meal.feeling) ?? MealFeeling.superFeeling;
-        notesController.text = meal.notes ?? '';
-      });
+      if (cached == null || !_editedSince(cached)) {
+        setState(() => _applyMeal(meal));
+      }
     } on NetworkException catch (e) {
-      if (mounted) setState(() => loadError = e.message);
+      // Önbellekten gösterilen öğün varsa hata ekranı açılmaz.
+      if (mounted && cached == null) setState(() => loadError = e.message);
     } on Object {
-      if (mounted)
+      if (mounted && cached == null) {
         setState(() => loadError = 'meal_records_page.empty_title'.tr());
+      }
     } finally {
       if (mounted) setState(() => loading = false);
     }
   }
+
+  void _applyMeal(MealRecord meal) {
+    mealAt = meal.eatenAt;
+    _loadedMealAt = meal.eatenAt;
+    mealKind = _kindFromApi(meal.kind);
+    dietChoice = _dietFromApi(meal.dietType);
+    feeling = _feelingFromApi(meal.feeling) ?? MealFeeling.superFeeling;
+    notesController.text = meal.notes ?? '';
+  }
+
+  /// Önbellekten açıldıktan sonra kullanıcı bir alanı değiştirdi mi.
+  bool _editedSince(MealRecord shown) =>
+      mealAt != shown.eatenAt ||
+      mealKind != _kindFromApi(shown.kind) ||
+      dietChoice != _dietFromApi(shown.dietType) ||
+      feeling != (_feelingFromApi(shown.feeling) ?? MealFeeling.superFeeling) ||
+      notesController.text != (shown.notes ?? '');
 
   @override
   void dispose() {

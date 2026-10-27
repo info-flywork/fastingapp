@@ -2,13 +2,9 @@ import 'dart:async';
 
 import 'package:fastingapp/core/di/injection.dart';
 import 'package:fastingapp/core/network/network_exception.dart';
-import 'package:fastingapp/domain/onboarding/onboarding_draft.dart';
+import 'package:fastingapp/core/sync/data_sync.dart';
 import 'package:fastingapp/domain/profile/profile_repository.dart';
-import 'package:fastingapp/domain/revenue_cat/revenue_cat_service.dart';
-import 'package:fastingapp/presentation/auth/onboard/fasting_plan/bloc/fasting_plan_bloc.dart';
 import 'package:fastingapp/presentation/fasting/bloc/fasting_session_cubit.dart';
-import 'package:fastingapp/presentation/home/bloc/home_bloc.dart';
-import 'package:fastingapp/presentation/home/bloc/home_event.dart';
 import 'package:fastingapp/presentation/profile/bloc/profile_event.dart';
 import 'package:fastingapp/presentation/profile/bloc/profile_state.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -23,8 +19,7 @@ export 'profile_state.dart';
 /// gelince yerine geçer; hata olursa eski değer döner ve [ProfileSaveError]
 /// yayılır. Yazmalar sırayla işlenir (araya giren tazeleme ezmesin).
 final class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
-  ProfileBloc(this._repository, this._revenueCat, this._homeBloc)
-    : super(const ProfileState()) {
+  ProfileBloc(this._repository) : super(const ProfileState()) {
     on<ProfileStarted>(_onStarted);
     on<ProfileCleared>((_, emit) => emit(const ProfileState()));
     on<ProfileNameChanged>(_tracked(_onNameChanged), transformer: _sequential);
@@ -33,7 +28,37 @@ final class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
       _tracked(_onFieldsChanged),
       transformer: _sequential,
     );
-    on<ProfilePlanChanged>(_tracked(_onPlanChanged), transformer: _sequential);
+    on<ProfileSessionPlanChanged>(_onSessionPlanChanged);
+    // Planın tek kaynağı oruç oturumu (Planlar sayfası, oruç sekmesi ve
+    // Profili Düzenle aynı akıştan değiştirir): profil ekranı onu yansıtır,
+    // iyimser seçim ve geri dönüş burada da anında görünür.
+    final session = getIt<FastingSessionCubit>();
+    _planSub = session.stream
+        .map((s) => s.plan?.planCode)
+        .distinct()
+        .listen((code) => add(ProfileSessionPlanChanged(code)));
+  }
+
+  late final StreamSubscription<String?> _planSub;
+
+  @override
+  Future<void> close() async {
+    await _planSub.cancel();
+    return super.close();
+  }
+
+  void _onSessionPlanChanged(
+    ProfileSessionPlanChanged event,
+    Emitter<ProfileState> emit,
+  ) {
+    final code = event.planCode;
+    if (code == null || code == state.planCode) return;
+    emit(
+      state.copyWith(
+        plan: () => ProfileRepository.planFromCode(code),
+        planCode: () => code,
+      ),
+    );
   }
 
   /// Her yazmanın başında ve sonunda artar. Yazmadan önce başlamış bir
@@ -56,8 +81,6 @@ final class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
   };
 
   final ProfileRepository _repository;
-  final RevenueCatService _revenueCat;
-  final HomeBloc _homeBloc;
   var _errorSeq = 0;
 
   static Stream<E> _sequential<E>(Stream<E> events, EventMapper<E> mapper) =>
@@ -113,8 +136,14 @@ final class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
           name: () => account.name,
           avatarUrl: () => account.avatarUrl,
           profile: results[1]! as UserProfile,
-          plan: () => ProfileRepository.planFromCode(results[2] as String?),
-          planCode: () => results[2] as String?,
+          // Oturumdaki plan (iyimser seçim dahil) varsa o; yoksa sunucu.
+          plan: () => ProfileRepository.planFromCode(
+            getIt<FastingSessionCubit>().state.plan?.planCode ??
+                results[2] as String?,
+          ),
+          planCode: () =>
+              getIt<FastingSessionCubit>().state.plan?.planCode ??
+              results[2] as String?,
         ),
       );
     } on Object catch (e) {
@@ -167,8 +196,9 @@ final class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
     try {
       final saved = await _repository.updateProfile(event.fields);
       emit(state.copyWith(profile: saved));
-      // Kilo ve hedef ana sayfa kartlarında da görünür.
-      _homeBloc.add(const HomeRefreshRequested());
+      // Kilo ve hedef ana sayfa kartlarında da görünür. Yazma sinyali yoldaki
+      // eski özetin yeni değeri geri almasını engeller.
+      DataSync.afterWrite();
     } on Object catch (e) {
       emit(state.copyWith(profile: previous, saveError: _error(e)));
     }
@@ -176,88 +206,6 @@ final class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
 
   /// Premium plan premium değilken 402 → paywall; satın alınırsa tekrar
   /// denenir, vazgeçilirse sessizce eski plana dönülür.
-  Future<void> _onPlanChanged(
-    ProfilePlanChanged event,
-    Emitter<ProfileState> emit,
-  ) async {
-    final previous = state.plan;
-    final previousCode = state.planCode;
-    String? codeOf(OnboardingFastingPlan? p) =>
-        p == null ? null : OnboardingDraft.planCodes[p];
-    emit(
-      state.copyWith(
-        plan: () => event.plan,
-        planCode: () => codeOf(event.plan),
-      ),
-    );
-    try {
-      final saved = await _trySetPlan(
-        event.plan,
-        safetyAcknowledged: event.safetyAcknowledged,
-      );
-      if (saved == null) {
-        emit(
-          state.copyWith(plan: () => previous, planCode: () => previousCode),
-        );
-        return;
-      }
-      emit(state.copyWith(plan: () => saved, planCode: () => codeOf(saved)));
-      _homeBloc.add(const HomeRefreshRequested());
-      // Oruç sekmesi / Planlar seçili kartı yeni planı göstersin.
-      unawaited(getIt<FastingSessionCubit>().refresh(showLoading: false));
-    } on Object catch (e) {
-      emit(
-        state.copyWith(
-          plan: () => previous,
-          planCode: () => previousCode,
-          saveError: _error(e),
-        ),
-      );
-    }
-  }
-
-  /// Plan değişince mevcut yeme zamanlaması korunur (önceden sunucu
-  /// varsayılanına sıfırlanıyordu). Özel pencere isteyen planlarda (OMAD,
-  /// 23:1) sunucu varsayılan başlangıcı (18:00) gönderilir; yoksa reddediliyordu.
-  ({String? timing, String? eatStart}) _timingFor(OnboardingFastingPlan plan) {
-    const preset = {'skipBreakfast', 'skipDinner', 'earlyWindow', 'lateWindow'};
-    final code = OnboardingDraft.planCodes[plan];
-    final oneMeal = code == 'omad' || code == '23_1';
-    final current = getIt<FastingSessionCubit>().state.plan;
-    final timing = current?.timing;
-    if (timing != null &&
-        preset.contains(timing) &&
-        (!oneMeal || timing == 'skipBreakfast' || timing == 'skipDinner')) {
-      return (timing: timing, eatStart: null);
-    }
-    final start = current?.eatWindow?.start;
-    if (timing == 'custom' && start != null) {
-      return (timing: 'custom', eatStart: start);
-    }
-    if (oneMeal) return (timing: 'custom', eatStart: '18:00');
-    return (timing: null, eatStart: null);
-  }
-
-  Future<OnboardingFastingPlan?> _trySetPlan(
-    OnboardingFastingPlan plan, {
-    required bool safetyAcknowledged,
-  }) async {
-    final t = _timingFor(plan);
-    Future<OnboardingFastingPlan?> put() => _repository.setCurrentPlan(
-      plan,
-      safetyAcknowledged: safetyAcknowledged,
-      timing: t.timing,
-      eatStart: t.eatStart,
-    );
-    try {
-      return await put();
-    } on NetworkException catch (e) {
-      if (!RevenueCatService.needsUpgrade(e)) rethrow;
-      if (!await _revenueCat.presentPaywall()) return null;
-      return _revenueCat.retryAfterUpgrade(put);
-    }
-  }
-
   ProfileSaveError _error(Object e) =>
       ProfileSaveError(++_errorSeq, e is NetworkException ? e.message : null);
 }

@@ -1,8 +1,17 @@
 part of '../profile_view.dart';
 
 mixin ProfileViewMixin on State<ProfileView> {
-  bool pushNotifications = true;
-  bool healthSync = true;
+  /// Son bilinen ayarlarla açılır (yoksa sunucu varsayılanları: bildirim
+  /// açık, sağlık senkronu kapalı); önceden ikisi de açık başlayıp sunucu
+  /// cevabıyla kapanıyordu.
+  late bool pushNotifications =
+      getIt<ProfileRepository>().cachedSettings?.pushEnabled ?? true;
+  late bool healthSync =
+      getIt<ProfileRepository>().cachedSettings?.healthSyncEnabled ?? false;
+
+  /// Her anahtar dokunuşunda artar: dokunuştan önce başlamış ayar okuması
+  /// seçimi geri almasın, eski kaydın hatası yeni seçimi bozmasın.
+  int _settingsGen = 0;
 
   /// Okunmamış bildirim sayısı (Bildirimler satırındaki rozet).
   int unreadNotifications = 0;
@@ -50,9 +59,10 @@ mixin ProfileViewMixin on State<ProfileView> {
 
   /// Anahtarlar sunucudan (`/user/settings`); önceden yalnızca ekrandaydı.
   Future<void> _loadSettings() async {
+    final gen = _settingsGen;
     try {
       final s = await _profileRepo.getSettings();
-      if (!mounted) return;
+      if (!mounted || gen != _settingsGen) return;
       setState(() {
         pushNotifications = s.pushEnabled;
         healthSync = s.healthSyncEnabled;
@@ -62,12 +72,14 @@ mixin ProfileViewMixin on State<ProfileView> {
     }
   }
 
-  /// İyimser: anahtar hemen döner, hata olursa geri alınır.
+  /// İyimser: anahtar hemen döner, hata olursa geri alınır (arada yeni
+  /// dokunuş olduysa o korunur).
   Future<void> _saveSetting({
     required VoidCallback revert,
     bool? push,
     bool? health,
   }) async {
+    final gen = _settingsGen;
     try {
       await _profileRepo.updateSettings(
         pushEnabled: push,
@@ -76,7 +88,7 @@ mixin ProfileViewMixin on State<ProfileView> {
       );
     } on Object catch (e) {
       if (!mounted) return;
-      setState(revert);
+      if (gen == _settingsGen) setState(revert);
       AppSnackbar.showError(context, e);
     }
   }
@@ -87,6 +99,7 @@ mixin ProfileViewMixin on State<ProfileView> {
   }
 
   void onPushNotificationsChanged(bool value) {
+    _settingsGen++;
     setState(() => pushNotifications = value);
     unawaited(
       _saveSetting(push: value, revert: () => pushNotifications = !value),
@@ -94,19 +107,23 @@ mixin ProfileViewMixin on State<ProfileView> {
   }
 
   Future<void> onHealthSyncChanged(bool value) async {
+    final gen = ++_settingsGen;
     final previous = healthSync;
     setState(() => healthSync = value);
+    // Arada yeni dokunuş olduysa sonuç onu bozmasın.
     if (!value) {
       try {
         await getIt<HealthSyncService>().disable();
       } on Object {
-        if (mounted) setState(() => healthSync = previous);
+        if (mounted && gen == _settingsGen) {
+          setState(() => healthSync = previous);
+        }
       }
       return;
     }
     try {
       final ok = await getIt<HealthSyncService>().enable();
-      if (!mounted) return;
+      if (!mounted || gen != _settingsGen) return;
       if (!ok) {
         setState(() => healthSync = false);
         AppSnackbar.show(
@@ -116,7 +133,7 @@ mixin ProfileViewMixin on State<ProfileView> {
         );
       }
     } on Object {
-      if (!mounted) return;
+      if (!mounted || gen != _settingsGen) return;
       setState(() => healthSync = previous);
       AppSnackbar.show(
         context: context,
@@ -214,13 +231,20 @@ mixin ProfileViewMixin on State<ProfileView> {
     }
   }
 
-  /// Posta uygulaması yoksa adres panoya kopyalanır.
+  /// Önce posta uygulaması. Yoksa tarayıcıda yazma penceresi açılır.
+  /// İkisi de olmazsa adres kopyalanır.
   Future<void> onContactSupport(String email) async {
-    final ok = await getIt<UrlLauncherManager>().openEmail(
-      email,
-      subject: 'MochiFast',
-    );
-    if (ok || !mounted) return;
+    final launcher = getIt<UrlLauncherManager>();
+    if (await launcher.openEmail(email, subject: 'MochiFast')) return;
+    if (!mounted) return;
+    final compose = Uri.https('mail.google.com', '/mail/', {
+      'view': 'cm',
+      'fs': '1',
+      'to': email,
+      'su': 'MochiFast',
+    });
+    if (await launcher.openUrl(compose.toString())) return;
+    if (!mounted) return;
     await Clipboard.setData(ClipboardData(text: email));
     if (!mounted) return;
     AppSnackbar.show(

@@ -17,7 +17,7 @@ mixin HungerFourthQuestionViewMixin on State<HungerFourthQuestionView> {
     try {
       final evaluation = await _hunger.evaluate(flow);
       if (!mounted) return;
-     await  context.pushNamed(
+      await context.pushNamed(
         RoutePaths.hungerResult.name,
         extra: HungerSessionArgs(
           flow: flow,

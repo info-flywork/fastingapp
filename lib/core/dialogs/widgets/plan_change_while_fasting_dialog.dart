@@ -16,6 +16,10 @@ enum PlanChangeWhileFastingAction {
 
   /// Mevcut orucu iptal et, yeni planı kaydet, aynı başlangıçla yeni oruç aç.
   restartWithSameData,
+
+  /// Yeni planı kaydet; süren oruç kendi hedefiyle aynen devam etsin, plan
+  /// bir sonraki oruçtan geçerli olsun.
+  applyFromNextFast,
 }
 
 /// Aktif oruç varken "Bu plana başla" onayı.
@@ -74,9 +78,9 @@ final class PlanChangeWhileFastingDialog extends StatelessWidget {
                         Expanded(
                           child: AppButton(
                             label: 'plans.active_fast_reject'.tr(),
-                            onPressed: () => Navigator.of(context).pop(
-                              PlanChangeWhileFastingAction.reject,
-                            ),
+                            onPressed: () => Navigator.of(
+                              context,
+                            ).pop(PlanChangeWhileFastingAction.reject),
                             showIcon: false,
                             fontSize: 14,
                             decoration: AppButtonDecoration.homeJoin(),
@@ -87,11 +91,20 @@ final class PlanChangeWhileFastingDialog extends StatelessWidget {
                     const SizedBox(height: 12),
                     AppButton(
                       label: 'plans.active_fast_restart_same'.tr(),
-                      onPressed: () => Navigator.of(context).pop(
-                        PlanChangeWhileFastingAction.restartWithSameData,
-                      ),
+                      onPressed: () => Navigator.of(
+                        context,
+                      ).pop(PlanChangeWhileFastingAction.restartWithSameData),
                       showIcon: false,
                       decoration: AppButtonDecoration.fastingStartConfirm(),
+                    ),
+                    const SizedBox(height: 12),
+                    AppButton(
+                      label: 'plans.active_fast_next'.tr(),
+                      onPressed: () => Navigator.of(
+                        context,
+                      ).pop(PlanChangeWhileFastingAction.applyFromNextFast),
+                      showIcon: false,
+                      decoration: AppButtonDecoration.fastingAnother(),
                     ),
                   ],
                 ),

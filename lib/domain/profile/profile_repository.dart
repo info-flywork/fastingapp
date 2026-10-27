@@ -28,7 +28,7 @@ const _notificationKeys = [
 /// (`/user/profile`), avatar (`/user/me/avatar`) ve aktif plan
 /// (`/plans/current`). Enum'lar API'de istemcideki adlarıyla gider.
 final class ProfileRepository {
-  const ProfileRepository(this._network, this._dio, this._authCache);
+  ProfileRepository(this._network, this._dio, this._authCache);
 
   final NetworkManager _network;
   final Dio _dio;
@@ -44,6 +44,10 @@ final class ProfileRepository {
     return result ?? const ProfileAccount();
   }
 
+  /// Son bilinen ayarlar (profil anahtarları açılışta varsayılandan
+  /// zıplamasın; oturum boyunca bellekte).
+  UserSettings? cachedSettings;
+
   /// `GET /user/settings` → bildirim ve sağlık senkronu anahtarları.
   Future<UserSettings> getSettings() async {
     final result = await _network.send<UserSettings>(
@@ -51,7 +55,7 @@ final class ProfileRepository {
       method: RequestType.get,
       parserModel: UserSettings.fromJson,
     );
-    return result ?? const UserSettings();
+    return cachedSettings = result ?? const UserSettings();
   }
 
   /// `PATCH /user/settings` (yalnızca verilen alanlar).
@@ -60,6 +64,7 @@ final class ProfileRepository {
   Future<UserSettings> updateSettings({
     bool? pushEnabled,
     bool? healthSyncEnabled,
+    bool? showInChallenges,
     bool? allNotifications,
   }) async {
     final result = await _network.send<UserSettings>(
@@ -68,6 +73,7 @@ final class ProfileRepository {
       data: {
         'pushEnabled': ?pushEnabled,
         'healthSyncEnabled': ?healthSyncEnabled,
+        'showInChallenges': ?showInChallenges,
         if (allNotifications != null)
           'notifications': {
             for (final key in _notificationKeys) key: allNotifications,
@@ -75,7 +81,7 @@ final class ProfileRepository {
       },
       parserModel: UserSettings.fromJson,
     );
-    return result ?? const UserSettings();
+    return cachedSettings = result ?? const UserSettings();
   }
 
   Future<UserProfile> getProfile() async {
@@ -163,29 +169,6 @@ final class ProfileRepository {
       parserModel: _PlanEnvelope.fromJson,
     );
     return result?.planCode;
-  }
-
-  /// `PUT /plans/current` (bir sonraki oruçtan geçerli). Premium plan
-  /// premium değilken `402 PREMIUM_REQUIRED` fırlatır. Uzun planlar
-  /// [safetyAcknowledged] ister (bkz. `planRequiresSafetyAck`).
-  Future<OnboardingFastingPlan?> setCurrentPlan(
-    OnboardingFastingPlan plan, {
-    bool safetyAcknowledged = false,
-    String? timing,
-    String? eatStart,
-  }) async {
-    final result = await _network.send<_PlanEnvelope>(
-      path: '/plans/current',
-      method: RequestType.put,
-      data: {
-        'planCode': OnboardingDraft.planCodes[plan],
-        'timing': ?timing,
-        if (eatStart != null) 'eatWindow': {'start': eatStart},
-        if (safetyAcknowledged) 'safetyAcknowledged': true,
-      },
-      parserModel: _PlanEnvelope.fromJson,
-    );
-    return planFromCode(result?.planCode) ?? plan;
   }
 
   static OnboardingFastingPlan? planFromCode(String? code) {
@@ -343,15 +326,23 @@ final class _PlanEnvelope implements BaseModel<_PlanEnvelope> {
 
 /// `/user/settings` içinden Profil ekranının kullandıkları.
 final class UserSettings implements BaseModel<UserSettings> {
-  const UserSettings({this.pushEnabled = true, this.healthSyncEnabled = false});
+  const UserSettings({
+    this.pushEnabled = true,
+    this.healthSyncEnabled = false,
+    this.showInChallenges = false,
+  });
 
   factory UserSettings.fromJson(Map<String, dynamic> json) => UserSettings(
     pushEnabled: json['pushEnabled'] as bool? ?? true,
     healthSyncEnabled: json['healthSyncEnabled'] as bool? ?? false,
+    showInChallenges: json['showInChallenges'] as bool? ?? false,
   );
 
   final bool pushEnabled;
   final bool healthSyncEnabled;
+
+  /// Meydan okuma katılımcı listesinde ad + fotoğraf görünsün mü (açık rıza).
+  final bool showInChallenges;
 
   @override
   UserSettings fromJson(Map<String, dynamic> json) =>
@@ -361,5 +352,6 @@ final class UserSettings implements BaseModel<UserSettings> {
   Map<String, dynamic> toJson() => {
     'pushEnabled': pushEnabled,
     'healthSyncEnabled': healthSyncEnabled,
+    'showInChallenges': showInChallenges,
   };
 }

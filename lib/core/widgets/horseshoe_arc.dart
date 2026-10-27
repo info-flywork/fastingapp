@@ -31,6 +31,9 @@ final class HorseshoeArc extends StatelessWidget {
 
   static const diameterDefault = 300.0;
   static const stroke = 28.0;
+
+  /// İz ve ilerleme konturu `stroke`tan bu kadar kalın çizilir.
+  static const strokeExtra = 4.0;
   static const sweepDegrees = 235.0;
 
   static const double _sweepRad = sweepDegrees * math.pi / 180;
@@ -39,9 +42,15 @@ final class HorseshoeArc extends StatelessWidget {
   /// Flutter: 0=sağ, saat yönü pozitif. Alt merkez = π/2.
   static const double startRad = (math.pi / 2) + (_gapRad / 2);
 
+  /// En kalın konturun dış kenarı tuvalin içinde kalsın (yanlar kesilmesin).
+  static double radiusFor(Size size) {
+    final outer = stroke + strokeExtra;
+    return (math.min(size.width, size.height) - outer) / 2 - 0.5;
+  }
+
   /// Yay ucunun daire sol/sağ kenarından uzaklığı.
   static double endpointInset(double diameter) {
-    final radius = (diameter - stroke) / 2;
+    final radius = radiusFor(Size(diameter, diameter));
     return (diameter / 2) + radius * math.cos(startRad);
   }
 
@@ -92,12 +101,12 @@ final class _HorseshoeArcPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final center = Offset(size.width / 2, size.height / 2);
-    final radius = (math.min(size.width, size.height) - stroke) / 2;
+    final radius = HorseshoeArc.radiusFor(size);
     final rect = Rect.fromCircle(center: center, radius: radius);
 
     final trackPaint = Paint()
       ..style = PaintingStyle.stroke
-      ..strokeWidth = stroke + 4
+      ..strokeWidth = stroke + HorseshoeArc.strokeExtra
       ..strokeCap = StrokeCap.round
       ..color = ColorName.colorPlanArcTrack;
 
@@ -119,7 +128,7 @@ final class _HorseshoeArcPainter extends CustomPainter {
     final from = start.clamp(0.0, 1.0);
     final progressPaint = Paint()
       ..style = PaintingStyle.stroke
-      ..strokeWidth = stroke + 4
+      ..strokeWidth = stroke + HorseshoeArc.strokeExtra
       ..strokeCap = StrokeCap.round
       ..color = progressColor;
 

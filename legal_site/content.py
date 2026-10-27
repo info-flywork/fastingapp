@@ -92,6 +92,9 @@ talimatlarımızla çalışan hizmet sağlayıcılarla, gereken en az veriyi pay
 <tr><td>Apple / Google</td><td>Uygulama mağazası satın alma işlemleri</td><td>Global</td></tr>
 </table></div>
 <p>Ayrıca yasal bir zorunluluk veya yetkili makam talebi olduğunda veri paylaşabiliriz.</p>
+<p>Meydan okumalarda "Listede adımla görün" ayarını açarsan, adın (soyadının baş harfiyle) ve profil fotoğrafın aynı meydan okumaya
+katılan diğer kullanıcılara gösterilir. Ayar varsayılan olarak kapalıdır; kapalıyken diğer katılımcılar seni yalnızca anonim olarak
+ve ilerlemenle görür.</p>
 
 <h2>6. Yurt dışına aktarım</h2>
 <p>Bazı hizmet sağlayıcılarımız Türkiye ve Avrupa Ekonomik Alanı dışında (özellikle ABD) bulunur. Bu aktarımları KVKK ve GDPR'ın
@@ -226,6 +229,9 @@ minimum necessary data with service providers that act on our behalf and under o
 <tr><td>Apple / Google</td><td>App store purchases</td><td>Global</td></tr>
 </table></div>
 <p>We may also disclose data where required by law or by a competent authority.</p>
+<p>If you turn on "Show my name in the list" in a challenge, your name (with your last initial) and profile photo are shown to other
+users taking part in the same challenge. The setting is off by default; while it is off, other participants only see you anonymously
+together with your progress.</p>
 
 <h2>6. International transfers</h2>
 <p>Some providers are located outside Türkiye and the European Economic Area (mainly the USA). We make these transfers with the
@@ -337,7 +343,9 @@ güvenlik önlemlerini aşmaya çalışmak; kotaları veya ödeme sistemini atla
 
 <h2>8. Kullanıcı içeriği</h2>
 <p>Yüklediğin fotoğraflar, notlar ve mesajlar sana aittir. Bunları yalnızca Uygulamayı sana sunmak (saklamak, işlemek, göstermek, analiz
-etmek) için kullanmamıza izin verirsin. Profil adın ve fotoğrafın, katıldığın meydan okumalarda diğer katılımcılara görünebilir.</p>
+etmek) için kullanmamıza izin verirsin. Meydan okuma sayfasında "Listede adımla görün" ayarını açarsan, adın (soyadının yalnızca
+baş harfiyle) ve profil fotoğrafın katıldığın meydan okumalarda diğer katılımcılara görünür. Bu ayar varsayılan olarak kapalıdır ve
+istediğin zaman kapatabilirsin; kapalıyken listede anonim görünürsün.</p>
 
 <h2>9. Fikri mülkiyet</h2>
 <p>Uygulama, Mochi karakteri, tasarımlar, metinler ve yazılım bize veya lisans verenlerimize aittir. Sana Uygulamayı kişisel ve ticari
@@ -423,7 +431,9 @@ automated tools; attempt to bypass security measures; or circumvent quotas or th
 
 <h2>8. Your content</h2>
 <p>Photos, notes and messages you upload remain yours. You allow us to use them only to provide the App to you (store, process, display
-and analyse them). Your profile name and photo may be visible to other participants in challenges you join.</p>
+and analyse them). If you turn on "Show my name in the list" on a challenge page, your name (with only your last initial) and profile
+photo become visible to other participants in challenges you join. This setting is off by default and you can turn it off at any time;
+while it is off, you appear anonymously.</p>
 
 <h2>9. Intellectual property</h2>
 <p>The App, the Mochi character, designs, texts and software belong to us or our licensors. We grant you a limited, non-transferable
@@ -550,7 +560,7 @@ CSAE_TR = f"""
 <h2>1. Kapsam</h2>
 <p>Bu standartlar MochiFast uygulaması ve ilgili tüm hizmetler için geçerlidir. MochiFast bir sağlık ve alışkanlık takibi
 uygulamasıdır; herkese açık bir akış veya kullanıcılar arası mesajlaşma sunmaz. Kullanıcıların başkalarına görünebilen tek içeriği,
-meydan okumalarda görünebilen profil adı ve profil fotoğrafıdır. Yapay zekâ koçu ile yapılan sohbetler yalnızca kullanıcının kendisine
+kullanıcının açıkça izin vermesi hâlinde meydan okumalarda görünen kısaltılmış adı ve profil fotoğrafıdır. Yapay zekâ koçu ile yapılan sohbetler yalnızca kullanıcının kendisine
 görünür.</p>
 
 <h2>2. Yasaklanan içerik ve davranışlar</h2>
@@ -600,8 +610,8 @@ CSAE_EN = f"""
 
 <h2>1. Scope</h2>
 <p>These standards apply to the MochiFast app and all related services. MochiFast is a health and habit tracking app; it has no public
-feed and no user-to-user messaging. The only user content that may be visible to others is a profile name and profile photo shown in
-challenges. Conversations with the AI coach are visible only to the user.</p>
+feed and no user-to-user messaging. The only user content that may be visible to others is a shortened name and profile photo shown in
+challenges, and only if the user explicitly opts in. Conversations with the AI coach are visible only to the user.</p>
 
 <h2>2. Prohibited content and behaviour</h2>
 <ul>

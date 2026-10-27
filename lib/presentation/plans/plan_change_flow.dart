@@ -6,6 +6,7 @@ import 'package:fastingapp/core/router/route_paths.dart';
 import 'package:fastingapp/core/snackbar/app_snackbar.dart';
 import 'package:fastingapp/core/utils/enum/snackbar_type.dart';
 import 'package:fastingapp/core/utils/extensions/future_extensions.dart';
+import 'package:fastingapp/domain/fasting/fasting_repository.dart';
 import 'package:fastingapp/domain/fasting/plan_catalog_repository.dart';
 import 'package:fastingapp/domain/fasting/plan_safety.dart';
 import 'package:fastingapp/domain/fasting/weekly_schedule.dart';
@@ -15,6 +16,29 @@ import 'package:fastingapp/presentation/plans/plans_catalog.dart';
 import 'package:fastingapp/presentation/plans/view/weekly_plan_detail_view.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+
+/// Plan değişince mevcut yeme zamanlaması korunur (sunucu varsayılanına
+/// sıfırlanmasın). Özel pencere isteyen planlarda (OMAD, 23:1) sunucu
+/// varsayılan başlangıcı (18:00) gönderilir; yoksa reddediliyordu.
+({String? timing, String? eatStart}) preservedPlanTiming(
+  String planCode,
+  UserFastingPlan? current,
+) {
+  const preset = {'skipBreakfast', 'skipDinner', 'earlyWindow', 'lateWindow'};
+  final oneMeal = planCode == 'omad' || planCode == '23_1';
+  final timing = current?.timing;
+  if (timing != null &&
+      preset.contains(timing) &&
+      (!oneMeal || timing == 'skipBreakfast' || timing == 'skipDinner')) {
+    return (timing: timing, eatStart: null);
+  }
+  final start = current?.eatWindow?.start;
+  if (timing == 'custom' && start != null) {
+    return (timing: 'custom', eatStart: start);
+  }
+  if (oneMeal) return (timing: 'custom', eatStart: '18:00');
+  return (timing: null, eatStart: null);
+}
 
 /// Plan kaydı: aktif oruçta diyalog → loading → snackbar.
 /// `true` = başarıyla uygulandı.
@@ -38,6 +62,7 @@ Future<bool> applyPlanChange({
 
   var whileFasting = false;
   var restartSame = false;
+  var nextFast = false;
   if (session.state.isFasting) {
     final action = await AppDialogs.instance.showPlanChangeWhileFasting(
       context,
@@ -46,7 +71,10 @@ Future<bool> applyPlanChange({
     if (action == null || action == PlanChangeWhileFastingAction.reject) {
       return false;
     }
-    whileFasting = true;
+    // Sonraki oruçtan geçerli: süren oruca dokunulmaz, yalnızca plan
+    // kaydedilir.
+    nextFast = action == PlanChangeWhileFastingAction.applyFromNextFast;
+    whileFasting = !nextFast;
     restartSame = action == PlanChangeWhileFastingAction.restartWithSameData;
   }
 
@@ -88,7 +116,11 @@ Future<bool> applyPlanChange({
 
   AppSnackbar.show(
     context: context,
-    text: restartSame ? 'plans.plan_restarted'.tr() : 'plans.plan_saved'.tr(),
+    text: restartSame
+        ? 'plans.plan_restarted'.tr()
+        : nextFast
+        ? 'plans.plan_next_fast'.tr()
+        : 'plans.plan_saved'.tr(),
     type: SnackBarType.success,
   );
   return true;

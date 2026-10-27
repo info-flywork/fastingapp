@@ -3,12 +3,11 @@ import 'dart:async';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:fastingapp/core/di/injection.dart';
 import 'package:fastingapp/core/managers/localization_manager.dart';
+import 'package:fastingapp/core/sync/data_sync.dart';
 import 'package:fastingapp/core/theme/app_text_styles.dart';
 import 'package:fastingapp/domain/auth/auth_repository.dart';
 import 'package:fastingapp/domain/profile/profile_repository.dart';
 import 'package:fastingapp/generated/colors.gen.dart';
-import 'package:fastingapp/presentation/home/bloc/home_bloc.dart';
-import 'package:fastingapp/presentation/home/bloc/home_event.dart';
 import 'package:fastingapp/presentation/profile/languages/languages_catalog.dart';
 import 'package:fastingapp/presentation/profile/view/widgets/edit_profile_app_bar.dart';
 import 'package:flutter/material.dart';
@@ -46,7 +45,7 @@ class _LanguagesViewState extends State<LanguagesView> {
       // Bir sonraki cihaz kaydında yine gider.
     }
     // Sunucudan gelen metinler (ipucu, challenge, öneriler) yeni dilde.
-    getIt<HomeBloc>().add(const HomeRefreshRequested());
+    DataSync.afterWrite();
   }
 
   @override

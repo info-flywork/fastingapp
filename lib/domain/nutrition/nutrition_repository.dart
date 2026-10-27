@@ -38,9 +38,16 @@ final class NutritionRepository {
   NutritionWeek? cachedWeek({String metric = 'protein', DateTime? date}) =>
       _weekCache['$metric:${_dayKey(date)}'];
 
+  /// Her yazmada artar ([invalidate]). Yazmadan önce başlamış bir isteğin
+  /// (eski) cevabı önbelleğe yazılmaz; ekranlar da karşılaştırıp yok sayar.
+  int writeSeq = 0;
+
   /// Yazma sonrası: veriyi silmez, bayat işaretler (ekranlar eski değeri
   /// gösterip sessizce tazeler).
-  void invalidate() => _dayStale = _weekStale = true;
+  void invalidate() {
+    writeSeq++;
+    _dayStale = _weekStale = true;
+  }
 
   /// Çıkış / hesap değişimi: önbellek tamamen boşalır.
   void clear() {
@@ -55,6 +62,7 @@ final class NutritionRepository {
     if (!force && !_dayStale && _dayCache != null && _dayCacheKey == key) {
       return _dayCache!;
     }
+    final seqAtStart = writeSeq;
     final result = await _network.send<NutritionDay>(
       path: '/nutrition/day',
       method: RequestType.get,
@@ -62,9 +70,12 @@ final class NutritionRepository {
       parserModel: NutritionDay.fromJson,
     );
     final day = result ?? NutritionDay.empty();
-    _dayCache = day;
-    _dayCacheKey = key;
-    _dayStale = false;
+    // İstek sürerken yazma olduysa cevap eskidir: önbellek ezilmez.
+    if (seqAtStart == writeSeq) {
+      _dayCache = day;
+      _dayCacheKey = key;
+      _dayStale = false;
+    }
     return day;
   }
 
@@ -78,6 +89,7 @@ final class NutritionRepository {
       final hit = _weekCache[key];
       if (hit != null) return hit;
     }
+    final seqAtStart = writeSeq;
     final result = await _network.send<NutritionWeek>(
       path: '/nutrition/week',
       method: RequestType.get,
@@ -85,6 +97,7 @@ final class NutritionRepository {
       parserModel: NutritionWeek.fromJson,
     );
     final week = result ?? NutritionWeek.empty(metric: metric);
+    if (seqAtStart != writeSeq) return week;
     if (_weekStale) _weekCache.clear();
     _weekStale = false;
     _weekCache[key] = week;

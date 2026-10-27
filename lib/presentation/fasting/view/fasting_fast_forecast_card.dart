@@ -88,6 +88,8 @@ class _FastingFastForecastCardState extends State<FastingFastForecastCard> {
     final forecast = _forecast;
     // Yükleniyor ya da yeterli geçmiş yok → kart gösterilmez.
     if (forecast == null || !forecast.available) return const SizedBox.shrink();
+    final today = _dayFor(forecast.successChance);
+    final slice = forecast.sliceFor(_dayKey(_day), isToday: _day == today);
     return Container(
       margin: const EdgeInsets.fromLTRB(16, 12, 16, 0),
       padding: const EdgeInsets.fromLTRB(12, 12, 12, 24),
@@ -107,11 +109,11 @@ class _FastingFastForecastCardState extends State<FastingFastForecastCard> {
           const SizedBox(height: 16),
           _ForecastSummary(day: _day, chance: forecast.successChance),
           const SizedBox(height: 16),
-          _MetricsRow(forecast: forecast),
+          _MetricsRow(forecast: forecast, slice: slice),
           const SizedBox(height: 16),
           SizedBox(
             height: 180,
-            child: _ForecastChart(day: _day, toughestAt: _forecast?.toughestAt),
+            child: _ForecastChart(forecast: forecast, curve: slice.curve),
           ),
         ],
       ),
@@ -140,6 +142,12 @@ final class _Header extends StatelessWidget {
     );
   }
 }
+
+String _dayKey(_ForecastDay day) => switch (day) {
+  _ForecastDay.easy => 'easy',
+  _ForecastDay.moderate => 'moderate',
+  _ForecastDay.hard => 'hard',
+};
 
 /// Figma Frame 1597878700 — 40h, pad 4, radius 20, #F6F6F6, inner shadows.
 final class _DaySegment extends StatelessWidget {
@@ -299,14 +307,17 @@ final class _ForecastSummary extends StatelessWidget {
 }
 
 final class _MetricsRow extends StatelessWidget {
-  const _MetricsRow({required this.forecast});
+  const _MetricsRow({required this.forecast, required this.slice});
 
   final FastForecast forecast;
+  final ForecastSlice slice;
 
   @override
   Widget build(BuildContext context) {
     String clock(DateTime t) => DateFormat.Hm().format(t);
-    final peak = forecast.toughestAt;
+    final peak = slice.toughestAt;
+    final riskStart = slice.riskStartsAt;
+    final riskEnd = slice.riskEndsAt;
     final start = forecast.fastStartsAt;
     final end = forecast.fastEndsAt;
     final fastMinutes = start != null && end != null
@@ -325,10 +336,9 @@ final class _MetricsRow extends StatelessWidget {
         Expanded(
           child: _MetricCell(
             icon: AppImages.redWarning,
-            value: peak == null
+            value: riskStart == null || riskEnd == null
                 ? '–'
-                : '${clock(peak.subtract(const Duration(minutes: 30)))} - '
-                      '${clock(peak.add(const Duration(minutes: 30)))}',
+                : '${clock(riskStart)} – ${clock(riskEnd)}',
             label: 'fasting_page.forecast_risk_zone'.tr(),
           ),
         ),
@@ -365,12 +375,18 @@ final class _MetricCell extends StatelessWidget {
       children: [
         icon.image(width: 42, height: 42, fit: BoxFit.contain),
         const SizedBox(height: 4),
-        Text(
-          value,
-          style: AppTextStyles.fastingForecastMetricValue,
-          textAlign: TextAlign.center,
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
+        SizedBox(
+          height: 28,
+          width: double.infinity,
+          child: FittedBox(
+            fit: BoxFit.scaleDown,
+            child: Text(
+              value,
+              style: AppTextStyles.fastingForecastMetricValue,
+              textAlign: TextAlign.center,
+              maxLines: 1,
+            ),
+          ),
         ),
         Text(
           label,
@@ -384,57 +400,48 @@ final class _MetricCell extends StatelessWidget {
   }
 }
 
-/// High/Low + multi-color line + PEAK — body_history chart kalıbı.
+/// Yüksek/Düşük çizgisi. Noktalar sunucunun `curve` dizisi;
+/// tepe yalnızca gerçek bir zorluk kaydı varsa çizilir.
 final class _ForecastChart extends StatelessWidget {
-  const _ForecastChart({required this.day, this.toughestAt});
+  const _ForecastChart({required this.forecast, required this.curve});
 
-  final _ForecastDay day;
+  final FastForecast forecast;
+  final List<double> curve;
 
-  /// Sunucudaki en zor an (geçmiş zorlanma kayıtları); tepe buraya oturur.
-  final DateTime? toughestAt;
-
-  static const _xLabels = ['8:00', '16:00', '24:00'];
   static const _leftPad = 36.0;
   static const _topPad = 28.0;
   static const _bottomPad = 22.0;
   static const _rightPad = 8.0;
 
-  static _DaySeries _seriesFor(_ForecastDay day) => switch (day) {
-    _ForecastDay.easy => const _DaySeries(
-      values: [0.18, 0.32, 0.48, 0.62, 0.88, 0.72, 0.45],
-      peakIndex: 4,
-    ),
-    _ForecastDay.moderate => const _DaySeries(
-      values: [0.28, 0.45, 0.58, 0.82, 0.70, 0.55, 0.40],
-      peakIndex: 3,
-    ),
-    _ForecastDay.hard => const _DaySeries(
-      values: [0.40, 0.62, 0.92, 0.78, 0.65, 0.52, 0.38],
-      peakIndex: 2,
-    ),
-  };
+  static _DaySeries _series(List<double> curve) {
+    final values = curve.length >= 2 ? curve : const [0.0, 0.0];
+    var peak = -1;
+    var best = 0.0;
+    for (var i = 0; i < values.length; i++) {
+      if (values[i] > best) {
+        best = values[i];
+        peak = i;
+      }
+    }
+    return _DaySeries(values: values, peakIndex: best > 0 ? peak : -1);
+  }
 
-  /// Eğrinin şekli zorluk şablonundan; tepe noktası en zor saate kaydırılır
-  /// (x ekseni 08:00–24:00, 7 nokta). Saatlik risk verisi sunucuda yok.
-  static _DaySeries _placePeak(_DaySeries base, DateTime? at) {
-    if (at == null) return base;
-    final local = at.toLocal();
-    var hour = local.hour + local.minute / 60;
-    if (hour < 8) hour += 24;
-    final last = base.values.length - 1;
-    final peak = (((hour - 8) / 16) * last).round().clamp(0, last);
-    final shift = peak - base.peakIndex;
-    return _DaySeries(
-      values: [
-        for (var i = 0; i <= last; i++) base.values[(i - shift).clamp(0, last)],
-      ],
-      peakIndex: peak,
-    );
+  static List<String> _axis(FastForecast forecast) {
+    final start = forecast.fastStartsAt;
+    final end = forecast.fastEndsAt;
+    if (start == null || end == null) {
+      final last = math.max(0, forecast.curve.length - 1);
+      return ['0s', '${last ~/ 2}s', '${last}s'];
+    }
+    final mid = start.add(end.difference(start) ~/ 2);
+    String fmt(DateTime t) => DateFormat.Hm().format(t);
+    return [fmt(start), fmt(mid), fmt(end)];
   }
 
   @override
   Widget build(BuildContext context) {
-    final target = _placePeak(_seriesFor(day), toughestAt);
+    final target = _series(curve);
+    final labels = _axis(forecast);
 
     return TweenAnimationBuilder<_DaySeries>(
       tween: _DaySeriesTween(end: target),
@@ -445,10 +452,14 @@ final class _ForecastChart extends StatelessWidget {
           builder: (context, constraints) {
             final chartW = constraints.maxWidth - _leftPad - _rightPad;
             final chartH = constraints.maxHeight - _topPad - _bottomPad;
-            final peakT = series.peakIndex / (series.values.length - 1);
+            final hasPeak = series.peakIndex >= 0;
+            final peakT = hasPeak
+                ? series.peakIndex / (series.values.length - 1)
+                : 0.0;
             final peakX = _leftPad + peakT * chartW;
-            final peakY =
-                _topPad + (1 - series.values[series.peakIndex]) * chartH;
+            final peakY = hasPeak
+                ? _topPad + (1 - series.values[series.peakIndex]) * chartH
+                : 0.0;
 
             return Stack(
               clipBehavior: Clip.none,
@@ -481,43 +492,47 @@ final class _ForecastChart extends StatelessWidget {
                     style: AppTextStyles.bodyChartAxis,
                   ),
                 ),
-                for (var i = 0; i < _xLabels.length; i++)
+                for (var i = 0; i < labels.length; i++)
                   Positioned(
-                    left: _leftPad + (i / (_xLabels.length - 1)) * chartW - 14,
+                    left: _leftPad + (i / (labels.length - 1)) * chartW - 18,
                     bottom: 0,
                     child: SizedBox(
-                      width: 36,
+                      width: 44,
                       child: Text(
-                        _xLabels[i],
+                        labels[i],
                         style: AppTextStyles.bodyChartAxis,
                         textAlign: TextAlign.center,
                       ),
                     ),
                   ),
-                Positioned(
-                  left: (peakX - 28).clamp(_leftPad, constraints.maxWidth - 64),
-                  top: (peakY - 34).clamp(0.0, chartH),
-                  child: Container(
-                    height: 24,
-                    padding: const EdgeInsets.symmetric(horizontal: 10),
-                    decoration: BoxDecoration(
-                      color: ColorName.colorChartTooltip,
-                      borderRadius: BorderRadius.circular(8),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withValues(alpha: 0.25),
-                          offset: const Offset(0, 4),
-                          blurRadius: 8,
-                        ),
-                      ],
+                if (hasPeak)
+                  Positioned(
+                    left: (peakX - 28).clamp(
+                      _leftPad,
+                      constraints.maxWidth - 64,
                     ),
-                    alignment: Alignment.center,
-                    child: Text(
-                      'fasting_page.forecast_peak'.tr(),
-                      style: AppTextStyles.bodyChartTooltip,
+                    top: (peakY - 34).clamp(0.0, chartH),
+                    child: Container(
+                      height: 24,
+                      padding: const EdgeInsets.symmetric(horizontal: 10),
+                      decoration: BoxDecoration(
+                        color: ColorName.colorChartTooltip,
+                        borderRadius: BorderRadius.circular(8),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withValues(alpha: 0.25),
+                            offset: const Offset(0, 4),
+                            blurRadius: 8,
+                          ),
+                        ],
+                      ),
+                      alignment: Alignment.center,
+                      child: Text(
+                        'fasting_page.forecast_peak'.tr(),
+                        style: AppTextStyles.bodyChartTooltip,
+                      ),
                     ),
                   ),
-                ),
               ],
             );
           },
@@ -627,12 +642,14 @@ final class _ForecastChartPainter extends CustomPainter {
       canvas.drawLine(start, end, paint);
     }
 
+    if (peakIndex < 0) return;
     final peak = points[peakIndex];
     canvas.drawCircle(peak, 3, Paint()..color = ColorName.colorErrorRed);
   }
 
-  /// Peak sağ/sol kırmızı → turuncu → koyu yeşil → açık yeşil.
+  /// Tepe yoksa çizgi düz yeşil. Varsa tepeye yaklaştıkça kırmızıya döner.
   Color _colorForSegment(int segmentIndex) {
+    if (peakIndex < 0) return ColorName.colorMealPositive;
     final distance = segmentIndex < peakIndex
         ? peakIndex - 1 - segmentIndex
         : segmentIndex - peakIndex;

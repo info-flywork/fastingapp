@@ -20,6 +20,7 @@ import 'package:fastingapp/core/widgets/weight_progress_bar.dart';
 import 'package:fastingapp/domain/nutrition/meals_repository.dart';
 import 'package:fastingapp/domain/nutrition/nutrition_repository.dart';
 import 'package:fastingapp/domain/trackers/trackers_repository.dart';
+import 'package:fastingapp/domain/trackers/weight_store.dart';
 import 'package:fastingapp/generated/app_images.g.dart';
 import 'package:fastingapp/generated/assets.gen.dart';
 import 'package:fastingapp/generated/colors.gen.dart';

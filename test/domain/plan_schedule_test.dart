@@ -108,31 +108,34 @@ void main() {
       expect(schedule.endMinute, 30);
     });
 
-    test('kayıtlı pencere aynı kartta ve süre uyuyorsa başlangıcı kaydırır', () {
-      final dinner = resolvePlanSchedule(
-        fallbackFastHours: 15,
-        fallbackEatHours: 9,
-        cardTiming: 'skipDinner',
-        planCode: '15_9',
-        currentPlanCode: '15_9',
-        currentTiming: 'skipDinner',
-        currentEatStart: '09:00',
-        currentEatEnd: '18:00',
-      );
-      final breakfast = resolvePlanSchedule(
-        fallbackFastHours: 15,
-        fallbackEatHours: 9,
-        cardTiming: 'skipBreakfast',
-        planCode: '15_9',
-        currentPlanCode: '15_9',
-        currentTiming: 'skipDinner',
-        currentEatStart: '09:00',
-        currentEatEnd: '18:00',
-      );
-      expect(dinner.startHour, 9);
-      expect(dinner.endHour, 18);
-      expect(breakfast.startHour, 12);
-      expect(breakfast.endHour, 21);
-    });
+    test(
+      'kayıtlı pencere aynı kartta ve süre uyuyorsa başlangıcı kaydırır',
+      () {
+        final dinner = resolvePlanSchedule(
+          fallbackFastHours: 15,
+          fallbackEatHours: 9,
+          cardTiming: 'skipDinner',
+          planCode: '15_9',
+          currentPlanCode: '15_9',
+          currentTiming: 'skipDinner',
+          currentEatStart: '09:00',
+          currentEatEnd: '18:00',
+        );
+        final breakfast = resolvePlanSchedule(
+          fallbackFastHours: 15,
+          fallbackEatHours: 9,
+          cardTiming: 'skipBreakfast',
+          planCode: '15_9',
+          currentPlanCode: '15_9',
+          currentTiming: 'skipDinner',
+          currentEatStart: '09:00',
+          currentEatEnd: '18:00',
+        );
+        expect(dinner.startHour, 9);
+        expect(dinner.endHour, 18);
+        expect(breakfast.startHour, 12);
+        expect(breakfast.endHour, 21);
+      },
+    );
   });
 }

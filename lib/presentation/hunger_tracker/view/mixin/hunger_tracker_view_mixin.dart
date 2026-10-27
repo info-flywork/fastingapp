@@ -17,10 +17,7 @@ mixin HungerTrackerViewMixin on State<HungerTrackerView> {
       HungerFlowArgs(symptoms: Set<HungerSymptom>.of(selectedSymptoms));
 
   void _openHungerCheck() {
-    context.pushNamed(
-      RoutePaths.hungerCheck.name,
-      extra: _flowArgs,
-    );
+    context.pushNamed(RoutePaths.hungerCheck.name, extra: _flowArgs);
   }
 
   void onHungryNowTapped() => _openHungerCheck();

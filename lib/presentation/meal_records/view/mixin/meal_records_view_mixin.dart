@@ -7,6 +7,9 @@ mixin MealRecordsViewMixin on State<MealRecordsView> {
 
   MealsRepository get _meals => getIt<MealsRepository>();
 
+  /// Yeni yükleme başlayınca artar: eski yüklemenin cevabı yenisini ezmesin.
+  int _loadGen = 0;
+
   void initMealRecords() {
     selectedDate = DateUtils.dateOnly(DateTime.now());
     unawaited(_loadMeals());
@@ -17,7 +20,10 @@ mixin MealRecordsViewMixin on State<MealRecordsView> {
   /// Bu gün daha önce görüldüyse iskelet gösterilmez: önbellek hemen
   /// çizilir, ağ yanıtı gelince yenilenir. Hata boş liste gibi gösterilmez.
   Future<void> _loadMeals() async {
+    final gen = ++_loadGen;
     final date = selectedDate;
+    // Yazmalar önbelleği yerinde günceller: kayıt / düzenleme sonrası dönüşte
+    // liste beklemeden doğru.
     final cached = _meals.cachedDay(date);
     setState(() {
       meals = cached ?? const [];
@@ -25,15 +31,13 @@ mixin MealRecordsViewMixin on State<MealRecordsView> {
     });
     try {
       final items = await _meals.listForDay(date);
-      if (mounted && DateUtils.isSameDay(date, selectedDate)) {
-        setState(() => meals = items);
-      }
+      if (mounted && gen == _loadGen) setState(() => meals = items);
     } on Object catch (e) {
-      if (mounted) AppSnackbar.showError(context, e);
-    } finally {
-      if (mounted && DateUtils.isSameDay(date, selectedDate)) {
-        setState(() => loading = false);
+      if (mounted && gen == _loadGen && _meals.cachedDay(date) == null) {
+        AppSnackbar.showError(context, e);
       }
+    } finally {
+      if (mounted && gen == _loadGen) setState(() => loading = false);
     }
   }
 

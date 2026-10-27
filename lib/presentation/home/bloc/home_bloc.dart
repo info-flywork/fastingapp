@@ -2,7 +2,11 @@ import 'package:fastingapp/core/di/injection.dart';
 import 'package:fastingapp/core/network/network_exception.dart';
 import 'package:fastingapp/core/sync/data_sync.dart';
 import 'package:fastingapp/data/model/user/home_summary.dart';
+import 'package:fastingapp/domain/hunger/hunger_store.dart';
 import 'package:fastingapp/domain/revenue_cat/revenue_cat_service.dart';
+import 'package:fastingapp/domain/trackers/steps_store.dart';
+import 'package:fastingapp/domain/trackers/water_store.dart';
+import 'package:fastingapp/domain/trackers/weight_store.dart';
 import 'package:fastingapp/domain/user/user_repository.dart';
 import 'package:fastingapp/presentation/auth/bloc/auth_bloc.dart';
 import 'package:fastingapp/presentation/auth/bloc/auth_state.dart';
@@ -20,21 +24,19 @@ final class HomeBloc extends Bloc<HomeEvent, HomeState> {
     on<HomeStarted>(_onStarted);
     on<HomeCleared>(_onCleared);
     on<HomeRefreshRequested>(_onRefreshRequested);
-    on<HomeWeightOptimistic>(_onWeightOptimistic);
     on<HomeMetricsOptimistic>(_onMetricsOptimistic);
+    on<HomeChallengeUpdated>(_onChallengeUpdated);
     on<HomePremiumTapped>(_onPremiumTapped);
+    getIt<StepsStore>().addListener(_onTrackerStoreChanged);
+    getIt<WaterStore>().addListener(_onTrackerStoreChanged);
+    getIt<WeightStore>().addListener(_onTrackerStoreChanged);
+    getIt<HungerStore>().addListener(_onTrackerStoreChanged);
   }
 
   final UserRepository _userRepository;
 
   /// [HomeWeightOptimistic] state'i sunucudan bağımsız değiştirdi.
   bool _locallyEdited = false;
-
-  /// Detay ekranının yazdığı su / adım. Aynı kuşaktaki eski özet yanıtı
-  /// bunu ezmesin; yazma bitip yeni özet gelince bırakılır.
-  int? _holdWaterMl;
-  int? _holdSteps;
-  int _holdGeneration = -1;
 
   /// Uçuşta bir özet isteği varken gelen yenilemeler tek bir "sonra bir kez
   /// daha" isteğine katlanır: eski yanıt yenisini ezemez, istek yağmuru olmaz.
@@ -103,7 +105,7 @@ final class HomeBloc extends Bloc<HomeEvent, HomeState> {
         _again = true;
         return;
       }
-      final shown = _overlayHeldMetrics(summary, generation);
+      final shown = _overlayPending(summary);
       getIt<FastingSessionCubit>().applyFromSummary(
         fast: summary.activeFast,
         eatingWindow: summary.eatingWindow,
@@ -149,13 +151,45 @@ final class HomeBloc extends Bloc<HomeEvent, HomeState> {
     add(const HomeStarted());
   }
 
-  HomeSummary _overlayHeldMetrics(HomeSummary summary, int requestGeneration) {
-    if (requestGeneration != _holdGeneration) {
-      _holdWaterMl = null;
-      _holdSteps = null;
-      return summary;
-    }
-    return summary.copyWith(waterMl: _holdWaterMl, steps: _holdSteps);
+  /// Sunucunun henüz onaylamadığı su / adım / hedef her özetin üstüne
+  /// biner ([WaterStore], [StepsStore]): yoldaki eski özet sayıyı geri alamaz.
+  HomeSummary _overlayPending(HomeSummary summary) {
+    final steps = getIt<StepsStore>();
+    final water = getIt<WaterStore>();
+    final weight = getIt<WeightStore>();
+    final hunger = getIt<HungerStore>().pendingToday;
+    final today = DateTime.now();
+    return summary.copyWith(
+      hungerPhysical: hunger?.physical,
+      hungerEmotional: hunger?.emotional,
+      waterMl: water.pendingTotal(today),
+      waterGoalMl: water.pendingGoal,
+      steps: steps.pendingSteps(today),
+      stepsGoal: steps.pendingGoal,
+      weightCurrentKg: weight.pendingKg,
+      weightGoalKg: weight.pendingGoal,
+    );
+  }
+
+  /// Detay ekranlarındaki onaylanmamış değer ana sayfa kartına anında yansır.
+  void _onTrackerStoreChanged() {
+    final steps = getIt<StepsStore>();
+    final water = getIt<WaterStore>();
+    final weight = getIt<WeightStore>();
+    final hunger = getIt<HungerStore>().pendingToday;
+    final today = DateTime.now();
+    final event = HomeMetricsOptimistic(
+      hungerPhysical: hunger?.physical,
+      hungerEmotional: hunger?.emotional,
+      waterMl: water.pendingTotal(today),
+      waterGoalMl: water.pendingGoal,
+      steps: steps.pendingSteps(today),
+      stepsGoal: steps.pendingGoal,
+      weightKg: weight.pendingKg,
+      weightGoalKg: weight.pendingGoal,
+    );
+    if (event.props.every((v) => v == null)) return;
+    add(event);
   }
 
   void _onMetricsOptimistic(
@@ -167,21 +201,27 @@ final class HomeBloc extends Bloc<HomeEvent, HomeState> {
     final summary = current.summary;
     if (summary == null) return;
     _locallyEdited = true;
-    _holdGeneration = DataSync.generation;
-    if (event.waterMl != null) _holdWaterMl = event.waterMl;
-    if (event.steps != null) _holdSteps = event.steps;
     emit(
       HomeLoaded(
         user: current.user,
         progress: current.progress,
         isPremium: current.isPremium,
-        summary: summary.copyWith(waterMl: event.waterMl, steps: event.steps),
+        summary: summary.copyWith(
+          waterMl: event.waterMl,
+          waterGoalMl: event.waterGoalMl,
+          steps: event.steps,
+          stepsGoal: event.stepsGoal,
+          weightCurrentKg: event.weightKg,
+          weightGoalKg: event.weightGoalKg,
+          hungerPhysical: event.hungerPhysical,
+          hungerEmotional: event.hungerEmotional,
+        ),
       ),
     );
   }
 
-  void _onWeightOptimistic(
-    HomeWeightOptimistic event,
+  void _onChallengeUpdated(
+    HomeChallengeUpdated event,
     Emitter<HomeState> emit,
   ) {
     final current = state;
@@ -194,7 +234,7 @@ final class HomeBloc extends Bloc<HomeEvent, HomeState> {
         user: current.user,
         progress: current.progress,
         isPremium: current.isPremium,
-        summary: summary.copyWith(weightCurrentKg: event.weightKg),
+        summary: summary.copyWith(featuredChallenge: event.challenge),
       ),
     );
   }

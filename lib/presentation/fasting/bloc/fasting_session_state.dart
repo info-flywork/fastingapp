@@ -62,13 +62,14 @@ final class FastingSessionState extends Equatable {
     bool clearError = false,
     bool clearFast = false,
     bool clearEating = false,
+    bool clearPlan = false,
   }) {
     return FastingSessionState(
       isLoading: isLoading ?? this.isLoading,
       errorMessage: clearError ? null : (errorMessage ?? this.errorMessage),
       fast: clearFast ? null : (fast ?? this.fast),
       eatingWindow: clearEating ? null : (eatingWindow ?? this.eatingWindow),
-      plan: plan ?? this.plan,
+      plan: clearPlan ? null : (plan ?? this.plan),
       fetchedAt: fetchedAt ?? this.fetchedAt,
       clockOffset: clockOffset ?? this.clockOffset,
       bodyStages: bodyStages ?? this.bodyStages,

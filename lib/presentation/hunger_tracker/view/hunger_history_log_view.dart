@@ -7,6 +7,7 @@ import 'package:fastingapp/core/router/route_paths.dart';
 import 'package:fastingapp/core/snackbar/app_snackbar.dart';
 import 'package:fastingapp/core/theme/app_text_styles.dart';
 import 'package:fastingapp/domain/hunger/hunger_repository.dart';
+import 'package:fastingapp/domain/hunger/hunger_store.dart';
 import 'package:fastingapp/generated/app_images.g.dart';
 import 'package:fastingapp/generated/assets.gen.dart';
 import 'package:fastingapp/generated/colors.gen.dart';

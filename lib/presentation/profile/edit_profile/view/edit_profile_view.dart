@@ -12,7 +12,6 @@ import 'package:fastingapp/core/theme/app_text_styles.dart';
 import 'package:fastingapp/core/utils/enum/snackbar_type.dart';
 import 'package:fastingapp/core/utils/extensions/future_extensions.dart';
 import 'package:fastingapp/domain/auth/auth_exception.dart';
-import 'package:fastingapp/domain/fasting/plan_safety.dart';
 import 'package:fastingapp/domain/onboarding/onboarding_draft.dart';
 import 'package:fastingapp/domain/profile/profile_repository.dart';
 import 'package:fastingapp/generated/assets.gen.dart';
@@ -30,6 +29,8 @@ import 'package:fastingapp/presentation/auth/onboard/food_skips/bloc/food_skips_
 import 'package:fastingapp/presentation/auth/onboard/food_skips/food_skips_options_catalog.dart';
 import 'package:fastingapp/presentation/auth/onboard/goal/bloc/goal_bloc.dart';
 import 'package:fastingapp/presentation/auth/onboard/goal/goal_options_catalog.dart';
+import 'package:fastingapp/presentation/fasting/bloc/fasting_session_cubit.dart';
+import 'package:fastingapp/presentation/plans/plan_change_flow.dart';
 import 'package:fastingapp/presentation/plans/plans_catalog.dart';
 import 'package:fastingapp/presentation/profile/bloc/profile_bloc.dart';
 import 'package:fastingapp/presentation/profile/edit_profile/view/edit_height_view.dart';

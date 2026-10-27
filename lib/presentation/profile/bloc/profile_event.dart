@@ -1,6 +1,5 @@
 import 'package:equatable/equatable.dart';
 import 'package:fastingapp/domain/profile/profile_repository.dart';
-import 'package:fastingapp/presentation/auth/onboard/fasting_plan/bloc/fasting_plan_bloc.dart';
 
 sealed class ProfileEvent extends Equatable {
   const ProfileEvent();
@@ -55,14 +54,13 @@ final class ProfileFieldsChanged extends ProfileEvent {
   List<Object?> get props => [fields, optimistic];
 }
 
-final class ProfilePlanChanged extends ProfileEvent {
-  const ProfilePlanChanged(this.plan, {this.safetyAcknowledged = false});
+/// Oruç oturumundaki plan değişti (Planlar / oruç sekmesi / Profili
+/// Düzenle); profil ekranı aynı planı gösterir.
+final class ProfileSessionPlanChanged extends ProfileEvent {
+  const ProfileSessionPlanChanged(this.planCode);
 
-  final OnboardingFastingPlan plan;
-
-  /// Uzun plan güvenlik uyarısı kullanıcıya gösterilip onaylandı.
-  final bool safetyAcknowledged;
+  final String? planCode;
 
   @override
-  List<Object?> get props => [plan, safetyAcknowledged];
+  List<Object?> get props => [planCode];
 }

@@ -41,6 +41,8 @@ final class HomeMetricCards extends StatelessWidget {
               formatGoal: (ml) => WaterUnits.withUnit(ml, waterUnit),
               trackColor: ColorName.colorWaterTrack,
               fillColor: ColorName.colorWaterFill,
+              accent: ColorName.colorWaterAction,
+              wash: ColorName.colorWaterPageFade,
               progress: _ratio(waterMl, waterGoalMl),
               liquid: true,
               onTap: onWaterTapped,
@@ -57,6 +59,8 @@ final class HomeMetricCards extends StatelessWidget {
               goalKey: 'home.steps_goal',
               trackColor: ColorName.colorStepsTrack,
               fillColor: ColorName.colorStepsFill,
+              accent: ColorName.colorStepsAction,
+              wash: ColorName.colorStepsPageFade,
               progress: _ratio(steps, stepsGoal),
               onTap: onStepsTapped,
             ),
@@ -80,6 +84,8 @@ final class _MetricCard extends StatelessWidget {
     required this.goalKey,
     required this.trackColor,
     required this.fillColor,
+    required this.accent,
+    required this.wash,
     required this.progress,
     this.format,
     this.formatGoal,
@@ -97,6 +103,8 @@ final class _MetricCard extends StatelessWidget {
   final String Function(int goal)? formatGoal;
   final Color trackColor;
   final Color fillColor;
+  final Color accent;
+  final Color wash;
   final double progress;
   final bool liquid;
   final VoidCallback? onTap;
@@ -104,16 +112,37 @@ final class _MetricCard extends StatelessWidget {
   static const _iconSize = 40.0;
   static const _radius = 20.0;
 
+  bool get _goalReached => goal > 0 && value >= goal;
+
   @override
   Widget build(BuildContext context) {
+    final reached = _goalReached;
     return Material(
-      color: ColorName.colorWhite,
+      color: Colors.transparent,
       borderRadius: BorderRadius.circular(_radius),
       child: InkWell(
         onTap: onTap,
         borderRadius: BorderRadius.circular(_radius),
-        child: Padding(
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 480),
+          curve: Curves.easeOutCubic,
           padding: const EdgeInsets.fromLTRB(14, 14, 12, 14),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(_radius),
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: reached
+                  ? [wash, ColorName.colorWhite]
+                  : const [ColorName.colorWhite, ColorName.colorWhite],
+            ),
+            border: Border.all(
+              color: reached
+                  ? accent.withValues(alpha: 0.65)
+                  : Colors.transparent,
+              width: 1.5,
+            ),
+          ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -129,13 +158,21 @@ final class _MetricCard extends StatelessWidget {
                   Expanded(
                     child: Text(
                       labelKey.tr(),
-                      style: AppTextStyles.homeMetricLabel,
+                      style: AppTextStyles.homeMetricLabel.copyWith(
+                        color: reached ? accent : null,
+                      ),
                     ),
                   ),
-                  const Icon(
-                    Icons.chevron_right_rounded,
-                    size: 20,
-                    color: ColorName.colorTitle,
+                  AnimatedSwitcher(
+                    duration: const Duration(milliseconds: 280),
+                    child: Icon(
+                      reached
+                          ? Icons.check_circle_rounded
+                          : Icons.chevron_right_rounded,
+                      key: ValueKey(reached),
+                      size: reached ? 22 : 20,
+                      color: reached ? accent : ColorName.colorTitle,
+                    ),
                   ),
                 ],
               ),

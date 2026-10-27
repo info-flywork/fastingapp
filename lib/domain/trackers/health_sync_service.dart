@@ -1,10 +1,12 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:fastingapp/core/di/injection.dart';
 import 'package:fastingapp/core/sync/data_sync.dart';
 import 'package:fastingapp/domain/profile/profile_repository.dart';
+import 'package:fastingapp/domain/trackers/steps_store.dart';
 import 'package:fastingapp/domain/trackers/trackers_repository.dart';
-import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:health/health.dart';
 
 /// Apple Health / Health Connect → `POST /steps/sync`.
@@ -65,6 +67,15 @@ final class HealthSyncService {
 
   Future<void>? _running;
 
+  /// Kullanıcı bu günü elle değiştirdi. Süren aktarım o günü yazmasın;
+  /// aksi halde sağlık sayısı, az önce girilen adımın üstüne yazıp ekranı
+  /// geri alıyordu.
+  final Set<String> _manualDates = {};
+
+  void keepManual(DateTime date) {
+    _manualDates.add(_ymd(DateUtils.dateOnly(date)));
+  }
+
   /// Ayar açıksa son 31 günü sunucuya yazar. Sessiz; hata yutulur.
   /// Süren bir senkron varsa onu bekler (Adım ekranı senkron öncesi veriyi
   /// göstermesin); yazınca ana sayfa / adım verisi tazelenir.
@@ -106,14 +117,26 @@ final class HealthSyncService {
 
       final days = await _readLastDays(31);
       if (days.isEmpty) return;
+      // Okuma uzun sürer. Bu sırada elle değiştirilen gün aktarılmasın.
+      final payload = [
+        for (final day in days)
+          if (!_manualDates.remove(day.date)) day,
+      ];
+      if (payload.isEmpty) {
+        _lastSync = DateTime.now();
+        return;
+      }
 
       final result = await _trackers.syncSteps(
         source: Platform.isIOS ? 'appleHealth' : 'googleFit',
-        days: days,
+        days: payload,
       );
       _lastSync = DateTime.now();
       // Önceden ana sayfa adım kartı senkron öncesi sayıda kalıyordu.
-      if (result.updated > 0) DataSync.afterWrite();
+      if (result.updated > 0) {
+        getIt<StepsStore>().invalidate();
+        DataSync.afterWrite();
+      }
     } on Object catch (e, st) {
       debugPrint('HealthSyncService.sync: $e\n$st');
     } finally {

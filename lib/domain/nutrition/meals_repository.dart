@@ -108,14 +108,17 @@ final class MealsRepository {
       },
       parserModel: MealWriteResult.fromJson,
     );
-    // Öğün kayıtları önbelleği eski listeyi göstermesin.
-    _dayCache.clear();
-    return result ?? const MealWriteResult();
+    final written = result ?? const MealWriteResult();
+    _afterWrite(added: written.meal);
+    return written;
   }
 
   /// Son görülen günler (bellekte): ekran tekrar açılınca iskelet yerine
   /// hemen gösterilir, ağ yanıtıyla sessizce yenilenir.
   final Map<String, List<MealRecord>> _dayCache = {};
+
+  /// Her öğün yazmasında artar (bkz. [_afterWrite]).
+  int writeSeq = 0;
 
   List<MealRecord>? cachedDay(DateTime date) => _dayCache[_ymd(date)];
 
@@ -123,6 +126,7 @@ final class MealsRepository {
   void clearCache() => _dayCache.clear();
 
   Future<List<MealRecord>> listForDay(DateTime date) async {
+    final seqAtStart = writeSeq;
     final page = await _network.send<_MealsPage>(
       path: '/meals',
       method: RequestType.get,
@@ -130,6 +134,9 @@ final class MealsRepository {
       parserModel: _MealsPage.fromJson,
     );
     final items = page?.items ?? const <MealRecord>[];
+    // İstek sürerken yazma olduysa cevap eskidir: önbellekteki (yazmayla
+    // güncellenmiş) liste döner.
+    if (seqAtStart != writeSeq) return _dayCache[_ymd(date)] ?? items;
     if (_dayCache.length > 14) _dayCache.clear();
     _dayCache[_ymd(date)] = items;
     return items;
@@ -166,7 +173,7 @@ final class MealsRepository {
       parserModel: MealWriteResult.fromJson,
     );
     if (result == null) throw StateError('Öğün kaydedilemedi');
-    _dayCache.clear();
+    _afterWrite(added: result.meal);
     return result;
   }
 
@@ -187,7 +194,7 @@ final class MealsRepository {
       parserModel: MealWriteResult.fromJson,
     );
     if (result == null) throw StateError('Kalori kaydedilemedi');
-    _dayCache.clear();
+    _afterWrite(added: result.meal);
     return result;
   }
 
@@ -214,8 +221,9 @@ final class MealsRepository {
     );
     final meal = envelope?.meal;
     if (meal == null) throw StateError('Öğün güncellenemedi');
-    // Saat değişince öğün başka güne de geçebilir.
-    _dayCache.clear();
+    // Saat değişince öğün başka güne de geçebilir: eski yerinden çıkıp
+    // yeni gününe girer.
+    _afterWrite(removedId: id, added: meal);
     return meal;
   }
 
@@ -225,14 +233,42 @@ final class MealsRepository {
       method: RequestType.delete,
       parserModel: _MealDeleteEnvelope.fromJson,
     );
-    for (final key in _dayCache.keys.toList()) {
-      final list = _dayCache[key];
-      if (list == null) continue;
-      _dayCache[key] = [
-        for (final m in list)
-          if (m.id != id) m,
-      ];
+    _afterWrite(removedId: id);
+  }
+
+  /// Yazma sonrası önbellek silinmez, yerinde güncellenir: liste ekrana
+  /// döndüğünde iskelet / boş liste görünmez. [writeSeq] artar; yazmadan önce
+  /// başlamış bir liste isteğinin (eski) cevabı önbelleğe yazılmaz.
+  void _afterWrite({String? removedId, MealRecord? added}) {
+    writeSeq++;
+    if (removedId != null) {
+      for (final key in _dayCache.keys.toList()) {
+        _dayCache[key] = [
+          for (final m in _dayCache[key]!)
+            if (m.id != removedId) m,
+        ];
+      }
     }
+    if (added == null) return;
+    final key = _ymd(added.eatenAt);
+    final list = _dayCache[key];
+    // O gün hiç görülmediyse ekran açılınca sunucudan okunur.
+    if (list == null) return;
+    _dayCache[key] = [
+      for (final m in list)
+        if (m.id != added.id) m,
+      added,
+    ]..sort((a, b) => a.eatenAt.compareTo(b.eatenAt));
+  }
+
+  /// Önbellekteki öğün (detay ekranı beklemeden dolu açılsın).
+  MealRecord? cachedMeal(String id) {
+    for (final list in _dayCache.values) {
+      for (final m in list) {
+        if (m.id == id) return m;
+      }
+    }
+    return null;
   }
 
   static String _ymd(DateTime d) =>

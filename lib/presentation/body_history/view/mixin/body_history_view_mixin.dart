@@ -1,161 +1,50 @@
 part of '../body_history_view.dart';
 
+/// Kilo geçmişi: görünen her değer [WeightStore]'dan okunur. Ekran kendi
+/// kopyasını tutmaz; yoldaki eski cevap yeni tartıyı geri alamaz, ana sayfa
+/// kartıyla aynı değer görünür.
 mixin BodyHistoryViewMixin on State<BodyHistoryView> {
-  TrackersRepository get _trackers => getIt<TrackersRepository>();
-
-  double? currentKg;
-  double? startKg;
-  double? targetKg;
-  double? bmi;
-  double? heightCm;
+  WeightStore get _store => getIt<WeightStore>();
 
   _HistoryRange selectedRange = _HistoryRange.day;
 
-  /// Son kilo kayıtları (`GET /weights`).
-  List<WeightEntry> entries = const [];
   int selectedPointIndex = 0;
-  List<_ChartPoint> chartPoints = const [];
-  double chartYMin = 65;
-  double chartYMax = 120;
 
-  /// Yalnızca grafik alanı; sayfa iskeleti anında açılır.
-  bool chartLoading = true;
+  /// Bilinen ilk değerler (store'da özet yoksa ana sayfa özetinden).
+  double? _seedCurrent;
+  double? _seedStart;
+  double? _seedGoal;
 
-  /// Aralık başına grafik: sekme değişiminde iskelet yok, diğer aralıklar
-  /// arka planda önceden yüklenir. Kilo yazılınca boşaltılır.
-  final Map<_HistoryRange, WeightChart> _charts = {};
+  double? get currentKg => _store.currentKg ?? _seedCurrent;
 
-  /// Kilo yazılınca artar: yazmadan önce başlamış ön yüklemeler eski
-  /// grafiği önbelleğe koymasın.
-  int _chartGeneration = 0;
+  double? get startKg => _store.summary?.startKg ?? _seedStart;
 
-  Future<WeightChart> _chartFor(_HistoryRange range) async {
-    final generation = _chartGeneration;
-    final chart = await _fetchChart(range);
-    if (generation == _chartGeneration) _charts[range] = chart;
-    return chart;
-  }
+  double? get targetKg => _store.goalKg ?? _seedGoal;
 
-  void _prefetchOtherRanges() {
-    for (final range in _HistoryRange.values) {
-      if (range == selectedRange || _charts.containsKey(range)) continue;
-      unawaited(_chartFor(range).then((_) {}, onError: (Object _) {}));
-    }
-  }
+  double? get heightCm => _store.summary?.heightCm ?? widget.heightCm;
 
-  void initBodyHistory() {
-    currentKg = widget.currentKg;
-    startKg = widget.startKg;
-    targetKg = widget.targetKg;
-    bmi = widget.bmi;
-    heightCm = widget.heightCm;
-    _seedFromHomeSummary();
-    _recomputeBmi();
-    unawaited(_loadSummaryAndChart());
-  }
+  /// Yeni tartı onaylanmamışken BMI yerelde hesaplanır.
+  double? get bmi =>
+      (_store.pendingKg != null ? _bmiFor(currentKg) : null) ??
+      _store.summary?.bmi ??
+      _bmiFor(currentKg) ??
+      widget.bmi;
 
-  void _seedFromHomeSummary() {
-    final home = getIt<HomeBloc>().state;
-    if (home is! HomeLoaded) return;
-    final s = home.summary;
-    _weightUnit = s?.weightUnit ?? 'kg';
-    currentKg ??= s?.weightCurrentKg;
-    startKg ??= s?.weightStartKg;
-    targetKg ??= s?.weightGoalKg;
-  }
+  String get _apiRange => switch (selectedRange) {
+    _HistoryRange.day => 'day',
+    _HistoryRange.week => 'week',
+    _HistoryRange.month => 'month',
+  };
 
-  double? _bmiFor(double? kg) {
-    final h = heightCm;
-    if (kg == null || h == null || h <= 0) return null;
-    final m = h / 100;
-    return double.parse((kg / (m * m)).toStringAsFixed(1));
-  }
+  WeightChart? get _chart => _store.chart(_apiRange);
 
-  void _recomputeBmi() {
-    bmi = _bmiFor(currentKg) ?? bmi;
-  }
+  /// Grafik bu aralık için hiç yüklenmediyse iskelet.
+  bool get chartLoading => _chart == null;
 
-  Future<void> _loadEntries() async {
-    try {
-      final list = await _trackers.listWeights();
-      if (mounted) setState(() => entries = list);
-    } on Object {
-      // Liste ikincil; grafik ve özet yine görünür.
-    }
-  }
-
-  Future<void> onEditEntry(WeightEntry entry) async {
-    final result = await AppDialogs.instance.showEditWeight(
-      context,
-      initialWeightKg: entry.weightKg,
-    );
-    if (result == null || !mounted) return;
-    await _writeEntry(() => _trackers.updateWeight(entry.id, result.weightKg));
-  }
-
-  Future<void> onDeleteEntry(WeightEntry entry) async {
-    final ok = await AppDialogs.instance.showDeleteWeight(context);
-    if (ok != true || !mounted) return;
-    await _writeEntry(() => _trackers.deleteWeight(entry.id));
-  }
-
-  Future<void> _writeEntry(Future<void> Function() call) async {
-    try {
-      await call();
-      DataSync.afterWrite(profile: true);
-      if (!mounted) return;
-      await Future.wait([_loadEntries(), _refreshAfterWrite()]);
-    } on Object catch (e) {
-      if (mounted) AppSnackbar.showError(context, e);
-    }
-  }
-
-  Future<void> _loadSummaryAndChart() async {
-    unawaited(_loadEntries());
-    setState(() => chartLoading = true);
-    // Özet (BMI) ile grafik paralel — BMI kartı grafik bitmeden dolar.
-    final summaryFuture = _trackers.getWeightSummary();
-    final chartFuture = _chartFor(selectedRange);
-
-    try {
-      final summary = await summaryFuture;
-      if (!mounted) return;
-      setState(() {
-        currentKg = summary.currentKg ?? currentKg;
-        startKg = summary.startKg ?? startKg;
-        targetKg = summary.goalKg ?? targetKg;
-        heightCm = summary.heightCm ?? heightCm;
-        bmi = summary.bmi ?? _bmiFor(currentKg) ?? bmi;
-      });
-    } on Object {
-      // Seed / yerel BMI kalsın.
-    }
-
-    try {
-      final chart = await chartFuture;
-      if (!mounted) return;
-      _applyChart(chart);
-      _prefetchOtherRanges();
-    } on Object catch (e) {
-      if (!mounted) return;
-      setState(() => chartPoints = const []);
-      AppSnackbar.showError(context, e);
-    } finally {
-      if (mounted) setState(() => chartLoading = false);
-    }
-  }
-
-  Future<WeightChart> _fetchChart(_HistoryRange range) {
-    final apiRange = switch (range) {
-      _HistoryRange.day => 'day',
-      _HistoryRange.week => 'week',
-      _HistoryRange.month => 'month',
-    };
-    return _trackers.getWeightChart(apiRange);
-  }
-
-  void _applyChart(WeightChart chart) {
-    _currentBucketLabel = chart.buckets.lastOrNull?.label;
+  /// Sunucu kovaları + onaylanmamış bugünkü tartı (son kova).
+  List<_ChartPoint> get chartPoints {
+    final chart = _chart;
+    if (chart == null) return const [];
     final points = <_ChartPoint>[
       for (var i = 0; i < chart.buckets.length; i++)
         if (chart.buckets[i].weightKg case final kg?)
@@ -165,61 +54,98 @@ mixin BodyHistoryViewMixin on State<BodyHistoryView> {
             isCurrent: i == chart.buckets.length - 1,
           ),
     ];
+    final pending = _store.pendingKg;
+    if (pending == null) return points;
+    // Bugünün kovası doluysa değeri güncellenir, yoksa yeni nokta eklenir.
+    return [
+      for (final p in points)
+        if (!p.isCurrent) p,
+      _ChartPoint(
+        label: chart.buckets.lastOrNull?.label ?? '—',
+        kg: pending,
+        isCurrent: true,
+      ),
+    ];
+  }
+
+  double get chartYMin {
+    final base = _chart?.yMin ?? 65;
+    final points = chartPoints;
+    if (points.isEmpty) return base;
+    return math.min(base, points.map((p) => p.kg).reduce(math.min) - 2);
+  }
+
+  double get chartYMax {
+    final base = _chart?.yMax ?? 120;
+    final points = chartPoints;
+    if (points.isEmpty) return base;
+    return math.max(base, points.map((p) => p.kg).reduce(math.max) + 2);
+  }
+
+  void initBodyHistory() {
+    _seedCurrent = widget.currentKg;
+    _seedStart = widget.startKg;
+    _seedGoal = widget.targetKg;
+    _seedFromHomeSummary();
+    _store.addListener(_onStoreChanged);
+    unawaited(_load());
+  }
+
+  void disposeBodyHistory() {
+    _store.removeListener(_onStoreChanged);
+  }
+
+  void _onStoreChanged() {
+    if (!mounted) return;
     setState(() {
-      chartYMin = chart.yMin ?? chartYMin;
-      chartYMax = chart.yMax ?? chartYMax;
-      chartPoints = points;
-      selectedPointIndex = points.isEmpty
-          ? 0
-          : math.min(selectedPointIndex, points.length - 1);
+      final count = chartPoints.length;
+      if (count == 0) {
+        selectedPointIndex = 0;
+      } else if (_store.pendingKg != null || selectedPointIndex >= count) {
+        selectedPointIndex = count - 1;
+      }
     });
   }
 
-  /// Bugünün kovasının etiketi (iyimser nokta için).
-  String? _currentBucketLabel;
+  void _seedFromHomeSummary() {
+    final home = getIt<HomeBloc>().state;
+    if (home is! HomeLoaded) return;
+    final s = home.summary;
+    _weightUnit = s?.weightUnit ?? 'kg';
+    _seedCurrent ??= s?.weightCurrentKg;
+    _seedStart ??= s?.weightStartKg;
+    _seedGoal ??= s?.weightGoalKg;
+  }
 
-  /// Bugünün kovası doluysa değeri güncellenir, yoksa yeni nokta eklenir.
-  /// Önceden son dolu kova (ör. geçen haftaki) eziliyordu.
-  void _upsertTodayChartPoint(double kg) {
-    final today = _ChartPoint(
-      label: _currentBucketLabel ?? '—',
-      kg: kg,
-      isCurrent: true,
-    );
-    chartPoints = [
-      for (final p in chartPoints)
-        if (!p.isCurrent) p,
-      today,
-    ];
-    selectedPointIndex = chartPoints.length - 1;
-    final lo = chartPoints.map((p) => p.kg).reduce(math.min);
-    final hi = chartPoints.map((p) => p.kg).reduce(math.max);
-    chartYMin = math.min(chartYMin, lo - 2);
-    chartYMax = math.max(chartYMax, hi + 2);
+  double? _bmiFor(double? kg) {
+    final h = heightCm;
+    if (kg == null || h == null || h <= 0) return null;
+    final m = h / 100;
+    return double.parse((kg / (m * m)).toStringAsFixed(1));
+  }
+
+  /// Özet ve seçili grafik paralel; diğer aralıklar arka planda hazırlanır
+  /// (sekme değişiminde iskelet görünmesin).
+  Future<void> _load() async {
+    unawaited(_store.loadSummary().catchError((Object _) {}));
+    try {
+      await _store.loadChart(_apiRange);
+    } on Object catch (e) {
+      if (mounted && _chart == null) AppSnackbar.showError(context, e);
+    }
+    for (final range in const ['day', 'week', 'month']) {
+      if (range == _apiRange || _store.chart(range) != null) continue;
+      unawaited(_store.loadChart(range).then((_) {}, onError: (Object _) {}));
+    }
   }
 
   void onRangeChanged(_HistoryRange range) {
-    final cached = _charts[range];
     setState(() {
       selectedRange = range;
-      selectedPointIndex = 0;
-      chartLoading = cached == null;
+      selectedPointIndex = math.max(0, chartPoints.length - 1);
     });
-    if (cached != null) {
-      _applyChart(cached);
-      return;
-    }
-    unawaited(() async {
-      try {
-        final chart = await _chartFor(range);
-        if (!mounted || range != selectedRange) return;
-        _applyChart(chart);
-      } on Object {
-        if (mounted) setState(() => chartPoints = const []);
-      } finally {
-        if (mounted) setState(() => chartLoading = false);
-      }
-    }());
+    if (_chart != null) return;
+    unawaited(_store.loadChart(_apiRange).then((_) {}, onError: (Object _) {}));
   }
 
   void onPointSelected(int index) {
@@ -227,7 +153,7 @@ mixin BodyHistoryViewMixin on State<BodyHistoryView> {
   }
 
   void onUpdateTapped() {
-    _openWeightDialog();
+    unawaited(_openWeightDialog());
   }
 
   Future<void> _openWeightDialog() async {
@@ -236,64 +162,11 @@ mixin BodyHistoryViewMixin on State<BodyHistoryView> {
       initialWeightKg: currentKg ?? 70,
     );
     if (result == null || !mounted) return;
-
-    final kg = result.weightKg;
-    final prevCurrent = currentKg;
-    final prevBmi = bmi;
-    final prevPoints = chartPoints;
-    final prevIndex = selectedPointIndex;
-    final prevYMin = chartYMin;
-    final prevYMax = chartYMax;
-
-    // Anında UI — API cevabını bekleme.
-    setState(() {
-      currentKg = kg;
-      bmi = _bmiFor(kg) ?? bmi;
-      _upsertTodayChartPoint(kg);
-    });
-
     try {
-      await _trackers.createWeight(weightKg: kg);
-      DataSync.afterWrite(profile: true);
-      if (!mounted) return;
-      // Sunucu özeti / grafik arka planda; ekran zaten güncel.
-      unawaited(_refreshAfterWrite());
-      unawaited(_loadEntries());
+      // Anında görünür; onaylanınca taze özet / grafik gelir.
+      await _store.addWeight(result.weightKg, visibleRange: _apiRange);
     } on Object catch (e) {
-      if (!mounted) return;
-      setState(() {
-        currentKg = prevCurrent;
-        bmi = prevBmi;
-        chartPoints = prevPoints;
-        selectedPointIndex = prevIndex;
-        chartYMin = prevYMin;
-        chartYMax = prevYMax;
-      });
-      AppSnackbar.showError(context, e);
-    }
-  }
-
-  Future<void> _refreshAfterWrite() async {
-    try {
-      final summary = await _trackers.getWeightSummary();
-      if (!mounted) return;
-      setState(() {
-        currentKg = summary.currentKg ?? currentKg;
-        startKg = summary.startKg ?? startKg;
-        targetKg = summary.goalKg ?? targetKg;
-        heightCm = summary.heightCm ?? heightCm;
-        bmi = summary.bmi ?? _bmiFor(currentKg) ?? bmi;
-      });
-      _chartGeneration++;
-      _charts.clear();
-      // Yanıt gelene kadar sekme değişmiş olabilir: yanlış aralığın grafiği
-      // gösterilmesin.
-      final range = selectedRange;
-      final chart = await _chartFor(range);
-      if (!mounted || range != selectedRange) return;
-      _applyChart(chart);
-    } on Object {
-      // Optimistic UI yeterli.
+      if (mounted) AppSnackbar.showError(context, e);
     }
   }
 
@@ -303,21 +176,10 @@ mixin BodyHistoryViewMixin on State<BodyHistoryView> {
       initialWeightKg: targetKg ?? currentKg ?? 70,
     );
     if (result == null || !mounted) return;
-
-    final prev = targetKg;
-    setState(() => targetKg = result.weightKg);
-
     try {
-      final summary = await _trackers.setWeightGoal(result.weightKg);
-      DataSync.afterWrite(profile: true);
-      if (!mounted) return;
-      setState(() {
-        if (summary.goalKg != null) targetKg = summary.goalKg;
-      });
+      await _store.setGoal(result.weightKg);
     } on Object catch (e) {
-      if (!mounted) return;
-      setState(() => targetKg = prev);
-      AppSnackbar.showError(context, e);
+      if (mounted) AppSnackbar.showError(context, e);
     }
   }
 }

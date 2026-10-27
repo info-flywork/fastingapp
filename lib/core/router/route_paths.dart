@@ -36,6 +36,7 @@ enum RoutePaths {
   fastingFinish('/fasting-finish', 'fastingFinish'),
   fastingFirstTime('/fasting-first-time', 'fastingFirstTime'),
   fastingHistory('/fasting-history', 'fastingHistory'),
+  challengeDetail('/challenge', 'challengeDetail'),
   plans('/plans', 'plans'),
   planDetail('/plan-detail', 'planDetail'),
   weeklyPlanDetail('/weekly-plan-detail', 'weeklyPlanDetail'),

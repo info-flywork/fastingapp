@@ -3,11 +3,13 @@ import 'dart:async';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:fastingapp/core/di/injection.dart';
 import 'package:fastingapp/core/dialogs/app_dialogs.dart';
+import 'package:fastingapp/core/network/network_exception.dart';
 import 'package:fastingapp/core/remote_images/app_image.dart';
 import 'package:fastingapp/core/snackbar/app_snackbar.dart';
-import 'package:fastingapp/core/sync/data_sync.dart';
 import 'package:fastingapp/core/theme/app_text_styles.dart';
+import 'package:fastingapp/core/utils/enum/snackbar_type.dart';
 import 'package:fastingapp/core/widgets/horseshoe_arc.dart';
+import 'package:fastingapp/domain/trackers/sleep_store.dart';
 import 'package:fastingapp/domain/trackers/trackers_repository.dart';
 import 'package:fastingapp/generated/app_images.g.dart';
 import 'package:fastingapp/generated/assets.gen.dart';
@@ -25,7 +27,10 @@ final class SleepView extends StatefulWidget {
 }
 
 final class _SleepViewState extends State<SleepView> {
-  SleepSummary? _summary;
+  SleepStore get _store => getIt<SleepStore>();
+
+  /// Store'daki görünen özet (bellekte varsa beklemeden dolu açılır).
+  SleepSummary? get _summary => _store.summary;
 
   static const _dayKeys = [
     'sleep_page.day_mon',
@@ -40,16 +45,26 @@ final class _SleepViewState extends State<SleepView> {
   @override
   void initState() {
     super.initState();
+    _store.addListener(_onStoreChanged);
     unawaited(_load());
+  }
+
+  @override
+  void dispose() {
+    _store.removeListener(_onStoreChanged);
+    super.dispose();
+  }
+
+  void _onStoreChanged() {
+    if (mounted) setState(() {});
   }
 
   Future<void> _load() async {
     try {
-      final summary = await getIt<TrackersRepository>().getSleepSummary();
-      if (mounted) setState(() => _summary = summary);
+      await _store.load();
     } on Object catch (e) {
-      // Hata boş ekran gibi gösterilmesin.
-      if (mounted) AppSnackbar.showError(context, e);
+      // Bellekte özet varsa o kalır; yoksa hata boş ekran gibi görünmesin.
+      if (mounted && _summary == null) AppSnackbar.showError(context, e);
     }
   }
 
@@ -64,9 +79,15 @@ final class _SleepViewState extends State<SleepView> {
   /// Dün gecenin uykusu: kalkış saati henüz gelmediyse dünkü kalkış;
   /// yatış kalkıştan sonra görünüyorsa bir önceki güne düşer. [editing]
   /// verilirse o kaydın gerçek saatleriyle açılır ve kayıt güncellenir.
+  /// "+" ile açıldığında dün gece zaten elle girildiyse yeni kayıt değil o
+  /// düzenlenir (önceden aynı geceye ikinci kayıt 409 "çakışıyor" alıyordu).
   Future<void> _logSleep({SleepSummary? editing}) async {
-    final start0 = editing?.lastNightStart;
-    final end0 = editing?.lastNightEnd;
+    final current = _summary;
+    final target =
+        editing ??
+        (current != null && current.lastNightEditable ? current : null);
+    final start0 = target?.lastNightStart;
+    final end0 = target?.lastNightEnd;
     final (bedH, bedM) = start0 != null
         ? (start0.hour, start0.minute)
         : _hm(_summary?.bedtime, (23, 0));
@@ -99,16 +120,22 @@ final class _SleepViewState extends State<SleepView> {
       result.startMinute,
     );
     if (!start.isBefore(end)) start = start.subtract(const Duration(days: 1));
-    final trackers = getIt<TrackersRepository>();
-    final id = editing?.lastNightId;
     try {
-      if (id != null) {
-        await trackers.updateSleep(id, sleepStart: start, sleepEnd: end);
-      } else {
-        await trackers.createSleep(sleepStart: start, sleepEnd: end);
+      // Anında görünür; sunucu onaylayınca gerçek özet gelir.
+      await _store.logNight(start: start, end: end, id: target?.lastNightId);
+    } on NetworkException catch (e) {
+      if (!mounted) return;
+      // Seçilen saatler başka bir kayıtla (ör. sağlık uygulamasından gelen
+      // gece) çakışıyor: genel "çakışıyor" yerine ne yapılacağı söylenir.
+      if (e.details?['reason'] == 'sleep_overlap') {
+        AppSnackbar.show(
+          context: context,
+          text: 'sleep_page.overlap'.tr(),
+          type: SnackBarType.failure,
+        );
+        return;
       }
-      DataSync.afterWrite();
-      await _load();
+      AppSnackbar.showError(context, e);
     } on Object catch (e) {
       if (mounted) AppSnackbar.showError(context, e);
     }
@@ -124,9 +151,7 @@ final class _SleepViewState extends State<SleepView> {
     if (delete == null || !mounted) return;
     if (!delete) return _logSleep(editing: summary);
     try {
-      await getIt<TrackersRepository>().deleteSleep(id);
-      DataSync.afterWrite();
-      await _load();
+      await _store.deleteNight(id);
     } on Object catch (e) {
       if (mounted) AppSnackbar.showError(context, e);
     }
@@ -147,10 +172,12 @@ final class _SleepViewState extends State<SleepView> {
       wakeMinute: wakeM,
     );
     if (result == null || !mounted) return;
-    await _saveGoals({
-      'bedtime': _hhmm(result.startHour, result.startMinute),
-      'wakeTime': _hhmm(result.endHour, result.endMinute),
-    });
+    await _saveGoals(
+      () => _store.setGoals(
+        bedtime: _hhmm(result.startHour, result.startMinute),
+        wakeTime: _hhmm(result.endHour, result.endMinute),
+      ),
+    );
   }
 
   /// Uyku hedefi 3–12 saat, yarım saat adımlarla.
@@ -165,14 +192,13 @@ final class _SleepViewState extends State<SleepView> {
       format: _goalHours,
     );
     if (minutes == null || !mounted) return;
-    await _saveGoals({'sleepGoalMin': minutes});
+    await _saveGoals(() => _store.setGoals(goalMin: minutes));
   }
 
-  Future<void> _saveGoals(Map<String, dynamic> fields) async {
+  /// Anında görünür; kaydedilemezse eski değere döner.
+  Future<void> _saveGoals(Future<void> Function() save) async {
     try {
-      await getIt<TrackersRepository>().updateGoals(fields);
-      DataSync.afterWrite();
-      await _load();
+      await save();
     } on Object catch (e) {
       if (mounted) AppSnackbar.showError(context, e);
     }
@@ -213,13 +239,18 @@ final class _SleepViewState extends State<SleepView> {
           return _dayKeys[((date ?? DateTime.now()).weekday - 1) % 7];
         }(),
     ];
-    final bedtime = summary?.bedtime ?? '—';
-    final wakeTime = summary?.wakeTime ?? '—';
+    // Program hiç ayarlanmadıysa sunucunun varsayılanları kullanıcınınmış
+    // gibi gösterilmez; kartlar boş, altında oluşturma çağrısı.
+    final scheduleSet = summary?.scheduleSet ?? false;
+    final bedtime = scheduleSet ? summary?.bedtime ?? '—' : '—';
+    final wakeTime = scheduleSet ? summary?.wakeTime ?? '—' : '—';
     // Yay altındaki satır gecenin gerçek saatleri (önceden program).
     String clock(DateTime? t) => t == null ? '—' : _hhmm(t.hour, t.minute);
     final sleptAt = clock(summary?.lastNightStart);
     final wokeAt = clock(summary?.lastNightEnd);
-    final goalText = summary != null ? _goalHours(summary.goalMin) : '—';
+    final goalText = summary != null && scheduleSet
+        ? _goalHours(summary.goalMin)
+        : '—';
 
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: SystemUiOverlayStyle.dark,
@@ -231,20 +262,20 @@ final class _SleepViewState extends State<SleepView> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               SizedBox(
-                height: 56,
+                height: 46,
                 width: double.infinity,
                 child: _SleepHeader(onAdd: () => unawaited(_logSleep())),
               ),
               Expanded(
                 child: ListView(
                   physics: const ClampingScrollPhysics(),
-                  padding: EdgeInsets.fromLTRB(16, 8, 16, bottom + 24),
+                  padding: EdgeInsets.fromLTRB(16, 8, 16, bottom - 10),
                   children: [
                     _SleepArc(
                       progress: progress.clamp(0.0, 1.0),
                       durationText: lastNight,
                     ),
-                    const SizedBox(height: 8),
+                    const SizedBox(height: 4),
                     GestureDetector(
                       behavior: HitTestBehavior.opaque,
                       onTap: summary?.lastNightEditable ?? false
@@ -252,7 +283,7 @@ final class _SleepViewState extends State<SleepView> {
                           : null,
                       child: _BoundRow(bedtime: sleptAt, wakeTime: wokeAt),
                     ),
-                    const SizedBox(height: 20),
+                    const SizedBox(height: 12),
                     const _HourAxis(),
                     const SizedBox(height: 8),
                     for (var i = 0; i < weekHours.length; i++) ...[
@@ -262,12 +293,19 @@ final class _SleepViewState extends State<SleepView> {
                       ),
                       if (i != weekHours.length - 1) const SizedBox(height: 16),
                     ],
-                    const SizedBox(height: 24),
+                    const SizedBox(height: 16),
                     Text(
                       'sleep_page.schedule'.tr(),
                       style: AppTextStyles.sleepSectionTitle,
                     ),
-                    const SizedBox(height: 12),
+                    if (summary != null && !scheduleSet) ...[
+                      const SizedBox(height: 6),
+                      Text(
+                        'sleep_page.schedule_empty'.tr(),
+                        style: AppTextStyles.sleepCaption,
+                      ),
+                    ],
+                    const SizedBox(height: 8),
                     Row(
                       children: [
                         Expanded(
@@ -412,6 +450,7 @@ final class _SleepArc extends StatelessWidget {
             height: HorseshoeArc.diameterDefault * 0.82,
             child: Stack(
               alignment: Alignment.center,
+              clipBehavior: Clip.none,
               children: [
                 HorseshoeArc(
                   progress: progress,

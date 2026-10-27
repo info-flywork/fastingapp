@@ -218,8 +218,23 @@ class _FastingViewState extends State<FastingView> {
     );
   }
 
+  /// Moladayken oruç başlatmadan önce onay ister (yemek penceresi kısalır).
+  /// Molada değilse ya da kullanıcı onaylarsa `true`.
+  Future<bool> _confirmEarlyStart(FastingSessionState session) async {
+    final endsAt = session.eatingWindow?.endsAt;
+    if (!session.isEating || endsAt == null) return true;
+    final remaining = endsAt.difference(DateTime.now());
+    if (remaining <= Duration.zero) return true;
+    final ok = await AppDialogs.instance.showEarlyFastStart(
+      context,
+      remaining: remaining,
+    );
+    return ok ?? false;
+  }
+
   Future<void> _pickStart(FastingSessionState session) async {
     if (session.isFasting) return;
+    if (!await _confirmEarlyStart(session) || !mounted) return;
     final picked = await showModalBottomSheet<DateTime>(
       context: context,
       useRootNavigator: true,
@@ -239,6 +254,7 @@ class _FastingViewState extends State<FastingView> {
     MochiDailyPlan plan,
   ) async {
     if (session.isFasting) return;
+    if (!await _confirmEarlyStart(session) || !mounted) return;
     final now = DateTime.now();
     final initial = plan.startsAt.isAfter(now) ? now : plan.startsAt;
     final picked = await showModalBottomSheet<DateTime>(
@@ -1212,7 +1228,7 @@ final class _FastingArc extends StatelessWidget {
 }
 
 Offset _pointOnArc(Size size, double t) {
-  final radius = (math.min(size.width, size.height) - HorseshoeArc.stroke) / 2;
+  final radius = HorseshoeArc.radiusFor(size);
   final angle =
       HorseshoeArc.startRad + HorseshoeArc.sweepDegrees * math.pi / 180 * t;
   return Offset(
@@ -1411,12 +1427,12 @@ final class _FastingActions extends StatelessWidget {
   Widget build(BuildContext context) {
     final fasting =
         state == _FastState.fasting || state == _FastState.goalReached;
-    // Mola: sıradaki oruç pencere bitmeden başlamaz, bu yüzden buton yok.
+    // Mola: erken başlatılabilir ama onay ister; buton ikincil görünür.
     final primaryLabel = switch (state) {
       _FastState.fasting => 'fasting_page.finish_early'.tr(),
       _FastState.goalReached => 'fasting_page.finish_cta'.tr(),
       _FastState.idle => 'fasting_page.start_cta'.tr(args: [planTitle]),
-      _FastState.eating => null,
+      _FastState.eating => 'fasting_page.start_early'.tr(),
     };
     final showStruggle = fasting && state != _FastState.goalReached;
     return Padding(
@@ -1429,38 +1445,37 @@ final class _FastingActions extends StatelessWidget {
             startedCaption: startedCaption,
             endsCaption: endsCaption,
           ),
-          if (primaryLabel != null || showSaveMeal || showStruggle) ...[
-            const SizedBox(height: 20),
-            if (primaryLabel != null)
-              AppButton(
-                label: primaryLabel,
-                onPressed: onAction,
-                showIcon: false,
-                decoration: state == _FastState.fasting
-                    ? AppButtonDecoration.dark()
-                    : AppButtonDecoration.fastingStart(),
-              ),
-            // Orucunu boz: erken bitir ile zorlanıyorum arasında.
-            if (showSaveMeal) ...[
-              if (primaryLabel != null) const SizedBox(height: 10),
-              AppButton(
-                label: 'fasting_page.save_meal'.tr(),
-                onPressed: onSaveMeal,
-                showIcon: false,
-                decoration: AppButtonDecoration.fastingAnother(),
-              ),
-            ],
-            // Zorlanma yalnızca hedefe ulaşmadan önce anlamlı.
-            if (showStruggle) ...[
-              const SizedBox(height: 10),
-              AppButton(
-                label: 'fasting_page.struggling'.tr(),
-                onPressed: () =>
-                    context.pushNamed(RoutePaths.fastingStruggle.name),
-                showIcon: false,
-                decoration: AppButtonDecoration.fastingStruggle(),
-              ),
-            ],
+          const SizedBox(height: 20),
+          AppButton(
+            label: primaryLabel,
+            onPressed: onAction,
+            showIcon: false,
+            decoration: switch (state) {
+              _FastState.fasting => AppButtonDecoration.dark(),
+              _FastState.eating => AppButtonDecoration.fastingAnother(),
+              _ => AppButtonDecoration.fastingStart(),
+            },
+          ),
+          // Orucunu boz: erken bitir ile zorlanıyorum arasında.
+          if (showSaveMeal) ...[
+            const SizedBox(height: 10),
+            AppButton(
+              label: 'fasting_page.save_meal'.tr(),
+              onPressed: onSaveMeal,
+              showIcon: false,
+              decoration: AppButtonDecoration.fastingAnother(),
+            ),
+          ],
+          // Zorlanma yalnızca hedefe ulaşmadan önce anlamlı.
+          if (showStruggle) ...[
+            const SizedBox(height: 10),
+            AppButton(
+              label: 'fasting_page.struggling'.tr(),
+              onPressed: () =>
+                  context.pushNamed(RoutePaths.fastingStruggle.name),
+              showIcon: false,
+              decoration: AppButtonDecoration.fastingStruggle(),
+            ),
           ],
         ],
       ),

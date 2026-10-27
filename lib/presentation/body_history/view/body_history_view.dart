@@ -5,13 +5,13 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:fastingapp/core/di/injection.dart';
 import 'package:fastingapp/core/dialogs/app_dialogs.dart';
 import 'package:fastingapp/core/snackbar/app_snackbar.dart';
-import 'package:fastingapp/core/sync/data_sync.dart';
 import 'package:fastingapp/core/theme/app_text_styles.dart';
 import 'package:fastingapp/core/utils/weight_progress.dart';
 import 'package:fastingapp/core/utils/weight_units.dart';
 import 'package:fastingapp/core/widgets/app_shimmer.dart';
 import 'package:fastingapp/core/widgets/weight_progress_bar.dart';
 import 'package:fastingapp/domain/trackers/trackers_repository.dart';
+import 'package:fastingapp/domain/trackers/weight_store.dart';
 import 'package:fastingapp/generated/app_images.g.dart';
 import 'package:fastingapp/generated/assets.gen.dart';
 import 'package:fastingapp/generated/colors.gen.dart';
@@ -52,6 +52,12 @@ class _BodyHistoryViewState extends State<BodyHistoryView>
   void initState() {
     super.initState();
     initBodyHistory();
+  }
+
+  @override
+  void dispose() {
+    disposeBodyHistory();
+    super.dispose();
   }
 
   @override

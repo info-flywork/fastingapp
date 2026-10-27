@@ -671,6 +671,7 @@ final class StepsDay {
   const StepsDay({
     required this.date,
     required this.steps,
+    this.goal,
     this.distanceKm = 0,
     this.kcal = 0,
     this.durationMin = 0,
@@ -681,6 +682,7 @@ final class StepsDay {
   factory StepsDay.fromJson(Map<String, dynamic> json) => StepsDay(
     date: DateTime.tryParse(json['date'] as String? ?? '') ?? DateTime.now(),
     steps: (json['steps'] as num?)?.toInt() ?? 0,
+    goal: (json['goal'] as num?)?.toInt(),
     distanceKm: (json['distanceKm'] as num?)?.toDouble() ?? 0,
     kcal: (json['kcal'] as num?)?.toInt() ?? 0,
     durationMin: (json['durationMin'] as num?)?.toInt() ?? 0,
@@ -690,6 +692,9 @@ final class StepsDay {
 
   final DateTime date;
   final int steps;
+
+  /// O günün adım hedefi. Geçmiş gün değişmez; bugün ve yarın canlı hedeftir.
+  final int? goal;
   final double distanceKm;
   final int kcal;
   final int durationMin;
@@ -716,6 +721,7 @@ final class SleepSummary implements BaseModel<SleepSummary> {
     this.wakeTime,
     this.weekMinutes = const [],
     this.weekDates = const [],
+    this.scheduleSet = false,
   });
 
   factory SleepSummary.empty(DateTime date) => SleepSummary(date: date);
@@ -741,6 +747,7 @@ final class SleepSummary implements BaseModel<SleepSummary> {
       progress: (json['progress'] as num?)?.toDouble() ?? 0,
       bedtime: scheduleMap?['bedtime'] as String?,
       wakeTime: scheduleMap?['wakeTime'] as String?,
+      scheduleSet: json['scheduleSet'] as bool? ?? false,
       weekMinutes: weekRaw is List
           ? weekRaw
                 .whereType<Map<String, dynamic>>()
@@ -775,6 +782,10 @@ final class SleepSummary implements BaseModel<SleepSummary> {
   final double progress;
   final String? bedtime;
   final String? wakeTime;
+
+  /// Kullanıcı yatış / uyanış / hedefi hiç ayarlamadıysa false; o zaman
+  /// [bedtime], [wakeTime], [goalMin] yalnızca varsayılan öneridir.
+  final bool scheduleSet;
   final List<int> weekMinutes;
 
   /// [weekMinutes] ile aynı sırada günler (son 7 gün, bugün en sonda).

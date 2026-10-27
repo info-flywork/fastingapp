@@ -27,7 +27,12 @@ mixin PlanDetailViewMixin on State<PlanDetailView> {
 
   void initPlanDetail(PlanDetailArgs detailArgs) {
     args = detailArgs;
-    _apply(_resolve());
+    // Detay önceden yüklendiyse sayfa doğru pencereyle açılır (sonradan
+    // katalog gelip saatler zıplamaz).
+    final cached = PlanCatalogRepository.instance?.cachedDetail(
+      args.plan.planCode,
+    );
+    _apply(_resolve(detail: cached));
   }
 
   /// Katalog listesi ve plan detayı gelince saati gerçek süreye çeker.
@@ -36,6 +41,7 @@ mixin PlanDetailViewMixin on State<PlanDetailView> {
     final repo = PlanCatalogRepository.instance;
     if (repo == null) return;
     final token = _scheduleToken;
+    if (repo.isLoaded && repo.cachedDetail(args.plan.planCode) != null) return;
     try {
       await repo.ensureLoaded();
       final detail = await repo.detail(args.plan.planCode);

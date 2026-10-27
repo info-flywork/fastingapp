@@ -44,6 +44,12 @@ class _ProteinTrackerViewState extends State<ProteinTrackerView> {
   NutritionDay _day = NutritionDay.empty();
   NutritionWeek _week = NutritionWeek.empty();
 
+  /// Kaydı süren hedef: anında görünür, yoldaki eski cevap geri alamaz.
+  int? _pendingGoal;
+
+  /// Yeni yükleme başlayınca artar: eski yüklemenin cevabı yenisini ezmesin.
+  int _loadGen = 0;
+
   static const _dayKeys = [
     'sleep_page.day_mon',
     'sleep_page.day_tue',
@@ -93,12 +99,17 @@ class _ProteinTrackerViewState extends State<ProteinTrackerView> {
     } else if (mounted) {
       setState(() => _error = null);
     }
+    final gen = ++_loadGen;
+    final seqAtStart = _nutrition.writeSeq;
     try {
       final results = await Future.wait([
         _nutrition.getDay(force: force),
         _nutrition.getWeek(force: force),
       ]);
-      if (!mounted) return;
+      if (!mounted || gen != _loadGen) return;
+      // İstek sürerken bir yazma oldu: cevap eski; yazmanın tetiklediği
+      // yükleme doğru değeri getirecek.
+      if (seqAtStart != _nutrition.writeSeq && _hasContent) return;
       final revealFromShimmer = _showShimmer || !_hasContent;
       setState(() {
         _day = results[0] as NutritionDay;
@@ -135,12 +146,22 @@ class _ProteinTrackerViewState extends State<ProteinTrackerView> {
       format: (v) => '$v g',
     );
     if (value == null || value == current || !mounted) return;
+    // Anında görünür; onay + taze gün gelince iyimser değer kalkar (arada
+    // eski hedefe düşmez), kaydedilemezse eski hedefe döner.
+    setState(() => _pendingGoal = value);
+    void clear() {
+      if (_pendingGoal == value) _pendingGoal = null;
+    }
+
     try {
       await getIt<TrackersRepository>().updateGoals({'proteinGoalG': value});
       DataSync.afterWrite();
-      if (mounted) await _load();
+      await _load();
+      if (mounted) setState(clear);
     } on Object catch (e) {
-      if (mounted) AppSnackbar.showError(context, e);
+      if (!mounted) return;
+      setState(clear);
+      AppSnackbar.showError(context, e);
     }
   }
 
@@ -154,8 +175,12 @@ class _ProteinTrackerViewState extends State<ProteinTrackerView> {
     final bottom = MediaQuery.paddingOf(context).bottom;
     final protein = _day.macros.protein;
     final currentG = protein.g.round();
-    final goalG = protein.goalG?.round();
-    final arcProgress = protein.progressOrZero;
+    final serverGoal = protein.goalG?.round();
+    // Hedef gizliyse (sağlık bayrağı) bekleyen değer de gösterilmez.
+    final goalG = serverGoal == null ? null : _pendingGoal ?? serverGoal;
+    final arcProgress = _pendingGoal != null && goalG != null && goalG > 0
+        ? (protein.g / goalG).clamp(0.0, 1.0)
+        : protein.progressOrZero;
 
     if (_error != null) {
       WidgetsBinding.instance.addPostFrameCallback((_) {

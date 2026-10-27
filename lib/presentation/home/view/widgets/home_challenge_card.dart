@@ -10,9 +10,12 @@ final class HomeChallengeCard extends StatelessWidget {
       bloc: getIt<HomeBloc>(),
       selector: (state) =>
           state is HomeLoaded ? state.summary?.featuredChallenge : null,
-      builder: (context, challenge) => challenge == null
-          ? const SizedBox.shrink()
-          : _ChallengeCardBody(challenge: challenge),
+      builder: (context, challenge) {
+        if (challenge == null) return const SizedBox.shrink();
+        // Detay sayfası dokununca beklemeden açılsın (dakikada en çok bir kez).
+        unawaited(prefetchChallengeDetail(challenge));
+        return _ChallengeCardBody(challenge: challenge);
+      },
     );
   }
 }
@@ -24,69 +27,75 @@ final class _ChallengeCardBody extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.fromLTRB(16, 12, 16, 0),
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: ColorName.colorWhite,
-        borderRadius: BorderRadius.circular(20),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              AppImages.challenge.image(width: 28, height: 28),
-              const SizedBox(width: 6),
-              Text(
-                'home.active_challenge'.tr(),
-                style: AppTextStyles.homeChallengeEyebrow,
-              ),
-              const Spacer(),
-              Assets.icons.solarAltArrowUpLineDuotoneRight.svg(),
-            ],
-          ),
-          const SizedBox(height: 12),
-          Row(
-            children: [
-              AppImages.fastingChallenge.image(
-                width: 80,
-                height: 80,
-                fit: BoxFit.contain,
-              ),
-              const SizedBox(width: 8),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      challenge.title,
-                      style: AppTextStyles.homeChallengeTitle,
-                    ),
-                    if (challenge.subtitle.isNotEmpty) ...[
-                      const SizedBox(height: 8),
-                      Text(
-                        challenge.subtitle,
-                        style: AppTextStyles.homeChallengeSubtitle,
-                      ),
-                    ],
-                  ],
+    // Karta dokununca detay sayfası (katılımcılar, ilerleme, görünürlük).
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: () =>
+          context.pushNamed(RoutePaths.challengeDetail.name, extra: challenge),
+      child: Container(
+        margin: const EdgeInsets.fromLTRB(16, 12, 16, 0),
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: ColorName.colorWhite,
+          borderRadius: BorderRadius.circular(20),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                AppImages.challenge.image(width: 28, height: 28),
+                const SizedBox(width: 6),
+                Text(
+                  'home.active_challenge'.tr(),
+                  style: AppTextStyles.homeChallengeEyebrow,
                 ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 16),
-          Row(
-            children: [
-              _ParticipantsCluster(
-                count: challenge.participantsCount,
-                avatars: challenge.participantAvatars,
-              ),
-              const SizedBox(width: 12),
-              Expanded(child: _JoinNowButton(challenge: challenge)),
-            ],
-          ),
-        ],
+                const Spacer(),
+                Assets.icons.solarAltArrowUpLineDuotoneRight.svg(),
+              ],
+            ),
+            const SizedBox(height: 12),
+            Row(
+              children: [
+                AppImages.fastingChallenge.image(
+                  width: 80,
+                  height: 80,
+                  fit: BoxFit.contain,
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        challenge.title,
+                        style: AppTextStyles.homeChallengeTitle,
+                      ),
+                      if (challenge.subtitle.isNotEmpty) ...[
+                        const SizedBox(height: 8),
+                        Text(
+                          challenge.subtitle,
+                          style: AppTextStyles.homeChallengeSubtitle,
+                        ),
+                      ],
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            Row(
+              children: [
+                _ParticipantsCluster(
+                  count: challenge.participantsCount,
+                  avatars: challenge.participantAvatars,
+                ),
+                const SizedBox(width: 12),
+                Expanded(child: _JoinNowButton(challenge: challenge)),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -210,15 +219,19 @@ class _JoinNowButtonState extends State<_JoinNowButton> {
     final code = widget.challenge.code;
     final repo = getIt<ChallengesRepository>();
     try {
+      Challenge? joined;
       try {
-        await repo.join(code);
+        joined = await repo.join(code);
       } on NetworkException catch (e) {
         if (!RevenueCatService.needsUpgrade(e)) rethrow;
         final revenueCat = getIt<RevenueCatService>();
         if (!await revenueCat.presentPaywall()) return;
-        await revenueCat.retryAfterUpgrade(() => repo.join(code));
+        joined = await revenueCat.retryAfterUpgrade(() => repo.join(code));
       }
-      getIt<HomeBloc>().add(const HomeRefreshRequested());
+      // Yanıttaki challenge kartta hemen görünür; yazma sinyali yoldaki
+      // eski özetin "Şimdi Katıl"a geri çevirmesini engeller.
+      if (joined != null) getIt<HomeBloc>().add(HomeChallengeUpdated(joined));
+      DataSync.afterWrite();
     } on Object catch (e) {
       if (mounted) AppSnackbar.showError(context, e);
     } finally {
@@ -232,7 +245,7 @@ class _JoinNowButtonState extends State<_JoinNowButton> {
     setState(() => _joining = true);
     try {
       await getIt<ChallengesRepository>().leave(widget.challenge.code);
-      getIt<HomeBloc>().add(const HomeRefreshRequested());
+      DataSync.afterWrite();
     } on Object catch (e) {
       if (mounted) AppSnackbar.showError(context, e);
     } finally {

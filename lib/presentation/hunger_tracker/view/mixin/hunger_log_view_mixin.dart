@@ -5,7 +5,7 @@ mixin HungerLogViewMixin on State<HungerLogView> {
   late final DateTime loggedAt;
   bool saving = false;
 
-  HungerRepository get _hunger => getIt<HungerRepository>();
+  HungerStore get _hunger => getIt<HungerStore>();
 
   @override
   void initState() {
@@ -37,12 +37,12 @@ mixin HungerLogViewMixin on State<HungerLogView> {
     }
     setState(() => saving = true);
     try {
-      await _hunger.saveCheckin(
+      // Geçmiş listesi, hafta şeridi ve ana sayfa sayıları anında güncellenir.
+      await _hunger.save(
         flow: session.flow,
         mode: session.flow.mode,
         notes: notesController.text.trim(),
       );
-      DataSync.afterWrite();
       if (!mounted) return;
       await context.pushNamed(RoutePaths.hungerSuccess.name);
     } on Object catch (e) {

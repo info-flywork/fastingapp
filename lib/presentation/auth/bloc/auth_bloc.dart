@@ -9,10 +9,16 @@ import 'package:fastingapp/domain/auth/auth_repository.dart';
 import 'package:fastingapp/domain/chat/chat_repository.dart';
 import 'package:fastingapp/domain/content/content_repository.dart';
 import 'package:fastingapp/domain/gamification/world_repository.dart';
+import 'package:fastingapp/domain/hunger/hunger_store.dart';
 import 'package:fastingapp/domain/notification/notifications_repository.dart';
 import 'package:fastingapp/domain/nutrition/meals_repository.dart';
 import 'package:fastingapp/domain/nutrition/nutrition_repository.dart';
+import 'package:fastingapp/domain/profile/profile_repository.dart';
 import 'package:fastingapp/domain/trackers/health_sync_service.dart';
+import 'package:fastingapp/domain/trackers/sleep_store.dart';
+import 'package:fastingapp/domain/trackers/steps_store.dart';
+import 'package:fastingapp/domain/trackers/water_store.dart';
+import 'package:fastingapp/domain/trackers/weight_store.dart';
 import 'package:fastingapp/domain/trackers/trackers_repository.dart';
 import 'package:fastingapp/presentation/auth/bloc/auth_event.dart';
 import 'package:fastingapp/presentation/auth/bloc/auth_state.dart';
@@ -131,6 +137,24 @@ final class AuthBloc extends Bloc<AuthEvent, AuthState> {
     }
     if (getIt.isRegistered<FastingSessionCubit>()) {
       getIt<FastingSessionCubit>().reset();
+    }
+    if (getIt.isRegistered<StepsStore>()) {
+      getIt<StepsStore>().reset();
+    }
+    if (getIt.isRegistered<WaterStore>()) {
+      getIt<WaterStore>().reset();
+    }
+    if (getIt.isRegistered<SleepStore>()) {
+      getIt<SleepStore>().reset();
+    }
+    if (getIt.isRegistered<WeightStore>()) {
+      getIt<WeightStore>().reset();
+    }
+    if (getIt.isRegistered<HungerStore>()) {
+      getIt<HungerStore>().reset();
+    }
+    if (getIt.isRegistered<ProfileRepository>()) {
+      getIt<ProfileRepository>().cachedSettings = null;
     }
     if (getIt.isRegistered<TrackersRepository>()) {
       getIt<TrackersRepository>().clearSession();
