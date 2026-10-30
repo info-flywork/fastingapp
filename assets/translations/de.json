@@ -295,7 +295,9 @@
     "summit_progress": "{}/{} kg",
     "garden_progress": "{}/{} Mahlzeiten",
     "explore_hint": "Zum Erkunden tippen",
-    "immersive_hint": "Tippen zum Zurückkehren"
+    "immersive_hint": "Tippen zum Zurückkehren",
+    "next_stage": "Nächste Inselstufe: Level {}",
+    "island_complete": "Deine Insel ist voll gewachsen!"
   },
   "fasting_page": {
     "meal_time": "Essenszeit!",
@@ -684,7 +686,6 @@
     "weekly": "Wochenaktivität",
     "view_history": "Verlauf ansehen",
     "weekdays": "M,D,M,D,F,S,S",
-    "next_reminder": "Nächste Erinnerung",
     "add_water": "Wasser hinzufügen",
     "edit_goal_title": "Tägliches Wasserziel",
     "edit_goal_hint": "ml",

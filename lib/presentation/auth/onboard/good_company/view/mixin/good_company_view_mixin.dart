@@ -2,7 +2,8 @@ part of '../good_company_view.dart';
 
 mixin GoodCompanyViewMixin on State<GoodCompanyView> {
   /// Cevaplar BuildingPlan'da gönderildi; gönderilemediyse burada tekrar
-  /// denenir. Misafir oturumu + onboarding tamam → ana uygulamaya girilir.
+  /// denenir. Ardından giriş sayfası: Apple/Google misafir hesabı yükseltir
+  /// (cevaplar ve plan aynen kalır), "misafir devam" ana sayfaya geçer.
   Future<void> onContinue() async {
     final onboarding = getIt<OnboardingRepository>();
     try {
@@ -26,6 +27,6 @@ mixin GoodCompanyViewMixin on State<GoodCompanyView> {
     );
     unawaited(getIt<AuthRepository>().registerDevice());
     if (!mounted) return;
-    context.go(RoutePaths.home.path);
+    context.go(RoutePaths.loginAfterOnboarding);
   }
 }

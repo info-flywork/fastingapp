@@ -73,6 +73,8 @@ internal object FastingLive {
         val ty = json.optDouble("ty")
         val leading = json.optString("ta") == "l"
         val ts = json.optDouble("ts", 40.0)
+        /** Sola dayalı metnin en geniş hâli (maskota taşmasın); yoksa sınır yok. */
+        val tw: Double? = if (json.has("tw")) json.optDouble("tw") else null
         val tc = parseColor(json.optString("tc"))
         val hasRing = json.has("rr")
         val rx = json.optDouble("rx")
@@ -162,6 +164,11 @@ internal object FastingLive {
         // Halkada saniyeli sayaç iç çapa sığsın ("0:00:00" ≈ 3.9 em).
         var sizeDp = spec.ts * scale
         if (spec.hasRing) sizeDp = min(sizeDp, (spec.rr - spec.rs) * 2 * scale / 3.9)
+        // Sola dayalı satır ("7:33:31 kaldı") [Spec.tw] içine sığsın (≈ 0.55 em/harf).
+        spec.tw?.let { tw ->
+            val ems = 3.9 + ((live.suffix?.length ?: 0) + 1) * 0.55
+            sizeDp = min(sizeDp, tw * scale / ems)
+        }
         views.setTextViewTextSize(R.id.fasting_live_timer, TypedValue.COMPLEX_UNIT_DIP, sizeDp.toFloat())
         views.setTextColor(R.id.fasting_live_timer, spec.tc)
 

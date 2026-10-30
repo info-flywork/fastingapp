@@ -1,11 +1,10 @@
 import 'dart:math' as math;
-import 'dart:ui' as ui;
 
 import 'package:fastingapp/generated/colors.gen.dart';
 import 'package:fastingapp/generated/fonts.gen.dart';
 import 'package:flutter/material.dart';
 
-/// Büyük su widget'ı — halka, haftalık çubuklar ve hatırlatma.
+/// Büyük su widget'ı — halka, haftalık çubuklar ve su ekle düğmesi.
 final class WaterLargeWidgetView extends StatelessWidget {
   const WaterLargeWidgetView({
     required this.currentMl,
@@ -17,12 +16,10 @@ final class WaterLargeWidgetView extends StatelessWidget {
     required this.percentLabel,
     required this.weeklyLabel,
     required this.historyLabel,
-    required this.reminderLabel,
     required this.addWaterLabel,
     required this.weekdayLabels,
     required this.weekProgress,
     required this.todayIndex,
-    this.bell,
     super.key,
   });
 
@@ -35,12 +32,10 @@ final class WaterLargeWidgetView extends StatelessWidget {
   final String percentLabel;
   final String weeklyLabel;
   final String historyLabel;
-  final String reminderLabel;
   final String addWaterLabel;
   final List<String> weekdayLabels;
   final List<double> weekProgress;
   final int todayIndex;
-  final ui.Picture? bell;
 
   static const logicalSize = Size(658, 690);
 
@@ -88,10 +83,11 @@ final class WaterLargeWidgetView extends StatelessWidget {
                 todayIndex: todayIndex,
               ),
               const Spacer(),
-              _Footer(
-                reminderLabel: reminderLabel,
-                addWaterLabel: addWaterLabel,
-                bell: bell,
+              // Hatırlatma satırı yok: gerçek bildirim saati sunucuda
+              // planlanır, widget bilmez (saatsiz etiket yanıltıyordu).
+              Align(
+                alignment: AlignmentDirectional.centerEnd,
+                child: _AddWaterButton(label: addWaterLabel),
               ),
             ],
           ),
@@ -275,81 +271,24 @@ final class _WeekBar extends StatelessWidget {
   }
 }
 
-final class _Footer extends StatelessWidget {
-  const _Footer({
-    required this.reminderLabel,
-    required this.addWaterLabel,
-    required this.bell,
-  });
+final class _AddWaterButton extends StatelessWidget {
+  const _AddWaterButton({required this.label});
 
-  final String reminderLabel;
-  final String addWaterLabel;
-  final ui.Picture? bell;
+  final String label;
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      children: [
-        DecoratedBox(
-          decoration: const BoxDecoration(
-            color: ColorName.colorWaterWaveLight,
-            shape: BoxShape.circle,
-          ),
-          child: SizedBox(
-            width: 52,
-            height: 52,
-            child: Center(
-              child: CustomPaint(
-                size: const Size(26, 26),
-                painter: _BellPainter(bell),
-              ),
-            ),
-          ),
-        ),
-        const SizedBox(width: 12),
-        Expanded(
-          child: Text(
-            reminderLabel,
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-            style: _reminder,
-          ),
-        ),
-        const SizedBox(width: 12),
-        DecoratedBox(
-          decoration: BoxDecoration(
-            color: ColorName.colorWaterAction,
-            borderRadius: BorderRadius.circular(100),
-          ),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 14),
-            child: Text(addWaterLabel, style: _addWater),
-          ),
-        ),
-      ],
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: ColorName.colorWaterAction,
+        borderRadius: BorderRadius.circular(100),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 14),
+        child: Text(label, style: _addWater),
+      ),
     );
   }
-}
-
-final class _BellPainter extends CustomPainter {
-  const _BellPainter(this.picture);
-
-  final ui.Picture? picture;
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final picture = this.picture;
-    if (picture == null) return;
-    canvas
-      ..save()
-      ..scale(size.width / 20, size.height / 20)
-      ..drawPicture(picture)
-      ..restore();
-  }
-
-  @override
-  bool shouldRepaint(covariant _BellPainter oldDelegate) =>
-      oldDelegate.picture != picture;
 }
 
 final class _WaterRingPainter extends CustomPainter {
@@ -477,14 +416,6 @@ const _dayToday = TextStyle(
   fontWeight: FontWeight.w700,
   fontSize: 20,
   height: 1,
-  color: ColorName.colorTitle,
-);
-
-const _reminder = TextStyle(
-  fontFamily: FontFamily.sFProDisplay,
-  fontWeight: FontWeight.w600,
-  fontSize: 22,
-  height: 1.15,
   color: ColorName.colorTitle,
 );
 

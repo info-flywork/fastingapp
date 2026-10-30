@@ -4,7 +4,7 @@
     android:initialLayout="@layout/water_widget"
     android:minWidth="110dp"
     android:minHeight="110dp"
-    android:previewLayout="@layout/water_widget"
+    android:previewImage="@drawable/widget_preview_water"
     android:resizeMode="none"
     android:targetCellWidth="2"
     android:targetCellHeight="2"

@@ -22,8 +22,13 @@ final class FastingMediumWidgetView extends StatelessWidget {
 
   static const logicalSize = Size(310, 310);
 
+  /// Canlı süre satırının en geniş hâli (soldan maskota kadar).
+  static const _liveTextWidth = 124;
+
   /// Süre satırının konumu başlığın satır sayısına bağlı: başlık 258 px
   /// genişlikte ölçülür; satır üst 56 + başlık + 6, yazı 26 (yükseklik 1).
+  /// Saniyeli sayaç ("7:33:31 kaldı") maskotun şapkasına taşmasın diye
+  /// satır [_liveTextWidth] ile sınırlı; sığmazsa yerelde küçülür.
   static Map<String, Object> liveSpec(String headline, TextDirection dir) {
     final painter = TextPainter(
       text: TextSpan(text: headline, style: _headline),
@@ -38,6 +43,7 @@ final class FastingMediumWidgetView extends StatelessWidget {
       'ty': top + 13,
       'ta': 'l',
       'ts': 26,
+      'tw': _liveTextWidth,
       'tc': _hex(ColorName.colorSubtitle),
     };
   }

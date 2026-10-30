@@ -1,17 +1,14 @@
 import 'dart:async';
-import 'dart:ui' as ui;
 
 import 'package:easy_localization/easy_localization.dart';
 import 'package:fastingapp/core/home_widgets/fasting_widget_sync.dart';
 import 'package:fastingapp/core/router/app_router.dart';
 import 'package:fastingapp/core/router/deep_link_gate.dart';
 import 'package:fastingapp/core/router/route_paths.dart';
-import 'package:fastingapp/generated/assets.gen.dart';
 import 'package:fastingapp/presentation/home_widgets/water_home_widget_view.dart';
 import 'package:fastingapp/presentation/home_widgets/water_large_widget_view.dart';
 import 'package:fastingapp/presentation/home_widgets/water_medium_widget_view.dart';
 import 'package:flutter/widgets.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:home_widget/home_widget.dart';
 
 /// Ana ekran widget'ına yazılan tek bir su kaydı.
@@ -96,7 +93,6 @@ abstract final class WaterWidgetSync {
     required String percentTemplate,
     required String weeklyLabel,
     required String historyLabel,
-    required String reminderLabel,
     required String addWaterLabel,
     required String weekdays,
     int? currentMl,
@@ -119,7 +115,6 @@ abstract final class WaterWidgetSync {
       percentTemplate: percentTemplate,
       weeklyLabel: weeklyLabel,
       historyLabel: historyLabel,
-      reminderLabel: reminderLabel,
       addWaterLabel: addWaterLabel,
       weekdays: weekdays,
       currentMl: currentMl,
@@ -188,7 +183,6 @@ abstract final class WaterWidgetSync {
         percentTemplate: percentTemplate,
         weeklyLabel: weeklyLabel,
         historyLabel: historyLabel,
-        reminderLabel: reminderLabel,
         addWaterLabel: addWaterLabel,
         weekdays: weekdays,
       );
@@ -251,7 +245,6 @@ abstract final class WaterWidgetSync {
     required String percentTemplate,
     required String weeklyLabel,
     required String historyLabel,
-    required String reminderLabel,
     required String addWaterLabel,
     required String weekdays,
   }) async {
@@ -261,42 +254,26 @@ abstract final class WaterWidgetSync {
         ? 0
         : ((current / goal) * 100).round().clamp(0, 100);
     final labels = weekdays.split(',');
-    ui.Picture? bell;
-    try {
-      final info = await vg.loadPicture(
-        SvgAssetLoader(Assets.icons.solarBellLineDuotone.path),
-        null,
-      );
-      bell = info.picture;
-    } on Object {
-      bell = null;
-    }
-    try {
-      await HomeWidget.renderFlutterWidget(
-        WaterLargeWidgetView(
-          currentMl: _shown(current),
-          goalMl: _shown(goal),
-          unitLabel: unitLabel,
-          title: largeTitle,
-          subtitle: largeSubtitle,
-          intakeLabel: intakeLabel,
-          percentLabel: percentTemplate.replaceFirst('{}', '$percent'),
-          weeklyLabel: weeklyLabel,
-          historyLabel: historyLabel,
-          reminderLabel: reminderLabel,
-          addWaterLabel: addWaterLabel,
-          weekdayLabels: labels,
-          weekProgress: _weekProgress(week, goal),
-          todayIndex: DateTime.now().weekday - 1,
-          bell: bell,
-        ),
-        key: largeImageKey,
-        logicalSize: WaterLargeWidgetView.logicalSize,
-        pixelRatio: 2,
-      );
-    } finally {
-      bell?.dispose();
-    }
+    await HomeWidget.renderFlutterWidget(
+      WaterLargeWidgetView(
+        currentMl: _shown(current),
+        goalMl: _shown(goal),
+        unitLabel: unitLabel,
+        title: largeTitle,
+        subtitle: largeSubtitle,
+        intakeLabel: intakeLabel,
+        percentLabel: percentTemplate.replaceFirst('{}', '$percent'),
+        weeklyLabel: weeklyLabel,
+        historyLabel: historyLabel,
+        addWaterLabel: addWaterLabel,
+        weekdayLabels: labels,
+        weekProgress: _weekProgress(week, goal),
+        todayIndex: DateTime.now().weekday - 1,
+      ),
+      key: largeImageKey,
+      logicalSize: WaterLargeWidgetView.logicalSize,
+      pixelRatio: 2,
+    );
   }
 
   static Future<int?> _readInt(String key) async {
@@ -487,7 +464,6 @@ class _WaterWidgetLocaleSyncState extends State<WaterWidgetLocaleSync> {
   static const _percentKey = 'water_page.percent_reached';
   static const _weeklyKey = 'water_page.weekly';
   static const _historyKey = 'water_page.view_history';
-  static const _reminderKey = 'water_page.next_reminder';
   static const _addWaterKey = 'water_page.add_water';
   static const _weekdaysKey = 'water_page.weekdays';
 
@@ -514,7 +490,6 @@ class _WaterWidgetLocaleSyncState extends State<WaterWidgetLocaleSync> {
     final percent = _percentKey.tr(context: context);
     final weekly = _weeklyKey.tr(context: context);
     final history = _historyKey.tr(context: context);
-    final reminder = _reminderKey.tr(context: context);
     final addWater = _addWaterKey.tr(context: context);
     final weekdays = _weekdaysKey.tr(context: context);
     if (goal == _goalKey ||
@@ -564,7 +539,6 @@ class _WaterWidgetLocaleSyncState extends State<WaterWidgetLocaleSync> {
         percentTemplate: percent,
         weeklyLabel: weekly,
         historyLabel: history,
-        reminderLabel: reminder,
         addWaterLabel: addWater,
         weekdays: weekdays,
       ),

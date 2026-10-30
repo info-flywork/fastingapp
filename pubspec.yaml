@@ -100,32 +100,16 @@ flutter:
   fonts:
     - family: SFProDisplay
       fonts:
+        # Yalnızca dik kesimler: italik dosyalar aynı ağırlıkta tanımlıyken
+        # Android dosyanın kendi ağırlığına bakıp italiği seçiyordu (w600
+        # → Semibold Italic). Upright "semibold" yok; Bold w600/700.
         - asset: assets/fonts/sf-pro-display/SFPRODISPLAYREGULAR.OTF
         - asset: assets/fonts/sf-pro-display/SFPRODISPLAYMEDIUM.OTF
           weight: 500
-        # Upright "semibold" yok; Bold upright w600 olarak maplenir.
         - asset: assets/fonts/sf-pro-display/SFPRODISPLAYBOLD.OTF
           weight: 600
-        - asset: assets/fonts/sf-pro-display/SFPRODISPLAYSEMIBOLDITALIC.OTF
-          weight: 600
-          style: italic
         - asset: assets/fonts/sf-pro-display/SFPRODISPLAYBOLD.OTF
           weight: 700
-        - asset: assets/fonts/sf-pro-display/SFPRODISPLAYHEAVYITALIC.OTF
-          weight: 800
-          style: italic
-        - asset: assets/fonts/sf-pro-display/SFPRODISPLAYBLACKITALIC.OTF
-          weight: 900
-          style: italic
-        - asset: assets/fonts/sf-pro-display/SFPRODISPLAYLIGHTITALIC.OTF
-          weight: 300
-          style: italic
-        - asset: assets/fonts/sf-pro-display/SFPRODISPLAYTHINITALIC.OTF
-          weight: 100
-          style: italic
-        - asset: assets/fonts/sf-pro-display/SFPRODISPLAYULTRALIGHTITALIC.OTF
-          weight: 200
-          style: italic
     - family: ShareTech
       fonts:
         - asset: assets/fonts/share-tech/ShareTech-Regular.ttf

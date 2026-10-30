@@ -1,14 +1,27 @@
 part of '../login_view.dart';
 
 mixin LoginViewMixin on State<LoginView> {
-  Future<void> onApple() =>
-      _login(() => context.read<WelcomeBloc>().loginWithApple());
+  bool get _afterOnboarding => widget.afterOnboarding;
 
-  Future<void> onGoogle() =>
-      _login(() => context.read<WelcomeBloc>().loginWithGoogle());
+  Future<void> onApple() => _login(
+    () => context.read<WelcomeBloc>().loginWithApple(
+      afterOnboarding: _afterOnboarding,
+    ),
+  );
 
-  Future<void> onGuest() =>
-      _login(() => context.read<WelcomeBloc>().loginAsGuest());
+  Future<void> onGoogle() => _login(
+    () => context.read<WelcomeBloc>().loginWithGoogle(
+      afterOnboarding: _afterOnboarding,
+    ),
+  );
+
+  /// Onboarding sonunda misafir oturumu zaten açık: yeni giriş yok, ana
+  /// sayfaya geçilir.
+  Future<void> onGuest() => _login(
+    () => _afterOnboarding
+        ? context.read<WelcomeBloc>().continueAsGuest()
+        : context.read<WelcomeBloc>().loginAsGuest(),
+  );
 
   Future<void> _login(Future<String> Function() action) async {
     try {
@@ -49,6 +62,8 @@ mixin LoginViewMixin on State<LoginView> {
       await bloc.discardPendingLogin();
       return;
     }
-    await _login(() => bloc.restoreAccount(pending));
+    await _login(
+      () => bloc.restoreAccount(pending, afterOnboarding: _afterOnboarding),
+    );
   }
 }

@@ -27,7 +27,9 @@ final class WorldRepository {
 final class WorldData implements BaseModel<WorldData> {
   const WorldData({
     required this.level,
+    required this.sceneLevel,
     required this.health,
+    this.nextSceneLevelAt,
     required this.worldProgress,
     required this.zones,
     required this.week,
@@ -38,6 +40,8 @@ final class WorldData implements BaseModel<WorldData> {
     final weekRaw = json['week'];
     return WorldData(
       level: (json['level'] as num?)?.toInt() ?? 1,
+      sceneLevel: (json['sceneLevel'] as num?)?.toInt() ?? 0,
+      nextSceneLevelAt: (json['nextSceneLevelAt'] as num?)?.toInt(),
       health: json['health'] as String? ?? 'thriving',
       worldProgress: (json['worldProgress'] as num?)?.toDouble() ?? 0,
       zones: {
@@ -60,8 +64,16 @@ final class WorldData implements BaseModel<WorldData> {
   /// Kullanıcı seviyesi (XP).
   final int level;
 
+  /// Adanın görsel aşaması (0–4), XP seviyesinden (sunucu).
+  final int sceneLevel;
+
+  /// Sonraki ada aşamasının açıldığı XP seviyesi; son aşamadaysa null.
+  final int? nextSceneLevelAt;
+
   /// `thriving` | `wilting` | `drought`
   final String health;
+
+  /// Tam adaya (son aşama) XP ilerlemesi, 0–1.
   final double worldProgress;
 
   /// `forest` | `lake` | `summit` | `garden` → ilerleme.

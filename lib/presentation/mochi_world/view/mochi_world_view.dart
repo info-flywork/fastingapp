@@ -37,13 +37,7 @@ class _MochiWorldViewState extends State<MochiWorldView>
   late final Ticker _ticker;
 
   /// Sürükleyici moddaki durum gösterisinin zamanlayıcısı.
-  Timer? _demoTimer;
-  static const _demoStep = Duration(milliseconds: 4500);
-
   bool _immersive = false;
-
-  /// Gösteride ekrandaki durum ([kMochiDemoStates] indisi).
-  int _demoIndex = 0;
 
   /// Sayfa açılınca ada boş başlar; hemen ardından kullanıcının adası
   /// elementleri sırayla zıplatarak büyür.
@@ -80,17 +74,6 @@ class _MochiWorldViewState extends State<MochiWorldView>
     _precacheAsset(mochiBaseAsset(peak, health));
     for (final p in mochiCompose(levels, health)) {
       _precacheAsset(p.kind.asset);
-    }
-  }
-
-  /// Sürükleyici modda dolaşan demo sahneleri — sayfa açılışında değil.
-  void _precacheDemoWorld() {
-    for (final s in kMochiDemoStates) {
-      _precacheAsset(mochiBaseAsset(s.level, s.health));
-      final levels = {for (final z in MochiZone.values) z: s.level};
-      for (final p in mochiCompose(levels, s.health)) {
-        _precacheAsset(p.kind.asset);
-      }
     }
   }
 
@@ -151,23 +134,15 @@ class _MochiWorldViewState extends State<MochiWorldView>
 
   _Zone get _active => _zones.firstWhere((z) => z.id == _selected);
 
-  /// Her bölgenin büyüme seviyesi (sunucu eşikleri).
+  /// Ada XP seviyesiyle bütün olarak büyür: tüm bölgeler sunucunun sahne
+  /// aşamasında (bölge kartları ayrı hedef olarak kalır).
   Map<MochiZone, int> get _dataLevels => {
-    for (final z in _zones) MochiZone.values.byName(z.id.name): z.level,
+    for (final z in MochiZone.values) z: _data?.sceneLevel ?? 0,
   };
 
-  /// Ekrandaki dünya: gösterideyse sıradaki referans durum, değilse
-  /// kullanıcının kendi adası.
-  ({Map<MochiZone, int> levels, MochiHealth health}) get _world {
-    if (_immersive) {
-      final s = kMochiDemoStates[_demoIndex];
-      return (
-        levels: {for (final z in MochiZone.values) z: s.level},
-        health: s.health,
-      );
-    }
-    return (levels: _opened ? _dataLevels : const {}, health: _health);
-  }
+  /// Ekrandaki dünya: kullanıcının kendi adası (keşfet modunda da).
+  ({Map<MochiZone, int> levels, MochiHealth health}) get _world =>
+      (levels: _opened ? _dataLevels : const {}, health: _health);
 
   /// Sahnenin ruh hâli: ada büyüdükçe parıltılar artar, çiçeklerle
   /// kelebekler, ormanla kuşlar gelir; solunca hepsi çekilir.
@@ -213,7 +188,6 @@ class _MochiWorldViewState extends State<MochiWorldView>
 
   @override
   void dispose() {
-    _demoTimer?.cancel();
     _openTimer?.cancel();
     _ticker.dispose();
     _clock.dispose();
@@ -225,25 +199,14 @@ class _MochiWorldViewState extends State<MochiWorldView>
     if (_immersive) return;
     HapticFeedback.lightImpact();
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
-    _precacheDemoWorld();
-    // Kurak, boş adadan başla; referans sahneleri sırayla dolaş.
-    setState(() {
-      _immersive = true;
-      _demoIndex = 0;
-    });
-    _demoTimer = Timer.periodic(_demoStep, (_) {
-      if (!mounted) return;
-      setState(() => _demoIndex = (_demoIndex + 1) % kMochiDemoStates.length);
-    });
+    // Arayüz kaybolur; kullanıcının adası tam ekran kalır.
+    setState(() => _immersive = true);
   }
 
   void _exitImmersive() {
     if (!_immersive) return;
     HapticFeedback.selectionClick();
-    _demoTimer?.cancel();
-    _demoTimer = null;
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
-    // Kullanıcının gerçek adasına dön: fazlalar küçülür, eksikler gelir.
     setState(() => _immersive = false);
   }
 
@@ -298,6 +261,7 @@ class _MochiWorldViewState extends State<MochiWorldView>
                       selected: _selected,
                       active: _active,
                       worldProgress: _worldProgress,
+                      nextStageAt: _data?.nextSceneLevelAt,
                       level: _data?.level ?? 1,
                       week: _data?.week ?? const [],
                       onSelect: (id) => setState(() => _selected = id),
@@ -314,12 +278,7 @@ class _MochiWorldViewState extends State<MochiWorldView>
                 child: AnimatedOpacity(
                   opacity: _immersive ? 1 : 0,
                   duration: const Duration(milliseconds: 500),
-                  child: _ImmersiveHud(
-                    top: top,
-                    bottom: MediaQuery.paddingOf(context).bottom,
-                    index: _demoIndex,
-                    count: kMochiDemoStates.length,
-                  ),
+                  child: _ImmersiveHud(top: top),
                 ),
               ),
             ),
@@ -344,65 +303,27 @@ class _MochiWorldViewState extends State<MochiWorldView>
 // ───────────────────────── Sürükleyici mod HUD ─────────────────────────
 
 final class _ImmersiveHud extends StatelessWidget {
-  const _ImmersiveHud({
-    required this.top,
-    required this.bottom,
-    required this.index,
-    required this.count,
-  });
+  const _ImmersiveHud({required this.top});
 
   final double top;
-  final double bottom;
-  final int index;
-  final int count;
 
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: EdgeInsets.only(top: top + 16, bottom: bottom + 24),
-      child: Column(
-        children: [
-          // Üstte nazik ipucu.
-          Center(
-            child: DecoratedBox(
-              decoration: BoxDecoration(
-                color: Colors.black.withValues(alpha: 0.22),
-                borderRadius: BorderRadius.circular(999),
-              ),
-              child: Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 14,
-                  vertical: 7,
-                ),
-                child: Text('mochi_world.immersive_hint'.tr(), style: _hud),
-              ),
-            ),
+      padding: EdgeInsets.only(top: top + 16),
+      child: Align(
+        alignment: Alignment.topCenter,
+        // Üstte nazik ipucu.
+        child: DecoratedBox(
+          decoration: BoxDecoration(
+            color: Colors.black.withValues(alpha: 0.22),
+            borderRadius: BorderRadius.circular(999),
           ),
-          const Spacer(),
-          // Altta ilerleme noktaları.
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              for (var i = 0; i < count; i++) ...[
-                if (i > 0) const SizedBox(width: 6),
-                AnimatedContainer(
-                  duration: const Duration(milliseconds: 300),
-                  width: i == index ? 20 : 7,
-                  height: 7,
-                  decoration: BoxDecoration(
-                    color: Colors.white.withValues(
-                      alpha: i == index ? 0.95 : 0.5,
-                    ),
-                    borderRadius: BorderRadius.circular(999),
-                    boxShadow: const [
-                      BoxShadow(color: Color(0x33000000), blurRadius: 4),
-                    ],
-                  ),
-                ),
-              ],
-            ],
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
+            child: Text('mochi_world.immersive_hint'.tr(), style: _hud),
           ),
-        ],
+        ),
       ),
     );
   }
@@ -418,6 +339,7 @@ final class _Chrome extends StatelessWidget {
     required this.selected,
     required this.active,
     required this.worldProgress,
+    required this.nextStageAt,
     required this.onSelect,
     required this.onExplore,
     required this.level,
@@ -432,6 +354,7 @@ final class _Chrome extends StatelessWidget {
   final _ZoneId selected;
   final _Zone active;
   final double worldProgress;
+  final int? nextStageAt;
   final ValueChanged<_ZoneId> onSelect;
   final VoidCallback onExplore;
 
@@ -453,7 +376,10 @@ final class _Chrome extends StatelessWidget {
           const SizedBox(height: 6),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: _WorldProgressCard(progress: worldProgress),
+            child: _WorldProgressCard(
+              progress: worldProgress,
+              nextStageAt: nextStageAt,
+            ),
           ),
           Expanded(
             child: Align(
@@ -823,9 +749,12 @@ final class _WeekDay extends StatelessWidget {
 }
 
 final class _WorldProgressCard extends StatelessWidget {
-  const _WorldProgressCard({required this.progress});
+  const _WorldProgressCard({required this.progress, this.nextStageAt});
 
   final double progress;
+
+  /// Adanın bir sonraki aşamasının açıldığı XP seviyesi.
+  final int? nextStageAt;
 
   @override
   Widget build(BuildContext context) {
@@ -847,6 +776,16 @@ final class _WorldProgressCard extends StatelessWidget {
             value: progress,
             fill: ColorName.colorStepsFill,
             track: ColorName.colorWhite,
+          ),
+          const SizedBox(height: 6),
+          Align(
+            alignment: AlignmentDirectional.centerStart,
+            child: Text(
+              nextStageAt == null
+                  ? 'mochi_world.island_complete'.tr()
+                  : 'mochi_world.next_stage'.tr(args: ['$nextStageAt']),
+              style: _hint,
+            ),
           ),
         ],
       ),
@@ -1060,6 +999,15 @@ const _sectionTitle = TextStyle(
   height: 20 / 14,
   letterSpacing: -0.5,
   color: ColorName.colorTitle,
+);
+
+const _hint = TextStyle(
+  fontFamily: FontFamily.sFProDisplay,
+  fontWeight: FontWeight.w500,
+  fontSize: 12,
+  height: 16 / 12,
+  letterSpacing: -0.3,
+  color: ColorName.colorSubtitle,
 );
 
 const _zoneTitle = TextStyle(

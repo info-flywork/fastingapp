@@ -295,7 +295,9 @@
     "summit_progress": "{}/{} kg",
     "garden_progress": "{}/{} meals",
     "explore_hint": "Tap to explore",
-    "immersive_hint": "Tap anywhere to return"
+    "immersive_hint": "Tap anywhere to return",
+    "next_stage": "Next island stage: Level {}",
+    "island_complete": "Your island is fully grown!"
   },
   "fasting_page": {
     "meal_time": "Meal time!",
@@ -684,7 +686,6 @@
     "weekly": "Weekly Activity",
     "view_history": "View History",
     "weekdays": "M,T,W,T,F,S,S",
-    "next_reminder": "Next Reminder",
     "add_water": "Add Water",
     "edit_goal_title": "Daily water goal",
     "edit_goal_hint": "ml",

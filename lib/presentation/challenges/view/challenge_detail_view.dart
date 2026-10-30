@@ -622,19 +622,38 @@ final class _ParticipantRow extends StatelessWidget {
 
   final ChallengeParticipant item;
 
-  /// Rızasız katılımcılar için maskot avatarları (sıraya göre dönüşümlü).
-  static final _mascots = [
-    AppImages.fastingChallengeUser1,
-    AppImages.fastingChallengeUser2,
-    AppImages.fastingChallengeUser3,
-  ];
+  /// Ad soyadın baş harfleri ("Furkan Ç." → "FÇ"); ad yoksa boş.
+  static String _initials(String? name) => (name ?? '')
+      .trim()
+      .split(RegExp(r'\s+'))
+      .where((p) => p.isNotEmpty)
+      .take(2)
+      .map((p) => p.characters.first)
+      .join()
+      .toUpperCase();
 
   @override
   Widget build(BuildContext context) {
     final target = math.max(item.target, 1);
     final name = item.displayName ?? 'challenge_page.anonymous'.tr();
-    final mascot = _mascots[item.rank % _mascots.length];
     final url = item.avatarUrl;
+    // Fotoğraf yoksa profil ekranındaki gibi: koyu daire, baş harfler
+    // (ad yoksa kişi simgesi).
+    final initials = _initials(item.displayName);
+    final fallback = initials.isEmpty
+        ? const Icon(
+            Icons.person_rounded,
+            color: ColorName.colorWhite,
+            size: 22,
+          )
+        : Text(
+            initials,
+            style: AppTextStyles.profileName.copyWith(
+              color: ColorName.colorWhite,
+              fontSize: 14,
+              height: 1,
+            ),
+          );
     return Row(
       children: [
         SizedBox(
@@ -646,19 +665,25 @@ final class _ParticipantRow extends StatelessWidget {
           ),
         ),
         const SizedBox(width: 8),
-        ClipOval(
-          child: SizedBox(
-            width: 40,
-            height: 40,
-            child: url != null
-                ? Image.network(
-                    url,
-                    fit: BoxFit.cover,
-                    cacheWidth: 120,
-                    errorBuilder: (_, _, _) => mascot.image(fit: BoxFit.cover),
-                  )
-                : mascot.image(fit: BoxFit.cover),
+        Container(
+          width: 40,
+          height: 40,
+          alignment: Alignment.center,
+          decoration: const BoxDecoration(
+            color: ColorName.colorTitle,
+            shape: BoxShape.circle,
           ),
+          clipBehavior: Clip.antiAlias,
+          child: url != null
+              ? Image.network(
+                  url,
+                  width: 40,
+                  height: 40,
+                  fit: BoxFit.cover,
+                  cacheWidth: 120,
+                  errorBuilder: (_, _, _) => fallback,
+                )
+              : fallback,
         ),
         const SizedBox(width: 12),
         Expanded(

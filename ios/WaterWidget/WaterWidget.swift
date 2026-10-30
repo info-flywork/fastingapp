@@ -86,6 +86,8 @@ struct LiveSpec {
   let ty: Double
   let leading: Bool
   let ts: Double
+  /// Sola dayalı metnin genişliği (yoksa iki kenar boşluğu arası).
+  let tw: Double?
   let tc: Color
   let ring: (x: Double, y: Double, r: Double, s: Double, c: Color)?
 
@@ -103,6 +105,7 @@ struct LiveSpec {
     ty = num("ty")
     leading = (d["ta"] as? String) == "l"
     ts = num("ts")
+    tw = d["tw"] != nil ? num("tw") : nil
     tc = Color(hex: d["tc"] as? String)
     if d["rr"] != nil {
       ring = (num("rx"), num("ry"), num("rr"), num("rs"), Color(hex: d["rc"] as? String))
@@ -186,6 +189,7 @@ struct LiveOverlay: View {
       let scale = fill ? max(sx, sy) : min(sx, sy)
       let ox = (geo.size.width - spec.w * scale) / 2
       let oy = (geo.size.height - spec.h * scale) / 2
+      let leadingWidth = spec.tw ?? (spec.w - spec.tx * 2)
       ZStack {
         if let ring = spec.ring {
           Circle()
@@ -205,13 +209,13 @@ struct LiveOverlay: View {
           // Halkada metin halkanın iç çapına sığar (saniyeli sayaç, gerekirse küçülür).
           .frame(
             width: spec.leading
-              ? (spec.w - spec.tx * 2) * scale
+              ? leadingWidth * scale
               : (spec.ring.map { ($0.r - $0.s) * 2 } ?? spec.ts * 4) * scale,
             alignment: spec.leading ? .leading : .center
           )
           .position(
             x: spec.leading
-              ? spec.tx * scale + ox + (spec.w - spec.tx * 2) * scale / 2
+              ? spec.tx * scale + ox + leadingWidth * scale / 2
               : spec.tx * scale + ox,
             y: spec.ty * scale + oy
           )

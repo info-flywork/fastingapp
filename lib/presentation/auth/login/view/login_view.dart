@@ -28,7 +28,10 @@ part 'widgets/login_hero.dart';
 
 /// Login ekranı — Apple, Google, misafir.
 final class LoginView extends StatefulWidget {
-  const LoginView({super.key});
+  const LoginView({this.afterOnboarding = false, super.key});
+
+  /// Onboarding'in sonunda açıldı: misafir oturumu ve cevaplar hazır.
+  final bool afterOnboarding;
 
   @override
   State<LoginView> createState() => _LoginViewState();

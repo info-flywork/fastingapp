@@ -355,21 +355,27 @@ final class _CaloriesHeader extends StatelessWidget {
                   ),
                   const SizedBox(height: 2),
                 ],
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: [
-                    Text(
-                      format.format(hero),
-                      style: AppTextStyles.caloriesHeroValue,
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.only(left: 6, bottom: 14),
-                      child: Text(
-                        heroLabel.tr(),
-                        style: AppTextStyles.caloriesOverLabel,
+                // 4 haneli kalan ("2.260 kcal kaldı") maskotun altına
+                // taşıyordu: satır sığmazsa birlikte küçülür.
+                FittedBox(
+                  fit: BoxFit.scaleDown,
+                  alignment: AlignmentDirectional.centerStart,
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      Text(
+                        format.format(hero),
+                        style: AppTextStyles.caloriesHeroValue,
                       ),
-                    ),
-                  ],
+                      Padding(
+                        padding: const EdgeInsets.only(left: 6, bottom: 14),
+                        child: Text(
+                          heroLabel.tr(),
+                          style: AppTextStyles.caloriesOverLabel,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
                 if (goal != null)
                   GestureDetector(
@@ -521,7 +527,8 @@ final class _BurnedCard extends StatelessWidget {
         children: [
           Row(
             children: [
-              const Text('👏', style: TextStyle(fontSize: 22)),
+              // Önceden emoji (👏): iOS'ta "?" kutusu çiziliyordu.
+              AppImages.steps.image(width: 28, height: 28, fit: BoxFit.contain),
               const SizedBox(width: 8),
               Text(
                 'calories_page.burned'.tr(),

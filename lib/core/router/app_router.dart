@@ -205,7 +205,9 @@ final GoRouter appRouter = GoRouter(
       name: RoutePaths.login.name,
       builder: (context, state) => BlocProvider(
         create: (_) => getIt<WelcomeBloc>(),
-        child: const LoginView(),
+        child: LoginView(
+          afterOnboarding: state.uri.queryParameters['from'] == 'onboarding',
+        ),
       ),
     ),
     // Onboarding ilk adım: hedef seçimi.

@@ -295,7 +295,9 @@
     "summit_progress": "{}/{} kg",
     "garden_progress": "{}/{} pasti",
     "explore_hint": "Tocca per esplorare",
-    "immersive_hint": "Tocca ovunque per tornare"
+    "immersive_hint": "Tocca ovunque per tornare",
+    "next_stage": "Prossima fase dell'isola: livello {}",
+    "island_complete": "La tua isola è cresciuta del tutto!"
   },
   "fasting_page": {
     "meal_time": "È ora di mangiare!",
@@ -684,7 +686,6 @@
     "weekly": "Attività settimanale",
     "view_history": "Vedi cronologia",
     "weekdays": "L,M,M,G,V,S,D",
-    "next_reminder": "Prossimo promemoria",
     "add_water": "Aggiungi acqua",
     "edit_goal_title": "Obiettivo giornaliero di acqua",
     "edit_goal_hint": "ml",

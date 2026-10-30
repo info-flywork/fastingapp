@@ -280,9 +280,6 @@ final class MochiPlacement {
   }
 }
 
-/// Bir dünya durumu: büyüme seviyesi + sağlık.
-typedef MochiWorldState = ({int level, MochiHealth health});
-
 const List<MochiElementDef> kMochiElements = [
   MochiElementDef(
     key: 'b1',
@@ -1163,21 +1160,6 @@ const List<MochiElementDef> kMochiElements = [
     },
     droughtOnly: true,
   ),
-];
-
-/// Sürükleyici moddaki gösteri — referans sahnelerin sırasıyla: kurak ada
-/// canlanır, cennete dönüşür, sonra ihmal edilip yeniden kurur.
-const List<MochiWorldState> kMochiDemoStates = [
-  (level: 0, health: MochiHealth.drought), // mochi-world-7
-  (level: 0, health: MochiHealth.wilting), // mochi-world-6
-  (level: 0, health: MochiHealth.thriving), // mochi-world-5
-  (level: 1, health: MochiHealth.thriving), // mochi-world-1
-  (level: 2, health: MochiHealth.thriving), // mochi-world-2
-  (level: 3, health: MochiHealth.thriving), // mochi-world-3
-  (level: 4, health: MochiHealth.thriving), // mochi-world-4
-  (level: 4, health: MochiHealth.wilting), // mochi-world-8
-  (level: 3, health: MochiHealth.wilting), // mochi-world-9
-  (level: 2, health: MochiHealth.drought), // mochi-world-10
 ];
 
 /// Bölge ilerlemesini (0..1) büyüme seviyesine çevirir.

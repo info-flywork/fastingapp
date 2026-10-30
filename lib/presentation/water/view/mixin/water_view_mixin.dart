@@ -237,7 +237,6 @@ mixin WaterViewMixin on State<WaterView>, TickerProvider {
       percentTemplate: 'water_page.percent_reached'.tr(context: context),
       weeklyLabel: 'water_page.weekly'.tr(context: context),
       historyLabel: 'water_page.view_history'.tr(context: context),
-      reminderLabel: 'water_page.next_reminder'.tr(context: context),
       addWaterLabel: 'water_page.add_water'.tr(context: context),
       weekdays: 'water_page.weekdays'.tr(context: context),
     );

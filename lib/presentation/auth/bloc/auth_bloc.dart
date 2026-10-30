@@ -60,8 +60,11 @@ final class AuthBloc extends Bloc<AuthEvent, AuthState> {
     Emitter<AuthState> emit,
   ) async {
     try {
+      // Android'de güvenli depo soğuk açılışta birkaç saniye sürebiliyor
+      // (emülatörde 3–6 sn ölçüldü). Süre yalnızca takılmaya karşı: 5 sn
+      // iken girişli kullanıcı açılış ekranına düşüyordu.
       final user = await _authRepository.cachedSession().timeout(
-        const Duration(seconds: 5),
+        const Duration(seconds: 20),
         onTimeout: () => null,
       );
       emit(

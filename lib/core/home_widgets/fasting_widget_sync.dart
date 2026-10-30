@@ -303,7 +303,10 @@ abstract final class FastingWidgetSync {
         title: _todaysPlanTitle ?? "Today's Plan",
         planLabel: _planLabel ?? '16:8',
         windowLabel: window,
-        ctaLabel: _startFastingCta ?? 'Start Fasting',
+        // Oruç sürerken "Oruca Başla" yanlış: düğme durumu söyler.
+        ctaLabel: isFasting
+            ? headline.replaceAll('\n', ' ')
+            : _startFastingCta ?? 'Start Fasting',
       ),
       key: planImageKey,
       logicalSize: FastingPlanWidgetView.logicalSize,

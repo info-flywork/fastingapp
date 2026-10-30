@@ -84,4 +84,8 @@ enum RoutePaths {
 
   final String path;
   final String name;
+
+  /// Onboarding sonu giriş sayfası (`/login?from=onboarding`): misafir
+  /// hesabı Apple/Google'a bağlanır ya da misafir olarak devam edilir.
+  static const String loginAfterOnboarding = '/login?from=onboarding';
 }

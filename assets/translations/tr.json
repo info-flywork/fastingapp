@@ -295,7 +295,9 @@
     "summit_progress": "{}/{} kg",
     "garden_progress": "{}/{} öğün",
     "explore_hint": "Keşfetmek için dokun",
-    "immersive_hint": "Dönmek için dokun"
+    "immersive_hint": "Dönmek için dokun",
+    "next_stage": "Sonraki ada aşaması: Seviye {}",
+    "island_complete": "Adan tamamen büyüdü!"
   },
   "fasting_page": {
     "meal_time": "Öğün vakti!",
@@ -684,7 +686,6 @@
     "weekly": "Haftalık aktivite",
     "view_history": "Geçmişi gör",
     "weekdays": "P,S,Ç,P,C,C,P",
-    "next_reminder": "Sonraki hatırlatma",
     "add_water": "Su ekle",
     "edit_goal_title": "Günlük su hedefi",
     "edit_goal_hint": "ml",

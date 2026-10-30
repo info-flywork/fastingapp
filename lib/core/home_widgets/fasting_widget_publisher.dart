@@ -20,9 +20,6 @@ void publishFastingWidget(BuildContext context, FastingSessionState session) {
   final eat = fasting ? null : session.eatingWindow;
   final fastStart = session.fast?.startedAt;
   final fastEnd = session.fast?.plannedEndAt ?? fastStart?.add(total);
-  // Yeme penceresinde geri sayım pencerenin sonuna.
-  final start = fasting ? fastStart : eat?.startedAt;
-  final end = fasting ? fastEnd : eat?.endsAt;
   // Plan widget'ı: sürmekte olan ya da sıradaki oruç (önceden sabit 20:00).
   final nextStart = fasting
       ? fastStart
@@ -30,6 +27,19 @@ void publishFastingWidget(BuildContext context, FastingSessionState session) {
             eat?.endsAt ??
             _todayAt(session.plan?.eatWindow?.end);
   final nextEnd = fasting ? fastEnd : nextStart?.add(total);
+  // Yeme penceresinde geri sayım pencerenin sonuna. Ne oruç ne pencere
+  // varsa (oruç başlatılmadı) planın bugünkü yeme penceresi sayılır ve
+  // sıradaki oruca geri sayılır; önceden widget'lar "0:00 kaldı" diyordu.
+  final now = DateTime.now();
+  final planEatFrom = _todayAt(session.plan?.eatWindow?.start);
+  final idleFrom = planEatFrom != null && planEatFrom.isBefore(now)
+      ? planEatFrom
+      : now;
+  final idle = !fasting && eat == null && nextStart != null;
+  final start = fasting
+      ? fastStart
+      : (eat?.startedAt ?? (idle ? idleFrom : null));
+  final end = fasting ? fastEnd : (eat?.endsAt ?? (idle ? nextStart : null));
   FastingWidgetSync.rememberLabels(
     fasting: 'fasting_page.widget_fasting'.tr(context: context),
     eating: 'fasting_page.widget_eating'.tr(context: context),
