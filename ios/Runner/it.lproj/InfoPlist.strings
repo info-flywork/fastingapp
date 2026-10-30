@@ -1,4 +1,5 @@
 /* İzin metinleri (it). */
 "NSCameraUsageDescription" = "La fotocamera serve per la foto profilo e per calcolare le calorie dei pasti.";
 "NSHealthShareUsageDescription" = "Sincronizziamo i tuoi passi da Apple Salute per mantenere precisi i tuoi obiettivi di attività.";
+"NSHealthUpdateUsageDescription" = "MochiFast non modifica i tuoi dati di Apple Salute. La libreria che legge i passi richiede questa spiegazione.";
 "NSPhotoLibraryUsageDescription" = "Puoi scegliere la foto profilo dalla tua libreria foto.";

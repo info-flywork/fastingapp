@@ -27,6 +27,9 @@ class $AssetsColorsGen {
 class $AssetsFlagsGen {
   const $AssetsFlagsGen();
 
+  /// File path: assets/flags/ic_china.svg
+  SvgGenImage get icChina => const SvgGenImage('assets/flags/ic_china.svg');
+
   /// File path: assets/flags/ic_english.svg
   SvgGenImage get icEnglish => const SvgGenImage('assets/flags/ic_english.svg');
 
@@ -63,6 +66,7 @@ class $AssetsFlagsGen {
 
   /// List of all assets
   List<SvgGenImage> get values => [
+    icChina,
     icEnglish,
     icFrench,
     icGermany,

@@ -1,4 +1,5 @@
 /* İzin metinleri (en). */
 "NSCameraUsageDescription" = "Camera is used for profile photos and calorie food scanning.";
 "NSHealthShareUsageDescription" = "We sync your step count from Apple Health to keep your activity goals accurate.";
+"NSHealthUpdateUsageDescription" = "MochiFast does not change your Apple Health data. The health library used to read your steps requires this description.";
 "NSPhotoLibraryUsageDescription" = "Profile photo can be chosen from your photo library.";

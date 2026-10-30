@@ -1,0 +1,5 @@
+/* İzin metinleri (hi). */
+"NSCameraUsageDescription" = "कैमरा प्रोफ़ाइल फ़ोटो और खाने की कैलोरी स्कैन के लिए इस्तेमाल होता है।";
+"NSHealthShareUsageDescription" = "गतिविधि के लक्ष्य सही रखने के लिए हम Apple Health से आपके कदम सिंक करते हैं।";
+"NSHealthUpdateUsageDescription" = "MochiFast आपके Apple Health डेटा को नहीं बदलता। कदम पढ़ने वाली स्वास्थ्य लाइब्रेरी यह विवरण माँगती है।";
+"NSPhotoLibraryUsageDescription" = "प्रोफ़ाइल फ़ोटो आपकी फ़ोटो लाइब्रेरी से चुनी जा सकती है।";

@@ -11,7 +11,7 @@ Kaynak: veri modeli ([03](03-veri-modeli.md)), KVKK ([06 §8](06-guvenlik.md#8-k
 |---|---|
 | Takip (tracking, ATT) | **Hayır.** Reklam yok, veri broker'a/üçüncü tarafa reklam amaçlı veri yok → ATT istemi gerekmez |
 | Veriler aktarımda şifreli mi | Evet (HTTPS/TLS, HSTS) |
-| Kullanıcı verisinin silinmesini isteyebilir mi | Evet: uygulama içi (Profil → Profili Düzenle → Hesabı Sil) ve web: `https://mochifast-api.fly-work.com/account/delete` |
+| Kullanıcı verisinin silinmesini isteyebilir mi | Evet: uygulama içi (Profil → Profili Düzenle → Hesabı Sil) ve web: `https://mochifast.fly-work.com/account/delete` |
 | Hesap oluşturmadan kullanılabilir mi | Evet (misafir) |
 | Veri paylaşımı (Play tanımıyla) | **Hayır.** Aşağıdaki hizmet sağlayıcılar yalnızca bizim adımıza işler (Play'de "paylaşım" sayılmaz) |
 
@@ -61,7 +61,7 @@ işlevselliği, Hesap yönetimi; aktarımda şifreli; silinebilir):
 | Cihaz veya diğer kimlikler | Evet (kurulum kimliği, push token) | Hayır | Uygulama işlevselliği |
 | Konum, Kişiler, Takvim, Dosyalar, Ses, Web tarama | Hayır | — | — |
 
-**Paylaşılan veri:** Yok. **Hesap silme URL'si:** `https://mochifast-api.fly-work.com/account/delete`.
+**Paylaşılan veri:** Yok. **Hesap silme URL'si:** `https://mochifast.fly-work.com/account/delete`.
 **Verilerin bir kısmını hesabı silmeden silme:** Evet (öğün, kilo, oruç, sohbet kayıtları tek tek silinebilir).
 
 ## Saklama (forma ve aydınlatma metnine)

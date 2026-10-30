@@ -57,10 +57,40 @@ abstract final class LanguagesCatalog {
       locale: const Locale('es'),
     ),
     AppLanguageOption(
+      code: 'pt',
+      nameKey: 'languages.portuguese',
+      flag: Assets.flags.icPortugal,
+      locale: const Locale('pt'),
+    ),
+    AppLanguageOption(
+      code: 'ko',
+      nameKey: 'languages.korean',
+      flag: Assets.flags.icKorean,
+      locale: const Locale('ko'),
+    ),
+    AppLanguageOption(
+      code: 'hi',
+      nameKey: 'languages.indian',
+      flag: Assets.flags.icIndia,
+      locale: const Locale('hi'),
+    ),
+    AppLanguageOption(
+      code: 'zh',
+      nameKey: 'languages.chinese',
+      flag: Assets.flags.icChina,
+      locale: const Locale('zh'),
+    ),
+    AppLanguageOption(
       code: 'ru',
       nameKey: 'languages.russian',
       flag: Assets.flags.icRussian,
       locale: const Locale('ru'),
+    ),
+    AppLanguageOption(
+      code: 'ja',
+      nameKey: 'languages.japanese',
+      flag: Assets.flags.icJapanne,
+      locale: const Locale('ja'),
     ),
   ];
 

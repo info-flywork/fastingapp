@@ -1,4 +1,5 @@
 /* İzin metinleri (fr). */
 "NSCameraUsageDescription" = "L'appareil photo sert à la photo de profil et au calcul des calories de tes repas.";
 "NSHealthShareUsageDescription" = "Nous synchronisons tes pas depuis Apple Santé pour que tes objectifs d'activité soient exacts.";
+"NSHealthUpdateUsageDescription" = "MochiFast ne modifie pas tes données Apple Santé. La bibliothèque qui lit tes pas exige cette explication.";
 "NSPhotoLibraryUsageDescription" = "Tu peux choisir ta photo de profil dans ta photothèque.";

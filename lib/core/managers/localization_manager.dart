@@ -13,6 +13,11 @@ final class LocalizationManager {
     Locale('es'),
     Locale('it'),
     Locale('ru'),
+    Locale('pt'),
+    Locale('ko'),
+    Locale('hi'),
+    Locale('zh'),
+    Locale('ja'),
   ];
 
   static const fallbackLocale = Locale('en');

@@ -1,0 +1,5 @@
+/* İzin metinleri (zh). */
+"NSCameraUsageDescription" = "相机用于头像和食物热量扫描。";
+"NSHealthShareUsageDescription" = "我们会从 Apple 健康同步步数，让活动目标更准确。";
+"NSHealthUpdateUsageDescription" = "MochiFast 不会修改你的 Apple 健康数据。读取步数的健康库需要这段说明。";
+"NSPhotoLibraryUsageDescription" = "可以从照片图库选择头像。";

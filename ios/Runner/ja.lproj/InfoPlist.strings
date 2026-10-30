@@ -1,0 +1,5 @@
+/* İzin metinleri (ja). */
+"NSCameraUsageDescription" = "カメラはプロフィール写真と食事のカロリースキャンに使います。";
+"NSHealthShareUsageDescription" = "活動目標を正確に保つため、Appleヘルスケアから歩数を同期します。";
+"NSHealthUpdateUsageDescription" = "MochiFastはAppleヘルスケアのデータを変更しません。歩数を読むヘルスケアのライブラリがこの説明を必要とします。";
+"NSPhotoLibraryUsageDescription" = "プロフィール写真は写真ライブラリから選べます。";

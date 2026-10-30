@@ -1,4 +1,5 @@
 /* İzin metinleri (ru). */
 "NSCameraUsageDescription" = "Камера используется для фото профиля и подсчёта калорий по фото еды.";
 "NSHealthShareUsageDescription" = "Мы синхронизируем шаги из приложения «Здоровье», чтобы цели активности были точными.";
+"NSHealthUpdateUsageDescription" = "MochiFast не изменяет данные в приложении «Здоровье». Библиотека, которая читает шаги, требует это описание.";
 "NSPhotoLibraryUsageDescription" = "Фото профиля можно выбрать из медиатеки.";

@@ -23,6 +23,11 @@
 		<string>es</string>
 		<string>it</string>
 		<string>ru</string>
+		<string>pt</string>
+		<string>ko</string>
+		<string>hi</string>
+		<string>zh</string>
+		<string>ja</string>
 	</array>
 	<key>CFBundleName</key>
 	<string>Mochi Fast</string>
@@ -70,6 +75,8 @@
 	<string>Camera is used for profile photos and calorie food scanning.</string>
 	<key>NSHealthShareUsageDescription</key>
 	<string>We sync your step count from Apple Health to keep your activity goals accurate.</string>
+	<key>NSHealthUpdateUsageDescription</key>
+	<string>MochiFast does not change your Apple Health data. The health library used to read your steps requires this description.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>Profile photo can be chosen from your photo library.</string>
 	<key>UIApplicationSceneManifest</key>

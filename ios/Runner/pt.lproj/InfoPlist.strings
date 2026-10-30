@@ -1,0 +1,5 @@
+/* İzin metinleri (pt). */
+"NSCameraUsageDescription" = "A câmara é usada para fotos de perfil e para analisar as calorias das refeições.";
+"NSHealthShareUsageDescription" = "Sincronizamos a tua contagem de passos do Apple Health para manter as metas de atividade certas.";
+"NSHealthUpdateUsageDescription" = "O MochiFast não altera os teus dados do Apple Health. A biblioteca de saúde usada para ler os passos exige esta descrição.";
+"NSPhotoLibraryUsageDescription" = "A foto de perfil pode ser escolhida da tua biblioteca de fotos.";
