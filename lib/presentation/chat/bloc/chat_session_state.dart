@@ -67,6 +67,7 @@ final class ChatSessionState extends Equatable {
     this.messages = const [],
     this.history = const [],
     this.isAiTyping = false,
+    this.isStreaming = false,
     this.isLoadingHistory = false,
     this.activeConversationId,
     this.errorMessage,
@@ -75,6 +76,9 @@ final class ChatSessionState extends Equatable {
   final List<ChatMessage> messages;
   final List<ChatHistoryItem> history;
   final bool isAiTyping;
+
+  /// Yanıt SSE akışı sürüyor — UI typewriter için.
+  final bool isStreaming;
   final bool isLoadingHistory;
   final String? activeConversationId;
   final String? errorMessage;
@@ -85,6 +89,7 @@ final class ChatSessionState extends Equatable {
     List<ChatMessage>? messages,
     List<ChatHistoryItem>? history,
     bool? isAiTyping,
+    bool? isStreaming,
     bool? isLoadingHistory,
     String? activeConversationId,
     String? errorMessage,
@@ -95,6 +100,7 @@ final class ChatSessionState extends Equatable {
       messages: messages ?? this.messages,
       history: history ?? this.history,
       isAiTyping: isAiTyping ?? this.isAiTyping,
+      isStreaming: isStreaming ?? this.isStreaming,
       isLoadingHistory: isLoadingHistory ?? this.isLoadingHistory,
       activeConversationId: clearActiveConversation
           ? null
@@ -108,6 +114,7 @@ final class ChatSessionState extends Equatable {
     messages,
     history,
     isAiTyping,
+    isStreaming,
     isLoadingHistory,
     activeConversationId,
     errorMessage,

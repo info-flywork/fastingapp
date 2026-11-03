@@ -295,7 +295,7 @@ final class ChatRepository {
           case 'error':
             final code = event.data['code'] as String? ?? 'UNAVAILABLE';
             throw NetworkException(
-              'Coach Mochi şu an yanıt veremiyor.',
+              'chat.unavailable'.tr(),
               code: code,
             );
         }

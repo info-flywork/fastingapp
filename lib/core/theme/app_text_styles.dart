@@ -1280,8 +1280,8 @@ abstract final class AppTextStyles {
   static TextStyle get profileSectionTitle => const TextStyle(
     fontFamily: FontFamily.sFProDisplay,
     fontWeight: FontWeight.w600,
-    fontSize: 14,
-    height: 20 / 14,
+    fontSize: 16,
+    height: 20 / 16,
     letterSpacing: -0.5,
     color: ColorName.colorTitle,
   );
@@ -1290,8 +1290,8 @@ abstract final class AppTextStyles {
   static TextStyle get profileRowTitle => const TextStyle(
     fontFamily: FontFamily.sFProDisplay,
     fontWeight: FontWeight.w600,
-    fontSize: 15,
-    height: 16 / 15,
+    fontSize: 16,
+    height: 20 / 16,
     letterSpacing: -0.5,
     color: ColorName.colorTitle,
   );
@@ -1390,8 +1390,8 @@ abstract final class AppTextStyles {
   static TextStyle get editProfileLabel => TextStyle(
     fontFamily: FontFamily.sFProDisplay,
     fontWeight: FontWeight.w600,
-    fontSize: 15,
-    height: 16 / 15,
+    fontSize: 16,
+    height: 20 / 16,
     letterSpacing: -0.5,
     color: ColorName.colorSubtitle.withValues(alpha: 0.75),
   );
@@ -1400,8 +1400,8 @@ abstract final class AppTextStyles {
   static TextStyle get editProfileValue => const TextStyle(
     fontFamily: FontFamily.sFProDisplay,
     fontWeight: FontWeight.w600,
-    fontSize: 15,
-    height: 16 / 15,
+    fontSize: 16,
+    height: 20 / 16,
     letterSpacing: -0.5,
     color: ColorName.colorTitle,
   );
@@ -1410,8 +1410,8 @@ abstract final class AppTextStyles {
   static TextStyle get editProfileChip => const TextStyle(
     fontFamily: FontFamily.sFProDisplay,
     fontWeight: FontWeight.w600,
-    fontSize: 12,
-    height: 16 / 12,
+    fontSize: 13,
+    height: 16 / 13,
     letterSpacing: -0.5,
     color: ColorName.colorTitle,
   );
@@ -1420,8 +1420,8 @@ abstract final class AppTextStyles {
   static TextStyle get editProfileChipNegative => const TextStyle(
     fontFamily: FontFamily.sFProDisplay,
     fontWeight: FontWeight.w600,
-    fontSize: 12,
-    height: 16 / 12,
+    fontSize: 13,
+    height: 16 / 13,
     letterSpacing: -0.5,
     color: ColorName.colorNegativeV2,
   );
@@ -1619,6 +1619,11 @@ abstract final class AppTextStyles {
   /// Chat bubble message — 16 / Semibold / white
   static TextStyle get chatBubbleMessage => const TextStyle(
     fontFamily: FontFamily.sFProDisplay,
+    fontFamilyFallback: <String>[
+      'Apple Color Emoji',
+      'Noto Color Emoji',
+      'Segoe UI Emoji',
+    ],
     fontWeight: FontWeight.w600,
     fontSize: 16,
     height: 24 / 16,
@@ -2494,8 +2499,8 @@ abstract final class AppTextStyles {
   static TextStyle get fastingStruggleBack => TextStyle(
     fontFamily: FontFamily.sFProDisplay,
     fontWeight: FontWeight.w500,
-    fontSize: 12,
-    height: 16 / 12,
+    fontSize: 14,
+    height: 16 / 14,
     letterSpacing: 12 * -0.025,
     color: ColorName.colorTextPrimary.withValues(alpha: 0.5),
   );

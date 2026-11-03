@@ -3,6 +3,7 @@ import 'package:fastingapp/core/theme/app_text_styles.dart';
 import 'package:fastingapp/core/widgets/app_button.dart';
 import 'package:fastingapp/generated/colors.gen.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 /// İsim düzenleme bottom sheet’i.
 final class EditNameBottomSheet extends StatefulWidget {
@@ -21,10 +22,13 @@ class _EditNameBottomSheetState extends State<EditNameBottomSheet> {
   @override
   void initState() {
     super.initState();
-    _controller = TextEditingController(text: widget.initialName)
+    final initial = widget.initialName.length > _maxNameLength
+        ? widget.initialName.substring(0, _maxNameLength)
+        : widget.initialName;
+    _controller = TextEditingController(text: initial)
       ..selection = TextSelection(
         baseOffset: 0,
-        extentOffset: widget.initialName.length,
+        extentOffset: initial.length,
       );
     _focusNode = FocusNode();
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -39,10 +43,16 @@ class _EditNameBottomSheetState extends State<EditNameBottomSheet> {
     super.dispose();
   }
 
+  static const _maxNameLength = 25;
+
   void _onSave() {
     final trimmed = _controller.text.trim();
     if (trimmed.isEmpty) return;
-    Navigator.of(context).pop(trimmed);
+    final name = trimmed.length > _maxNameLength
+        ? trimmed.substring(0, _maxNameLength).trim()
+        : trimmed;
+    if (name.isEmpty) return;
+    Navigator.of(context).pop(name);
   }
 
   @override
@@ -91,6 +101,10 @@ class _EditNameBottomSheetState extends State<EditNameBottomSheet> {
                   child: TextField(
                     controller: _controller,
                     focusNode: _focusNode,
+                    maxLength: _maxNameLength,
+                    inputFormatters: [
+                      LengthLimitingTextInputFormatter(_maxNameLength),
+                    ],
                     textInputAction: TextInputAction.done,
                     textCapitalization: TextCapitalization.words,
                     style: AppTextStyles.editProfileValue,
@@ -100,6 +114,7 @@ class _EditNameBottomSheetState extends State<EditNameBottomSheet> {
                       hintText: 'profile.name_hint'.tr(),
                       hintStyle: AppTextStyles.editProfileLabel,
                       border: InputBorder.none,
+                      counterText: '',
                       contentPadding: const EdgeInsets.symmetric(
                         horizontal: 16,
                         vertical: 16,

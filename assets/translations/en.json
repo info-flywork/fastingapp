@@ -51,7 +51,7 @@
     "great_choice": "Great Choice",
     "habit_highlight_subtitle": "Building a habit is the #1 reason squishes join Mochi, and the one most likely to stick.",
     "social_proof_metric": "1M+",
-    "social_proof_caption": "squished are\nfasting with us",
+    "social_proof_caption": "squishes are\nfasting with us",
     "lets_keep_going": "Let's keep going",
     "about_you_title": "A little about you",
     "about_you_subtitle": "This helps me estimate your energy needs. No judgement, ever.",
@@ -124,7 +124,7 @@
     "noted_subtitle_or": " or ",
     "noted_subtitle_comma": ", ",
     "noted_subtitle_suffix": " — promise. Every meal idea I send will be built around what you actually love.",
-    "noted_summary": "🥗 {} favourites saved, {} skips locked out",
+    "noted_summary": "{} favourites saved, {} skips locked out",
     "weight_history_title": "Tried losing weight before?",
     "weight_history_subtitle": "Be honest — it changes how I coach you.",
     "weight_history_many_title": "Yes, many times",
@@ -216,7 +216,7 @@
     "good_company_rating_label": "app rating",
     "good_company_reviewer": "Defne K.",
     "good_company_quote": "First time fasting didn't feel like punishment. Coach Mochi talked me through the 11am cravings and I actually laughed.",
-    "good_company_cta": "See my goal ->",
+    "good_company_cta": "See my goal",
     "plans_age_note": "Under 18, only age-appropriate plans are shown.",
     "goal_bmi_low": "Goal weight is too low for your height. Please choose a healthier goal.",
     "meal_window_same_error": "Start and end time can't be the same.",
@@ -905,7 +905,8 @@
       "zero": "No messages left today",
       "one": "1 message left today",
       "other": "{} messages left today"
-    }
+    },
+    "unavailable": "Coach Mochi can’t reply right now."
   },
   "plans": {
     "title": "Fasting Plans",

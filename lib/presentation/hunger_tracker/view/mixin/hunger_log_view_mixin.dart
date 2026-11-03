@@ -38,11 +38,13 @@ mixin HungerLogViewMixin on State<HungerLogView> {
     setState(() => saving = true);
     try {
       // Geçmiş listesi, hafta şeridi ve ana sayfa sayıları anında güncellenir.
-      await _hunger.save(
-        flow: session.flow,
-        mode: session.flow.mode,
-        notes: notesController.text.trim(),
-      );
+      await _hunger
+          .save(
+            flow: session.flow,
+            mode: session.flow.mode,
+            notes: notesController.text.trim(),
+          )
+          .withLoading(context);
       if (!mounted) return;
       await context.pushNamed(RoutePaths.hungerSuccess.name);
     } on Object catch (e) {

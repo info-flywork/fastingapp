@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:math' as math;
 
+import 'package:characters/characters.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:fastingapp/core/di/injection.dart';
 import 'package:fastingapp/core/router/route_paths.dart';
@@ -37,6 +38,9 @@ class _ChatViewState extends State<ChatView> {
   /// Kullanıcı yukarı kaydırdıysa otomatik kaydırmayı durdur.
   var _stickToBottom = true;
 
+  /// Aynı frame'de birden fazla scroll isteğini tek jump'ta birleştir.
+  var _scrollScheduled = false;
+
   /// Sunucu önerileri gelene kadar (veya gelmezse) yerel metinler.
   static const _fallbackSuggestions = <String>[
     'chat.suggestion_hungry',
@@ -59,6 +63,7 @@ class _ChatViewState extends State<ChatView> {
     _cubit.loadHistory();
     unawaited(_loadSuggestions());
     unawaited(_loadQuota());
+    unawaited(AiConsent.warmUp());
   }
 
   /// Ücretsiz kullanıcıya bugün kalan mesaj (önceden sınır ancak 402'de
@@ -94,51 +99,43 @@ class _ChatViewState extends State<ChatView> {
     super.dispose();
   }
 
-  void _scrollToBottom({bool animated = true}) {
-    if (!_stickToBottom) return;
-
-    void jump() {
-      if (!_scrollController.hasClients) return;
-      final target = _scrollController.position.maxScrollExtent;
-      if (animated) {
-        _scrollController.animateTo(
-          target,
-          duration: const Duration(milliseconds: 220),
-          curve: Curves.easeOutCubic,
-        );
-      } else {
-        _scrollController.jumpTo(target);
-      }
-    }
-
+  void _scrollToBottom() {
+    if (!_stickToBottom || _scrollScheduled) return;
+    _scrollScheduled = true;
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      jump();
-      // Baloncuk giriş animasyonu ve metin büyümesi layout'u geciktirir.
-      WidgetsBinding.instance.addPostFrameCallback((_) => jump());
+      _scrollScheduled = false;
+      if (!_stickToBottom || !mounted || !_scrollController.hasClients) return;
+      final position = _scrollController.position;
+      final target = position.maxScrollExtent;
+      if ((position.pixels - target).abs() < 1) return;
+      _scrollController.jumpTo(target);
     });
-    Future<void>.delayed(const Duration(milliseconds: 120), jump);
-    Future<void>.delayed(const Duration(milliseconds: 340), jump);
   }
 
   bool _chatContentChanged(ChatSessionState prev, ChatSessionState next) {
     if (prev.messages.length != next.messages.length) return true;
     if (prev.isAiTyping != next.isAiTyping) return true;
+    if (prev.isStreaming != next.isStreaming) return true;
     if (prev.messages.isEmpty || next.messages.isEmpty) {
       return prev.messages.isNotEmpty != next.messages.isNotEmpty;
     }
     final pl = prev.messages.last;
     final nl = next.messages.last;
-    return pl.id != nl.id || pl.text != nl.text;
+    return pl.id != nl.id || pl.text != nl.text || pl.urgent != nl.urgent;
   }
 
   Future<void> _sendText(String raw) async {
     final text = raw.trim();
     if (text.isEmpty || _cubit.isBusy) return;
-    if (!await AiConsent.ensure(context)) return;
-    if (!mounted) return;
     _stickToBottom = true;
     _controller.clear();
     _focusNode.unfocus();
+    // warmUp ile çoğu zaman anında; yoksa diyalog. Mesaj emit'i hemen ardından.
+    if (!await AiConsent.ensure(context)) {
+      if (mounted && _controller.text.isEmpty) _controller.text = text;
+      return;
+    }
+    if (!mounted) return;
     final delivered = await _cubit.sendMessage(text);
     unawaited(_loadQuota());
     // Ulaşmadıysa yazılan metin kaybolmasın.
@@ -177,17 +174,20 @@ class _ChatViewState extends State<ChatView> {
   Widget _buildConversation(ChatSessionState state) {
     final messages = state.messages;
     final isTyping = state.isAiTyping;
+    final lastAiIndex = messages.lastIndexWhere((m) => m.sender == ChatSender.ai);
 
     return NotificationListener<ScrollNotification>(
       onNotification: (notification) {
         if (!_scrollController.hasClients) return false;
-        if (notification is UserScrollNotification &&
-            notification.direction == ScrollDirection.reverse) {
-          _stickToBottom = false;
-        } else if (notification is ScrollUpdateNotification) {
-          final pos = _scrollController.position;
-          if (pos.maxScrollExtent - pos.pixels <= 72) {
-            _stickToBottom = true;
+        // Yalnızca kullanıcı jesti; programatik jumpTo stick'i bozmasın.
+        if (notification is UserScrollNotification) {
+          if (notification.direction == ScrollDirection.reverse) {
+            _stickToBottom = false;
+          } else if (notification.direction == ScrollDirection.forward) {
+            final pos = _scrollController.position;
+            if (pos.maxScrollExtent - pos.pixels <= 72) {
+              _stickToBottom = true;
+            }
           }
         }
         return false;
@@ -205,10 +205,16 @@ class _ChatViewState extends State<ChatView> {
             );
           }
           final message = messages[index];
+          final typewriter =
+              message.sender == ChatSender.ai && index == lastAiIndex;
           return _AppearOnce(
             key: ValueKey(message.id),
-            onLayoutChanged: _stickToBottom ? _scrollToBottom : null,
-            child: _MessageBubble(message: message),
+            child: _MessageBubble(
+              message: message,
+              typewriter: typewriter,
+              streaming: typewriter && state.isStreaming,
+              onReveal: _scrollToBottom,
+            ),
           );
         },
       ),
@@ -231,7 +237,7 @@ class _ChatViewState extends State<ChatView> {
                     _chatContentChanged(prev, next) ||
                     prev.errorMessage != next.errorMessage,
                 listener: (context, state) {
-                  _scrollToBottom(animated: state.messages.length > 1);
+                  _scrollToBottom();
                   final error = state.errorMessage;
                   if (error != null && error.isNotEmpty) {
                     AppSnackbar.show(
@@ -244,23 +250,11 @@ class _ChatViewState extends State<ChatView> {
                 },
                 buildWhen: _chatContentChanged,
                 builder: (context, state) {
-                  if (_stickToBottom && state.hasConversation) {
-                    _scrollToBottom(animated: false);
+                  // Boş → konuşma geçişi animasyonsuz; öneri tıkı anında gelsin.
+                  if (state.hasConversation) {
+                    return _buildConversation(state);
                   }
-                  return AnimatedSwitcher(
-                    duration: const Duration(milliseconds: 280),
-                    switchInCurve: Curves.easeOutCubic,
-                    switchOutCurve: Curves.easeInCubic,
-                    child: state.hasConversation
-                        ? KeyedSubtree(
-                            key: const ValueKey('conversation'),
-                            child: _buildConversation(state),
-                          )
-                        : KeyedSubtree(
-                            key: const ValueKey('empty'),
-                            child: _buildEmptyState(),
-                          ),
-                  );
+                  return _buildEmptyState();
                 },
               ),
             ),
@@ -288,11 +282,11 @@ class _ChatViewState extends State<ChatView> {
 }
 
 /// Key sabit kaldığı sürece animasyon bir kez çalışır.
+/// SizeTransition yok: her karede liste yüksekliği değişip scroll savaşı çıkıyordu.
 final class _AppearOnce extends StatefulWidget {
-  const _AppearOnce({required this.child, this.onLayoutChanged, super.key});
+  const _AppearOnce({required this.child, super.key});
 
   final Widget child;
-  final VoidCallback? onLayoutChanged;
 
   @override
   State<_AppearOnce> createState() => _AppearOnceState();
@@ -302,7 +296,7 @@ class _AppearOnceState extends State<_AppearOnce>
     with SingleTickerProviderStateMixin {
   late final AnimationController _controller = AnimationController(
     vsync: this,
-    duration: const Duration(milliseconds: 320),
+    duration: const Duration(milliseconds: 280),
   )..forward();
 
   late final Animation<double> _curved = CurvedAnimation(
@@ -311,19 +305,7 @@ class _AppearOnceState extends State<_AppearOnce>
   );
 
   @override
-  void initState() {
-    super.initState();
-    _curved.addListener(_onAppearLayout);
-  }
-
-  void _onAppearLayout() {
-    if (!_curved.isAnimating) return;
-    widget.onLayoutChanged?.call();
-  }
-
-  @override
   void dispose() {
-    _curved.removeListener(_onAppearLayout);
     _controller.dispose();
     super.dispose();
   }
@@ -334,23 +316,27 @@ class _AppearOnceState extends State<_AppearOnce>
       opacity: _curved,
       child: SlideTransition(
         position: Tween<Offset>(
-          begin: const Offset(0, 0.14),
+          begin: const Offset(0, 0.08),
           end: Offset.zero,
         ).animate(_curved),
-        child: SizeTransition(
-          sizeFactor: _curved,
-          alignment: Alignment.topCenter,
-          child: widget.child,
-        ),
+        child: widget.child,
       ),
     );
   }
 }
 
 final class _MessageBubble extends StatelessWidget {
-  const _MessageBubble({required this.message});
+  const _MessageBubble({
+    required this.message,
+    this.typewriter = false,
+    this.streaming = false,
+    this.onReveal,
+  });
 
   final ChatMessage message;
+  final bool typewriter;
+  final bool streaming;
+  final VoidCallback? onReveal;
 
   @override
   Widget build(BuildContext context) {
@@ -371,7 +357,13 @@ final class _MessageBubble extends StatelessWidget {
           bottomRight: Radius.circular(isUser ? 8 : 24),
         ),
       ),
-      child: Text(message.text, style: AppTextStyles.chatBubbleMessage),
+      child: isUser || !typewriter
+          ? Text(message.text, style: AppTextStyles.chatBubbleMessage)
+          : _TypewriterText(
+              text: message.text,
+              streaming: streaming,
+              onReveal: onReveal,
+            ),
     );
 
     return Padding(
@@ -406,6 +398,130 @@ final class _MessageBubble extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+/// ChatGPT benzeri yazma; grapheme (emoji) bütünlüğünü korur.
+final class _TypewriterText extends StatefulWidget {
+  const _TypewriterText({
+    required this.text,
+    required this.streaming,
+    this.onReveal,
+  });
+
+  final String text;
+  final bool streaming;
+  final VoidCallback? onReveal;
+
+  @override
+  State<_TypewriterText> createState() => _TypewriterTextState();
+}
+
+final class _TypewriterTextState extends State<_TypewriterText> {
+  static const _tick = Duration(milliseconds: 24);
+  var _visibleCount = 0;
+  var _scrollTick = 0;
+  Timer? _timer;
+
+  Characters get _target => widget.text.characters;
+
+  String get _visible => _target.take(_visibleCount).toString();
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.streaming || widget.text.isEmpty) {
+      _visibleCount = 0;
+      _arm();
+    } else {
+      // Geçmişten açılan tam metin — animasyonsuz.
+      _visibleCount = _target.length;
+    }
+  }
+
+  @override
+  void didUpdateWidget(covariant _TypewriterText oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.text == oldWidget.text &&
+        widget.streaming == oldWidget.streaming) {
+      return;
+    }
+    // Metin kısaldıysa / değiştiyse: eski görünür önekse koru, değilse sıfırla.
+    final next = _target;
+    if (_visibleCount > next.length) {
+      final oldVisible = oldWidget.text.characters.take(_visibleCount).toString();
+      if (widget.text.startsWith(oldVisible)) {
+        _visibleCount = next.length;
+      } else if (!widget.text.startsWith(_visible) && _visible.isNotEmpty) {
+        // Farklı içerik — geri zıplatma; mevcut önek kadar tut.
+        var keep = 0;
+        final oldChars = oldVisible.characters.toList();
+        final newChars = next.toList();
+        while (keep < oldChars.length &&
+            keep < newChars.length &&
+            oldChars[keep] == newChars[keep]) {
+          keep++;
+        }
+        _visibleCount = keep;
+      } else {
+        _visibleCount = next.length;
+      }
+    }
+    // Akış bitti ve az kaldıysa tamamını göster (tamamlanma titremesini kes).
+    if (!widget.streaming &&
+        oldWidget.streaming &&
+        next.length - _visibleCount <= 12) {
+      _visibleCount = next.length;
+      _timer?.cancel();
+      _timer = null;
+      return;
+    }
+    _arm();
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    super.dispose();
+  }
+
+  void _arm() {
+    if (_visibleCount >= _target.length && !widget.streaming) {
+      _timer?.cancel();
+      _timer = null;
+      return;
+    }
+    _timer ??= Timer.periodic(_tick, (_) => _tickReveal());
+  }
+
+  void _tickReveal() {
+    if (!mounted) return;
+    final total = _target.length;
+    if (_visibleCount >= total) {
+      if (!widget.streaming) {
+        _timer?.cancel();
+        _timer = null;
+      }
+      return;
+    }
+    // Grapheme adımı: emoji ortasından bölünmesin.
+    final step = widget.streaming ? 1 : 4;
+    setState(() {
+      _visibleCount = math.min(_visibleCount + step, total);
+    });
+    // Her harfte scroll = tamamlanınca zıplama; seyrek tut.
+    _scrollTick++;
+    if (_scrollTick % 3 == 0 || _visibleCount >= total) {
+      widget.onReveal?.call();
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Text(
+      _visibleCount == 0 ? ' ' : _visible,
+      style: AppTextStyles.chatBubbleMessage,
     );
   }
 }
@@ -713,15 +829,17 @@ final class _SendButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return Material(
       color: Colors.transparent,
+      shape: const CircleBorder(),
+      clipBehavior: Clip.antiAlias,
       child: InkWell(
         onTap: onTap,
         customBorder: const CircleBorder(),
         child: Ink(
           width: 48,
           height: 48,
-          decoration: BoxDecoration(
+          decoration: const BoxDecoration(
             shape: BoxShape.circle,
-            gradient: const LinearGradient(
+            gradient: LinearGradient(
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
               colors: [
@@ -729,17 +847,6 @@ final class _SendButton extends StatelessWidget {
                 ColorName.colorCtaGradientBottom,
               ],
             ),
-            border: Border.all(
-              color: ColorName.colorWhite.withValues(alpha: 0.15),
-            ),
-            boxShadow: [
-              BoxShadow(
-                color: ColorName.colorWhite.withValues(alpha: 0.22),
-                blurRadius: 16,
-                offset: const Offset(0, 4),
-                blurStyle: BlurStyle.inner,
-              ),
-            ],
           ),
           child: Center(
             child: Assets.icons.solarPlainBold.svg(width: 22, height: 22),

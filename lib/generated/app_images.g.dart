@@ -42,6 +42,7 @@ abstract final class AppImages {
   static const AppImageAsset chatGptImage24Eyl20261650197 = AppImageAsset('assets/images/ChatGPT Image 24 Eyl 2026 16_50_19 (7).png');
   static const AppImageAsset chatGptImage24Eyl20261650198 = AppImageAsset('assets/images/ChatGPT Image 24 Eyl 2026 16_50_19 (8).png');
   static const AppImageAsset chatGptImage24Eyl20261650199 = AppImageAsset('assets/images/ChatGPT Image 24 Eyl 2026 16_50_19 (9).png');
+  static const AppImageAsset dilCKaranGuLenSarEmoji = AppImageAsset('assets/images/Dil çıkaran gülen sarı emoji.png');
   static const AppImageAsset kildenPembeIEkVeYapraklar2 = AppImageAsset('assets/images/Kilden pembe çiçek ve yapraklar-2.png');
   static const AppImageAsset kremIEkYeIlSapVeYapraklar4 = AppImageAsset('assets/images/Krem çiçek, yeşil sap ve yapraklar-4.png');
   static const AppImageAsset kurakTaEmberliGLet6 = AppImageAsset('assets/images/Kurak taş çemberli gölet-6.png');

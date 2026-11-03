@@ -703,7 +703,7 @@ final class StepsDay {
   /// `manual` | `appleHealth` | `googleFit`; kayıt yoksa null.
   final String? source;
 
-  /// Sağlık uygulamasından gelen gün: elle değiştirilemez (sunucu 409).
+  /// Sağlık uygulamasından gelen gün (gösterim / bilgi amaçlı).
   bool get isHealthSynced => source != null && source != 'manual';
 }
 

@@ -76,7 +76,7 @@ final class ProfileMenuRow extends StatelessWidget {
     final showChevron = trailing == null;
 
     final content = Padding(
-      padding: const EdgeInsets.fromLTRB(12, 14, 12, 14),
+      padding: const EdgeInsets.fromLTRB(12, 16, 12, 16),
       child: Row(
         children: [
           SizedBox(

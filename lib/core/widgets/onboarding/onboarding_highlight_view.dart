@@ -50,13 +50,16 @@ final class OnboardingHighlightView extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 20),
             child: Column(
               children: [
-                const Spacer(),
-                appImage(
-                  mediaPath,
-                  width: mediaSize,
-                  height: mediaSize,
-                  fit: BoxFit.contain,
-                  gaplessPlayback: true,
+                const Spacer(flex: 2),
+                Flexible(
+                  flex: 5,
+                  child: appImage(
+                    mediaPath,
+                    width: mediaSize,
+                    height: mediaSize,
+                    fit: BoxFit.contain,
+                    gaplessPlayback: true,
+                  ),
                 ),
                 Text(
                   title,
@@ -69,9 +72,9 @@ final class OnboardingHighlightView extends StatelessWidget {
                   textAlign: TextAlign.center,
                   child: subtitle,
                 ),
-                const SizedBox(height: 20),
+                const SizedBox(height: 16),
                 middle,
-                const SizedBox(height: 60),
+                const Spacer(),
                 AppButton(
                   label: buttonLabel,
                   onPressed: onContinue,

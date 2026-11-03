@@ -48,19 +48,12 @@ class _PrivacyHighlightViewState extends State<PrivacyHighlightView> {
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Checkbox(
-                    value: consent,
-                    activeColor: ColorName.colorOptionSelected,
-                    onChanged: (v) =>
-                        setState(() => _draft.healthDataConsent = v ?? false),
-                  ),
+                  _ConsentCheck(checked: consent),
+                  const SizedBox(width: 10),
                   Expanded(
-                    child: Padding(
-                      padding: const EdgeInsets.only(top: 12),
-                      child: Text(
-                        'onboarding.health_consent'.tr(),
-                        style: AppTextStyles.footerHint,
-                      ),
+                    child: Text(
+                      'onboarding.health_consent'.tr(),
+                      style: AppTextStyles.footerHint,
                     ),
                   ),
                 ],
@@ -72,6 +65,33 @@ class _PrivacyHighlightViewState extends State<PrivacyHighlightView> {
       buttonLabel: 'onboarding.lets_keep_going'.tr(),
       onContinue: consent
           ? () => context.push(RoutePaths.startingPoint.path)
+          : null,
+    );
+  }
+}
+
+final class _ConsentCheck extends StatelessWidget {
+  const _ConsentCheck({required this.checked});
+
+  final bool checked;
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 180),
+      width: 22,
+      height: 22,
+      margin: const EdgeInsets.only(top: 1),
+      decoration: BoxDecoration(
+        color: checked ? ColorName.colorBrandStrong : ColorName.colorWhite,
+        borderRadius: BorderRadius.circular(6),
+        border: Border.all(
+          width: 2,
+          color: checked ? ColorName.colorBrandStrong : ColorName.colorWhite,
+        ),
+      ),
+      child: checked
+          ? const Icon(Icons.check, size: 16, color: ColorName.colorWhite)
           : null,
     );
   }

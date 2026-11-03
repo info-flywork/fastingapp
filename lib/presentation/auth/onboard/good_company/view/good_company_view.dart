@@ -15,6 +15,7 @@ import 'package:fastingapp/domain/auth/auth_repository.dart';
 import 'package:fastingapp/domain/notification/push_service.dart';
 import 'package:fastingapp/domain/onboarding/onboarding_repository.dart';
 import 'package:fastingapp/generated/app_images.g.dart';
+import 'package:fastingapp/generated/assets.gen.dart';
 import 'package:fastingapp/generated/colors.gen.dart';
 import 'package:fastingapp/presentation/auth/bloc/auth_bloc.dart';
 import 'package:fastingapp/presentation/auth/bloc/auth_event.dart';
@@ -134,7 +135,7 @@ class _GoodCompanyViewState extends State<GoodCompanyView>
                 child: AppButton(
                   label: 'onboarding.good_company_cta'.tr(),
                   onPressed: onContinue,
-                  showIcon: false,
+                  iconAsset: Assets.icons.solarArrowLeftLinear.path,
                 ),
               ),
             ],

@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:bloc/bloc.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:fastingapp/core/network/network_exception.dart';
 import 'package:fastingapp/domain/chat/ai_consent.dart';
 import 'package:fastingapp/domain/chat/chat_repository.dart';
@@ -91,6 +92,7 @@ final class ChatSessionCubit extends Cubit<ChatSessionState> {
       state.copyWith(
         messages: const [],
         isAiTyping: false,
+        isStreaming: false,
         clearActiveConversation: true,
         clearError: true,
       ),
@@ -108,11 +110,15 @@ final class ChatSessionCubit extends Cubit<ChatSessionState> {
   Future<bool> sendMessage(String raw) async {
     if (raw.trim().isEmpty || isBusy) return true;
     _streaming = true;
+    emit(state.copyWith(isStreaming: true));
     final token = _replyToken + 1;
     try {
       return await _send(raw);
     } finally {
-      if (_replyToken == token) _streaming = false;
+      if (_replyToken == token) {
+        _streaming = false;
+        if (!isClosed) emit(state.copyWith(isStreaming: false));
+      }
     }
   }
 
@@ -195,37 +201,47 @@ final class ChatSessionCubit extends Cubit<ChatSessionState> {
           ),
         );
       } else {
-        final nextMessages = [...state.messages];
         if (result.userMessageId != null) storedOnServer = true;
+        final nextMessages = [...state.messages];
         final assistantIdx = nextMessages.indexWhere(
           (m) => m.id == assistant.id,
         );
-        if (assistantIdx >= 0) {
-          nextMessages[assistantIdx] = ChatMessage(
-            id: assistant.id,
-            text: assistant.text,
-            sender: ChatSender.ai,
-            urgent: assistant.safety == 'urgent',
+        final urgent = assistant.safety == 'urgent';
+        final nextAssistant = ChatMessage(
+          id: assistant.id,
+          text: assistant.text,
+          sender: ChatSender.ai,
+          urgent: urgent,
+        );
+        // Aynı metinse sadece urgent güncelle — gereksiz rebuild/titreme yok.
+        final unchanged =
+            assistantIdx >= 0 &&
+            nextMessages[assistantIdx].text == assistant.text &&
+            nextMessages[assistantIdx].urgent == urgent;
+        if (!unchanged) {
+          if (assistantIdx >= 0) {
+            nextMessages[assistantIdx] = nextAssistant;
+          } else {
+            nextMessages.add(nextAssistant);
+          }
+          emit(
+            state.copyWith(
+              messages: nextMessages,
+              isAiTyping: false,
+              activeConversationId: conversationId,
+            ),
           );
         } else {
-          nextMessages.add(
-            ChatMessage(
-              id: assistant.id,
-              text: assistant.text,
-              sender: ChatSender.ai,
-              urgent: assistant.safety == 'urgent',
+          emit(
+            state.copyWith(
+              isAiTyping: false,
+              activeConversationId: conversationId,
             ),
           );
         }
-        emit(
-          state.copyWith(
-            messages: nextMessages,
-            isAiTyping: false,
-            activeConversationId: conversationId,
-          ),
-        );
       }
-      await loadHistory(force: true);
+      // Geçmişi arka planda yenile; tamamlanma anındaki UI'yı bloklamasın.
+      unawaited(loadHistory(force: true));
       return true;
     } on NetworkException catch (e) {
       AiConsent.onError(e);
@@ -398,7 +414,7 @@ final class ChatSessionCubit extends Cubit<ChatSessionState> {
 
   ChatHistoryItem _toHistoryItem(ChatConversation c) => ChatHistoryItem(
     id: c.id,
-    title: c.title.isEmpty ? 'Coach Mochi' : c.title,
+    title: c.title.isEmpty ? 'chat.coach_name'.tr() : c.title,
     messageCount: c.messageCount,
     date: c.lastMessageAt ?? c.createdAt,
     isPinned: c.isPinned,

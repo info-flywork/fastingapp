@@ -67,10 +67,8 @@ class _LatestChatsViewState extends State<LatestChatsView> {
                   if (state.isLoadingHistory && state.history.isEmpty) {
                     return const Center(child: CircularProgressIndicator());
                   }
-                  if (state.history.isEmpty) {
-                    return const _LatestChatsEmptyState();
-                  }
-
+                  // Boş listeyi de _AnimatedChatHistory yönetir; son kart
+                  // silinirken parent'ın EmptyState'e zıplaması animasyonu kesmesin.
                   return _AnimatedChatHistory(
                     items: state.history,
                     onOpen: (item) async {
@@ -223,7 +221,8 @@ final class _AnimatedChatHistory extends StatefulWidget {
 }
 
 class _AnimatedChatHistoryState extends State<_AnimatedChatHistory> {
-  static const _motion = Duration(milliseconds: 320);
+  static const _insertMotion = Duration(milliseconds: 320);
+  static const _deleteMotion = Duration(milliseconds: 420);
 
   final _listKey = GlobalKey<AnimatedListState>();
   late List<ChatHistoryItem> _items = List.of(widget.items);
@@ -282,12 +281,12 @@ class _AnimatedChatHistoryState extends State<_AnimatedChatHistory> {
       final current = _items.indexWhere((item) => item.id == want.id);
       if (current == -1) {
         _items.insert(target, want);
-        list.insertItem(target, duration: _motion);
+        list.insertItem(target, duration: _insertMotion);
       } else if (current != target) {
         _removeAt(list, current, revealEmpty: false);
         final insertAt = current < target ? target - 1 : target;
         _items.insert(insertAt, want);
-        list.insertItem(insertAt, duration: _motion);
+        list.insertItem(insertAt, duration: _insertMotion);
       } else if (_items[target] != want) {
         _items[target] = want;
         changedInPlace = true;
@@ -315,17 +314,24 @@ class _AnimatedChatHistoryState extends State<_AnimatedChatHistory> {
           }
         });
       }
-      return _row(removed, animation, interactive: false);
-    }, duration: _motion);
+      return _row(
+        removed,
+        animation,
+        interactive: false,
+        deleting: true,
+      );
+    }, duration: _deleteMotion);
   }
 
   Widget _row(
     ChatHistoryItem item,
     Animation<double> animation, {
     required bool interactive,
+    bool deleting = false,
   }) {
     return _MotionRow(
       animation: animation,
+      deleting: deleting,
       child: Padding(
         padding: const EdgeInsets.only(bottom: 12),
         child: _ChatHistoryCard(
@@ -521,25 +527,37 @@ final class _ChatHistoryCard extends StatelessWidget {
 enum _HistoryMenuAction { pin, delete }
 
 final class _MotionRow extends StatefulWidget {
-  const _MotionRow({required this.animation, required this.child});
+  const _MotionRow({
+    required this.animation,
+    required this.child,
+    this.deleting = false,
+  });
 
   final Animation<double> animation;
   final Widget child;
+  final bool deleting;
 
   @override
   State<_MotionRow> createState() => _MotionRowState();
 }
 
 class _MotionRowState extends State<_MotionRow> {
-  late final CurvedAnimation _curved = CurvedAnimation(
-    parent: widget.animation,
+  late CurvedAnimation _curved = _buildCurve(widget.animation);
+
+  CurvedAnimation _buildCurve(Animation<double> parent) => CurvedAnimation(
+    parent: parent,
     curve: Curves.easeOutCubic,
     reverseCurve: Curves.easeInCubic,
   );
-  late final Animation<Offset> _slide = Tween<Offset>(
-    begin: const Offset(0.16, 0),
-    end: Offset.zero,
-  ).animate(_curved);
+
+  @override
+  void didUpdateWidget(covariant _MotionRow oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.animation != widget.animation) {
+      _curved.dispose();
+      _curved = _buildCurve(widget.animation);
+    }
+  }
 
   @override
   void dispose() {
@@ -549,11 +567,20 @@ class _MotionRowState extends State<_MotionRow> {
 
   @override
   Widget build(BuildContext context) {
-    return SizeTransition(
-      sizeFactor: _curved,
-      child: FadeTransition(
-        opacity: _curved,
-        child: SlideTransition(position: _slide, child: widget.child),
+    // Silmede sağa kayarak çık; eklemede soldan gelsin.
+    final slide = Tween<Offset>(
+      begin: widget.deleting ? const Offset(0.55, 0) : const Offset(-0.08, 0),
+      end: Offset.zero,
+    ).animate(_curved);
+
+    return ClipRect(
+      child: SizeTransition(
+        sizeFactor: _curved,
+        axisAlignment: -1,
+        child: FadeTransition(
+          opacity: _curved,
+          child: SlideTransition(position: slide, child: widget.child),
+        ),
       ),
     );
   }

@@ -35,7 +35,17 @@ class _NotedHighlightViewState extends State<NotedHighlightView>
       title: 'onboarding.noted_title'.tr(),
       subtitle: buildNotedSubtitle(widget.args.skips),
       middle: OnboardingInfoChip(
-        leading: const Text('🥗', style: TextStyle(fontSize: 16)),
+        leading: Text(
+          '🥗',
+          style: TextStyle(
+            fontSize: 16,
+            fontFamilyFallback: const [
+              'Apple Color Emoji',
+              'Noto Color Emoji',
+              'Segoe UI Emoji',
+            ],
+          ),
+        ),
         label: summaryChipLabel(
           favourites: widget.args.loves.length,
           skips: widget.args.skips.length,

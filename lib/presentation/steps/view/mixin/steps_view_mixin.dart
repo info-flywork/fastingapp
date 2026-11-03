@@ -26,8 +26,6 @@ mixin StepsViewMixin on State<StepsView>, TickerProvider {
 
   int get dailyGoalSteps => _store.goalFor(selectedDate);
 
-  bool get selectedDayHealthSynced => _store.isHealthSynced(selectedDate);
-
   double get progress =>
       dailyGoalSteps <= 0 ? 0 : (currentSteps / dailyGoalSteps).clamp(0.0, 1.0);
 
@@ -89,8 +87,9 @@ mixin StepsViewMixin on State<StepsView>, TickerProvider {
 
   bool get isStepsToday => DateUtils.isSameDay(selectedDate, _today);
 
-  /// Elle yalnızca bugün ve sağlık uygulamasından gelmeyen günde girilir.
-  bool get canEditSteps => isStepsToday && !selectedDayHealthSynced;
+  /// Elle yalnızca bugün girilir. Sağlık sync'li günde de düzeltilebilir;
+  /// yazınca kaynak `manual` olur, sonraki senkron ezmez.
+  bool get canEditSteps => isStepsToday;
 
   void initStepsControllers() {
     selectedDate = _today;

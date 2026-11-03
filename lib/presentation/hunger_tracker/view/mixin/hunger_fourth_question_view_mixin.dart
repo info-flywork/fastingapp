@@ -15,7 +15,7 @@ mixin HungerFourthQuestionViewMixin on State<HungerFourthQuestionView> {
     setState(() => evaluating = true);
     final flow = widget.args.copyWith(q4: selected!.name);
     try {
-      final evaluation = await _hunger.evaluate(flow);
+      final evaluation = await _hunger.evaluate(flow).withLoading(context);
       if (!mounted) return;
       await context.pushNamed(
         RoutePaths.hungerResult.name,

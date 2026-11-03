@@ -3,11 +3,7 @@ import 'package:flutter/material.dart';
 
 /// Bölüm başlığı + içerik.
 final class ProfileSection extends StatelessWidget {
-  const ProfileSection({
-    required this.title,
-    required this.child,
-    super.key,
-  });
+  const ProfileSection({required this.title, required this.child, super.key});
 
   final String title;
   final Widget child;

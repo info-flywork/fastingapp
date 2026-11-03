@@ -1,11 +1,7 @@
-import 'dart:async';
-
 import 'package:easy_localization/easy_localization.dart';
-import 'package:fastingapp/core/di/injection.dart';
 import 'package:fastingapp/core/remote_images/app_image.dart';
 import 'package:fastingapp/core/router/route_paths.dart';
 import 'package:fastingapp/core/theme/app_text_styles.dart';
-import 'package:fastingapp/domain/content/content_repository.dart';
 import 'package:fastingapp/generated/app_images.g.dart';
 import 'package:fastingapp/generated/assets.gen.dart';
 import 'package:fastingapp/generated/colors.gen.dart';
@@ -14,7 +10,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 /// Zorlanıyorum — neden seçimi. İlk açılışta kart seçili gelmez.
-/// Metinler `GET /catalog/struggle`; yüklenemezse yerel çeviri.
+/// Metinler uygulama lokalinden (API kataloğu nickname'i ezmesin diye).
 final class FastingStruggleView extends StatefulWidget {
   const FastingStruggleView({super.key});
 
@@ -24,7 +20,6 @@ final class FastingStruggleView extends StatefulWidget {
 
 class _FastingStruggleViewState extends State<FastingStruggleView> {
   int? _selected;
-  StruggleCatalog? _catalog;
 
   static const _options = <_StruggleOption>[
     _StruggleOption(
@@ -59,41 +54,13 @@ class _FastingStruggleViewState extends State<FastingStruggleView> {
     ),
   ];
 
-  @override
-  void initState() {
-    super.initState();
-    unawaited(_loadCatalog());
-  }
+  String get _introTitle => 'fasting_struggle.title'.tr();
 
-  Future<void> _loadCatalog() async {
-    try {
-      final catalog = await getIt<ContentRepository>().struggle();
-      if (!mounted) return;
-      setState(() => _catalog = catalog);
-    } on Object {
-      // Yerel çeviri kalır.
-    }
-  }
+  String get _introBody => 'fasting_struggle.body'.tr();
 
-  String get _introTitle {
-    final t = _catalog?.intro.title.trim() ?? '';
-    return t.isNotEmpty ? t : 'fasting_struggle.title'.tr();
-  }
+  String _titleOf(_StruggleOption option) => option.titleKey.tr();
 
-  String get _introBody {
-    final t = _catalog?.intro.body.trim() ?? '';
-    return t.isNotEmpty ? t : 'fasting_struggle.body'.tr();
-  }
-
-  String _titleOf(_StruggleOption option) {
-    final t = _catalog?.reason(option.reason.name)?.title.trim() ?? '';
-    return t.isNotEmpty ? t : option.titleKey.tr();
-  }
-
-  String _bodyOf(_StruggleOption option) {
-    final t = _catalog?.reason(option.reason.name)?.body.trim() ?? '';
-    return t.isNotEmpty ? t : option.bodyKey.tr();
-  }
+  String _bodyOf(_StruggleOption option) => option.bodyKey.tr();
 
   @override
   Widget build(BuildContext context) {

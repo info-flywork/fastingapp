@@ -127,8 +127,8 @@ class _StepsViewState extends State<StepsView>
                               goal: weekChartScale,
                               todayIndex: todayWeekIndex,
                             ),
-                            // Adımlar elle yalnızca bugün ve sağlık
-                            // uygulamasından gelmeyen günde girilir.
+                            // Adımlar elle yalnızca bugün girilir (sağlık
+                            // sync'li gün de düzeltilebilir).
                             if (canEditSteps) ...[
                               const SizedBox(height: 28),
                               _StepsControls(

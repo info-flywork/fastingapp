@@ -13,6 +13,18 @@ abstract final class AiConsent {
   /// Yerel önbellek (oturum içi); çıkışta [clear] çağır.
   static void clear() => _cachedGranted = null;
 
+  /// Sohbet açılırken rızayı arka planda ısıt — ilk öneri tıkında ağ beklemesin.
+  static Future<void> warmUp() async {
+    if (_cachedGranted == true) return;
+    try {
+      if (await getIt<ChatRepository>().hasAiProcessingConsent()) {
+        _cachedGranted = true;
+      }
+    } on Object {
+      // ensure sırasında yeniden denenecek.
+    }
+  }
+
   /// Sunucu rızayı tanımıyor (`CONSENT_REQUIRED`, ör. başka cihazda geri
   /// çekildi): önbellek bırakılır, bir sonraki denemede yeniden sorulur.
   static void onError(Object error) {

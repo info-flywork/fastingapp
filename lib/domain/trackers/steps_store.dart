@@ -112,8 +112,7 @@ final class StepsStore extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// Elle adım (yalnızca bugün; sağlık günü değilse). Art arda dokunuşlar
-  /// 600 ms içinde tek PUT olur.
+  /// Elle adım (yalnızca bugün). Art arda dokunuşlar 600 ms içinde tek PUT olur.
   void setSteps(DateTime date, int steps) {
     final d = _day(date);
     _local[d] = steps.clamp(0, 99999);
