@@ -61,28 +61,31 @@ void main() {
     },
   );
 
-  test('ağ kapanınca debounce sonrası çevrimdışı; kısa none blip yanıp sönmez', () async {
-    service.start();
-    await pumpEventQueue();
-    final before = probe.calls;
+  test(
+    'ağ kapanınca debounce sonrası çevrimdışı; kısa none blip yanıp sönmez',
+    () async {
+      service.start();
+      await pumpEventQueue();
+      final before = probe.calls;
 
-    // Anlık none → hemen wifi: offline sayfası açılmaz.
-    changes.add([ConnectivityResult.none]);
-    await pumpEventQueue();
-    expect(service.isOnline.value, isTrue);
-    changes.add([ConnectivityResult.wifi]);
-    await pumpEventQueue();
-    await Future<void>.delayed(const Duration(milliseconds: 40));
-    expect(service.isOnline.value, isTrue);
+      // Anlık none → hemen wifi: offline sayfası açılmaz.
+      changes.add([ConnectivityResult.none]);
+      await pumpEventQueue();
+      expect(service.isOnline.value, isTrue);
+      changes.add([ConnectivityResult.wifi]);
+      await pumpEventQueue();
+      await Future<void>.delayed(const Duration(milliseconds: 40));
+      expect(service.isOnline.value, isTrue);
 
-    // Kalıcı none: debounce sonrası çevrimdışı.
-    changes.add([ConnectivityResult.none]);
-    await pumpEventQueue();
-    expect(service.isOnline.value, isTrue);
-    await Future<void>.delayed(const Duration(milliseconds: 40));
-    expect(service.isOnline.value, isFalse);
-    expect(probe.calls, greaterThanOrEqualTo(before));
-  });
+      // Kalıcı none: debounce sonrası çevrimdışı.
+      changes.add([ConnectivityResult.none]);
+      await pumpEventQueue();
+      expect(service.isOnline.value, isTrue);
+      await Future<void>.delayed(const Duration(milliseconds: 40));
+      expect(service.isOnline.value, isFalse);
+      expect(probe.calls, greaterThanOrEqualTo(before));
+    },
+  );
 
   test('açılış probe sürerken none olayı offline flash yapmaz', () async {
     probe.gate = Completer();

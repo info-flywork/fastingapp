@@ -294,10 +294,7 @@ final class ChatRepository {
             safety = event.data['safety'] as String? ?? safety;
           case 'error':
             final code = event.data['code'] as String? ?? 'UNAVAILABLE';
-            throw NetworkException(
-              'chat.unavailable'.tr(),
-              code: code,
-            );
+            throw NetworkException('chat.unavailable'.tr(), code: code);
         }
       }
     }

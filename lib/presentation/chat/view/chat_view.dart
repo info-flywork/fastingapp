@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:math' as math;
 
-import 'package:characters/characters.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:fastingapp/core/di/injection.dart';
 import 'package:fastingapp/core/router/route_paths.dart';
@@ -174,7 +173,9 @@ class _ChatViewState extends State<ChatView> {
   Widget _buildConversation(ChatSessionState state) {
     final messages = state.messages;
     final isTyping = state.isAiTyping;
-    final lastAiIndex = messages.lastIndexWhere((m) => m.sender == ChatSender.ai);
+    final lastAiIndex = messages.lastIndexWhere(
+      (m) => m.sender == ChatSender.ai,
+    );
 
     return NotificationListener<ScrollNotification>(
       onNotification: (notification) {
@@ -450,7 +451,9 @@ final class _TypewriterTextState extends State<_TypewriterText> {
     // Metin kısaldıysa / değiştiyse: eski görünür önekse koru, değilse sıfırla.
     final next = _target;
     if (_visibleCount > next.length) {
-      final oldVisible = oldWidget.text.characters.take(_visibleCount).toString();
+      final oldVisible = oldWidget.text.characters
+          .take(_visibleCount)
+          .toString();
       if (widget.text.startsWith(oldVisible)) {
         _visibleCount = next.length;
       } else if (!widget.text.startsWith(_visible) && _visible.isNotEmpty) {

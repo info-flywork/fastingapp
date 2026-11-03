@@ -14,6 +14,6 @@ void main() {
   });
 
   test('eksik veri: 0', () {
-    expect(weightProgressOf(start: null, goal: 70, current: 70), 0);
+    expect(weightProgressOf(goal: 70, current: 70), 0);
   });
 }

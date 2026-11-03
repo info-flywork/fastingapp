@@ -29,10 +29,10 @@ final class WorldData implements BaseModel<WorldData> {
     required this.level,
     required this.sceneLevel,
     required this.health,
-    this.nextSceneLevelAt,
     required this.worldProgress,
     required this.zones,
     required this.week,
+    this.nextSceneLevelAt,
   });
 
   factory WorldData.fromJson(Map<String, dynamic> json) {

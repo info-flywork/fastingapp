@@ -44,7 +44,7 @@ final class HorseshoeArc extends StatelessWidget {
 
   /// En kalın konturun dış kenarı tuvalin içinde kalsın (yanlar kesilmesin).
   static double radiusFor(Size size) {
-    final outer = stroke + strokeExtra;
+    const outer = stroke + strokeExtra;
     return (math.min(size.width, size.height) - outer) / 2 - 0.5;
   }
 
@@ -153,13 +153,7 @@ final class _HorseshoeArcPainter extends CustomPainter {
         false,
         progressPaint,
       )
-      ..drawArc(
-        rect,
-        startRad,
-        sweepRad * (end - 1),
-        false,
-        progressPaint,
-      );
+      ..drawArc(rect, startRad, sweepRad * (end - 1), false, progressPaint);
   }
 
   @override
