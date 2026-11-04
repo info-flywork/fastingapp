@@ -172,7 +172,8 @@ final class _ParticipantsCluster extends StatelessWidget {
               child: label,
             ),
           ),
-          for (var i = 0; i < shown.length; i++)
+          // Sağdaki en arkada, soldaki en önde (Stack son çocuğu üstte).
+          for (var i = shown.length - 1; i >= 0; i--)
             Positioned(
               left: i * step,
               top: 0,
