@@ -79,9 +79,7 @@ final class Challenge implements BaseModel<Challenge> {
       rewardXp: (json['rewardXp'] as num?)?.toInt() ?? 0,
       isPremium: json['isPremium'] as bool? ?? false,
       participantsCount: (json['participantsCount'] as num?)?.toInt() ?? 0,
-      participantAvatars: avatars is List
-          ? avatars.whereType<String>().toList()
-          : const [],
+      participantAvatars: ChallengeAvatarPreview.listFrom(avatars),
       my: myRaw is Map<String, dynamic>
           ? ChallengeProgress.fromJson(myRaw)
           : null,
@@ -98,8 +96,8 @@ final class Challenge implements BaseModel<Challenge> {
   final bool isPremium;
   final int participantsCount;
 
-  /// Katılımcı avatar URL'leri (en fazla birkaç tane).
-  final List<String> participantAvatars;
+  /// Ana sayfa yüzüğü (en fazla 3): fotoğraf ve/veya baş harf.
+  final List<ChallengeAvatarPreview> participantAvatars;
 
   /// Katıldıysa ilerleme; katılmadıysa null.
   final ChallengeProgress? my;
@@ -111,6 +109,32 @@ final class Challenge implements BaseModel<Challenge> {
 
   @override
   Map<String, dynamic> toJson() => {'code': code};
+}
+
+/// Ana sayfa yüzüğündeki bir yüz: fotoğraf ve/veya baş harf.
+final class ChallengeAvatarPreview {
+  const ChallengeAvatarPreview({this.url, this.initials});
+
+  factory ChallengeAvatarPreview.fromJson(Map<String, dynamic> json) =>
+      ChallengeAvatarPreview(
+        url: json['url'] as String?,
+        initials: json['initials'] as String?,
+      );
+
+  /// Eski `string[]` ve yeni `{url, initials}[]` yanıtlarını tolere eder.
+  static List<ChallengeAvatarPreview> listFrom(Object? raw) {
+    if (raw is! List) return const [];
+    return [
+      for (final item in raw)
+        if (item is String && item.isNotEmpty)
+          ChallengeAvatarPreview(url: item)
+        else if (item is Map<String, dynamic>)
+          ChallengeAvatarPreview.fromJson(item),
+    ];
+  }
+
+  final String? url;
+  final String? initials;
 }
 
 final class ChallengeProgress {

@@ -345,6 +345,21 @@
       "bytes": 112682,
       "sha256": "0d458ad93cb9b06fb2e8d7aafe9dec79af28b34fbd88a9f2392d3935fb6bd201"
     },
+    "assets/images/fasting_challenge_user_1.png": {
+      "file": "766a8eb53f125cdfe613.webp",
+      "bytes": 102262,
+      "sha256": "766a8eb53f125cdfe6135e2021a8699da1d3a2c5809d48185f5c182a681ed191"
+    },
+    "assets/images/fasting_challenge_user_2.png": {
+      "file": "1cd21837c34f02ad3be4.webp",
+      "bytes": 83404,
+      "sha256": "1cd21837c34f02ad3be466821b8e60043a54049ee3ebb56415f3910a887f0c67"
+    },
+    "assets/images/fasting_challenge_user_3.png": {
+      "file": "f0406f6ac25bf7f1618d.webp",
+      "bytes": 111770,
+      "sha256": "f0406f6ac25bf7f1618d4fa0d34512eced2c2c9ae55fb088b399a1d46653a6a7"
+    },
     "assets/images/fatigue.png": {
       "file": "abfb0d6da221a62c6f04.webp",
       "bytes": 65882,

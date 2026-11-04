@@ -125,9 +125,13 @@ class _LoginLegalTextState extends State<_LoginLegalText> {
   }
 
   Future<void> _open(String? Function(AppLinks links) pick) async {
-    final url = pick(await getIt<AppLinksRepository>().get());
-    if (url == null) return;
-    await getIt<UrlLauncherManager>().openUrl(url);
+    Future<void> launch() async {
+      final url = pick(await getIt<AppLinksRepository>().get());
+      if (url == null) return;
+      await getIt<UrlLauncherManager>().openUrl(url);
+    }
+
+    await launch().withLoading(context);
   }
 
   @override

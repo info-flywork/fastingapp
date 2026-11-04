@@ -107,8 +107,8 @@ final class _ParticipantsCluster extends StatelessWidget {
 
   final int count;
 
-  /// Sunucudaki katılımcı avatar URL'leri (en fazla 3 gösterilir).
-  final List<String> avatars;
+  /// Sunucudaki yüzler (fotoğraf öncelikli, yoksa baş harf; en fazla 3).
+  final List<ChallengeAvatarPreview> avatars;
   static const _avatarSize = 40.0;
   static const _avatarOverlap = 12.0;
   static const _chipHeight = 28.0;
@@ -118,7 +118,7 @@ final class _ParticipantsCluster extends StatelessWidget {
   Widget build(BuildContext context) {
     final shown = avatars.take(3).toList();
     const step = _avatarSize - _avatarOverlap;
-    final lastAvatarLeft = (shown.length - 1) * step;
+    final lastAvatarLeft = shown.isEmpty ? 0.0 : (shown.length - 1) * step;
     final chipLeft = shown.isEmpty
         ? 0.0
         : lastAvatarLeft + _avatarSize - _chipOverlap;
@@ -155,6 +155,7 @@ final class _ParticipantsCluster extends StatelessWidget {
     return SizedBox(
       height: _avatarSize,
       child: Stack(
+        clipBehavior: Clip.none,
         alignment: Alignment.centerLeft,
         children: [
           // Pill — stack genişliğini belirler; sol kenarı son avatarın altında.
@@ -175,24 +176,75 @@ final class _ParticipantsCluster extends StatelessWidget {
             Positioned(
               left: i * step,
               top: 0,
-              child: Container(
-                width: _avatarSize,
-                height: _avatarSize,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  border: Border.all(color: ColorName.colorWhite, width: 2),
-                ),
-                child: ClipOval(
-                  child: Image.network(
-                    shown[i],
-                    fit: BoxFit.cover,
-                    cacheWidth: 120,
-                    errorBuilder: (_, _, _) =>
-                        const ColoredBox(color: ColorName.colorHomeChipBg),
-                  ),
+              child: _Face(preview: shown[i]),
+            ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Profildeki gibi: foto varsa o, yoksa koyu daire + baş harf / kişi ikonu.
+/// Foto tam daireyi doldurur; beyaz halka üstte çizilir (border+clip kayması yok).
+final class _Face extends StatelessWidget {
+  const _Face({required this.preview});
+
+  final ChallengeAvatarPreview preview;
+  static const _size = _ParticipantsCluster._avatarSize;
+
+  Widget _initials() {
+    final text = preview.initials?.trim() ?? '';
+    if (text.isEmpty) {
+      return const Icon(
+        Icons.person_rounded,
+        color: ColorName.colorWhite,
+        size: 22,
+      );
+    }
+    return Text(
+      text,
+      style: AppTextStyles.profileName.copyWith(
+        color: ColorName.colorWhite,
+        fontSize: 14,
+        height: 1,
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final url = preview.url;
+    final face = ColoredBox(
+      color: ColorName.colorTitle,
+      child: url == null || url.isEmpty
+          ? Center(child: _initials())
+          : Image.network(
+              url,
+              fit: BoxFit.cover,
+              alignment: Alignment.center,
+              width: _size,
+              height: _size,
+              cacheWidth: 120,
+              errorBuilder: (_, _, _) => Center(child: _initials()),
+            ),
+    );
+    return SizedBox(
+      width: _size,
+      height: _size,
+      child: Stack(
+        fit: StackFit.expand,
+        children: [
+          ClipOval(child: face),
+          const IgnorePointer(
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                border: Border.fromBorderSide(
+                  BorderSide(color: ColorName.colorWhite, width: 2),
                 ),
               ),
             ),
+          ),
         ],
       ),
     );
