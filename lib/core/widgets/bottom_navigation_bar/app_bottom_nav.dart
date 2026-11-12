@@ -1,8 +1,9 @@
+import 'dart:ui';
+
 import 'package:easy_localization/easy_localization.dart';
 import 'package:fastingapp/core/remote_images/app_image.dart';
 import 'package:fastingapp/core/theme/app_text_styles.dart';
 import 'package:fastingapp/generated/app_images.g.dart';
-import 'package:fastingapp/generated/colors.gen.dart';
 import 'package:flutter/material.dart';
 
 /// Ana shell alt navigasyonu — ortada bar ile bütünleşik çıkıntı.
@@ -22,9 +23,11 @@ final class AppBottomNav extends StatelessWidget {
   /// Figma Ellipse 160 genişliği (68). Yükseklik daha alçak → bombeli kapak.
   static const _bumpWidth = 68.0;
   static const _bumpHeight = 28.0;
-  static const _cornerRadius = 24.0;
+  static const _cornerRadius = 12.0;
   static const _mochiIndex = 2;
-  static const _barColor = ColorName.colorWhite;
+
+  /// Figma: fill #FFFFFF %80.
+  static const _barFill = Color(0xCCFFFFFF);
 
   /// SafeArea altı hariç bar yüksekliği — scroll içerik padding'i için.
   static const barClearance = _bumpHeight + 10 + _iconSize + 4 + 16;
@@ -35,6 +38,11 @@ final class AppBottomNav extends StatelessWidget {
     final barPadBottom = bottom > 0 ? bottom : 10.0;
     const contentHeight = 10 + _iconSize + 4 + 16;
     final totalHeight = _bumpHeight + contentHeight + barPadBottom;
+    const shape = _NavBarBumpShape(
+      bumpWidth: _bumpWidth,
+      bumpHeight: _bumpHeight,
+      cornerRadius: _cornerRadius,
+    );
 
     return SizedBox(
       height: totalHeight,
@@ -42,12 +50,14 @@ final class AppBottomNav extends StatelessWidget {
         clipBehavior: Clip.none,
         children: [
           const Positioned.fill(
-            child: CustomPaint(
-              painter: _NavBarBumpPainter(
-                bumpWidth: _bumpWidth,
-                bumpHeight: _bumpHeight,
-                cornerRadius: _cornerRadius,
-                color: _barColor,
+            child: CustomPaint(painter: _NavBarShadowPainter(shape: shape)),
+          ),
+          Positioned.fill(
+            child: ClipPath(
+              clipper: const _NavBarBumpClipper(shape: shape),
+              child: BackdropFilter(
+                filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
+                child: const ColoredBox(color: _barFill),
               ),
             ),
           ),
@@ -191,49 +201,23 @@ final class _NavTile extends StatelessWidget {
   }
 }
 
-/// 68px genişlik × bombeli kapak — AA fringe'i outset fill ile kapatır.
-final class _NavBarBumpPainter extends CustomPainter {
-  const _NavBarBumpPainter({
+final class _NavBarBumpShape {
+  const _NavBarBumpShape({
     required this.bumpWidth,
     required this.bumpHeight,
     required this.cornerRadius,
-    required this.color,
   });
 
   final double bumpWidth;
   final double bumpHeight;
   final double cornerRadius;
-  final Color color;
 
-  @override
-  void paint(Canvas canvas, Size size) {
-    final path = _buildPath(size);
-    final fill = Paint()
-      ..color = color
-      ..style = PaintingStyle.fill
-      ..isAntiAlias = true;
-
-    // Beyaz path #F6F6F6 zeminde AA ile gri saçak bırakır.
-    // BlurStyle.solid şekli opak büyütür; saçak zemine karışmadan örtülür.
-    final outset = Paint()
-      ..color = color
-      ..style = PaintingStyle.fill
-      ..isAntiAlias = true
-      ..maskFilter = const MaskFilter.blur(BlurStyle.solid, 1.5);
-
-    canvas
-      ..drawPath(path, outset)
-      ..drawPath(path.shift(const Offset(0, -1)), fill)
-      ..drawPath(path, fill);
-  }
-
-  Path _buildPath(Size size) {
+  Path pathFor(Size size) {
     final w = size.width;
     final h = size.height;
     final cx = w / 2;
     final halfW = bumpWidth / 2;
-    final rise = bumpHeight;
-    final flatTop = rise;
+    final flatTop = bumpHeight;
 
     return Path()
       ..moveTo(0, h)
@@ -247,12 +231,50 @@ final class _NavBarBumpPainter extends CustomPainter {
       ..lineTo(w, h)
       ..close();
   }
+}
+
+final class _NavBarBumpClipper extends CustomClipper<Path> {
+  const _NavBarBumpClipper({required this.shape});
+
+  final _NavBarBumpShape shape;
 
   @override
-  bool shouldRepaint(covariant _NavBarBumpPainter oldDelegate) {
-    return oldDelegate.bumpWidth != bumpWidth ||
-        oldDelegate.bumpHeight != bumpHeight ||
-        oldDelegate.cornerRadius != cornerRadius ||
-        oldDelegate.color != color;
+  Path getClip(Size size) => shape.pathFor(size);
+
+  @override
+  bool shouldReclip(covariant _NavBarBumpClipper oldClipper) =>
+      oldClipper.shape.bumpWidth != shape.bumpWidth ||
+      oldClipper.shape.bumpHeight != shape.bumpHeight ||
+      oldClipper.shape.cornerRadius != shape.cornerRadius;
+}
+
+/// Figma drop shadow'ları (blur ≈ sigma×2).
+final class _NavBarShadowPainter extends CustomPainter {
+  const _NavBarShadowPainter({required this.shape});
+
+  final _NavBarBumpShape shape;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final path = shape.pathFor(size);
+    void shadow(Offset offset, double sigma, double opacity) {
+      final paint = Paint()
+        ..color = Colors.black.withValues(alpha: opacity)
+        ..maskFilter = sigma <= 0
+            ? null
+            : MaskFilter.blur(BlurStyle.normal, sigma);
+      canvas.drawPath(path.shift(offset), paint);
+    }
+
+    // Y:3 blur 0 → %22; Y:-1 blur 12 → %5; Y:-2 blur 8 → %5.
+    shadow(const Offset(0, 3), 0, 0.22);
+    shadow(const Offset(0, -1), 6, 0.05);
+    shadow(const Offset(0, -2), 4, 0.05);
   }
+
+  @override
+  bool shouldRepaint(covariant _NavBarShadowPainter oldDelegate) =>
+      oldDelegate.shape.bumpWidth != shape.bumpWidth ||
+      oldDelegate.shape.bumpHeight != shape.bumpHeight ||
+      oldDelegate.shape.cornerRadius != shape.cornerRadius;
 }

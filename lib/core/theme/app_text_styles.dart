@@ -1178,13 +1178,13 @@ abstract final class AppTextStyles {
     color: ColorName.colorWhite,
   );
 
-  /// Bottom nav label — 11 / Semibold
+  /// Bottom nav label — 12 / Semibold
   static TextStyle get navLabel => const TextStyle(
     fontFamily: FontFamily.sFProDisplay,
     fontWeight: FontWeight.w600,
-    fontSize: 11,
-    height: 14 / 11,
-    letterSpacing: 11 * -0.015,
+    fontSize: 13,
+    height: 15 / 13,
+    letterSpacing: 13 * -0.015,
     color: ColorName.colorTextPrimary,
   );
 
